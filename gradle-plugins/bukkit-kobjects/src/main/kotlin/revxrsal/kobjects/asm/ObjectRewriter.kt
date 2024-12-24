@@ -124,7 +124,10 @@ class ObjectRewriter(
         signature: String?,
         value: Any?,
     ): FieldVisitor? {
-        if (descriptor == className && access.isPublicStaticFinal && name == SINGLETON_NAME)
+        println("Visiting field:")
+        println(descriptor)
+        println(name)
+        if (descriptor == "L$className;" && access.isPublicStaticFinal && name == SINGLETON_NAME)
             return super.visitField(access and ACC_FINAL.inv(), name, descriptor, signature, value)
         return super.visitField(access, name, descriptor, signature, value)
     }
