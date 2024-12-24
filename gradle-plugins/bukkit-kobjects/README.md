@@ -1,3 +1,5 @@
+[![Discord](https://discord.com/api/guilds/939962855476846614/widget.png)](https://discord.gg/pEGGF785zp)
+
 # Bukkit KObjects
 A Gradle plugin that allows using Kotlin `object`s for Bukkit's `JavaPlugin`.
 
