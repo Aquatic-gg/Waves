@@ -48,7 +48,7 @@ Which is a lot more Kotlin-ish!
 Usage is very simple: Simply add the Gradle plugin:
 ```groovy
 plugins {
-  id("io.github.revxrsal.bukkitkobjects") version "0.0.2"
+  id("io.github.revxrsal.bukkitkobjects") version "0.0.3"
 }
 ```
 

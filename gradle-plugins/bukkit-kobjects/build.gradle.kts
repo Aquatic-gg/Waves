@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.revxrsal"
-version = "0.0.2"
+version = "0.0.3"
 
 repositories {
     mavenCentral()
@@ -25,9 +25,9 @@ gradlePlugin {
             displayName = "Bukkit KObjects"
             description = "A Gradle plugin that allows using Kotlin objects for JavaPlugins"
             implementationClass = "revxrsal.kobjects.KObjectPlugin"
-            website = "https://github.com/Revxrsal/bukkit-kobject"
-            vcsUrl = "https://github.com/Revxrsal/bukkit-kobject.git"
-            tags = listOf("kotlin", "asm", "bukkit")
+            website = "https://github.com/Revxrsal/bukkit-kobjects"
+            vcsUrl = "https://github.com/Revxrsal/bukkit-kobjects.git"
+            tags = listOf("kotlin", "asm", "spigot", "bukkit", "minecraft")
         }
     }
 }
