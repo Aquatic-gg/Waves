@@ -24,6 +24,13 @@ fun String.toMMComponent(): Component {
             .replace("&8", "<dark_gray>")
             .replace("&2", "<dark_green>")
             .replace("&5", "<dark_purple>")
+            .replace("&0", "<black>")
+            .replace("&k", "<obfuscated>")
+            .replace("&l", "<bold>")
+            .replace("&m", "<strikethrough>")
+            .replace("&n", "<underlined>")
+            .replace("&o", "<italic>")
+            .replace("&r", "<reset>")
     )
 }
 
