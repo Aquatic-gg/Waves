@@ -29,7 +29,7 @@ object ItemEncoder {
                     return (dataInput.readObject() as ItemStack)
                 }
             }
-        } catch (exception: java.lang.Exception) {
+        } catch (exception: Exception) {
             throw exception
         }
     }
@@ -54,7 +54,7 @@ object ItemEncoder {
                     return (dataInput.readObject() as List<ItemStack>)
                 }
             }
-        } catch (exception: java.lang.Exception) {
+        } catch (exception: Exception) {
             throw exception
         }
     }
