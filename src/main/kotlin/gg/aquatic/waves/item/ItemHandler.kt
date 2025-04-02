@@ -72,10 +72,10 @@ object ItemHandler : WavesModule {
                 val interaction = listenInteractions[registry] ?: return@event
 
                 val interactType = when (it.click) {
-                    ClickType.SHIFT_LEFT -> AquaticItemInteractEvent.InteractType.SHIFT_LEFT
-                    ClickType.LEFT -> AquaticItemInteractEvent.InteractType.LEFT
-                    ClickType.SHIFT_RIGHT -> AquaticItemInteractEvent.InteractType.SHIFT_RIGHT
-                    ClickType.RIGHT -> AquaticItemInteractEvent.InteractType.RIGHT
+                    ClickType.SHIFT_LEFT -> AquaticItemInteractEvent.InteractType.INVENTORY_SHIFT_LEFT
+                    ClickType.LEFT -> AquaticItemInteractEvent.InteractType.INVENTORY_LEFT
+                    ClickType.SHIFT_RIGHT -> AquaticItemInteractEvent.InteractType.INVENTORY_SHIFT_RIGHT
+                    ClickType.RIGHT -> AquaticItemInteractEvent.InteractType.INVENTORY_RIGHT
                     ClickType.NUMBER_KEY -> {
                         when (it.hotbarButton) {
                             1 -> AquaticItemInteractEvent.InteractType.NUM_1

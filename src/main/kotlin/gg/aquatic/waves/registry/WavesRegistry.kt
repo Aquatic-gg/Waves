@@ -33,6 +33,7 @@ import gg.aquatic.waves.util.toMMComponent
 import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
+import java.awt.Color
 
 object WavesRegistry {
 
@@ -122,7 +123,7 @@ object WavesRegistry {
         createProperty("custom-name-visible") { s, str, builder, _ ->
             builder.isCustomNameVisible(s.getBoolean(str))
         },
-        createProperty("is-silent") { s, str, builder,  _ ->
+        createProperty("is-silent") { s, str, builder, _ ->
             builder.isSilent(s.getBoolean(str))
         },
         createProperty("no-gravity") { s, str, builder, _ ->
@@ -145,10 +146,28 @@ object WavesRegistry {
             if (builder is TextDisplayEntityDataBuilder) {
                 builder.setText(updater(s.getString(str) ?: "").toMMComponent())
             }
-        },
-        createProperty("text") { s, str, builder, updater ->
+        }, createProperty("is-see-through") { s, str, builder, updater ->
             if (builder is TextDisplayEntityDataBuilder) {
-                builder.setText(updater(s.getString(str) ?: "").toMMComponent())
+                val boolean = s.getBoolean(str)
+                builder.isSeeThrough(boolean)
+            }
+        }, createProperty("background-color") { s, str, builder, updater ->
+            if (builder is TextDisplayEntityDataBuilder) {
+                val colorStr = s.getString(str) ?: "0;0;0"
+                val color = colorStr.split(";").mapNotNull { it.toIntOrNull() }
+                val colorInst = Color(color[0], color[1], color[2])
+                builder.useDefaultBackgroundColor(false)
+                builder.setBackgroundColor(colorInst.rgb)
+            }
+        }, createProperty("text-opacity") { s, str, builder, updater ->
+            if (builder is TextDisplayEntityDataBuilder) {
+                val opacity = s.getInt(str, 255)
+                builder.setTextOpacity(opacity.toByte())
+            }
+        }, createProperty("has-shadow") { s, str, builder, updater ->
+            if (builder is TextDisplayEntityDataBuilder) {
+                val has = s.getBoolean(str)
+                builder.hasShadow(has)
             }
         },
         createProperty("line-width") { s, str, builder, updater ->

@@ -1,5 +1,6 @@
 package gg.aquatic.waves.item
 
+import com.google.common.collect.HashMultimap
 import gg.aquatic.waves.util.item.modifyFastMeta
 import gg.aquatic.waves.util.item.setSpawnerType
 import gg.aquatic.waves.util.toMMComponent
@@ -57,14 +58,20 @@ class AquaticItem(
         }
         val im = iS.itemMeta ?: return iS
 
-
         spawnerEntityType?.apply {
             if (iS.type == Material.SPAWNER) {
                 im.setSpawnerType(this)
             }
         }
 
-        iS.itemMeta = im
+        val modifiers = im.attributeModifiers
+        if (modifiers == null) {
+            im.attributeModifiers = HashMultimap.create()
+        }
+
+        flags?.apply {
+            im.addItemFlags(*this.toTypedArray())
+        }
 
         enchantments?.apply {
             if (iS.type == Material.ENCHANTED_BOOK) {
@@ -97,9 +104,6 @@ class AquaticItem(
                     }
                 }
             }
-        }
-        flags?.apply {
-            im.addItemFlags(*this.toTypedArray())
         }
 
         iS.amount = amount
