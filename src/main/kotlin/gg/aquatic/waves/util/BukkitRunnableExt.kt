@@ -24,7 +24,7 @@ inline fun runSyncTimer(delay: Long, period: Long, crossinline runnable: () -> U
 }
 
 inline fun runAsyncTimer(delay: Long, period: Long, crossinline runnable: () -> Unit) {
-    Waves.INSTANCE.foliaLib.scheduler.runTimer(Runnable {
+    Waves.INSTANCE.foliaLib.scheduler.runTimerAsync(Runnable {
         runnable()
     }, delay, period)
 }
