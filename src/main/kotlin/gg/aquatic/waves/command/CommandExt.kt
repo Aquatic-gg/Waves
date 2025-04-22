@@ -28,6 +28,7 @@ fun Server.commandMap(): CommandMap {
     return bukkitCommandMapField.get(this) as CommandMap
 }
 
+@Suppress("UNCHECKED_CAST")
 fun CommandMap.knownCommands(): MutableMap<String, Command> {
     val commandMap = this as SimpleCommandMap
 

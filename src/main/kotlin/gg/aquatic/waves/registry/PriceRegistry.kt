@@ -7,6 +7,7 @@ inline fun <reified T: Any> WavesRegistry.registerPrice(id: String, price: Abstr
     map += id to price
 }
 
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T: Any> WavesRegistry.getPrice(id: String): AbstractPrice<T>? {
     val map = PRICE[T::class.java] ?: return null
     return map[id] as AbstractPrice<T>

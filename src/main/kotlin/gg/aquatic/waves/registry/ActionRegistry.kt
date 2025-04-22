@@ -7,6 +7,7 @@ inline fun <reified T: Any> WavesRegistry.registerAction(id: String, action: Act
     map += id to action
 }
 
+@Suppress("UNCHECKED_CAST")
 inline fun <reified T: Any> WavesRegistry.getAction(id: String): Action<T>? {
     val map = ACTION[T::class.java] ?: return null
 

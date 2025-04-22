@@ -24,6 +24,7 @@ object InteractableHandler: WavesModule {
         }
         event<PlayerJoinEvent> {
             for (tickableObject in megInteractables) {
+                if (tickableObject.location.world != it.player.world) continue
                 if (tickableObject.audience.canBeApplied(it.player)) {
                     tickableObject.addViewer(it.player)
                 }

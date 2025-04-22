@@ -12,6 +12,6 @@ class InventoryViewer(
 
     fun changeCarriedItem(itemStack: ItemStack?) {
         carriedItem = itemStack?.let { SpigotConversionUtil.fromBukkitItemStack(it) }
-        player.openInventory.cursor = itemStack
+        player.openInventory.setCursor(itemStack)
     }
 }

@@ -22,7 +22,7 @@ class ItemCurrency(
             return
         }
         for (content in player.inventory.contents) {
-            if (content.isSimilar(item)) {
+            if (content?.isSimilar(item) == true) {
                 val toRemove = amount - removed
                 if (content.amount < toRemove) {
                     removed += content.amount
@@ -47,7 +47,7 @@ class ItemCurrency(
     override fun getBalance(player: Player): Double {
         var balance = 0
         for (content in player.inventory.contents) {
-            if (content.isSimilar(item)) {
+            if (content?.isSimilar(item) == true) {
                 balance += content.amount
             }
         }

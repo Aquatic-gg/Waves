@@ -1,7 +1,6 @@
 package gg.aquatic.waves.chunk.cache
 
 import org.bukkit.Chunk
-import java.util.concurrent.ConcurrentHashMap
 
 object ChunkCacheHandler {
 

@@ -4,10 +4,13 @@ import com.google.common.collect.HashMultimap
 import gg.aquatic.waves.util.item.modifyFastMeta
 import gg.aquatic.waves.util.item.setSpawnerType
 import gg.aquatic.waves.util.toMMComponent
+import io.papermc.paper.registry.RegistryAccess
+import io.papermc.paper.registry.RegistryKey
 import net.advancedplugins.ae.api.AEAPI
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.Registry
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -112,7 +115,8 @@ class AquaticItem(
 
     companion object {
         private fun getEnchantmentByString(ench: String): Enchantment? {
-            return Enchantment.getByKey(NamespacedKey.minecraft(ench.lowercase(Locale.getDefault())))
+            return RegistryAccess.registryAccess().getRegistry(RegistryKey.ENCHANTMENT)
+                .get(NamespacedKey.minecraft(ench.lowercase(Locale.getDefault())))
         }
 
         /*

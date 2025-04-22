@@ -1,19 +1,22 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.10"
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "7.1.2"
+    id("com.gradleup.shadow") version "9.0.0-beta11"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
 }
 
 group = "gg.aquatic.waves"
-version = "1.2.0"
+version = "1.2.1"
 
 val ktor_version: String by project
 
 repositories {
     mavenCentral()
     mavenLocal()
-    maven("https://hub.spigotmc.org/nexus/content/repositories/snapshots/")
+    maven {
+        name = "papermc"
+        url = uri("https://repo.papermc.io/repository/maven-public/")
+    }
     maven("https://mvn.lumine.io/repository/maven-public/")
     maven("https://repo.oraxen.com/releases")
     maven("https://jitpack.io")
@@ -32,9 +35,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly("org.spigotmc:spigot-api:1.19.4-R0.1-SNAPSHOT")
-    compileOnly("net.kyori:adventure-text-serializer-gson:4.17.0")
-    compileOnly("net.kyori:adventure-text-serializer-plain:4.18.0")
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
+    implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
     implementation("gg.aquatic.wavessync:wavessync-api:1.0.1:all")
 
     implementation("io.ktor:ktor-client-core:$ktor_version")
@@ -50,7 +53,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation("com.github.retrooper:packetevents-spigot:2.7.0")
 
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7")
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("gg.aquatic:AEAPI:1.0")
     compileOnly("io.th0rgal:oraxen:1.171.0")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
@@ -60,7 +63,8 @@ dependencies {
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
     implementation("com.github.micartey:webhookly:master-SNAPSHOT")
-    implementation("net.kyori:adventure-text-minimessage:4.17.0")
+    implementation("net.kyori:adventure-text-minimessage:4.20.0")
+    implementation("net.kyori:adventure-api:4.20.0")
     implementation("com.github.technicallycoded:FoliaLib:main-SNAPSHOT")
     compileOnly("com.willfp:eco:6.74.5")
 
@@ -69,7 +73,7 @@ dependencies {
 
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 tasks.register<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJarPlugin") {
@@ -119,7 +123,7 @@ tasks {
 
     compileJava {
         options.encoding = Charsets.UTF_8.name()
-        options.release.set(17)
+        options.release.set(21)
     }
 
     javadoc {
