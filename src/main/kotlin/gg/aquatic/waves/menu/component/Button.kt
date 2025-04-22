@@ -3,7 +3,6 @@ package gg.aquatic.waves.menu.component
 import gg.aquatic.waves.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.waves.menu.AquaticMenu
 import gg.aquatic.waves.menu.MenuComponent
-import gg.aquatic.waves.util.item.modifyFastMeta
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.inventory.ItemStack
@@ -62,15 +61,22 @@ class Button(
             return currentComponent?.itemstack(menu)
         }
         val iS = itemstack?.clone()
-        iS?.modifyFastMeta {
-            this.displayName = this.displayName?.let { comp ->
-                MiniMessage.miniMessage().deserialize(textUpdater(MiniMessage.miniMessage().serialize(comp), menu))
-                    .decoration(TextDecoration.ITALIC, false)
+        val meta = iS?.itemMeta
+
+        if (meta != null) {
+            meta.displayName()?.let { comp ->
+                meta.displayName(MiniMessage.miniMessage().deserialize(textUpdater(MiniMessage.miniMessage().serialize(comp), menu))
+                    .decoration(TextDecoration.ITALIC, false))
             }
-            this.lore = this.lore.map {
-                MiniMessage.miniMessage().deserialize(textUpdater(MiniMessage.miniMessage().serialize(it), menu))
-                    .decoration(TextDecoration.ITALIC, false)
+
+            meta.lore()?.let { lore ->
+                meta.lore(lore.map {
+                    MiniMessage.miniMessage().deserialize(textUpdater(MiniMessage.miniMessage().serialize(it), menu))
+                        .decoration(TextDecoration.ITALIC, false)
+                })
             }
+
+            iS.itemMeta = meta
         }
         return iS
     }

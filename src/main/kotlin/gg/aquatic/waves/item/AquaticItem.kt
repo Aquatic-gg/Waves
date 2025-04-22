@@ -1,7 +1,6 @@
 package gg.aquatic.waves.item
 
 import com.google.common.collect.HashMultimap
-import gg.aquatic.waves.util.item.modifyFastMeta
 import gg.aquatic.waves.util.item.setSpawnerType
 import gg.aquatic.waves.util.toMMComponent
 import io.papermc.paper.registry.RegistryAccess
@@ -10,7 +9,6 @@ import net.advancedplugins.ae.api.AEAPI
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.Registry
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -48,18 +46,16 @@ class AquaticItem(
     fun getItem(): ItemStack {
         val iS = getUnmodifiedItem()
 
-        iS.modifyFastMeta {
-            name?.apply {
-                displayName = this.toMMComponent().decoration(TextDecoration.ITALIC, false)
-            }
-            description?.apply {
-                lore = this.map { it.toMMComponent().decoration(TextDecoration.ITALIC, false) }
-            }
-            if (this@AquaticItem.modelData > 0) {
-                modelData = this@AquaticItem.modelData
-            }
-        }
         val im = iS.itemMeta ?: return iS
+        name?.apply {
+            im.displayName(this.toMMComponent().decoration(TextDecoration.ITALIC, false))
+        }
+        description?.apply {
+            im.lore(this.map { it.toMMComponent().decoration(TextDecoration.ITALIC, false) })
+        }
+        if (this@AquaticItem.modelData > 0) {
+            im.setCustomModelData(this@AquaticItem.modelData)
+        }
 
         spawnerEntityType?.apply {
             if (iS.type == Material.SPAWNER) {

@@ -4,20 +4,17 @@ import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerChunkData
 import gg.aquatic.waves.Waves
-import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.module.WaveModules
+import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.util.event.call
 import gg.aquatic.waves.util.event.event
 import gg.aquatic.waves.util.packetEvent
 import gg.aquatic.waves.util.player
 import gg.aquatic.waves.util.runAsync
-import gg.aquatic.waves.util.runSync
 import org.bukkit.Bukkit
-import org.bukkit.Chunk
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.event.world.ChunkUnloadEvent
-import java.util.UUID
-import java.util.concurrent.CompletableFuture
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 object ChunkTracker : WavesModule {
@@ -33,19 +30,13 @@ object ChunkTracker : WavesModule {
             if (this.packetType != Play.Server.CHUNK_DATA) return@packetEvent
             val packet = WrapperPlayServerChunkData(this)
             val player = this.player() ?: return@packetEvent
-            val chunkId = ChunkId(packet.column.x, packet.column.z)
+
+            val chunkX = packet.column.x
+            val chunkZ = packet.column.z
+            val chunkId = ChunkId(chunkX, chunkZ)
+
             chunks.getOrPut(player.world.name) { ConcurrentHashMap() }.getOrPut(chunkId) { ConcurrentHashMap.newKeySet() }
                 .add(player.uniqueId)
-
-            /*
-            val future = CompletableFuture<Chunk>()
-            runSync {
-                val chunk =
-                future.complete(chunk)
-            }
-             */
-
-            val chunk = chunkId.toChunk(player.world)
 
             var (previousWorldName, worldChunks) = playerToChunks.getOrPut(player.uniqueId) { player.world.name to ConcurrentHashMap.newKeySet() }
             if (previousWorldName != player.world.name) {
@@ -53,7 +44,7 @@ object ChunkTracker : WavesModule {
                     val chunkListMap = chunks[previousWorldName] ?: break
                     val chunkList = chunkListMap[chunkId1] ?: continue
                     chunkList -= player.uniqueId
-                    AsyncPlayerChunkUnloadEvent(player, chunk).call()
+                    AsyncPlayerChunkUnloadEvent(player, chunkId).call()
                     if (chunkList.isEmpty()) {
                         chunks[previousWorldName]?.remove(chunkId1)
                     }
@@ -70,13 +61,13 @@ object ChunkTracker : WavesModule {
                         toRemove += chunkId1
                         chunks[player.world.name]?.get(chunkId1)?.remove(player.uniqueId)
 
-                        AsyncPlayerChunkUnloadEvent(player, chunk).call()
+                        AsyncPlayerChunkUnloadEvent(player, chunkId).call()
                     }
                 }
                 worldChunks -= toRemove
             }
             worldChunks += chunkId
-            AsyncPlayerChunkLoadEvent(player, chunk, packet).call()
+            AsyncPlayerChunkLoadEvent(player, chunkId, packet).call()
 
         }
         event<PlayerQuitEvent> {
@@ -86,7 +77,7 @@ object ChunkTracker : WavesModule {
                 chunkList -= it.player.uniqueId
                 val chunk = chunkId.toChunk(it.player.world)
                 runAsync {
-                    AsyncPlayerChunkUnloadEvent(it.player, chunk).call()
+                    AsyncPlayerChunkUnloadEvent(it.player, chunk.chunkId()).call()
                 }
                 if (chunkList.isNotEmpty()) continue
                 chunks[playerPair.first]?.remove(chunkId)
@@ -104,7 +95,7 @@ object ChunkTracker : WavesModule {
                 chunkSet -= chunkId
                 val player = Bukkit.getPlayer(playerUUID) ?: continue
                 runAsync {
-                    AsyncPlayerChunkUnloadEvent(player, it.chunk).call()
+                    AsyncPlayerChunkUnloadEvent(player, it.chunk.chunkId()).call()
                 }
             }
         }

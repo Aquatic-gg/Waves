@@ -1,6 +1,5 @@
 package gg.aquatic.waves.util
 
-import net.md_5.bungee.chat.ComponentSerializer
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -31,15 +30,8 @@ class Message(var messages: Collection<String>) {
     }
 
     fun send(sender: CommandSender) {
-        if (sender !is Player) {
-            val msgs = messages.map { ComponentSerializer.parse(it.toMMComponent().toJson()) }
-            for (baseComponents in msgs) {
-                for (baseComponent in baseComponents) {
-                    sender.spigot().sendMessage(baseComponent)
-                }
-            }
-        } else {
-            send(sender)
+        for (string in messages) {
+            sender.sendMessage(string.toMMComponent())
         }
     }
 

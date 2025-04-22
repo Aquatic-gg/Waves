@@ -1,7 +1,6 @@
 package gg.aquatic.waves.util.item
 
 import gg.aquatic.waves.item.AquaticItem
-import gg.aquatic.waves.item.FastItemMeta
 import gg.aquatic.waves.item.ItemHandler
 import gg.aquatic.waves.registry.serializer.ItemSerializer
 import org.bukkit.Material
@@ -40,16 +39,6 @@ fun Material.toCustomItem(): AquaticItem {
 
 fun AquaticItem.Companion.loadFromYml(section: ConfigurationSection?): AquaticItem? {
     return ItemSerializer.fromSection(section)
-}
-
-fun ItemStack.fastMeta(): FastItemMeta {
-    return FastItemMeta(this)
-}
-
-fun ItemStack.modifyFastMeta(block: FastItemMeta.() -> Unit) {
-    val meta = fastMeta()
-    block(meta)
-    meta.apply()
 }
 
 fun ItemStack.modifyMeta(block: (ItemMeta) -> Unit) {

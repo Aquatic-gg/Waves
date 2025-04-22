@@ -6,6 +6,6 @@ import org.bukkit.entity.Player
 
 class AsyncPlayerChunkUnloadEvent(
     val player: Player,
-    val chunk: Chunk
+    val chunkId: ChunkId
 ): AquaticEvent(true) {
 }

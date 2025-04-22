@@ -11,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection
 
 object StatisticTypeSerializer {
 
+    @Suppress("UNCHECKED_CAST")
     inline fun <reified T> fromSection(
         configurationSection: ConfigurationSection,
         noinline consumer: (StatisticAddEvent<T>) -> Unit

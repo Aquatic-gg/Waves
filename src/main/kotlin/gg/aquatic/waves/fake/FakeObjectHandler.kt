@@ -3,7 +3,6 @@ package gg.aquatic.waves.fake
 import com.github.retrooper.packetevents.event.PacketReceiveEvent
 import com.github.retrooper.packetevents.event.PacketSendEvent
 import com.github.retrooper.packetevents.protocol.packettype.PacketType
-import com.github.retrooper.packetevents.protocol.packettype.PacketType.Play
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange
 import gg.aquatic.waves.Waves
@@ -13,9 +12,7 @@ import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.chunkId
 import gg.aquatic.waves.fake.block.FakeBlock
 import gg.aquatic.waves.fake.block.FakeBlockInteractEvent
-import gg.aquatic.waves.fake.entity.FakeEntity
 import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
-import gg.aquatic.waves.fake.npc.FakePlayer
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.util.event.event
@@ -55,7 +52,12 @@ object FakeObjectHandler : WavesModule {
 
         event<AsyncPlayerChunkLoadEvent> {
             val obj =
-                ChunkCacheHandler.getObject(it.chunk, FakeObjectChunkBundle::class.java) as? FakeObjectChunkBundle
+                ChunkCacheHandler.getObject(
+                    it.chunk.x,
+                    it.chunk.z,
+                    it.player.world,
+                    FakeObjectChunkBundle::class.java
+                ) as? FakeObjectChunkBundle
                     ?: return@event
             tickableObjects += obj.blocks
             tickableObjects += obj.entities
@@ -75,7 +77,7 @@ object FakeObjectHandler : WavesModule {
         }
         event<AsyncPlayerChunkUnloadEvent> {
             for (tickableObject in tickableObjects) {
-                if (tickableObject.location.chunk.chunkId() != it.chunk.chunkId()) continue
+                if (tickableObject.location.chunk.chunkId() != it.chunkId) continue
                 handlePlayerRemove(it.player, tickableObject, false)
             }
         }
@@ -141,7 +143,7 @@ object FakeObjectHandler : WavesModule {
 
         }
         packetEvent<PacketReceiveEvent> {
-            if (this.packetType != Play.Client.INTERACT_ENTITY) return@packetEvent
+            if (this.packetType != PacketType.Play.Client.INTERACT_ENTITY) return@packetEvent
             val packet = WrapperPlayClientInteractEntity(this)
             val entity = idToEntity[packet.entityId] ?: return@packetEvent
             val event = FakeEntityInteractEvent(

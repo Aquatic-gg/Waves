@@ -1,8 +1,0 @@
-name: Waves
-main: gg.aquatic.waves.Waves
-version: '${project.version}'
-authors: [ AquaticCreations ]
-api-version: 1.19
-folia-supported: true
-libraries:
-  - "com.zaxxer:HikariCP:5.1.0"

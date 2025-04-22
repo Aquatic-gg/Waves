@@ -7,7 +7,7 @@ import org.bukkit.entity.Player
 
 class AsyncPlayerChunkLoadEvent(
     val player: Player,
-    val chunk: Chunk,
+    val chunk: ChunkId,
     val wrappedPacket: WrapperPlayServerChunkData
 ): AquaticEvent(true) {
 }

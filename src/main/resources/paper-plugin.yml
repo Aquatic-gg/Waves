@@ -1,0 +1,16 @@
+name: Waves
+main: gg.aquatic.waves.Waves
+version: '${project.version}'
+authors: [ AquaticCreations ]
+api-version: "1.21"
+folia-supported: true
+loader: gg.aquatic.waves.dependency.DependencyLoader
+
+dependencies:
+  server:
+    ModelEngine:
+      load: BEFORE
+      required: true
+    PlaceholderAPI:
+      load: BEFORE
+      required: true
