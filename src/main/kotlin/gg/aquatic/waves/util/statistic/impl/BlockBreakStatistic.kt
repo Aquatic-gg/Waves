@@ -27,9 +27,6 @@ object BlockBreakStatistic: StatisticType<Player>() {
                 val types = args.stringCollection("types") ?: listOf()
 
                 if ("ALL" !in types && it.block.type.name.uppercase() !in types) {
-                    for (type in types) {
-                        Bukkit.broadcastMessage(type)
-                    }
                     continue
                 }
 

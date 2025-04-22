@@ -48,10 +48,6 @@ object VanillaFactory: BlockFactory {
             blockData.type = type
         }
 
-        val extra = if (section.contains("extra")) {
-            section.getInt("extra")
-        } else null
-
-        return VanillaBlock(blockData, extra)
+        return VanillaBlock(blockData)
     }
 }

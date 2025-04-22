@@ -1,8 +1,6 @@
 package gg.aquatic.waves.fake
 
 import gg.aquatic.waves.util.audience.AquaticAudience
-import gg.aquatic.waves.chunk.trackedByPlayers
-import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.UUID
@@ -49,7 +47,7 @@ abstract class FakeObject {
             }
         }
 
-        val trackedPlayers = location.chunk.trackedByPlayers()
+        val trackedPlayers = location.chunk.playersSeeingChunk
         val loadedChunkViewers = trackedPlayers.filter { viewers.contains(it) }
         for (loadedChunkViewer in loadedChunkViewers.toSet()) {
             if (!loadedChunkViewer.isOnline) {

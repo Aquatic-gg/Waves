@@ -7,7 +7,6 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientIn
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.chunk.AsyncPlayerChunkLoadEvent
-import gg.aquatic.waves.chunk.AsyncPlayerChunkUnloadEvent
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.chunkId
 import gg.aquatic.waves.fake.block.FakeBlock
@@ -18,8 +17,10 @@ import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.util.event.event
 import gg.aquatic.waves.util.packetEvent
 import gg.aquatic.waves.util.player
+import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runAsyncTimer
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
+import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
@@ -75,10 +76,12 @@ object FakeObjectHandler : WavesModule {
                 }
             }
         }
-        event<AsyncPlayerChunkUnloadEvent> {
-            for (tickableObject in tickableObjects) {
-                if (tickableObject.location.chunk.chunkId() != it.chunkId) continue
-                handlePlayerRemove(it.player, tickableObject, false)
+        event<PlayerChunkUnloadEvent> {
+            runAsync {
+                for (tickableObject in tickableObjects) {
+                    if (tickableObject.location.chunk != it.chunk) continue
+                    handlePlayerRemove(it.player, tickableObject, false)
+                }
             }
         }
 

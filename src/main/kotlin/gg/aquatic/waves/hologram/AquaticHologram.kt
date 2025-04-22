@@ -1,6 +1,5 @@
 package gg.aquatic.waves.hologram
 
-import gg.aquatic.waves.chunk.trackedByPlayers
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import org.bukkit.Location
@@ -87,7 +86,7 @@ class AquaticHologram(
         }
         rangeTick = 0
         val remaining = viewers.toMutableMap()
-        for (trackedByPlayer in location.chunk.trackedByPlayers()) {
+        for (trackedByPlayer in location.chunk.playersSeeingChunk) {
             if (!filter(trackedByPlayer)) continue
             if (trackedByPlayer.world != location.world) continue
             if (trackedByPlayer.location.distanceSquared(location) <= viewDistance * viewDistance) {

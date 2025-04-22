@@ -5,7 +5,6 @@ import com.github.retrooper.packetevents.protocol.player.GameMode
 import com.github.retrooper.packetevents.protocol.player.UserProfile
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.chunkId
-import gg.aquatic.waves.chunk.trackedChunks
 import gg.aquatic.waves.fake.EntityBased
 import gg.aquatic.waves.fake.FakeObject
 import gg.aquatic.waves.fake.FakeObjectChunkBundle
@@ -13,6 +12,8 @@ import gg.aquatic.waves.fake.FakeObjectHandler
 import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.audience.FilterAudience
+import gg.aquatic.waves.util.runAsync
+import gg.aquatic.waves.util.runSync
 import gg.aquatic.waves.util.toUser
 import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.github.retrooper.packetevents.util.SpigotReflectionUtil
@@ -71,9 +72,15 @@ class FakePlayer(
         this.audience = audience
         FakeObjectHandler.tickableObjects += this
         FakeObjectHandler.idToEntity += entityId to this
-        for (viewer in viewers) {
-            if (viewer.trackedChunks().contains(location.chunk.chunkId())) {
-                show(viewer)
+
+        runSync {
+            val chunkViewers = location.chunk.playersSeeingChunk.toSet()
+            runAsync {
+                for (viewer in viewers) {
+                    if (viewer in chunkViewers) {
+                        show(viewer)
+                    }
+                }
             }
         }
     }
