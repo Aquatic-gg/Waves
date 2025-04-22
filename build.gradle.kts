@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "gg.aquatic.waves"
-version = "1.2.3"
+version = "1.2.4"
 
 val ktor_version: String by project
 
@@ -78,6 +78,7 @@ dependencies {
     implementation("net.kyori:adventure-api:4.20.0")
     implementation("com.github.technicallycoded:FoliaLib:main-SNAPSHOT")
     compileOnly("com.willfp:eco:6.74.5")
+    implementation("org.bstats:bstats-bukkit:3.1.0")
 
     //implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT")
 }
@@ -118,6 +119,7 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     relocate("net.wesjd.anvilgui", "gg.aquatic.waves.shadow.net.wesjd.anvilgui")
 
     exclude("com/google/**","com/typesafe/**", "io/netty/**", "org/slf4j/**")
+    relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
 }
 
 tasks {
