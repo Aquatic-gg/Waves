@@ -119,6 +119,7 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     relocate("net.wesjd.anvilgui", "gg.aquatic.waves.shadow.net.wesjd.anvilgui")
 
     exclude("com/google/**","com/typesafe/**", "io/netty/**", "org/slf4j/**")
+    exclude("plugin.yml")
     relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
 }
 

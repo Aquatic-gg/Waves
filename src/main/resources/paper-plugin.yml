@@ -10,7 +10,22 @@ dependencies:
   server:
     ModelEngine:
       load: BEFORE
-      required: true
+      required: false
+    ItemsAdder:
+      load: BEFORE
+      required: false
     PlaceholderAPI:
       load: BEFORE
-      required: true
+      required: false
+    Nexo:
+      load: BEFORE
+      required: false
+    Oraxen:
+      load: BEFORE
+      required: false
+    MythicMobs:
+      load: BEFORE
+      required: false
+    MMOItems:
+      load: BEFORE
+      required: false
