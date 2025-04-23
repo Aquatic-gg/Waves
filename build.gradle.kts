@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import xyz.jpenilla.gremlin.gradle.ShadowGremlin
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -6,6 +7,7 @@ plugins {
     java
     id("com.gradleup.shadow") version "9.0.0-beta11"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
+    id("xyz.jpenilla.gremlin-gradle") version "0.0.7"
 }
 
 group = "gg.aquatic.waves"
@@ -18,6 +20,49 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
+gremlin {
+    //defaultRepositories.set(false)
+    repositories {
+        mavenCentral()
+    }
+}
+
+
+configurations {
+    compileOnly {
+        extendsFrom(configurations.runtimeDownload.get())
+    }
+    testImplementation {
+        extendsFrom(configurations.runtimeDownload.get())
+    }
+}
+
+
+tasks.writeDependencies {
+    relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
+    relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
+    relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
+    relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
+    relocate("org.openjdk.nashorn", "gg.aquatic.waves.libs.nashorn")
+}
+
+
+gremlin {
+    //defaultRepositories.set(false) // Optional: if you want to manage repositories manually
+    repositories {
+        maven("https://repo1.maven.org/maven2/") // Maven Central
+    }
+
+    dependencies {
+        // Define your dependencies
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
+        implementation("org.openjdk.nashorn:nashorn-core:15.4")
+        implementation("com.zaxxer:HikariCP:5.1.0")
+    }
+}
 
 repositories {
     mavenCentral()
@@ -44,6 +89,7 @@ repositories {
 }
 
 dependencies {
+    implementation("xyz.jpenilla:gremlin-runtime:0.0.7")
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
     implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
     implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
@@ -78,6 +124,13 @@ dependencies {
     compileOnly("com.willfp:eco:6.74.5")
     implementation("org.bstats:bstats-bukkit:3.1.0")
 
+    runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
+    runtimeDownload("org.openjdk.nashorn:nashorn-core:15.4")
+    runtimeDownload("com.zaxxer:HikariCP:5.1.0")
+
     //implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT")
 }
 
@@ -110,9 +163,14 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     exclude("com/google/**","com/typesafe/**", "io/netty/**", "org/slf4j/**")
     exclude("plugin.yml")
     relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
+
+    relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
+    relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
+    relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
 }
 
 tasks {
+
     build {
         dependsOn(named("shadowJarPlugin"))
     }
