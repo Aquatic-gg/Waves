@@ -10,7 +10,7 @@ inline fun <reified T: Any> WavesRegistry.registerRequirement(id: String, requir
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T: Any> WavesRegistry.getRequirement(id: String): Condition<T>? {
     val map = REQUIREMENT[T::class.java] ?: return null
-    return map[id] as? Condition<T>
+    return (map[id] ?: return null) as? Condition<T>
 }
 
 inline fun <reified T: Any> Condition<T>.register(id: String) {
