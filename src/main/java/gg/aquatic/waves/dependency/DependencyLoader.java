@@ -19,7 +19,9 @@ public class DependencyLoader implements PluginLoader {
         resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib:2.1.10"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("org.jetbrains.kotlin:kotlin-reflect:2.1.10"), null));
+        resolver.addDependency(new Dependency(new DefaultArtifact("org.openjdk.nashorn:nashorn-core:15.4"), null));
         resolver.addDependency(new Dependency(new DefaultArtifact("com.zaxxer:HikariCP:5.1.0"), null));
+
         classpathBuilder.addLibrary(resolver);
     }
 }

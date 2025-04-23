@@ -6,8 +6,6 @@ plugins {
     java
     id("com.gradleup.shadow") version "9.0.0-beta11"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
-
-    id("xyz.jpenilla.gremlin-gradle") version "0.0.7"
 }
 
 group = "gg.aquatic.waves"
@@ -88,21 +86,12 @@ kotlin {
     jvmToolchain(21)
 }
 
-configurations.compileOnly {
-    extendsFrom(configurations.runtimeDownload.get())
-}
-configurations.testImplementation {
-    extendsFrom(configurations.runtimeDownload.get())
-}
-
 tasks.register<ShadowJar>("shadowJarPlugin") {
     archiveFileName.set("Waves-${project.version}-Shaded.jar")
     archiveClassifier.set("plugin")
 
-
     from(sourceSets.main.get().output)
     configurations = listOf(project.configurations.runtimeClasspath.get())
-
 
     //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
     relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
@@ -139,7 +128,7 @@ tasks {
 
     processResources {
         filteringCharset = Charsets.UTF_8.name()
-        filesMatching("plugin.yml") {
+        filesMatching("paper-plugin.yml") {
             expand(getProperties())
             expand(mutableMapOf("version" to project.version))
         }

@@ -3,9 +3,11 @@ package gg.aquatic.waves.item
 import com.google.common.collect.HashMultimap
 import gg.aquatic.waves.util.item.setSpawnerType
 import gg.aquatic.waves.util.toMMComponent
+import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import net.advancedplugins.ae.api.AEAPI
+import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Material
 import org.bukkit.NamespacedKey

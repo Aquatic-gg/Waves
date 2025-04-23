@@ -29,3 +29,6 @@ dependencies:
     MMOItems:
       load: BEFORE
       required: false
+    Vault:
+      load: BEFORE
+      required: false
