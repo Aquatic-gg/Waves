@@ -7,6 +7,6 @@ object Glyphs {
 
     val glyphs = HashMap<String, Glyph>()
     val fonts = HashMap<String, Font>()
-    val spaces = NegativeSpaces(Key("nametags", "negative-spaces"))
+    val spaces = NegativeSpaces(Key("wavesglyphs", "negative-spaces"))
 
 }

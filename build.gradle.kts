@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import xyz.jpenilla.gremlin.gradle.ShadowGremlin
 
 plugins {
     kotlin("jvm") version "2.1.10"
@@ -11,7 +10,7 @@ plugins {
 }
 
 group = "gg.aquatic.waves"
-version = "1.2.4"
+version = "1.2.6"
 
 val ktor_version: String by project
 
@@ -119,13 +118,11 @@ dependencies {
     //compileOnly("com.zaxxer:HikariCP:5.1.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("gg.aquatic:AEAPI:1.0")
     compileOnly("io.th0rgal:oraxen:1.171.0")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
-    compileOnly ("com.ticxo.modelengine:ModelEngine:R4.0.8")
+    compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
     compileOnly("io.lumine:Mythic-Dist:5.6.1")
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
@@ -150,6 +147,17 @@ dependencies {
     //implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT")
 }
 
+sourceSets {
+    main {
+        kotlin {
+            srcDir("src/main/kotlin")
+        }
+        java {
+            srcDir("src/main/java")
+        }
+    }
+}
+
 
 kotlin {
     jvmToolchain(21)
@@ -163,7 +171,7 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
     //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
-    exclude("com/github/retrooper/**","io/github/retrooper/**")
+    exclude("com/github/retrooper/**", "io/github/retrooper/**")
     exclude("net/radstevee/**")
     relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
     relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")
@@ -172,20 +180,63 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     // Exclude the original (unrelocated) kotlinx-coroutines-core package
     //exclude("kotlin/**")
     exclude("com/zaxxer/**")
-    exclude("kotlin/**", "kotlinx/**","io/ktor/**","assets/mappings/**")
+    exclude("kotlin/**", "kotlinx/**", "io/ktor/**", "assets/mappings/**")
     exclude("org/intellij/**")
     exclude("org/jetbrains/**")
 
     relocate("com.tcoded.folialib", "gg.aquatic.waves.shadow.lib.folialib")
     relocate("net.wesjd.anvilgui", "gg.aquatic.waves.shadow.net.wesjd.anvilgui")
 
-    exclude("com/google/**","com/typesafe/**", "io/netty/**", "org/slf4j/**")
+    exclude("com/google/**", "com/typesafe/**", "io/netty/**", "org/slf4j/**")
     exclude("plugin.yml")
     relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
 
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
+
+    relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
+
+    exclude(
+        "META-INF/*.SF",
+        "META-INF/*.DSA",
+        "META-INF/*.RSA",
+    )
+}
+
+tasks.register<ShadowJar>("shadowJarPublish") {
+    archiveFileName.set("Waves-${project.version}-Publish.jar")
+    archiveClassifier.set("publish")
+
+    from(sourceSets.main.get().output)
+    configurations = listOf(project.configurations.runtimeClasspath.get())
+
+    //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
+    exclude("com/github/retrooper/**", "io/github/retrooper/**")
+    exclude("net/radstevee/**")
+    //relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
+    //relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")
+    //relocate("kotlin", "gg.aquatic.waves.shadow.kotlin")
+
+    // Exclude the original (unrelocated) kotlinx-coroutines-core package
+    //exclude("kotlin/**")
+    exclude("com/zaxxer/**")
+    exclude("kotlin/**", "kotlinx/**", "io/ktor/**", "assets/mappings/**")
+    exclude("org/intellij/**")
+    exclude("org/jetbrains/**")
+
+    relocate("com.tcoded.folialib", "gg.aquatic.waves.shadow.lib.folialib")
+    relocate("net.wesjd.anvilgui", "gg.aquatic.waves.shadow.net.wesjd.anvilgui")
+
+    exclude(
+        "META-INF/*.SF",
+        "META-INF/*.DSA",
+        "META-INF/*.RSA",
+    )
+
+    exclude("com/google/**", "com/typesafe/**", "io/netty/**", "org/slf4j/**")
+    exclude("plugin.yml")
+    relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
 }
 
 tasks {
@@ -236,8 +287,8 @@ publishing {
             artifactId = "Waves"
             version = "${project.version}"
             from(components["java"])
-            artifact(tasks["shadowJarPlugin"]) {
-                classifier = "plugin"
+            artifact(tasks["shadowJarPublish"]) {
+                classifier = "publish"
             }
         }
     }
