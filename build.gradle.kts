@@ -44,6 +44,9 @@ tasks.writeDependencies {
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.openjdk.nashorn", "gg.aquatic.waves.libs.nashorn")
+
+    relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
+    relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")
 }
 
 
@@ -51,6 +54,13 @@ gremlin {
     //defaultRepositories.set(false) // Optional: if you want to manage repositories manually
     repositories {
         maven("https://repo1.maven.org/maven2/") // Maven Central
+        maven("https://maven.radsteve.net/public")
+        maven {
+            url = uri("https://repo.codemc.io/repository/maven-releases/")
+        }
+        maven {
+            url = uri("https://repo.codemc.io/repository/maven-snapshots/")
+        }
     }
 
     dependencies {
@@ -61,6 +71,9 @@ gremlin {
         implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
         implementation("org.openjdk.nashorn:nashorn-core:15.4")
         implementation("com.zaxxer:HikariCP:5.1.0")
+        implementation("net.radstevee.packed:packed-core:1.1.1")
+        implementation("net.radstevee.packed:packed-negative-spaces:1.1.1")
+        implementation("com.github.retrooper:packetevents-spigot:2.7.0")
     }
 }
 
@@ -86,6 +99,7 @@ repositories {
     maven("https://repo.extendedclip.com/releases/")
     maven("https://repo.auxilor.io/repository/maven-public/")
     maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
+    maven("https://maven.radsteve.net/public")
 }
 
 dependencies {
@@ -102,11 +116,10 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp-jvm:2.3.12")
     implementation("io.ktor:ktor-client-auth:$ktor_version")
 
-    compileOnly("com.zaxxer:HikariCP:5.1.0")
+    //compileOnly("com.zaxxer:HikariCP:5.1.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    implementation("com.github.retrooper:packetevents-spigot:2.7.0")
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("gg.aquatic:AEAPI:1.0")
@@ -124,12 +137,15 @@ dependencies {
     compileOnly("com.willfp:eco:6.74.5")
     implementation("org.bstats:bstats-bukkit:3.1.0")
 
+    runtimeDownload("com.github.retrooper:packetevents-spigot:2.7.0")
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10")
     runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
     runtimeDownload("org.openjdk.nashorn:nashorn-core:15.4")
     runtimeDownload("com.zaxxer:HikariCP:5.1.0")
+    runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
+    runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
 
     //implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT")
 }
@@ -147,13 +163,16 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
     //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
+    exclude("com/github/retrooper/**","io/github/retrooper/**")
+    exclude("net/radstevee/**")
     relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
     relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")
     //relocate("kotlin", "gg.aquatic.waves.shadow.kotlin")
 
     // Exclude the original (unrelocated) kotlinx-coroutines-core package
     //exclude("kotlin/**")
-    exclude("kotlin/**", "kotlinx/**","io/ktor/**")
+    exclude("com/zaxxer/**")
+    exclude("kotlin/**", "kotlinx/**","io/ktor/**","assets/mappings/**")
     exclude("org/intellij/**")
     exclude("org/jetbrains/**")
 

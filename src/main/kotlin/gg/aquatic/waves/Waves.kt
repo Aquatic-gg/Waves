@@ -6,6 +6,7 @@ import gg.aquatic.waves.data.MySqlDriver
 import gg.aquatic.waves.data.SQLiteDriver
 import gg.aquatic.waves.chunk.ChunkTracker
 import gg.aquatic.waves.command.AquaticBaseCommand
+import gg.aquatic.waves.command.impl.GeneratePackCommand
 import gg.aquatic.waves.command.impl.ItemConvertCommand
 import gg.aquatic.waves.command.register
 import gg.aquatic.waves.entity.EntityHandler
@@ -17,6 +18,7 @@ import gg.aquatic.waves.item.ItemHandler
 import gg.aquatic.waves.menu.MenuHandler
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.module.WaveModules
+import gg.aquatic.waves.pack.PackHandler
 import gg.aquatic.waves.profile.ProfilesModule
 import gg.aquatic.waves.sync.SyncHandler
 import gg.aquatic.waves.sync.SyncSettings
@@ -79,6 +81,8 @@ class Waves : JavaPlugin() {
         for ((_, module) in modules) {
             module.initialize(this@Waves)
         }
+        PackHandler.loadPack()
+
         initialized = true
         WavesInitializeEvent().call()
 
@@ -124,7 +128,8 @@ class Waves : JavaPlugin() {
          */
         AquaticBaseCommand("waves", "Waves base command", mutableListOf(),
             mutableMapOf(
-                "itemconvert" to ItemConvertCommand
+                "itemconvert" to ItemConvertCommand,
+                "generatepack" to GeneratePackCommand
             ), listOf()).register("waves")
     }
 
