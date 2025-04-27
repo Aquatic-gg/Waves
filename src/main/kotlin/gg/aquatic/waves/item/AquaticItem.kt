@@ -17,6 +17,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.EnchantmentStorageMeta
+import org.bukkit.inventory.meta.components.CustomModelDataComponent
 import java.util.*
 
 class AquaticItem(
@@ -25,6 +26,7 @@ class AquaticItem(
     val description: MutableList<String>?,
     val amount: Int,
     val modelData: Int,
+    val itemModel: String?,
     val enchantments: MutableMap<String, Int>?,
     val flags: MutableList<ItemFlag>?,
     val spawnerEntityType: EntityType?,
@@ -108,6 +110,9 @@ class AquaticItem(
         }
 
         iS.amount = amount
+        if (itemModel != null) {
+            iS.setData(DataComponentTypes.ITEM_MODEL, Key.key(itemModel))
+        }
         return iS
     }
 
