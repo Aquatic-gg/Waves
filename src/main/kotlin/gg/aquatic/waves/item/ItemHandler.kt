@@ -118,6 +118,7 @@ object ItemHandler : WavesModule {
         description: MutableList<String>? = null,
         amount: Int = 1,
         modeldata: Int = -1,
+        itemModel: String? = null,
         enchantments: MutableMap<String, Int>? = null,
         flags: MutableList<ItemFlag>? = null,
         spawnerEntityType: EntityType? = null
@@ -128,6 +129,7 @@ object ItemHandler : WavesModule {
             description,
             amount,
             modeldata,
+            itemModel,
             enchantments,
             flags,
             spawnerEntityType

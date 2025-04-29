@@ -47,6 +47,9 @@ object ItemSerializer {
                 flags.add(itemFlag)
             }
         }
+
+        val itemModel = section.getString("item-model")
+
         val spawnerEntityType = section.getString("entity-type")?.let { EntityType.valueOf(it.uppercase()) }
         return create(
             material,
@@ -54,16 +57,21 @@ object ItemSerializer {
             lore,
             section.getInt("amount", 1),
             section.getInt("model-data"),
+            itemModel,
             enchantments,
             flags,
             spawnerEntityType
         )
     }
+
     fun fromSections(sections: List<ConfigurationSection>): List<AquaticItem> {
         return sections.mapNotNull { fromSection(it) }
     }
 
-    inline fun <reified T : Any> fromSections(sections: List<ConfigurationSection>, crossinline mapper: (ConfigurationSection, AquaticItem) -> T): List<T> {
+    inline fun <reified T : Any> fromSections(
+        sections: List<ConfigurationSection>,
+        crossinline mapper: (ConfigurationSection, AquaticItem) -> T
+    ): List<T> {
         return sections.mapNotNull { fromSection(it, mapper) }
     }
 
@@ -73,6 +81,7 @@ object ItemSerializer {
         description: MutableList<String>?,
         amount: Int,
         modeldata: Int,
+        itemModel: String?,
         enchantments: MutableMap<String, Int>?,
         flags: MutableList<ItemFlag>?,
         spawnerEntityType: EntityType?
@@ -85,7 +94,17 @@ object ItemSerializer {
             ItemStack(Material.valueOf(namespace.uppercase()))
         } ?: return null
 
-        return ItemHandler.create(itemStack, name, description, amount, modeldata, enchantments, flags, spawnerEntityType)
+        return ItemHandler.create(
+            itemStack,
+            name,
+            description,
+            amount,
+            modeldata,
+            itemModel,
+            enchantments,
+            flags,
+            spawnerEntityType
+        )
     }
 
 }

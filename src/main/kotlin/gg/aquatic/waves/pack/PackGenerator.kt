@@ -62,6 +62,7 @@ object PackGenerator {
             val fontHeight = fontSection.getInt("height")
             val lettersSection = fontSection.getConfigurationSection("letters") ?: continue
             val namespace = fontSection.getString("namespace") ?: "wavesfonts"
+            val fontAscent = fontSection.getInt("height-offset")
             //val letterPaths = HashMap<Char, String>()
 
             val font = Font(Key(namespace, id))
@@ -81,7 +82,7 @@ object PackGenerator {
                     // Process the PNG file and modify it based on the `lines` value
                     val originalImage = try {
                         ImageIO.read(originalFile)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                         println("Failed to read the image for $char at path $originalFile")
                         null
                     }
@@ -114,7 +115,7 @@ object PackGenerator {
 
                     for (i in 0 until lines) {
                         val packChar = formattedUnicode(session)
-                        val newAscent = if (i == 0) height else height - ((fontHeight * i) + (2 * i))
+                        val newAscent = if (i == 0) height + fontAscent else height - ((fontHeight * i) + (2 * i)) + fontAscent
                         /*
                         height = 5 + (2*(5+2)) = 5 + 14 = 19
                         0 = 19
