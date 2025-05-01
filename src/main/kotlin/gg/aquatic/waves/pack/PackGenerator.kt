@@ -95,10 +95,10 @@ object PackGenerator {
                     val width = originalImage.width
                     val originalHeight = originalImage.height
 
-                    val height = if (lines > 1) {
+                    val height = (if (lines > 1) {
                         val additionalSpace = (lines - 1) * (fontHeight + 2) // Additional height for empty spaces
                         originalHeight + additionalSpace + baseHeight
-                    } else originalHeight + baseHeight
+                    } else originalHeight + baseHeight) + if (fontAscent > 0) fontAscent else 0
 
                     val newImage = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
 
@@ -115,7 +115,7 @@ object PackGenerator {
 
                     for (i in 0 until lines) {
                         val packChar = formattedUnicode(session)
-                        val newAscent = if (i == 0) height + fontAscent else height - ((fontHeight * i) + (2 * i)) + fontAscent
+                        val newAscent = (if (i == 0) height else height - ((fontHeight * i) + (2 * i))) + if (fontAscent < 0) fontAscent else 0
                         /*
                         height = 5 + (2*(5+2)) = 5 + 14 = 19
                         0 = 19

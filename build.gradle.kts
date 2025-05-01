@@ -19,14 +19,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_21
 }
 
-gremlin {
-    //defaultRepositories.set(false)
-    repositories {
-        mavenCentral()
-    }
-}
-
-
 configurations {
     compileOnly {
         extendsFrom(configurations.runtimeDownload.get())
