@@ -1,10 +1,8 @@
 package gg.aquatic.waves.command
 
-import gg.aquatic.waves.util.toUser
 import net.kyori.adventure.text.Component
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 
 class AquaticBaseCommand(
     name: String,
@@ -16,19 +14,13 @@ class AquaticBaseCommand(
 
     override fun execute(sender: CommandSender, commandLabel: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
-            if (sender is Player) {
-                val user = sender.toUser() ?: return true
-                helpMessage.forEach { user.sendMessage(it) }
-            }
+            helpMessage.forEach { sender.sendMessage(it) }
             return true
         }
 
         val cmd = subCommands[args[0]]
         if (cmd == null) {
-            if (sender is Player) {
-                val user = sender.toUser() ?: return true
-                helpMessage.forEach { user.sendMessage(it) }
-            }
+            helpMessage.forEach { sender.sendMessage(it) }
             return true
         }
         cmd.run(sender, args)

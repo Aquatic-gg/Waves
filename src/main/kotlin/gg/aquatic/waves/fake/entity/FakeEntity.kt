@@ -1,33 +1,21 @@
 package gg.aquatic.waves.fake.entity
 
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
-import com.github.retrooper.packetevents.protocol.player.Equipment
-import com.github.retrooper.packetevents.protocol.player.EquipmentSlot
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityEquipment
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSetPassengers
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity
+import gg.aquatic.waves.Waves
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
-import gg.aquatic.waves.util.audience.AquaticAudience
-import gg.aquatic.waves.chunk.chunkId
 import gg.aquatic.waves.fake.EntityBased
 import gg.aquatic.waves.fake.FakeObject
-import gg.aquatic.waves.fake.FakeObjectHandler
 import gg.aquatic.waves.fake.FakeObjectChunkBundle
+import gg.aquatic.waves.fake.FakeObjectHandler
+import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.packetevents.EntityDataBuilder
+import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.audience.FilterAudience
 import gg.aquatic.waves.util.collection.mapPair
 import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runSync
-import gg.aquatic.waves.util.toUser
-import io.github.retrooper.packetevents.util.SpigotConversionUtil
-import io.github.retrooper.packetevents.util.SpigotReflectionUtil
 import org.bukkit.Location
 import org.bukkit.Material
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.util.*
@@ -68,7 +56,7 @@ open class FakeEntity(
         FakeObjectHandler.idToEntity -= entityId
     }
 
-    val atomicEntityId = AtomicInteger(SpigotReflectionUtil.generateEntityId())
+    val atomicEntityId = AtomicInteger(Waves.NMS_HANDLER.generateEntityId())
     override val entityId: Int get() = atomicEntityId.get()
     val entityUUID = UUID.randomUUID()
     val entityData = ConcurrentHashMap<Int, EntityData>()

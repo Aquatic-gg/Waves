@@ -1,4 +1,4 @@
-package gg.aquatic.waves.util.event
+package gg.aquatic.waves.api.event
 
 import org.bukkit.event.Event
 import org.bukkit.event.HandlerList

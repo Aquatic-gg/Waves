@@ -3,7 +3,7 @@ package gg.aquatic.waves.inventory.event
 import gg.aquatic.waves.inventory.ButtonType
 import gg.aquatic.waves.inventory.InventoryViewer
 import gg.aquatic.waves.inventory.PacketInventory
-import gg.aquatic.waves.util.event.AquaticEvent
+import gg.aquatic.waves.api.event.AquaticEvent
 import org.bukkit.inventory.ItemStack
 
 class AsyncPacketInventoryInteractEvent(

@@ -1,10 +1,8 @@
-package gg.aquatic.waves.util
+package gg.aquatic.waves.api
 
 import java.lang.reflect.Field
 import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
-import java.util.*
-
 
 object ReflectionUtils {
 

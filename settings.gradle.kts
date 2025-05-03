@@ -3,3 +3,6 @@ plugins {
 }
 rootProject.name = "Waves"
 
+
+include("NMS_1_21_4")
+include("API")

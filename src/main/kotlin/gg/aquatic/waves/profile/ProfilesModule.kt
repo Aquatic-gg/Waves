@@ -10,8 +10,8 @@ import gg.aquatic.waves.profile.event.ProfileUnloadEvent
 import gg.aquatic.waves.profile.module.ProfileModule
 import gg.aquatic.waves.sync.SyncHandler
 import gg.aquatic.waves.sync.SyncedPlayer
-import gg.aquatic.waves.util.event.call
-import gg.aquatic.waves.util.event.event
+import gg.aquatic.waves.api.event.call
+import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.util.logger.type.InfoLogger
 import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.toBytes

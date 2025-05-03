@@ -3,7 +3,7 @@ package gg.aquatic.waves.input.impl
 import gg.aquatic.waves.input.AwaitingInput
 import gg.aquatic.waves.input.Input
 import gg.aquatic.waves.input.InputHandle
-import gg.aquatic.waves.util.event.event
+import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.util.unregister
 import io.papermc.paper.event.player.AsyncChatEvent
 import org.bukkit.entity.Player

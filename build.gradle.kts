@@ -64,7 +64,6 @@ gremlin {
         implementation("com.zaxxer:HikariCP:5.1.0")
         implementation("net.radstevee.packed:packed-core:1.1.1")
         implementation("net.radstevee.packed:packed-negative-spaces:1.1.1")
-        implementation("com.github.retrooper:packetevents-spigot:2.7.0")
     }
 }
 
@@ -126,7 +125,6 @@ dependencies {
     compileOnly("com.willfp:eco:6.74.5")
     implementation("org.bstats:bstats-bukkit:3.1.0")
 
-    runtimeDownload("com.github.retrooper:packetevents-spigot:2.7.0")
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10")
@@ -136,6 +134,8 @@ dependencies {
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
 
+    implementation(project(":API"))
+    implementation(project(":NMS_1_21_4"))
     //implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT")
 }
 

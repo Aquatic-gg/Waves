@@ -2,7 +2,7 @@ package gg.aquatic.waves.util.statistic.impl
 
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
-import gg.aquatic.waves.util.event.event
+import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.util.statistic.StatisticAddEvent
 import gg.aquatic.waves.util.statistic.StatisticType
 import org.bukkit.entity.Player
@@ -28,7 +28,7 @@ object TravelStatistic: StatisticType<Player>() {
                 return@event
             }
 
-            for (statisticHandle in TravelStatistic.handles) {
+            for (statisticHandle in handles) {
                 val args = statisticHandle.args
                 val swimming = args.boolean("count-swimming") ?: true
                 val flying = args.boolean("count-flying") ?: true

@@ -4,7 +4,7 @@ import gg.aquatic.waves.Waves
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.registry.WavesRegistry
-import gg.aquatic.waves.util.event.event
+import gg.aquatic.waves.api.event.event
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerQuitEvent

@@ -1,6 +1,6 @@
-package gg.aquatic.waves.util.event
+package gg.aquatic.waves.api.event
 
-import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.WavesPlugin
 import org.bukkit.Bukkit
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
@@ -8,7 +8,7 @@ import org.bukkit.event.Listener
 import java.util.function.Consumer
 
 fun Listener.register() {
-    Waves.INSTANCE.server.pluginManager.registerEvents(this, Waves.INSTANCE)
+    WavesPlugin.INSTANCE.server.pluginManager.registerEvents(this, WavesPlugin.INSTANCE)
 }
 
 inline fun <reified T : Event> event(
@@ -26,7 +26,7 @@ inline fun <reified T : Event> event(
                 callback.accept(event)
             }
         },
-        Waves.INSTANCE,
+        WavesPlugin.INSTANCE,
         ignoredCancelled
     )
     return listener

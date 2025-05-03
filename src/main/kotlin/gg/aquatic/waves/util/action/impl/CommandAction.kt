@@ -15,6 +15,7 @@ class CommandAction: Action<Player> {
         val executor = if (args.boolean("player-executor") == true) binder else Bukkit.getConsoleSender()
         for (cmd in commands) {
             val command = textUpdater(binder, cmd.updatePAPIPlaceholders(binder))
+            if (command.isEmpty() || command.isBlank()) continue
             Bukkit.dispatchCommand(
                 executor,
                 command

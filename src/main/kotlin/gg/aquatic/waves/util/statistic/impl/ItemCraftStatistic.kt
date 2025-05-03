@@ -2,16 +2,12 @@ package gg.aquatic.waves.util.statistic.impl
 
 import com.willfp.eco.core.gui.player
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
-import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
-import gg.aquatic.waves.util.event.event
+import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.util.statistic.StatisticAddEvent
 import gg.aquatic.waves.util.statistic.StatisticType
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
 import org.bukkit.event.Listener
-import org.bukkit.event.block.BlockBreakEvent
-import org.bukkit.event.block.BlockPlaceEvent
-import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.inventory.CraftItemEvent
 
 object ItemCraftStatistic: StatisticType<Player>() {

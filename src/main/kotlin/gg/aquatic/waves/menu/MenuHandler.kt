@@ -6,7 +6,7 @@ import gg.aquatic.waves.inventory.PacketInventory
 import gg.aquatic.waves.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.module.WaveModules
-import gg.aquatic.waves.util.event.event
+import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.util.runAsyncTimer
 
 object MenuHandler : WavesModule {

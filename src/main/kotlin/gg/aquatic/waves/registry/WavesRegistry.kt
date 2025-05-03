@@ -1,24 +1,16 @@
 package gg.aquatic.waves.registry
 
-import com.github.retrooper.packetevents.protocol.entity.pose.EntityPose
 import gg.aquatic.waves.util.price.AbstractPrice
 import gg.aquatic.waves.economy.RegisteredCurrency
+import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.hologram.line.AnimatedHologramLine
 import gg.aquatic.waves.hologram.line.ItemHologramLine
 import gg.aquatic.waves.hologram.line.TextHologramLine
-import gg.aquatic.waves.input.Input
 import gg.aquatic.waves.input.impl.ChatInput
 import gg.aquatic.waves.input.impl.VanillaMenuInput
 import gg.aquatic.waves.interactable.settings.*
-import gg.aquatic.waves.interactable.settings.entityproperty.EntityProperty
-import gg.aquatic.waves.interactable.settings.entityproperty.display.DisplayEntityProperty
-import gg.aquatic.waves.interactable.settings.entityproperty.display.ItemDisplayEntityProperty
 import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.item.factory.*
-import gg.aquatic.waves.packetevents.EntityDataBuilder
-import gg.aquatic.waves.packetevents.type.ItemEntityDataBuilder
-import gg.aquatic.waves.packetevents.type.TextDisplayEntityDataBuilder
-import gg.aquatic.waves.util.action.*
 import gg.aquatic.waves.util.action.impl.discord.DiscordWebhookAction
 import gg.aquatic.waves.util.action.impl.*
 import gg.aquatic.waves.util.currency.Currency
@@ -32,8 +24,15 @@ import gg.aquatic.waves.util.statistic.impl.BlockBreakStatistic
 import gg.aquatic.waves.util.toMMComponent
 import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.entity.Display
+import org.bukkit.entity.Entity
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
-import java.awt.Color
+import org.bukkit.entity.Pose
+import org.bukkit.entity.TextDisplay
+import org.bukkit.util.Transformation
+import org.joml.Quaternionf
+import org.joml.Vector3f
 
 object WavesRegistry {
 
@@ -93,89 +92,148 @@ object WavesRegistry {
         "animated" to AnimatedHologramLine.Companion,
     )
 
-    val ENTITY_PROPERTY_FACTORIES = hashMapOf(
-        createProperty("is-on-fire") { s, str, builder, _ ->
-            builder.isOnFire(s.getBoolean(str))
-        },
-        createProperty("is-sneaking") { s, str, builder, _ ->
-            builder.isSneaking(s.getBoolean(str))
-        },
-        createProperty("is-sprinting") { s, str, builder, _ ->
-            builder.isSprinting(s.getBoolean(str))
-        },
-        createProperty("is-swimming") { s, str, builder, _ ->
-            builder.isSwimming(s.getBoolean(str))
-        },
-        createProperty("invisible") { s, str, builder, _ ->
-            builder.isInvisible(s.getBoolean(str))
-        },
-        createProperty("glowing") { s, str, builder, _ ->
-            builder.isGlowing(s.getBoolean(str))
-        },
-        createProperty("is-flying") { s, str, builder, _ ->
-            builder.isFlying(s.getBoolean(str))
-        },
-        createProperty("custom-name") { s, str, builder, updater ->
-            var name = s.getString(str) ?: ""
-            name = updater(name)
-            builder.setCustomName(name.toMMComponent())
-        },
-        createProperty("custom-name-visible") { s, str, builder, _ ->
-            builder.isCustomNameVisible(s.getBoolean(str))
-        },
-        createProperty("is-silent") { s, str, builder, _ ->
-            builder.isSilent(s.getBoolean(str))
-        },
-        createProperty("no-gravity") { s, str, builder, _ ->
-            builder.hasNoGravity(s.getBoolean(str))
-        },
-        createProperty("pose") { s, str, builder, _ ->
-            builder.setPose(EntityPose.valueOf(s.getString(str, "STANDING")!!.uppercase()))
-        },
-        createProperty("entity-item") { s, str, builder, _ ->
-            (builder as ItemEntityDataBuilder).setItem(AquaticItem.loadFromYml(s)?.getItem() ?: return@createProperty)
-        },
-        "item" to ItemDisplayEntityProperty.Item.Companion,
-        "item-transform" to ItemDisplayEntityProperty.ItemTransformation.Companion,
-        "billboard" to DisplayEntityProperty.Billboard.Companion,
-        "interpolation-delay" to DisplayEntityProperty.InterpolationDelay.Companion,
-        "interpolation-duration" to DisplayEntityProperty.InterpolationDuration.Companion,
-        "teleport-interpolation-duration" to DisplayEntityProperty.TeleportInterpolationDuration.Companion,
-        "transformation" to DisplayEntityProperty.Transformation.Companion,
-        createProperty("text") { s, str, builder, updater ->
-            if (builder is TextDisplayEntityDataBuilder) {
-                builder.setText(updater(s.getString(str) ?: "").toMMComponent())
-            }
-        }, createProperty("is-see-through") { s, str, builder, updater ->
-            if (builder is TextDisplayEntityDataBuilder) {
-                val boolean = s.getBoolean(str)
-                builder.isSeeThrough(boolean)
-            }
-        }, createProperty("background-color") { s, str, builder, updater ->
-            if (builder is TextDisplayEntityDataBuilder) {
-                val colorStr = s.getString(str) ?: "0;0;0"
+    val ENTITY_PROPERTY_FACTORIES =
+        hashMapOf(
+            createProperty<Entity>("is-on-fire") { section, updater, entity ->
+                entity.isVisualFire = section.updatedBoolean("is-on-fire", updater)
+            },
+            createProperty<Entity>("is-sneaking") { section, updater, entity ->
+                entity.isSneaking = section.updatedBoolean("is-sneaking", updater)
+            },
+            createProperty<Entity>("invisible") { section, updater, entity ->
+                entity.isInvisible = section.updatedBoolean("invisible", updater)
+            },
+            createProperty<Entity>("glowing") { section, updater, entity ->
+                entity.isGlowing = section.updatedBoolean("glowing", updater)
+            },
+            createProperty<Entity>("custom-name") { section, updater, entity ->
+                entity.customName(section.getString("custom-name")?.let { updater(it).toMMComponent() })
+            },
+            createProperty<Entity>("custom-name-visible") { section, updater, entity ->
+                entity.isCustomNameVisible =
+                    section.updatedBoolean("custom-name-visible", updater)
+            },
+            createProperty<Entity>("is-silent") { section, updater, entity ->
+                entity.isSilent = section.updatedBoolean("is-silent", updater)
+            },
+            createProperty<Entity>("no-gravity") { section, updater, entity ->
+                entity.setGravity(!section.updatedBoolean("no-gravity", updater))
+            },
+            createProperty<Entity>("pose") { section, updater, entity ->
+                val poseId = updater(section.getString("pose")!!)
+                val pose = Pose.valueOf(poseId.uppercase())
+                entity.pose = pose
+            },
+            createProperty<ItemDisplay>("item") { section, updater, entity ->
+                val item = AquaticItem.loadFromYml(section.getConfigurationSection("item")) ?: return@createProperty
+                entity.setItemStack(item.getItem())
+            },
+            createProperty<ItemDisplay>("item-transform") { section, updater, entity ->
+                val transformId = section.getString("item-transform") ?: return@createProperty
+                val tranform = ItemDisplay.ItemDisplayTransform.valueOf(transformId.uppercase())
+                entity.itemDisplayTransform = tranform
+            },
+            createProperty<Display>("billboard") { section, updater, entity ->
+                val billboardId = section.getString("billboard") ?: return@createProperty
+                val billboard = Display.Billboard.valueOf(billboardId.uppercase())
+                entity.billboard = billboard
+            },
+            createProperty<Display>("interpolation-delay") { section, updater, entity ->
+                entity.interpolationDelay = section.updatedInt("interpolation-delay", updater)
+            },
+            createProperty<Display>("interpolation-duration") { section, updater, entity ->
+                entity.interpolationDuration = section.updatedInt("interpolation-duration", updater)
+            },
+            createProperty<Display>("teleport-duration") { section, updater, entity ->
+                entity.teleportDuration = section.updatedInt("teleport-duration", updater)
+            },
+            createProperty<Display>("transformation") { section, updater, entity ->
+                val s = section.getConfigurationSection("transformation") ?: return@createProperty
+
+                val scaleStr = s.getString("scale")
+                val scale = if (scaleStr != null) {
+                    val split = scaleStr.split(";")
+                    Vector3f(split[0].toFloat(), split[1].toFloat(), split[2].toFloat())
+                } else Vector3f(1f, 1f, 1f)
+
+                val translationStr = s.getString("translation")
+                val translation = if (translationStr != null) {
+                    val split = translationStr.split(";")
+                    Vector3f(split[0].toFloat(), split[1].toFloat(), split[2].toFloat())
+                } else Vector3f(0f, 0f, 0f)
+
+                val rotationStr = s.getString("rotation")
+                val rotation = if (rotationStr != null) {
+                    val split = rotationStr.split(";")
+                    if (split.size > 3) {
+                        Quaternionf(split[0].toFloat(), split[1].toFloat(), split[2].toFloat(), split[3].toFloat())
+                    } else Quaternionf().rotationXYZ(
+                        split[0].toFloat().toRadians(),
+                        split[1].toFloat().toRadians(),
+                        split[2].toFloat().toRadians()
+                    )
+                } else Quaternionf()
+
+                entity.transformation = Transformation(translation, rotation, scale, Quaternionf())
+            },
+            createProperty<TextDisplay>("text") { section, updater, entity ->
+                entity.text(updater(section.getString("text")!!).toMMComponent())
+            },
+            createProperty<TextDisplay>("is-see-through") { section, updater, entity ->
+                entity.isSeeThrough = section.updatedBoolean("is-see-through", updater)
+            },
+            createProperty<TextDisplay>("background-color") { section, updater, entity ->
+                val colorStr = section.getString("background-color") ?: "0;0;0"
                 val color = colorStr.split(";").mapNotNull { it.toIntOrNull() }
-                val colorInst = Color(color[0], color[1], color[2])
-                builder.useDefaultBackgroundColor(false)
-                builder.setBackgroundColor(colorInst.rgb)
+                val colorInst = org.bukkit.Color.fromARGB(color.getOrElse(3) { 255 }, color[0], color[1], color[2])
+                entity.isDefaultBackground = false
+                entity.backgroundColor = colorInst
+            },
+            createProperty<TextDisplay>("text-opacity") { section, updater, entity ->
+                entity.textOpacity = section.updatedInt("text-opacity", updater).toByte()
+            },
+            createProperty<TextDisplay>("has-shadow") { section, updater, entity ->
+                entity.isShadowed = section.updatedBoolean("has-shadow", updater)
+            },
+            createProperty<TextDisplay>("line-width") { section, updater, entity ->
+                entity.lineWidth = section.updatedInt("line-width", updater)
             }
-        }, createProperty("text-opacity") { s, str, builder, updater ->
-            if (builder is TextDisplayEntityDataBuilder) {
-                val opacity = s.getInt(str, 255)
-                builder.setTextOpacity(opacity.toByte())
-            }
-        }, createProperty("has-shadow") { s, str, builder, updater ->
-            if (builder is TextDisplayEntityDataBuilder) {
-                val has = s.getBoolean(str)
-                builder.hasShadow(has)
-            }
-        },
-        createProperty("line-width") { s, str, builder, updater ->
-            if (builder is TextDisplayEntityDataBuilder) {
-                builder.setLineWidth(updater(s.getString(str) ?: "").toIntOrNull() ?: 150)
+        )
+
+    private fun Float.toRadians() = Math.toRadians(this.toDouble()).toFloat()
+    private inline fun <reified T : Entity> createProperty(
+        id: String,
+        crossinline factory: (ConfigurationSection, (String) -> String, T) -> Unit
+    ): Pair<String, (ConfigurationSection, (String) -> String) -> EntityData> {
+        return id to { section: ConfigurationSection, updater: (String) -> String ->
+            object : EntityData {
+                override val id: String = id
+
+                override fun apply(entity: Entity) {
+                    if (entity !is T) return
+                    factory(section, updater, entity)
+                }
             }
         }
-    )
+    }
+
+    private fun ConfigurationSection.updatedBoolean(
+        id: String,
+        updater: (String) -> String
+    ): Boolean {
+        return this.getString(id)!!.let {
+            updater(it).toBoolean()
+        }
+    }
+
+    private fun ConfigurationSection.updatedInt(
+        id: String,
+        updater: (String) -> String
+    ): Int {
+        return this.getString(id)!!.let {
+            updater(it).toInt()
+        }
+    }
     val ITEM = HashMap<String, AquaticItem>()
 
     val STATISTIC_TYPES = HashMap<Class<*>, MutableMap<String, StatisticType<*>>>().apply {
@@ -187,19 +245,4 @@ object WavesRegistry {
         "chat" to ChatInput,
         "vanilla-menu" to VanillaMenuInput
     )
-
-    private fun createProperty(
-        path: String,
-        factory: (ConfigurationSection, String, EntityDataBuilder, updater: (String) -> String) -> Unit
-    ): Pair<String, EntityProperty.Serializer> {
-        return path to object : EntityProperty.Serializer {
-            override fun serialize(section: ConfigurationSection): EntityProperty {
-                return object : EntityProperty {
-                    override fun apply(builder: EntityDataBuilder, updater: (String) -> String) {
-                        factory(section, path, builder, updater)
-                    }
-                }
-            }
-        }
-    }
 }
