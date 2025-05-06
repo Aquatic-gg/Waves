@@ -66,3 +66,11 @@ fun Entity.setEntityData(data: List<EntityData>) {
 fun PacketEntity.modify(consumer: (Entity) -> Unit) {
     Waves.NMS_HANDLER.updateEntity(this, consumer)
 }
+fun PacketEntity.setPassengers(ids: IntArray) {
+    Waves.NMS_HANDLER.setPassengers(this, ids)
+}
+fun PacketEntity.setPassengers(vararg entities: Entity) {
+    entities.map { it.entityId }.toIntArray().let {
+        this.setPassengers(it)
+    }
+}
