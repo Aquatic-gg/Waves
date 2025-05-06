@@ -1,6 +1,7 @@
 package gg.aquatic.waves.fake.block
 
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
+import gg.aquatic.waves.chunk.trackedBy
 import gg.aquatic.waves.fake.FakeObject
 import gg.aquatic.waves.fake.FakeObjectChunkBundle
 import gg.aquatic.waves.fake.FakeObjectHandler
@@ -57,7 +58,7 @@ open class FakeBlock(
         FakeObjectHandler.tickableObjects += this
 
         runSync {
-            val chunkViewers = location.chunk.playersSeeingChunk.toSet()
+            val chunkViewers = location.chunk.trackedBy().toSet()
             runAsync {
                 for (viewer in viewers) {
                     if (viewer in chunkViewers) {

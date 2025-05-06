@@ -1,8 +1,8 @@
 package gg.aquatic.waves.nms_1_21_4
 
+import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
-import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.nms.ProtectedPacket
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
@@ -12,12 +12,7 @@ import net.minecraft.core.NonNullList
 import net.minecraft.network.Connection
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.Packet
-import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
-import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
-import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
+import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.network.ServerCommonPacketListenerImpl
@@ -26,7 +21,9 @@ import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.inventory.ClickType
+import net.minecraft.world.level.ChunkPos
 import org.bukkit.Bukkit
+import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.craftbukkit.v1_21_R3.CraftServer
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
@@ -37,16 +34,71 @@ import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
+import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
 
 object NMSHandlerImpl : NMSHandler {
 
-    fun registerPacketListener(player: Player) {
+    private val playerConnectionField =
+        ReflectionUtils.getField("connection", ServerCommonPacketListenerImpl::class.java)
+    private val entityCounterField = ReflectionUtils.getStatic<AtomicInteger>("ENTITY_COUNTER", Entity::class.java)
+    private val listeners = ConcurrentHashMap<UUID, PacketListener>()
 
+    override fun injectPacketListener(player: Player) {
+        val craftPlayer = (player as CraftPlayer)
+        val packetListener = PacketListener(craftPlayer)
+        val connection = playerConnectionField.get(craftPlayer.handle.connection) as Connection
+        val pipeline = connection.channel.pipeline()
+
+        for ((_, handler) in pipeline.toMap()) {
+            if (handler is Connection) {
+                pipeline.addBefore("packet_handler", "waves_packet_listener", packetListener)
+                break
+            }
+        }
     }
 
-    val entityCounterField = ReflectionUtils.getStatic<AtomicInteger>("ENTITY_COUNTER", Entity::class.java)
+    override fun unregisterPacketListener(player: Player) {
+        val craftPlayer = (player as CraftPlayer)
+        val connection = playerConnectionField.get(craftPlayer.handle.connection) as Connection
+        val channel = connection.channel
+        val pipeline = channel.pipeline()
+        if (channel != null) {
+            try {
+                if (pipeline.names().contains("waves_packet_listener")) {
+                    pipeline.remove("waves_packet_listener")
+                }
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+
+    override fun chunkViewers(chunk: Chunk): Collection<Player> {
+        val craftWorld = chunk.world as CraftWorld
+        return craftWorld.handle.chunkSource.chunkMap.getPlayers(ChunkPos(chunk.x, chunk.z), false)
+            .map { it.bukkitEntity as Player }
+    }
+
+    override fun trackedChunks(player: Player): Collection<Chunk> {
+        val chunkPositions = HashSet<ChunkPos>()
+        (player as CraftPlayer).handle.chunkTrackingView.forEach { chunkPos ->
+            chunkPositions.add(chunkPos)
+        }
+        val craftWorld = player.world as CraftWorld
+        return chunkPositions.mapNotNull {
+            val chunk = player.world.getChunkAt(it.x, it.z)
+            val players =
+                craftWorld.handle.chunkSource.chunkMap.getPlayers(ChunkPos(chunk.x, chunk.z), false).map { p -> p.uuid }
+            if (players.contains(player.uniqueId)) {
+                chunk
+            } else {
+                null
+            }
+        }
+    }
 
     fun showEntity(location: Location, entityType: EntityType, vararg player: Player): Pair<Int, Any>? {
         val packetEntity = showEntityPacket(location, entityType) ?: return null
@@ -286,15 +338,14 @@ object NMSHandlerImpl : NMSHandler {
         (this as CraftPlayer).handle.connection.send(packet)
     }
 
-    private val playerConnectionField =
-        ReflectionUtils.getField("connection", ServerCommonPacketListenerImpl::class.java)
 
     override fun sendPacket(packet: Any, silent: Boolean, vararg players: Player) {
         if (packet !is Packet<*>) return
         for (player in players) {
             if (silent) {
                 val protectedPacket = ProtectedPacket(packet)
-                val playerConnection = playerConnectionField.get((player as CraftPlayer).handle.connection) as Connection
+                val playerConnection =
+                    playerConnectionField.get((player as CraftPlayer).handle.connection) as Connection
                 playerConnection.channel.pipeline().write(protectedPacket)
             } else {
                 player.sendPacket(packet)

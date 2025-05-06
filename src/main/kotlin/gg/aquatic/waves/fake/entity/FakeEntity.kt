@@ -2,6 +2,7 @@ package gg.aquatic.waves.fake.entity
 
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
+import gg.aquatic.waves.chunk.trackedBy
 import gg.aquatic.waves.fake.EntityBased
 import gg.aquatic.waves.fake.FakeObject
 import gg.aquatic.waves.fake.FakeObjectChunkBundle
@@ -73,7 +74,7 @@ open class FakeEntity(
         FakeObjectHandler.idToEntity += entityId to this
 
         runSync {
-            val chunkViewers = location.chunk.playersSeeingChunk.toSet()
+            val chunkViewers = location.chunk.trackedBy().toSet()
             runAsync {
                 for (viewer in viewers) {
                     if (viewer in chunkViewers) {

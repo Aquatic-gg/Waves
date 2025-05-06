@@ -1,6 +1,7 @@
 package gg.aquatic.waves.api.nms
 
 import net.kyori.adventure.text.Component
+import org.bukkit.Chunk
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
@@ -8,6 +9,11 @@ import org.bukkit.inventory.MenuType
 interface NMSHandler {
 
     fun generateEntityId(): Int
+
+    fun injectPacketListener(player: Player)
+    fun unregisterPacketListener(player: Player)
+    fun chunkViewers(chunk: Chunk): Collection<Player>
+    fun trackedChunks(player: Player): Collection<Chunk>
 
     fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player)
     fun setWindowItems(
