@@ -4,7 +4,6 @@ import com.tcoded.folialib.FoliaLib
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.event.call
-import gg.aquatic.waves.chunk.ChunkTracker
 import gg.aquatic.waves.command.AquaticBaseCommand
 import gg.aquatic.waves.command.impl.GeneratePackCommand
 import gg.aquatic.waves.command.impl.ItemConvertCommand
@@ -33,7 +32,6 @@ class Waves : WavesPlugin() {
         WaveModules.PROFILES to ProfilesModule,
         WaveModules.ITEMS to ItemHandler,
         WaveModules.FAKE_OBJECTS to FakeObjectHandler,
-        WaveModules.CHUNK_TRACKER to ChunkTracker,
         WaveModules.INTERACTABLES to InteractableHandler,
         WaveModules.INVENTORIES to gg.aquatic.waves.inventory.InventoryManager,
         WaveModules.MENUS to MenuHandler,
