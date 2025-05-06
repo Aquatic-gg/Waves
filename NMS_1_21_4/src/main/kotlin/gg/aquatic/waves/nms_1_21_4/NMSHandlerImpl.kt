@@ -44,6 +44,10 @@ object NMSHandlerImpl : NMSHandler {
     private val playerConnectionField =
         ReflectionUtils.getField("connection", ServerCommonPacketListenerImpl::class.java)
     private val entityCounterField = ReflectionUtils.getStatic<AtomicInteger>("ENTITY_COUNTER", Entity::class.java)
+    private val setPassengersConstructor =
+        ClientboundSetPassengersPacket::class.java.getConstructor(FriendlyByteBuf::class.java).apply {
+            isAccessible = true
+        }
     private val listeners = ConcurrentHashMap<UUID, PacketListener>()
 
     override fun injectPacketListener(player: Player) {
@@ -100,59 +104,16 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
-    fun showEntity(location: Location, entityType: EntityType, vararg player: Player): Pair<Int, Any>? {
-        val packetEntity = showEntityPacket(location, entityType) ?: return null
-
-        val nmsEntityType =
-            net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase())?.getOrNull() ?: return null
-        val id = generateEntityId()
-
-        val worldServer = (location.world as CraftWorld).handle
-        val entity =
-            createEntity(nmsEntityType, worldServer, BlockPos(location.blockX, location.blockY, location.blockZ))
-                ?: return null
-
-        entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
-
-        val seenBy = HashSet<ServerPlayerConnection>()
-        for (p in player) {
-            seenBy.add((p as CraftPlayer).handle.connection)
-        }
-
-        val tracker = ServerEntity(
-            worldServer,
-            entity,
-            entity.type.updateInterval(),
-            true,
-            { },
-            seenBy,
-        )
+    override fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity? {
+        val packetEntity = createEntity(location, entityType) ?: return null
 
         for (item in player) {
-            item.sendPacket(entity.getAddEntityPacket(tracker))
+            item.sendPacket(packetEntity.spawnPacket as Packet<*>)
         }
-        /*
-        val packet = ClientboundAddEntityPacket(
-            id,
-            UUID.randomUUID(),
-            location.x,
-            location.y,
-            location.z,
-            location.yaw,
-            location.pitch,
-            nmsEntityType,
-            0,
-            Vec3(0.0, 0.0, 0.0),
-            location.yaw.toDouble()
-        )
-        for (player in player) {
-            player.sendPacket(packet)
-        }
-         */
-        return id to entity
+        return packetEntity
     }
 
-    fun showEntityPacket(location: Location, entityType: EntityType): PacketEntity? {
+    override fun createEntity(location: Location, entityType: EntityType): PacketEntity? {
         val nmsEntityType =
             net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase())?.getOrNull() ?: return null
         //val id = generateEntityId()
@@ -194,22 +155,17 @@ object NMSHandlerImpl : NMSHandler {
         return entity
     }
 
-    fun updateEntity(entityAny: Any, consumer: (org.bukkit.entity.Entity) -> Unit, vararg players: Player) {
-        val entity = (entityAny as Entity).bukkitEntity.apply {
-            consumer(this)
-        }.handle
+    override fun updateEntity(packetEntity: PacketEntity, consumer: (org.bukkit.entity.Entity) -> Unit, vararg players: Player) {
+        val packet = createEntityPacket(packetEntity,consumer) as Packet<*>
+        packetEntity.updatePacket = packet
 
-        val packet = ClientboundSetEntityDataPacket(
-            entity.id,
-            entity.entityData.nonDefaultValues ?: return
-        )
         for (player in players) {
             player.sendPacket(packet)
         }
     }
 
-    fun updateEntityPacket(entityAny: Any, consumer: (org.bukkit.entity.Entity) -> Unit): Any {
-        val entity = (entityAny as Entity).bukkitEntity.apply {
+    override fun createEntityPacket(packetEntity: PacketEntity, consumer: (org.bukkit.entity.Entity) -> Unit): Any {
+        val entity = (packetEntity.entityInstance as Entity).bukkitEntity.apply {
             consumer(this)
         }.handle
 
@@ -221,20 +177,20 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
-    val setPassengersConstructor =
-        ClientboundSetPassengersPacket::class.java.getConstructor(FriendlyByteBuf::class.java).apply {
-            isAccessible = true
-        }
-
-    fun setPassengers(baseId: Int, passengerIds: IntArray, vararg players: Player) {
-        val bytebuf = FriendlyByteBuf(Unpooled.buffer())
-        bytebuf.writeVarInt(baseId)
-        bytebuf.writeVarIntArray(passengerIds)
-
-        val packet = setPassengersConstructor.newInstance(bytebuf)
+    override fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player) {
+        val packet = createPassengersPacket(packetEntity, passengerIds) as Packet<*>
         for (player in players) {
             player.sendPacket(packet)
         }
+    }
+
+    override fun createPassengersPacket(packetEntity: PacketEntity, passengerIds: IntArray): Any {
+        val bytebuf = FriendlyByteBuf(Unpooled.buffer())
+        bytebuf.writeVarInt(packetEntity.entityId)
+        bytebuf.writeVarIntArray(passengerIds)
+
+        val packet = setPassengersConstructor.newInstance(bytebuf)
+        return packet
     }
 
     override fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player) {

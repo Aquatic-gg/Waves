@@ -1,12 +1,8 @@
 package gg.aquatic.waves.util
 
-import com.github.retrooper.packetevents.netty.buffer.ByteBufHelper
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData
-import com.github.retrooper.packetevents.wrapper.PacketWrapper
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
-import io.github.retrooper.packetevents.util.SpigotReflectionUtil
-import io.netty.buffer.PooledByteBufAllocator
-import org.bukkit.Bukkit
+import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.nms.NMSHandler
+import gg.aquatic.waves.api.nms.PacketEntity
 import org.bukkit.entity.Entity
 
 /*
@@ -65,3 +61,8 @@ fun Entity.setEntityData(data: List<EntityData>) {
     assignMethod.invoke(synchedData, nmsData)
 }
  */
+
+
+fun PacketEntity.modify(consumer: (Entity) -> Unit) {
+    Waves.NMS_HANDLER.updateEntity(this, consumer)
+}

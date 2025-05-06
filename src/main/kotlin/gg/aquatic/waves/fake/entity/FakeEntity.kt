@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 open class FakeEntity(
-    val type: EntityType, override var location: Location,
+    val type: EntityType, location: Location,
     override val viewRange: Int,
     audience: AquaticAudience,
     consumer: FakeEntity.() -> Unit = {},
@@ -46,6 +46,14 @@ open class FakeEntity(
                 addViewer(player)
             }
         }
+
+    override var location: Location = location
+        set(value) {
+            field = value
+
+        }
+
+    private var spawnPacket: Any
 
     override fun destroy() {
         destroyed = true

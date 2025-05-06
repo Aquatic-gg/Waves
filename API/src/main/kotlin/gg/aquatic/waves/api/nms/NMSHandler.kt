@@ -2,6 +2,9 @@ package gg.aquatic.waves.api.nms
 
 import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
+import org.bukkit.Location
+import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
@@ -23,6 +26,13 @@ interface NMSHandler {
         carriedItem: ItemStack?,
         vararg players: Player
     )
+
+    fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity?
+    fun createEntity(location: Location, entityType: EntityType): PacketEntity?
+    fun updateEntity(packetEntity: PacketEntity, consumer: (Entity) -> Unit, vararg players: Player)
+    fun createEntityPacket(packetEntity: PacketEntity, consumer: (Entity) -> Unit): Any
+    fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player)
+    fun createPassengersPacket(packetEntity: PacketEntity, passengerIds: IntArray): Any
 
     fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
     fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
