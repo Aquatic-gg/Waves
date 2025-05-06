@@ -1,4 +1,4 @@
-package gg.aquatic.waves.api
+package gg.aquatic.waves.api.nms
 
 class PacketEntity(
     val entityId: Int,

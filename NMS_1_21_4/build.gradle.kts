@@ -24,6 +24,8 @@ dependencies {
         generateSource = false,
         generateDocs = false
     )
+    compileOnly("net.kyori:adventure-api:4.20.0")
+    compileOnly("net.kyori:adventure-text-serializer-gson:4.20.0")
 }
 kotlin {
     jvmToolchain(21)

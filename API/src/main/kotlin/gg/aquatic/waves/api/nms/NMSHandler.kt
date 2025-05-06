@@ -1,4 +1,4 @@
-package gg.aquatic.waves.api
+package gg.aquatic.waves.api.nms
 
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
@@ -19,6 +19,8 @@ interface NMSHandler {
     )
 
     fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
+    fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
+    fun sendPacket(packet: Any, silent: Boolean = false, vararg players: Player)
 
     fun receiveWindowClick(
         inventoryId: Int,

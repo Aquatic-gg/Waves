@@ -4,7 +4,6 @@ import gg.aquatic.waves.Waves
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.MenuType
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -24,19 +23,24 @@ open class PacketInventory(
     var title = title
         set(value) {
             field = value
-            updateTitle()
+            inventoryOpenPacket = updateTitle()
         }
 
+    var inventoryOpenPacket: Any = updateTitle()
+        private set
+
     fun sendInventoryOpenPacket(player: Player) {
-        Waves.NMS_HANDLER.openWindow(126, type.menuType, title, player)
+        Waves.NMS_HANDLER.sendPacket(inventoryOpenPacket, false, player)
     }
 
-    private fun updateTitle() {
-        Waves.NMS_HANDLER.openWindow(126, type.menuType, title, *viewerPlayers)
+    private fun updateTitle(): Any {
+        val packet = Waves.NMS_HANDLER.openWindowPacket(126, type.menuType, title)
 
+        Waves.NMS_HANDLER.sendPacket(packet, false, *viewerPlayers)
         for (player in viewers.values) {
             InventoryManager.updateInventoryContent(this, player)
         }
+        return packet
     }
 
     internal fun addItem(slot: Int, item: ItemStack) {

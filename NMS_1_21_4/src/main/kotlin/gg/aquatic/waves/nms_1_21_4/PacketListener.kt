@@ -2,6 +2,7 @@ package gg.aquatic.waves.nms_1_21_4
 
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.packet.PacketChunkLoadEvent
+import gg.aquatic.waves.api.nms.ProtectedPacket
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
@@ -14,6 +15,9 @@ class PacketListener(
 ): ChannelDuplexHandler() {
 
     override fun write(ctx: ChannelHandlerContext?, msg: Any?, promise: ChannelPromise?) {
+        if (msg is ProtectedPacket) {
+            super.write(ctx, msg.packet, promise)
+        }
         if (ctx !is Packet<*>) {
             super.write(ctx, msg, promise)
             return

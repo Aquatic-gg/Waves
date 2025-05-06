@@ -1,28 +1,42 @@
 package gg.aquatic.waves.nms_1_21_4
 
-import gg.aquatic.waves.api.NMSHandler
-import gg.aquatic.waves.api.PacketEntity
+import gg.aquatic.waves.api.nms.NMSHandler
+import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.ReflectionUtils
+import gg.aquatic.waves.api.nms.ProtectedPacket
 import io.netty.buffer.Unpooled
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import net.kyori.adventure.text.Component
 import net.minecraft.core.BlockPos
+import net.minecraft.core.NonNullList
+import net.minecraft.network.Connection
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.Packet
+import net.minecraft.network.protocol.game.ClientboundContainerSetContentPacket
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
+import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket
 import net.minecraft.network.protocol.game.ClientboundSetEntityDataPacket
 import net.minecraft.network.protocol.game.ClientboundSetPassengersPacket
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
 import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.server.network.ServerPlayerConnection
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.inventory.ClickType
+import org.bukkit.Bukkit
 import org.bukkit.Location
+import org.bukkit.craftbukkit.v1_21_R3.CraftServer
 import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
 import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
+import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftMenuType
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.MenuType
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
 
@@ -128,7 +142,7 @@ object NMSHandlerImpl : NMSHandler {
         return entity
     }
 
-    fun updateEntityPacket(entityAny: Any, consumer: (org.bukkit.entity.Entity) -> Unit, vararg players: Player) {
+    fun updateEntity(entityAny: Any, consumer: (org.bukkit.entity.Entity) -> Unit, vararg players: Player) {
         val entity = (entityAny as Entity).bukkitEntity.apply {
             consumer(this)
         }.handle
@@ -140,6 +154,19 @@ object NMSHandlerImpl : NMSHandler {
         for (player in players) {
             player.sendPacket(packet)
         }
+    }
+
+    fun updateEntityPacket(entityAny: Any, consumer: (org.bukkit.entity.Entity) -> Unit): Any {
+        val entity = (entityAny as Entity).bukkitEntity.apply {
+            consumer(this)
+        }.handle
+
+        val packet = ClientboundSetEntityDataPacket(
+            entity.id,
+            entity.entityData.nonDefaultValues
+                ?: emptyList<net.minecraft.network.syncher.SynchedEntityData.DataValue<*>>()
+        )
+        return packet
     }
 
     val setPassengersConstructor =
@@ -171,6 +198,82 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
+    override fun setWindowItems(
+        inventoryId: Int,
+        stateId: Int,
+        items: Collection<ItemStack?>,
+        carriedItem: ItemStack?,
+        vararg players: Player
+    ) {
+        val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
+        nmsItems += items.mapNotNull { it?.toNMS() }
+        val packet = ClientboundContainerSetContentPacket(
+            inventoryId,
+            stateId,
+            nmsItems,
+            carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+        )
+        for (player in players) {
+            player.sendPacket(packet)
+        }
+    }
+
+    override fun openWindowPacket(
+        inventoryId: Int,
+        menuType: MenuType,
+        title: Component,
+    ): Any {
+        val packet = ClientboundOpenScreenPacket(
+            inventoryId,
+            CraftMenuType.bukkitToMinecraft(menuType),
+            title.toNMSComponent()
+        )
+        return packet
+    }
+
+    override fun openWindow(
+        inventoryId: Int,
+        menuType: MenuType,
+        title: Component,
+        vararg players: Player
+    ) {
+        val packet = openWindowPacket(inventoryId, menuType, title) as Packet<*>
+
+        for (player in players) {
+            player.sendPacket(packet)
+        }
+    }
+
+    override fun receiveWindowClick(
+        inventoryId: Int,
+        stateId: Int,
+        slot: Int,
+        buttonNum: Int,
+        clickTypeNum: Int,
+        carriedItem: ItemStack?,
+        changedSlots: Map<Int, ItemStack?>,
+        vararg players: Player
+    ) {
+        val map = Int2ObjectOpenHashMap<net.minecraft.world.item.ItemStack>()
+        changedSlots.forEach { (key, value) ->
+            map[key] = value?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+        }
+
+        val packet = ServerboundContainerClickPacket(
+            inventoryId,
+            stateId,
+            slot,
+            buttonNum,
+            ClickType.entries[clickTypeNum],
+            carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY,
+            map
+        )
+
+        for (player in players) {
+            (player as CraftPlayer).handle.connection.handleContainerClick(packet)
+        }
+    }
+
     override fun generateEntityId(): Int {
         return entityCounterField.getAndIncrement()
     }
@@ -181,5 +284,29 @@ object NMSHandlerImpl : NMSHandler {
 
     private fun Player.sendPacket(packet: Packet<*>) {
         (this as CraftPlayer).handle.connection.send(packet)
+    }
+
+    private val playerConnectionField =
+        ReflectionUtils.getField("connection", ServerCommonPacketListenerImpl::class.java)
+
+    override fun sendPacket(packet: Any, silent: Boolean, vararg players: Player) {
+        if (packet !is Packet<*>) return
+        for (player in players) {
+            if (silent) {
+                val protectedPacket = ProtectedPacket(packet)
+                val playerConnection = playerConnectionField.get((player as CraftPlayer).handle.connection) as Connection
+                playerConnection.channel.pipeline().write(protectedPacket)
+            } else {
+                player.sendPacket(packet)
+            }
+        }
+    }
+
+    fun Component.toNMSComponent(): net.minecraft.network.chat.Component {
+        val kyoriJson = net.kyori.adventure.text.serializer.gson.GsonComponentSerializer.gson().serialize(this)
+        return net.minecraft.network.chat.Component.Serializer.fromJson(
+            kyoriJson,
+            ((Bukkit.getServer() as CraftServer).worlds.first() as CraftWorld).handle.registryAccess()
+        )!!
     }
 }

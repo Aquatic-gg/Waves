@@ -1,7 +1,7 @@
 package gg.aquatic.waves
 
 import com.tcoded.folialib.FoliaLib
-import gg.aquatic.waves.api.NMSHandler
+import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.chunk.ChunkTracker
