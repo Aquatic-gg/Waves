@@ -17,22 +17,3 @@ fun Command.unregister() {
             knownCommands.remove(alias)
     }
 }
-
-/*
-private val bukkitCommandMapField: Field = Bukkit.getServer().javaClass.getDeclaredField("commandMap").apply { isAccessible = true }
-
-fun Server.commandMap(): CommandMap {
-    return bukkitCommandMapField.get(this) as CommandMap
-}
-
-@Suppress("UNCHECKED_CAST")
-fun CommandMap.knownCommands(): MutableMap<String, Command> {
-    val commandMap = this as SimpleCommandMap
-
-    val field = SimpleCommandMap::class.java.getDeclaredField("knownCommands").apply { isAccessible = true }
-    val value = field.get(commandMap) as MutableMap<String, Command>
-
-    return value
-}
-
- */

@@ -3,7 +3,6 @@ package gg.aquatic.waves.command.impl
 import gg.aquatic.waves.command.ICommand
 import gg.aquatic.waves.util.item.ItemEncoder
 import gg.aquatic.waves.util.toMMComponent
-import gg.aquatic.waves.util.toUser
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 
@@ -20,9 +19,7 @@ object ItemConvertCommand : ICommand {
             return
         }
         val base64 = ItemEncoder.encode(item)
-        sender.toUser()?.sendMessage(
-            "Item has been converted! (<u><click:COPY_TO_CLIPBOARD:'$base64'>Click to copy</click></u>)".toMMComponent()
-        )
+        sender.sendMessage("Item has been converted! (<u><click:COPY_TO_CLIPBOARD:'$base64'>Click to copy</click></u>)".toMMComponent())
     }
 
     override fun tabComplete(sender: CommandSender, args: Array<out String>): List<String> {
