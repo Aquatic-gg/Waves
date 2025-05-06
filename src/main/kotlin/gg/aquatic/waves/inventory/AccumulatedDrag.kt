@@ -1,9 +1,9 @@
 package gg.aquatic.waves.inventory
 
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClickWindow
+import gg.aquatic.waves.api.event.packet.PacketContainerClickEvent
 
 class AccumulatedDrag(
-    val packet: WrapperPlayClientClickWindow,
+    val packet: PacketContainerClickEvent,
     val type: ClickType
 ) {
 }

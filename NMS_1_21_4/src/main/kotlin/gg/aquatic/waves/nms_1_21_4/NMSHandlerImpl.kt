@@ -1,6 +1,7 @@
 package gg.aquatic.waves.nms_1_21_4
 
 import gg.aquatic.waves.api.NMSHandler
+import gg.aquatic.waves.api.PacketEntity
 import gg.aquatic.waves.api.ReflectionUtils
 import io.netty.buffer.Unpooled
 import net.minecraft.core.BlockPos
@@ -34,6 +35,8 @@ object NMSHandlerImpl : NMSHandler {
     val entityCounterField = ReflectionUtils.getStatic<AtomicInteger>("ENTITY_COUNTER", Entity::class.java)
 
     fun showEntity(location: Location, entityType: EntityType, vararg player: Player): Pair<Int, Any>? {
+        val packetEntity = showEntityPacket(location, entityType) ?: return null
+
         val nmsEntityType =
             net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase())?.getOrNull() ?: return null
         val id = generateEntityId()
@@ -81,6 +84,30 @@ object NMSHandlerImpl : NMSHandler {
         }
          */
         return id to entity
+    }
+
+    fun showEntityPacket(location: Location, entityType: EntityType): PacketEntity? {
+        val nmsEntityType =
+            net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase())?.getOrNull() ?: return null
+        //val id = generateEntityId()
+
+        val worldServer = (location.world as CraftWorld).handle
+        val entity =
+            createEntity(nmsEntityType, worldServer, BlockPos(location.blockX, location.blockY, location.blockZ))
+                ?: return null
+
+        entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
+
+        val seenBy = HashSet<ServerPlayerConnection>()
+        val tracker = ServerEntity(
+            worldServer,
+            entity,
+            entity.type.updateInterval(),
+            true,
+            { },
+            seenBy,
+        )
+        return PacketEntity(entity.id, entity, entity.getAddEntityPacket(tracker))
     }
 
     private fun <T : Entity> createEntity(
@@ -131,8 +158,13 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
-    fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack, vararg players: Player) {
-        val packet = ClientboundContainerSetSlotPacket(inventoryId, stateId, slot, itemStack.toNMS())
+    override fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player) {
+        val packet = ClientboundContainerSetSlotPacket(
+            inventoryId,
+            stateId,
+            slot,
+            itemStack?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+        )
 
         for (player in players) {
             player.sendPacket(packet)

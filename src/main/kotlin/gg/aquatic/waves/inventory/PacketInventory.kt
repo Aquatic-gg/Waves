@@ -1,11 +1,11 @@
 package gg.aquatic.waves.inventory
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerOpenWindow
-import gg.aquatic.waves.util.toUser
+import gg.aquatic.waves.Waves
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import java.util.UUID
+import org.bukkit.inventory.MenuType
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 open class PacketInventory(
@@ -16,26 +16,28 @@ open class PacketInventory(
     val viewers: ConcurrentHashMap<UUID, InventoryViewer> = ConcurrentHashMap<UUID, InventoryViewer>()
     val content: ConcurrentHashMap<Int, ItemStack> = ConcurrentHashMap<Int, ItemStack>()
 
+    val viewerPlayers: Array<Player>
+        get() {
+            return viewers.values.map { it.player }.toTypedArray()
+        }
+
     var title = title
         set(value) {
             field = value
-            inventoryOpenPacket = updateTitle()
+            updateTitle()
         }
 
-    var inventoryOpenPacket: WrapperPlayServerOpenWindow = updateTitle()
-        private set
-
-    private fun updateTitle(): WrapperPlayServerOpenWindow {
-        val packet = WrapperPlayServerOpenWindow(126, type.id(), title)
-
-        for ((_, viewer) in viewers) {
-            viewer.player.toUser()?.sendPacket(packet)
-            InventoryManager.updateInventoryContent(this, viewer)
-        }
-
-        return packet
+    fun sendInventoryOpenPacket(player: Player) {
+        Waves.NMS_HANDLER.openWindow(126, type.menuType, title, player)
     }
 
+    private fun updateTitle() {
+        Waves.NMS_HANDLER.openWindow(126, type.menuType, title, *viewerPlayers)
+
+        for (player in viewers.values) {
+            InventoryManager.updateInventoryContent(this, player)
+        }
+    }
 
     internal fun addItem(slot: Int, item: ItemStack) {
         val previous = content[slot]
@@ -50,9 +52,11 @@ open class PacketInventory(
     fun setItem(slot: Int, item: ItemStack?) {
         InventoryManager.updateItem(this, item, slot)
     }
-    fun changeItems(items: Map<Int,ItemStack?>) {
+
+    fun changeItems(items: Map<Int, ItemStack?>) {
         InventoryManager.updateItems(this, items)
     }
+
     fun setItems(items: Map<Int, ItemStack>) {
         this.content.clear()
         this.content.putAll(items)

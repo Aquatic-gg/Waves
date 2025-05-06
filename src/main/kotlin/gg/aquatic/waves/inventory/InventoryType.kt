@@ -1,31 +1,33 @@
 package gg.aquatic.waves.inventory
 
-enum class InventoryType(slots: Int) {
-    GENERIC9X1(9),
-    GENERIC9X2(18),
-    GENERIC9X3(27),
-    GENERIC9X4(36),
-    GENERIC9X5(45),
-    GENERIC9X6(54),
-    GENERIC3X3(9),
-    CRAFTER3X3(10),
-    ANVIL(3),
-    BEACON(1),
-    BLAST_FURNACE(3),
-    BREWING_STAND(4),
-    CRAFTING_TABLE(10),
-    ENCHANTMENT_TABLE(2),
-    FURNACE(3),
-    GRINDSTONE(3),
-    HOPPER(5),
-    LECTERN(0),
-    LOOM(4),
-    VILLAGER(3),
-    SHULKER_BOX(27),
-    SMITHING_TABLE(4),
-    SMOKER(3),
-    CARTOGRAPHY_TABLE(3),
-    STONECUTTER(2)
+import org.bukkit.inventory.MenuType
+
+enum class InventoryType(slots: Int, val menuType: MenuType) {
+    GENERIC9X1(9, MenuType.GENERIC_9X1),
+    GENERIC9X2(18, MenuType.GENERIC_9X2),
+    GENERIC9X3(27, MenuType.GENERIC_9X3),
+    GENERIC9X4(36, MenuType.GENERIC_9X4),
+    GENERIC9X5(45, MenuType.GENERIC_9X5),
+    GENERIC9X6(54, MenuType.GENERIC_9X6),
+    GENERIC3X3(9, MenuType.GENERIC_3X3),
+    CRAFTER3X3(10, MenuType.CRAFTER_3X3),
+    ANVIL(3, MenuType.ANVIL),
+    BEACON(1,MenuType.BEACON),
+    BLAST_FURNACE(3,MenuType.BLAST_FURNACE),
+    BREWING_STAND(4,MenuType.BREWING_STAND),
+    CRAFTING_TABLE(10,MenuType.CRAFTING),
+    ENCHANTMENT_TABLE(2,MenuType.ENCHANTMENT),
+    FURNACE(3,MenuType.FURNACE),
+    GRINDSTONE(3,MenuType.GRINDSTONE),
+    HOPPER(5,MenuType.HOPPER),
+    LECTERN(0,MenuType.LECTERN),
+    LOOM(4,MenuType.LOOM),
+    VILLAGER(3,MenuType.MERCHANT),
+    SHULKER_BOX(27,MenuType.SHULKER_BOX),
+    SMITHING_TABLE(4,MenuType.SMITHING),
+    SMOKER(3,MenuType.SMOKER),
+    CARTOGRAPHY_TABLE(3,MenuType.CARTOGRAPHY_TABLE),
+    STONECUTTER(2,MenuType.STONECUTTER)
     ;
 
     val size = slots
