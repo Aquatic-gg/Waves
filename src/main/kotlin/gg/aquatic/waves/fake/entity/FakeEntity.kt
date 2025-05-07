@@ -1,6 +1,7 @@
 package gg.aquatic.waves.fake.entity
 
 import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.trackedBy
 import gg.aquatic.waves.fake.EntityBased
@@ -8,20 +9,19 @@ import gg.aquatic.waves.fake.FakeObject
 import gg.aquatic.waves.fake.FakeObjectChunkBundle
 import gg.aquatic.waves.fake.FakeObjectHandler
 import gg.aquatic.waves.fake.entity.data.EntityData
-import gg.aquatic.waves.packetevents.EntityDataBuilder
+import gg.aquatic.waves.util.*
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.audience.FilterAudience
-import gg.aquatic.waves.util.collection.mapPair
-import gg.aquatic.waves.util.runAsync
-import gg.aquatic.waves.util.runSync
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.Item
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
+import org.bukkit.util.Vector
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicInteger
 
 open class FakeEntity(
     val type: EntityType, location: Location,
@@ -50,10 +50,15 @@ open class FakeEntity(
     override var location: Location = location
         set(value) {
             field = value
-
+            packetEntity = createEntity()
         }
 
-    private var spawnPacket: Any
+    private var packetEntity = createEntity()
+
+    private fun createEntity(): PacketEntity {
+        val entity = Waves.NMS_HANDLER.createEntity(location, type) ?: throw Exception("Failed to create entity")
+        return entity
+    }
 
     override fun destroy() {
         destroyed = true
@@ -65,16 +70,17 @@ open class FakeEntity(
         FakeObjectHandler.idToEntity -= entityId
     }
 
-    val atomicEntityId = AtomicInteger(Waves.NMS_HANDLER.generateEntityId())
-    override val entityId: Int get() = atomicEntityId.get()
-    val entityUUID = UUID.randomUUID()
-    val entityData = ConcurrentHashMap<Int, EntityData>()
+    override val entityId: Int get() = packetEntity.entityId
+    val entityData = ConcurrentHashMap<String, EntityData>()
     val equipment = ConcurrentHashMap<EquipmentSlot, ItemStack>()
     val passengers = ConcurrentHashMap.newKeySet<Int>()
 
     init {
-        if (type == EntityTypes.ITEM) {
-            entityData += EntityDataBuilder.ITEM().setItem(ItemStack(Material.STONE)).build().mapPair { it.index to it }
+        if (type == EntityType.ITEM) {
+            entityData += "item" to EntityData.create("item") { e ->
+                if (e !is Item) return@create
+                e.itemStack = ItemStack(Material.STONE)
+            }
         }
         consumer(this)
         this.audience = audience
@@ -115,28 +121,34 @@ open class FakeEntity(
     }
 
     fun updateEntity(func: FakeEntity.() -> Unit) {
+        val hadPassengers = passengers.isNotEmpty()
         func(this)
 
-        for (player in isViewing) {
-            sendUpdate(player)
+        packetEntity.modify { e->
+            for (data in entityData.values) {
+                data.apply(e)
+            }
         }
+        if (passengers.isNotEmpty()) {
+            packetEntity.setPassengers(passengers.toIntArray())
+        }
+
+        packetEntity.setEquipment(equipment)
+
+        val players = isViewing.toTypedArray()
+        packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false,*players)
+        if (!(!hadPassengers && passengers.isEmpty())) {
+            packetEntity.sendPassengerUpdate(Waves.NMS_HANDLER, false,*players)
+        }
+        packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,false,*players)
     }
 
     private fun sendUpdate(player: Player) {
-        val user = player.toUser() ?: return
         if (entityData.isNotEmpty()) {
-            val packet = WrapperPlayServerEntityMetadata(entityId, entityData.values.toList())
-            user.sendPacket(packet)
+            packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false,player)
         }
-        if (equipment.isNotEmpty()) {
-            val packet = WrapperPlayServerEntityEquipment(
-                entityId,
-                equipment.map { Equipment(it.key, SpigotConversionUtil.fromBukkitItemStack(it.value)) })
-            user.sendPacket(packet)
-        }
-        val passengersPacket = WrapperPlayServerSetPassengers(entityId, passengers.toIntArray())
-        user.sendPacket(passengersPacket)
-
+        packetEntity.sendPassengerUpdate(Waves.NMS_HANDLER, false,player)
+        packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,false,player)
         onUpdate(player)
     }
 
@@ -164,23 +176,14 @@ open class FakeEntity(
     override fun show(player: Player) {
         if (isViewing.contains(player)) return
         isViewing.add(player)
-        val spawnPacket = WrapperPlayServerSpawnEntity(
-            entityId,
-            entityUUID,
-            type,
-            SpigotConversionUtil.fromBukkitLocation(location),
-            location.yaw,
-            0,
-            null
-        )
-        player.toUser()?.sendPacket(spawnPacket)
-        sendUpdate(player)
+
+        packetEntity.sendSpawnComplete(Waves.NMS_HANDLER,false,player)
+        onUpdate(player)
     }
 
     override fun hide(player: Player) {
         isViewing.remove(player)
-        val destroyPacket = WrapperPlayServerDestroyEntities(entityId)
-        player.toUser()?.sendPacket(destroyPacket)
+        packetEntity.sendDespawn(Waves.NMS_HANDLER,false,player)
     }
 
     override fun tick() {
@@ -193,11 +196,9 @@ open class FakeEntity(
             unregister()
             register()
         }
-        val packet = WrapperPlayServerEntityTeleport(
-            entityId, SpigotConversionUtil.fromBukkitLocation(location), false
-        )
+        val packet = Waves.NMS_HANDLER.createTeleportPacket(packetEntity.entityId,location, Vector())
         for (player in isViewing) {
-            player.toUser()?.sendPacket(packet)
+            player.sendPacket(packet,false)
         }
     }
 }

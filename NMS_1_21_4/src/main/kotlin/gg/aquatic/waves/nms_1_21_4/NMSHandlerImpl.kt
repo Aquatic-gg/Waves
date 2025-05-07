@@ -1,5 +1,6 @@
 package gg.aquatic.waves.nms_1_21_4
 
+import com.mojang.datafixers.util.Pair
 import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
@@ -20,8 +21,11 @@ import net.minecraft.server.network.ServerPlayerConnection
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.Mob
+import net.minecraft.world.entity.PositionMoveRotation
+import net.minecraft.world.entity.Relative
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.phys.Vec3
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.Location
@@ -32,8 +36,11 @@ import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
 import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftMenuType
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
+import org.bukkit.util.Vector
+import org.joml.Vector3d
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -134,14 +141,19 @@ object NMSHandlerImpl : NMSHandler {
             { },
             seenBy,
         )
-        return PacketEntity(entity.id, entity, entity.getAddEntityPacket(tracker))
+        return PacketEntity(
+            entity.id,
+            entity,
+            entity.getAddEntityPacket(tracker),
+            despawnpacket = ClientboundRemoveEntitiesPacket(entity.id)
+        )
     }
 
     private fun <T : Entity> createEntity(
         entityType: net.minecraft.world.entity.EntityType<T>,
         worldServer: ServerLevel,
         blockPos: BlockPos
-    ): T? {
+    ): T? {;
         val entity = entityType.create(worldServer, EntitySpawnReason.COMMAND)
         entity?.let {
             it.moveTo(blockPos.x.toDouble(), blockPos.y.toDouble(), blockPos.z.toDouble(), 0.0f, 0.0f)
@@ -155,8 +167,12 @@ object NMSHandlerImpl : NMSHandler {
         return entity
     }
 
-    override fun updateEntity(packetEntity: PacketEntity, consumer: (org.bukkit.entity.Entity) -> Unit, vararg players: Player) {
-        val packet = createEntityPacket(packetEntity,consumer) as Packet<*>
+    override fun updateEntity(
+        packetEntity: PacketEntity,
+        consumer: (org.bukkit.entity.Entity) -> Unit,
+        vararg players: Player
+    ) {
+        val packet = createEntityUpdatePacket(packetEntity, consumer) as Packet<*>
         packetEntity.updatePacket = packet
 
         for (player in players) {
@@ -164,7 +180,23 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
-    override fun createEntityPacket(packetEntity: PacketEntity, consumer: (org.bukkit.entity.Entity) -> Unit): Any {
+    override fun createTeleportPacket(entityId: Int, location: Location, previousLocation: Vector): Any {
+        val delta = previousLocation.clone().subtract(location.toVector())
+        val packet = ClientboundTeleportEntityPacket(
+            entityId, PositionMoveRotation(
+                Vec3(location.x, location.y, location.z),
+                Vec3(delta.x, delta.y, delta.z),
+                location.yaw,
+                location.pitch
+            ), Relative.ALL, false
+        )
+        return packet
+    }
+
+    override fun createEntityUpdatePacket(
+        packetEntity: PacketEntity,
+        consumer: (org.bukkit.entity.Entity) -> Unit
+    ): Any {
         val entity = (packetEntity.entityInstance as Entity).bukkitEntity.apply {
             consumer(this)
         }.handle
@@ -179,6 +211,7 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player) {
         val packet = createPassengersPacket(packetEntity, passengerIds) as Packet<*>
+        packetEntity.passengerPacket = packet
         for (player in players) {
             player.sendPacket(packet)
         }
@@ -193,7 +226,38 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
-    override fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player) {
+    override fun setEquipment(
+        packetEntity: PacketEntity,
+        equipment: Map<EquipmentSlot, ItemStack?>,
+        vararg players: Player
+    ) {
+        val packet = createEquipmentPacket(packetEntity, equipment) as Packet<*>
+        packetEntity.equipmentPacket = packet
+
+        for (player in players) {
+            player.sendPacket(packet)
+        }
+    }
+
+    override fun createEquipmentPacket(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>): Any {
+        val mappedEquipment = equipment.map {
+            Pair(net.minecraft.world.entity.EquipmentSlot.entries[it.key.ordinal], (it.value?.let { item ->
+                CraftItemStack.asNMSCopy(
+                    item
+                )
+            } ?: net.minecraft.world.item.ItemStack.EMPTY))
+        }
+        val packet = ClientboundSetEquipmentPacket(packetEntity.entityId, mappedEquipment)
+        return packet
+    }
+
+    override fun setSlotItem(
+        inventoryId: Int,
+        stateId: Int,
+        slot: Int,
+        itemStack: ItemStack?,
+        vararg players: Player
+    ) {
         val packet = ClientboundContainerSetSlotPacket(
             inventoryId,
             stateId,

@@ -12,6 +12,7 @@ import io.th0rgal.oraxen.api.OraxenItems
 import io.th0rgal.oraxen.mechanics.provided.gameplay.furniture.FurnitureMechanic
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.entity.EntityType
 import org.bukkit.util.Vector
 
 class OraxenEntityInteractableSettings(
@@ -22,7 +23,7 @@ class OraxenEntityInteractableSettings(
     override fun build(location: Location, audience: AquaticAudience, onInteract: (InteractableInteractEvent) -> Unit): EntityInteractable {
         val item = OraxenItems.getItemById(furniture.itemID).build()
         val displaySettings = furniture.displayEntityProperties
-        val fakeEntity = FakeEntity(EntityTypes.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer =  {
+        val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer =  {
             entityData += EntityDataBuilder.ITEM_DISPLAY()
                 .setItem(item)
                 .setItemTransformation(displaySettings.displayTransform)

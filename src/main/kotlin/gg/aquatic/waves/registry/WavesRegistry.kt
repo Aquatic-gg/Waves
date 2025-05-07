@@ -26,6 +26,7 @@ import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Item
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.entity.Player
 import org.bukkit.entity.Pose
@@ -124,9 +125,13 @@ object WavesRegistry {
                 val pose = Pose.valueOf(poseId.uppercase())
                 entity.pose = pose
             },
-            createProperty<ItemDisplay>("item") { section, updater, entity ->
+            createProperty<Entity>("item") { section, updater, entity ->
                 val item = AquaticItem.loadFromYml(section.getConfigurationSection("item")) ?: return@createProperty
-                entity.setItemStack(item.getItem())
+                if (entity is Item) {
+                    entity.itemStack = item.getItem()
+                } else if (entity is ItemDisplay) {
+                    entity.setItemStack(item.getItem())
+                }
             },
             createProperty<ItemDisplay>("item-transform") { section, updater, entity ->
                 val transformId = section.getString("item-transform") ?: return@createProperty

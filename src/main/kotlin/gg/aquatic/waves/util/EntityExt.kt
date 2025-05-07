@@ -4,6 +4,9 @@ import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
 import org.bukkit.entity.Entity
+import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 
 /*
 fun Entity.getEntityData(): List<EntityData> {
@@ -64,13 +67,23 @@ fun Entity.setEntityData(data: List<EntityData>) {
 
 
 fun PacketEntity.modify(consumer: (Entity) -> Unit) {
-    Waves.NMS_HANDLER.updateEntity(this, consumer)
+    val packet = Waves.NMS_HANDLER.createEntityUpdatePacket(this,consumer)
+    this.updatePacket = packet
 }
 fun PacketEntity.setPassengers(ids: IntArray) {
-    Waves.NMS_HANDLER.setPassengers(this, ids)
+    val packet = Waves.NMS_HANDLER.createPassengersPacket(this,ids)
+    this.updatePacket = packet
 }
 fun PacketEntity.setPassengers(vararg entities: Entity) {
     entities.map { it.entityId }.toIntArray().let {
         this.setPassengers(it)
     }
+}
+fun PacketEntity.setEquipment(equipment: Map<EquipmentSlot, ItemStack>) {
+    val packet = Waves.NMS_HANDLER.createEquipmentPacket(this, equipment)
+    this.equipmentPacket = packet
+}
+
+fun Player.sendPacket(packet: Any, silent: Boolean = false) {
+    Waves.NMS_HANDLER.sendPacket(packet, silent, this)
 }
