@@ -1,13 +1,19 @@
 package gg.aquatic.waves.nms_1_21_4
 
+import com.google.common.collect.LinkedHashMultimap
+import com.mojang.authlib.GameProfile
+import com.mojang.authlib.properties.Property
+import com.mojang.authlib.properties.PropertyMap
 import com.mojang.datafixers.util.Pair
 import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.ProtectedPacket
+import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.kyori.adventure.text.Component
+import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.NonNullList
 import net.minecraft.network.Connection
@@ -16,6 +22,7 @@ import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.server.network.ServerPlayerConnection
 import net.minecraft.world.entity.Entity
@@ -25,7 +32,10 @@ import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.entity.Relative
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.level.ChunkPos
+import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec3
+import net.minecraft.world.scores.PlayerTeam
+import net.minecraft.world.scores.Scoreboard
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.Location
@@ -39,8 +49,9 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
+import org.bukkit.scoreboard.Team
 import org.bukkit.util.Vector
-import org.joml.Vector3d
+import java.util.EnumSet
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
@@ -112,7 +123,7 @@ object NMSHandlerImpl : NMSHandler {
     }
 
     override fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity? {
-        val packetEntity = createEntity(location, entityType) ?: return null
+        val packetEntity = createEntity(location, entityType, null) ?: return null
 
         for (item in player) {
             item.sendPacket(packetEntity.spawnPacket as Packet<*>)
@@ -120,14 +131,14 @@ object NMSHandlerImpl : NMSHandler {
         return packetEntity
     }
 
-    override fun createEntity(location: Location, entityType: EntityType): PacketEntity? {
+    override fun createEntity(location: Location, entityType: EntityType, uuid: UUID?): PacketEntity? {
         val nmsEntityType =
             net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase())?.getOrNull() ?: return null
         //val id = generateEntityId()
 
         val worldServer = (location.world as CraftWorld).handle
         val entity =
-            createEntity(nmsEntityType, worldServer, BlockPos(location.blockX, location.blockY, location.blockZ))
+            createEntity(nmsEntityType, uuid, worldServer, BlockPos(location.blockX, location.blockY, location.blockZ))
                 ?: return null
 
         entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
@@ -151,13 +162,18 @@ object NMSHandlerImpl : NMSHandler {
 
     private fun <T : Entity> createEntity(
         entityType: net.minecraft.world.entity.EntityType<T>,
+        uuid: UUID?,
         worldServer: ServerLevel,
         blockPos: BlockPos
-    ): T? {;
+    ): T? {
         val entity = entityType.create(worldServer, EntitySpawnReason.COMMAND)
         entity?.let {
             it.moveTo(blockPos.x.toDouble(), blockPos.y.toDouble(), blockPos.z.toDouble(), 0.0f, 0.0f)
             worldServer.addFreshEntityWithPassengers(it)
+
+            if (uuid != null) {
+                it.uuid = uuid
+            }
 
             if (it is Mob) {
                 it.yHeadRot = it.yRot
@@ -248,6 +264,72 @@ object NMSHandlerImpl : NMSHandler {
             } ?: net.minecraft.world.item.ItemStack.EMPTY))
         }
         val packet = ClientboundSetEquipmentPacket(packetEntity.entityId, mappedEquipment)
+        return packet
+    }
+
+    private val propertiesMapField = ReflectionUtils.getField("properties", PropertyMap::class.java).apply {
+        this.isAccessible = true
+    }
+
+    private val entriesField =
+        ReflectionUtils.getField("entries", ClientboundPlayerInfoUpdatePacket::class.java).apply {
+            this.isAccessible = true
+        }
+
+    override fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any {
+        return createPlayerInfoUpdatePacket(listOf(actionId), listOf(profileEntry))
+    }
+
+    override fun createPlayerInfoUpdatePacket(
+        actionIds: Collection<Int>,
+        profileEntries: Collection<ProfileEntry>
+    ): Any {
+        val entries = ArrayList<ClientboundPlayerInfoUpdatePacket.Entry>()
+
+        entries += profileEntries.map { profileEntry ->
+            ClientboundPlayerInfoUpdatePacket.Entry(
+                profileEntry.userProfile.uuid,
+                GameProfile(profileEntry.userProfile.uuid, profileEntry.userProfile.name).apply {
+                    val multiMap = LinkedHashMultimap.create<String, Property>()
+                    for (property in profileEntry.userProfile.textureProperties) {
+                        multiMap.put("textures", Property(property.name, property.value, property.signature))
+                    }
+                    propertiesMapField.set(properties, multiMap)
+                },
+                profileEntry.listed,
+                profileEntry.latency,
+                GameType.entries[profileEntry.gameMode.ordinal],
+                profileEntry.displayName?.toNMSComponent(),
+                profileEntry.showHat,
+                profileEntry.listOrder,
+                null
+            )
+        }
+
+        val packet = ClientboundPlayerInfoUpdatePacket(
+            EnumSet.copyOf(actionIds.map { ClientboundPlayerInfoUpdatePacket.Action.entries[it] }.toMutableList()),
+            mutableListOf<ServerPlayer>()
+        )
+        entriesField.set(packet, entries)
+        return packet
+    }
+
+    override fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any {
+        val scoreboard = Scoreboard()
+        val playerTeam = PlayerTeam(
+            scoreboard,
+            team.teamName
+        )
+        playerTeam.playerPrefix = team.prefix.toNMSComponent()
+        playerTeam.playerSuffix = team.suffix.toNMSComponent()
+        playerTeam.collisionRule = net.minecraft.world.scores.Team.CollisionRule.entries[team.collisionRule.ordinal]
+        playerTeam.nameTagVisibility =
+            net.minecraft.world.scores.Team.Visibility.entries[team.nametagVisibility.ordinal]
+        playerTeam.color = ChatFormatting.valueOf(team.nameColor.toString())
+        val packet = ClientboundSetPlayerTeamPacket.createPlayerPacket(
+            playerTeam, playerName,
+            ClientboundSetPlayerTeamPacket.Action.entries[actionId]
+        )
         return packet
     }
 

@@ -1,5 +1,6 @@
 package gg.aquatic.waves.api.nms
 
+import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
@@ -10,6 +11,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
+import java.util.UUID
 
 interface NMSHandler {
 
@@ -30,7 +32,7 @@ interface NMSHandler {
     )
 
     fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity?
-    fun createEntity(location: Location, entityType: EntityType): PacketEntity?
+    fun createEntity(location: Location, entityType: EntityType, uuid: UUID?): PacketEntity?
     fun updateEntity(packetEntity: PacketEntity, consumer: (Entity) -> Unit, vararg players: Player)
     fun createEntityUpdatePacket(packetEntity: PacketEntity, consumer: (Entity) -> Unit): Any
     fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player)
@@ -38,6 +40,9 @@ interface NMSHandler {
     fun setEquipment(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>, vararg players: Player)
     fun createEquipmentPacket(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>): Any
     fun createTeleportPacket(entityId: Int, location: Location, previousLocation: Vector): Any
+    fun createPlayerInfoUpdatePacket(actionIds: Collection<Int>, profileEntries: Collection<ProfileEntry>): Any
+    fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any
+    fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any
 
     fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
     fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
