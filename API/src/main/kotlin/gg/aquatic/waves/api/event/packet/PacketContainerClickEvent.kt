@@ -12,6 +12,6 @@ class PacketContainerClickEvent(
     var buttonNum: Int,
     var clickTypeId: Int,
     var carriedItem: ItemStack?,
-    var changedSlots: HashMap<Int, ItemStack?>
+    var changedSlots: Map<Int, ItemStack?>
 ): CancellableAquaticEvent(true) {
 }
