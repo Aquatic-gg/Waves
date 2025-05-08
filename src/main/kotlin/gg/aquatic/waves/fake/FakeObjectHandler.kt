@@ -1,10 +1,5 @@
 package gg.aquatic.waves.fake
 
-import com.github.retrooper.packetevents.event.PacketReceiveEvent
-import com.github.retrooper.packetevents.event.PacketSendEvent
-import com.github.retrooper.packetevents.protocol.packettype.PacketType
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.fake.block.FakeBlock
@@ -13,11 +8,9 @@ import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.api.event.event
-import gg.aquatic.waves.util.packetEvent
-import gg.aquatic.waves.util.player
+import gg.aquatic.waves.api.event.packet.PacketChunkLoadEvent
 import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runAsyncTimer
-import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -49,28 +42,32 @@ object FakeObjectHandler : WavesModule {
             }
         }
 
-        event<AsyncPlayerChunkLoadEvent> {
+        event<PacketChunkLoadEvent> {
             val obj =
                 ChunkCacheHandler.getObject(
-                    it.chunk.x,
-                    it.chunk.z,
+                    it.x,
+                    it.z,
                     it.player.world,
                     FakeObjectChunkBundle::class.java
                 ) as? FakeObjectChunkBundle
                     ?: return@event
             tickableObjects += obj.blocks
             tickableObjects += obj.entities
-            for (block in obj.blocks) {
-                if (block.viewers.contains(it.player)) {
-                    val index = (block.location.y.toInt() + 64) / 16
-                    val chunk = it.wrappedPacket.column.chunks[index]
-                    chunk.set(
-                        block.location.x.toInt() and 0xf,
-                        block.location.y.toInt() and 0xf,
-                        block.location.z.toInt() and 0xf,
-                        SpigotConversionUtil.fromBukkitBlockData(block.block.blockData)
-                    )
-                    block.isViewing += it.player
+
+            val packet = it.packet
+            Waves.NMS_HANDLER.modifyChunkPacketBlocks(it.player.world, packet) { sections ->
+                for (block in obj.blocks) {
+                    if (block.viewers.contains(it.player)) {
+                        val index = (block.location.y.toInt() + 64) / 16
+                        val section = sections[index]
+                        section.set(
+                            block.location.x.toInt() and 0xf,
+                            block.location.y.toInt() and 0xf,
+                            block.location.z.toInt() and 0xf,
+                            block.block.blockData
+                        )
+                        block.isViewing += it.player
+                    }
                 }
             }
         }

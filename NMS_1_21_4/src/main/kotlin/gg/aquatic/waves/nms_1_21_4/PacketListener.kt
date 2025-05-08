@@ -23,10 +23,12 @@ class PacketListener(
             return
         }
 
-        when (ctx) {
+        when (msg) {
             is ClientboundLevelChunkWithLightPacket -> {
-                val event = PacketChunkLoadEvent(player, ctx.x, ctx.z)
+                val event = PacketChunkLoadEvent(player, msg.x, msg.z, msg)
                 event.call()
+
+                msg.chunkData
 
                 if (event.isCancelled) {
                     return

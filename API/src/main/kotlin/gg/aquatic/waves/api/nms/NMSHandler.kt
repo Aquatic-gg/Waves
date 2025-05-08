@@ -1,9 +1,11 @@
 package gg.aquatic.waves.api.nms
 
+import gg.aquatic.waves.api.nms.chunk.WrappedChunkSection
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
+import org.bukkit.World
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -43,6 +45,8 @@ interface NMSHandler {
     fun createPlayerInfoUpdatePacket(actionIds: Collection<Int>, profileEntries: Collection<ProfileEntry>): Any
     fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any
     fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any
+
+    fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit)
 
     fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
     fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any

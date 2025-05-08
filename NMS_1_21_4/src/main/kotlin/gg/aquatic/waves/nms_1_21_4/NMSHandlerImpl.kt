@@ -9,13 +9,17 @@ import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.ProtectedPacket
+import gg.aquatic.waves.api.nms.chunk.WrappedChunkSection
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
+import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.kyori.adventure.text.Component
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.NonNullList
+import net.minecraft.core.Registry
+import net.minecraft.core.registries.Registries
 import net.minecraft.network.Connection
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.protocol.Packet
@@ -25,37 +29,44 @@ import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.server.network.ServerPlayerConnection
-import net.minecraft.world.entity.Entity
-import net.minecraft.world.entity.EntitySpawnReason
-import net.minecraft.world.entity.Mob
-import net.minecraft.world.entity.PositionMoveRotation
-import net.minecraft.world.entity.Relative
+import net.minecraft.world.entity.*
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.GameType
+import net.minecraft.world.level.biome.Biome
+import net.minecraft.world.level.biome.Biomes
+import net.minecraft.world.level.block.Block
+import net.minecraft.world.level.block.Blocks
+import net.minecraft.world.level.block.state.BlockState
+import net.minecraft.world.level.chunk.LevelChunkSection
+import net.minecraft.world.level.chunk.PalettedContainer
 import net.minecraft.world.phys.Vec3
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Scoreboard
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
 import org.bukkit.Location
-import org.bukkit.craftbukkit.v1_21_R3.CraftServer
-import org.bukkit.craftbukkit.v1_21_R3.CraftWorld
-import org.bukkit.craftbukkit.v1_21_R3.entity.CraftPlayer
-import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftItemStack
-import org.bukkit.craftbukkit.v1_21_R3.inventory.CraftMenuType
+import org.bukkit.World
+import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.CraftServer
+import org.bukkit.craftbukkit.CraftWorld
+import org.bukkit.craftbukkit.block.CraftBlockState
+import org.bukkit.craftbukkit.block.CraftBlockStates
+import org.bukkit.craftbukkit.block.data.CraftBlockData
+import org.bukkit.craftbukkit.entity.CraftPlayer
+import org.bukkit.craftbukkit.inventory.CraftItemStack
+import org.bukkit.craftbukkit.inventory.CraftMenuType
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
-import org.bukkit.scoreboard.Team
 import org.bukkit.util.Vector
-import java.util.EnumSet
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
+import kotlin.math.absoluteValue
 
 object NMSHandlerImpl : NMSHandler {
 
@@ -314,7 +325,83 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
-    override fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any {
+    private val chunkDataBufferField = ReflectionUtils.getField("buffer", ClientboundLevelChunkPacketData::class.java).apply {
+        isAccessible = true
+    }
+
+    override fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit) {
+        val sections = (world.minHeight.absoluteValue + world.maxHeight) shr 4
+        val chunkBundlePacket = packet as ClientboundLevelChunkWithLightPacket
+        val chunkData = chunkBundlePacket.chunkData
+        val readBuffer = chunkData.readBuffer
+
+        val wrappedSections = HashMap<WrappedChunkSection, LevelChunkSection>()
+        val registries = (world as CraftWorld).handle.registryAccess()
+        val registry: Registry<Biome?> = registries.lookupOrThrow<Biome?>(Registries.BIOME)
+        for (i in 0 until sections) {
+
+            val container1 = PalettedContainer(
+                Block.BLOCK_STATE_REGISTRY,
+                Blocks.AIR.defaultBlockState(),
+                PalettedContainer.Strategy.SECTION_STATES,
+                null
+            )
+            val container2 = PalettedContainer(
+                registry.asHolderIdMap(),
+                registry.getOrThrow(Biomes.PLAINS),
+                PalettedContainer.Strategy.SECTION_BIOMES,
+                null // Paper - Anti-Xray - Add preset biomes
+            )
+            val section = LevelChunkSection(container1, container2)
+            section.read(readBuffer)
+            wrappedSections += object : WrappedChunkSection {
+                override fun set(x: Int, y: Int, z: Int, blockState: BlockData) {
+                    section.setBlockState(x, y, z, (blockState as CraftBlockData).state, false)
+                    //palettedContainer.set(x, y, z, (blockState as CraftBlockState).handle)
+                }
+
+                override fun get(x: Int, y: Int, z: Int): BlockData {
+                    val state = CraftBlockData.fromData(section.getBlockState(x, y, z))
+                    return state
+                }
+            } to section
+        }
+        func(wrappedSections.keys.toList())
+
+        val bytes = ByteArray(calculateChunkSize(wrappedSections.values))
+        val writeBuffer: ByteBuf = Unpooled.wrappedBuffer(bytes)
+        writeBuffer.writerIndex(0)
+
+        extractChunkData(wrappedSections.values, writeBuffer)
+        chunkDataBufferField.set(chunkData, bytes)
+    }
+
+    private fun calculateChunkSize(sections: Collection<LevelChunkSection>): Int {
+        var i = 0
+
+        for (levelChunkSection in sections) {
+            i += levelChunkSection.serializedSize
+        }
+
+        return i
+    }
+
+    private fun extractChunkData(sections: Collection<LevelChunkSection>, wrapper: ByteBuf) {
+        var chunkSectionIndex = 0
+
+        val buffer= FriendlyByteBuf(wrapper)
+
+        for (levelChunkSection in sections) {
+            levelChunkSection.write(buffer, null, chunkSectionIndex)
+            ++chunkSectionIndex
+        }
+    }
+
+    override fun createTeamsPacket(
+        team: gg.aquatic.waves.api.nms.scoreboard.Team,
+        actionId: Int,
+        playerName: String
+    ): Any {
         val scoreboard = Scoreboard()
         val playerTeam = PlayerTeam(
             scoreboard,

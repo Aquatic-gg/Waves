@@ -134,6 +134,8 @@ dependencies {
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
 
+    compileOnly("io.netty:netty-all:4.1.24.Final")
+
     implementation(project(":API"))
     implementation(project(":NMS_1_21_4"))
     //implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT")

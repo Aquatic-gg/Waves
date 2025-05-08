@@ -1,6 +1,6 @@
 plugins {
     kotlin("jvm")
-    id("com.undefinedcreations.echo") version "0.0.11"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.16"
 }
 
 group = "gg.aquatic.waves.nms"
@@ -18,13 +18,8 @@ repositories {
 }
 
 dependencies {
+    paperweight.paperDevBundle("1.21.4-R0.1-SNAPSHOT")
     compileOnly(project(":API"))
-    echo(
-        "1.21.4",
-        generateSource = false,
-        generateDocs = false
-    )
-    compileOnly("net.kyori:adventure-api:4.20.0")
     compileOnly("net.kyori:adventure-text-serializer-gson:4.20.0")
 }
 kotlin {
