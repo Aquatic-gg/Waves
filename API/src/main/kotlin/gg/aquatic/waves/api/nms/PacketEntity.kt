@@ -2,6 +2,7 @@ package gg.aquatic.waves.api.nms
 
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.util.Vector
 
 class PacketEntity(
     location: Location,
@@ -52,7 +53,7 @@ class PacketEntity(
 
     fun teleport(nmsHandler: NMSHandler, location: Location, silent: Boolean = false, vararg players: Player) {
         setLocation(nmsHandler, location)
-        val packet = nmsHandler.createTeleportEntityPacket(this, location)
+        val packet = nmsHandler.createTeleportPacket(entityId, location, Vector())
         nmsHandler.sendPacket(packet, silent, *players)
     }
 
