@@ -1,12 +1,13 @@
 package gg.aquatic.waves.hologram
 
+import gg.aquatic.waves.api.nms.PacketEntity
 import org.bukkit.Location
 import org.bukkit.entity.Player
 
 class SpawnedHologramLine(
     val player: Player,
     val line: HologramLine,
-    val entityId: Int,
+    val packetEntity: PacketEntity,
     location: Location,
     val textUpdater: (Player, String) -> String,
 ) {

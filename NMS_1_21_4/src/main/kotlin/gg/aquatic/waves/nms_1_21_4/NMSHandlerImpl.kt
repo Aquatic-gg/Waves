@@ -164,11 +164,28 @@ object NMSHandlerImpl : NMSHandler {
             seenBy,
         )
         return PacketEntity(
+            location,
             entity.id,
             entity,
             entity.getAddEntityPacket(tracker),
             despawnpacket = ClientboundRemoveEntitiesPacket(entity.id)
         )
+    }
+
+    override fun recreateEntityPacket(
+        packetEntity: PacketEntity,
+        location: Location
+    ): Any {
+        val entity = packetEntity.entityInstance as Entity
+        entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
+        return entity.getAddEntityPacket(ServerEntity(
+            (location.world as CraftWorld).handle,
+            entity,
+            entity.type.updateInterval(),
+            true,
+            { },
+            HashSet()
+        ))
     }
 
     private fun <T : Entity> createEntity(

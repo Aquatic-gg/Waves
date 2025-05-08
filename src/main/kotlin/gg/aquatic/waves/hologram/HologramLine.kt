@@ -1,6 +1,6 @@
 package gg.aquatic.waves.hologram
 
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData
+import gg.aquatic.waves.fake.entity.data.EntityData
 import org.bukkit.Location
 import org.bukkit.entity.Player
 

@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDe
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity
+import gg.aquatic.waves.Waves
 import gg.aquatic.waves.hologram.*
 import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.packetevents.EntityDataBuilder
@@ -21,6 +22,7 @@ import io.github.retrooper.packetevents.util.SpigotReflectionUtil
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay.ItemDisplayTransform
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -40,11 +42,13 @@ class ItemHologramLine(
         player: Player,
         textUpdater: (Player, String) -> String
     ): SpawnedHologramLine {
-        val id = SpigotReflectionUtil.generateEntityId()
+        val packetEntity = Waves.NMS_HANDLER.createEntity(location, EntityType.ITEM_DISPLAY, null)
+            ?: throw Exception("Failed to create entity")
+
         val spawned = SpawnedHologramLine(
             player,
             this,
-            id,
+            packetEntity,
             location,
             textUpdater
         )
@@ -55,9 +59,7 @@ class ItemHologramLine(
     }
 
     override fun destroy(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.player.toUser()?.sendPacket(
-            WrapperPlayServerDestroyEntities(spawnedHologramLine.entityId)
-        )
+        spawnedHologramLine.packetEntity.sendDespawn(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
     override fun update(spawnedHologramLine: SpawnedHologramLine) {
