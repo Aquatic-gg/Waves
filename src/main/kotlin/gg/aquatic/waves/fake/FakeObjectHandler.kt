@@ -1,5 +1,6 @@
 package gg.aquatic.waves.fake
 
+import com.destroystokyo.paper.event.player.PlayerUseUnknownEntityEvent
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.fake.block.FakeBlock
@@ -8,7 +9,9 @@ import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.api.event.event
+import gg.aquatic.waves.api.event.packet.PacketBlockChangeEvent
 import gg.aquatic.waves.api.event.packet.PacketChunkLoadEvent
+import gg.aquatic.waves.api.event.packet.PacketInteractEvent
 import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runAsyncTimer
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
@@ -90,23 +93,19 @@ object FakeObjectHandler : WavesModule {
                 }
             }
         }
-        packetEvent<PacketSendEvent> {
-            val player = player() ?: return@packetEvent
-            if (packetType == PacketType.Play.Server.BLOCK_CHANGE) {
-                val packet = WrapperPlayServerBlockChange(this)
-                val blocks = locationToBlocks[player.world.getBlockAt(
-                    packet.blockPosition.x,
-                    packet.blockPosition.y,
-                    packet.blockPosition.z
-                ).location] ?: return@packetEvent
-
-                for (block in blocks) {
-                    if (block.viewers.contains(player)) {
-                        if (!block.destroyed) {
-                            val newState = SpigotConversionUtil.fromBukkitBlockData(block.block.blockData)
-                            packet.blockState = newState
-                            break
-                        }
+        event<PacketBlockChangeEvent> {
+            val player = it.player
+            val blocks = locationToBlocks[player.world.getBlockAt(
+                it.x,
+                it.y,
+                it.z
+            ).location] ?: return@event
+            for (block in blocks) {
+                if (block.viewers.contains(player)) {
+                    if (!block.destroyed) {
+                        val newState = block.block.blockData
+                        it.blockData = newState
+                        break
                     }
                 }
             }
@@ -140,14 +139,12 @@ object FakeObjectHandler : WavesModule {
             }
 
         }
-        packetEvent<PacketReceiveEvent> {
-            if (this.packetType != PacketType.Play.Client.INTERACT_ENTITY) return@packetEvent
-            val packet = WrapperPlayClientInteractEntity(this)
-            val entity = idToEntity[packet.entityId] ?: return@packetEvent
+        event<PacketInteractEvent> {
+            val entity = idToEntity[it.entityId] ?: return@event
             val event = FakeEntityInteractEvent(
                 entity,
-                this.player() ?: return@packetEvent,
-                (packet.action == WrapperPlayClientInteractEntity.InteractAction.ATTACK)
+                it.player,
+                it.isAttack
             )
             entity.onInteract(event)
         }
