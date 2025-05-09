@@ -7,10 +7,11 @@ import org.bukkit.entity.Player
 class SpawnedHologramLine(
     val player: Player,
     val line: HologramLine,
-    val packetEntity: PacketEntity,
     location: Location,
     val textUpdater: (Player, String) -> String,
 ) {
+    lateinit var packetEntity: PacketEntity
+
     var currentLocation: Location = location
         private set
 

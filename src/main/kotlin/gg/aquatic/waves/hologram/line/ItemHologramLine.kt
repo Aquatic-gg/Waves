@@ -36,13 +36,10 @@ class ItemHologramLine(
         player: Player,
         textUpdater: (Player, String) -> String
     ): SpawnedHologramLine {
-        val packetEntity = Waves.NMS_HANDLER.createEntity(location, EntityType.ITEM_DISPLAY, null)
-            ?: throw Exception("Failed to create entity")
 
         val spawned = SpawnedHologramLine(
             player,
             this,
-            packetEntity,
             location,
             textUpdater
         )
@@ -70,7 +67,11 @@ class ItemHologramLine(
     }
 
     override fun createEntity(spawnedHologramLine: SpawnedHologramLine) {
-        val packetEntity = spawnedHologramLine.packetEntity
+        val packetEntity =
+            Waves.NMS_HANDLER.createEntity(spawnedHologramLine.currentLocation, EntityType.ITEM_DISPLAY, null)
+                ?: throw Exception("Failed to create entity")
+
+        spawnedHologramLine.packetEntity = packetEntity
         val entityData = buildData(spawnedHologramLine)
 
         packetEntity.modify {

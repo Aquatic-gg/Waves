@@ -1,13 +1,12 @@
 package gg.aquatic.waves.hologram.line
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport
+import gg.aquatic.waves.Waves
 import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.hologram.*
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
+import gg.aquatic.waves.util.modify
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
@@ -29,11 +28,9 @@ class AnimatedHologramLine(
         player: Player,
         textUpdater: (Player, String) -> String
     ): SpawnedHologramLine {
-        val id = SpigotReflectionUtil.generateEntityId()
         val spawned = SpawnedHologramLine(
             player,
             this,
-            id,
             location,
             textUpdater
         )
@@ -44,9 +41,7 @@ class AnimatedHologramLine(
     }
 
     override fun destroy(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.player.toUser()?.sendPacket(
-            WrapperPlayServerDestroyEntities(spawnedHologramLine.entityId)
-        )
+        spawnedHologramLine.packetEntity.sendDespawn(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
         ticks.remove(spawnedHologramLine.player.uniqueId)
     }
 
@@ -66,27 +61,28 @@ class AnimatedHologramLine(
             frame = pair.second
 
             if (previousFrame.javaClass != frame.javaClass) {
-                spawnedHologramLine.player.toUser()?.sendPacket(
-                    WrapperPlayServerDestroyEntities(spawnedHologramLine.entityId)
-                )
+                spawnedHologramLine.packetEntity.sendDespawn(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
                 frame.createEntity(spawnedHologramLine)
                 return
             }
             val data = buildData(spawnedHologramLine)
-            val metadataPacket = WrapperPlayServerEntityMetadata(spawnedHologramLine.entityId, data)
-            spawnedHologramLine.player.toUser()?.sendPacket(metadataPacket)
+            spawnedHologramLine.packetEntity.modify {
+                for (entityData in data) {
+                    entityData.apply(it)
+                }
+            }
+            spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
             return
         }
         frame.update(spawnedHologramLine)
     }
 
     override fun move(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.player.toUser()?.sendPacket(
-            WrapperPlayServerEntityTeleport(
-                spawnedHologramLine.entityId,
-                SpigotConversionUtil.fromBukkitLocation(spawnedHologramLine.currentLocation),
-                false
-            )
+        spawnedHologramLine.packetEntity.teleport(
+            Waves.NMS_HANDLER,
+            spawnedHologramLine.currentLocation,
+            false,
+            spawnedHologramLine.player
         )
     }
 

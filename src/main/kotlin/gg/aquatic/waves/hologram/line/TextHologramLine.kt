@@ -1,28 +1,24 @@
 package gg.aquatic.waves.hologram.line
 
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
-import com.github.retrooper.packetevents.util.Vector3f
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity
+import gg.aquatic.waves.Waves
+import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.hologram.*
-import gg.aquatic.waves.packetevents.EntityDataBuilder
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
+import gg.aquatic.waves.util.modify
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import gg.aquatic.waves.util.toMMComponent
-import gg.aquatic.waves.util.toUser
-import io.github.retrooper.packetevents.util.SpigotConversionUtil
-import io.github.retrooper.packetevents.util.SpigotReflectionUtil
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
+import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import java.awt.Color
-import java.util.*
+import org.bukkit.entity.TextDisplay
+import org.bukkit.util.Transformation
+import org.joml.Quaternionf
+import org.joml.Vector3f
 
 class TextHologramLine(
     override val height: Double,
@@ -34,7 +30,7 @@ class TextHologramLine(
     val billboard: Billboard = Billboard.CENTER,
     val hasShadow: Boolean = true,
     val defaultBackground: Boolean = true,
-    val backgroundColor: Color? = null,
+    val backgroundColor: org.bukkit.Color? = null,
     val isSeeThrough: Boolean = true,
     val transformationDuration: Int = 0,
 ) : HologramLine() {
@@ -43,11 +39,9 @@ class TextHologramLine(
         player: Player,
         textUpdater: (Player, String) -> String
     ): SpawnedHologramLine {
-        val id = SpigotReflectionUtil.generateEntityId()
         val spawned = SpawnedHologramLine(
             player,
             this,
-            id,
             location,
             textUpdater
         )
@@ -58,73 +52,65 @@ class TextHologramLine(
     }
 
     override fun destroy(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.player.toUser()?.sendPacket(
-            WrapperPlayServerDestroyEntities(spawnedHologramLine.entityId)
-        )
+        spawnedHologramLine.packetEntity.sendDespawn(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
     override fun update(spawnedHologramLine: SpawnedHologramLine) {
         val text = spawnedHologramLine.textUpdater(spawnedHologramLine.player, this.text)
-        val builder = EntityDataBuilder.TEXT_DISPLAY()
-        builder.setText(text.toMMComponent())
-        builder.setLineWidth(lineWidth)
-        val entityData = builder
-            .setScale(Vector3f(scale, scale, scale))
-            .setBillboard(billboard)
-            .build()
-
-        val metadataPacket = WrapperPlayServerEntityMetadata(spawnedHologramLine.entityId, entityData)
-        spawnedHologramLine.player.toUser()?.sendPacket(metadataPacket)
+        spawnedHologramLine.packetEntity.modify {
+            if (it !is TextDisplay) return@modify
+            it.text(text.toMMComponent())
+            it.lineWidth = lineWidth
+            it.billboard = billboard
+            it.transformation = Transformation(Vector3f(), Quaternionf(), Vector3f(scale, scale, scale), Quaternionf())
+        }
+        spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
     override fun move(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.player.toUser()?.sendPacket(
-            WrapperPlayServerEntityTeleport(
-                spawnedHologramLine.entityId,
-                SpigotConversionUtil.fromBukkitLocation(spawnedHologramLine.currentLocation),
-                false
-            )
-        )
+        spawnedHologramLine.packetEntity.teleport(Waves.NMS_HANDLER, spawnedHologramLine.currentLocation, false, spawnedHologramLine.player)
     }
 
     override fun createEntity(spawnedHologramLine: SpawnedHologramLine) {
-        val id = spawnedHologramLine.entityId
-        val location = spawnedHologramLine.currentLocation
-        val spawnPacket = WrapperPlayServerSpawnEntity(
-            id,
-            UUID.randomUUID(),
-            EntityTypes.TEXT_DISPLAY,
-            SpigotConversionUtil.fromBukkitLocation(location),
-            location.yaw,
-            0,
-            null
-        )
+        val packetEntity =
+            Waves.NMS_HANDLER.createEntity(spawnedHologramLine.currentLocation, EntityType.TEXT_DISPLAY, null)
+                ?: throw Exception("Failed to create entity")
+        spawnedHologramLine.packetEntity = packetEntity
         val entityData = buildData(spawnedHologramLine)
-        val metadataPacket = WrapperPlayServerEntityMetadata(id, entityData)
 
-        val user = spawnedHologramLine.player.toUser() ?: return
-        user.sendPacket(spawnPacket)
-        user.sendPacket(metadataPacket)
+        packetEntity.modify {
+            for (data in entityData) {
+                data.apply(it)
+            }
+        }
+
+        packetEntity.sendSpawnComplete(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
     override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityData> {
-        val builder = EntityDataBuilder.TEXT_DISPLAY()
-        builder.setInterpolationDelay(0)
-        builder.setTransformationInterpolationDuration(transformationDuration)
-        builder.setPosRotInterpolationDuration(transformationDuration)
-        builder.setText(text.toMMComponent())
-        builder.setLineWidth(lineWidth)
-        builder.hasShadow(hasShadow)
-        builder.useDefaultBackgroundColor(defaultBackground)
-        builder.isSeeThrough(isSeeThrough)
-        backgroundColor?.let {
-            builder.setBackgroundColor(it.rgb)
-        }
-        val entityData = builder
-            .setScale(Vector3f(scale, scale, scale))
-            .setBillboard(billboard)
-            .build()
-        return entityData
+        return listOf(
+            object : EntityData {
+                override val id: String = "hologram-data"
+
+                override fun apply(entity: Entity) {
+                    val textDisplay = entity as? org.bukkit.entity.TextDisplay ?: return
+                    textDisplay.interpolationDelay = 0
+                    textDisplay.interpolationDuration = transformationDuration
+                    textDisplay.teleportDuration = transformationDuration
+                    textDisplay.text(text.toMMComponent())
+                    textDisplay.lineWidth = lineWidth
+                    textDisplay.billboard = billboard
+                    textDisplay.isShadowed = hasShadow
+                    textDisplay.isDefaultBackground = defaultBackground
+                    textDisplay.backgroundColor = backgroundColor ?: org.bukkit.Color.WHITE
+                    textDisplay.isSeeThrough = isSeeThrough
+                    textDisplay.transformation = Transformation(Vector3f(),
+                        Quaternionf(), Vector3f(scale, scale, scale), Quaternionf()
+                    )
+                }
+
+            }
+        )
     }
 
     class Settings(
@@ -136,7 +122,7 @@ class TextHologramLine(
         val conditions: List<ConfiguredRequirement<Player>>,
         val hasShadow: Boolean,
         val defaultBackground: Boolean,
-        val backgroundColor: Color?,
+        val backgroundColor: org.bukkit.Color?,
         val isSeeThrough: Boolean,
         val transformationDuration: Int,
         val failLine: LineSettings?,
@@ -179,7 +165,7 @@ class TextHologramLine(
             val transformationDuration = section.getInt("transformation-duration", 0)
             val backgroundColor = if (backgroundColorStr != null) {
                 val args = backgroundColorStr.split(";").map { it.toIntOrNull() ?: 0 }
-                Color(args[0], args[1], args[2], args.getOrNull(3) ?: 255)
+                org.bukkit.Color.fromARGB(args[0], args[1], args[2], args.getOrNull(3) ?: 255)
             } else null
             return Settings(
                 height,
