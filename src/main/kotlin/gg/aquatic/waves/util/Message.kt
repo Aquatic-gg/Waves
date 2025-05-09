@@ -23,10 +23,9 @@ class Message(var messages: Collection<String>) {
         if (messages.size == 1 && messages.first().isEmpty()) {
             return
         }
-        val user = player.toUser() ?: return
-        messages.forEach(Consumer { v: String ->
-            user.sendMessage(v.toMMComponent())
-        })
+        for (string in messages) {
+            player.sendMessage(string.toMMComponent())
+        }
     }
 
     fun send(sender: CommandSender) {
@@ -40,9 +39,8 @@ class Message(var messages: Collection<String>) {
             return
         }
         for (onlinePlayer in Bukkit.getOnlinePlayers()) {
-            val user = onlinePlayer.toUser()
             messages.forEach(Consumer { v: String ->
-                user?.sendMessage(v.toMMComponent())
+                onlinePlayer.sendMessage(v.toMMComponent())
             })
         }
 

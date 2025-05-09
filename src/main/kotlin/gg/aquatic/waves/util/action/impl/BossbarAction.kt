@@ -1,6 +1,5 @@
 package gg.aquatic.waves.util.action.impl
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBossBar
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
@@ -11,7 +10,6 @@ import gg.aquatic.waves.util.toMMComponent
 import gg.aquatic.waves.util.updatePAPIPlaceholders
 import net.kyori.adventure.bossbar.BossBar
 import org.bukkit.entity.Player
-import java.util.*
 
 class BossbarAction : Action<Player> {
 
@@ -24,8 +22,6 @@ class BossbarAction : Action<Player> {
         val bossBar =
             AquaticBossBar(textUpdater(binder, message).toMMComponent(), color, style, mutableSetOf(), progress)
         val duration = args.int("duration") { str -> textUpdater(binder, str)} ?: 60
-
-        WrapperPlayServerBossBar(UUID.randomUUID(), WrapperPlayServerBossBar.Action.ADD).color
 
         bossBar.addViewer(binder)
         runLaterSync(duration.toLong()) {

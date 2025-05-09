@@ -22,9 +22,11 @@ enum class PaletteType(
         return DataPalette(this,palette, storage)
     }
 
+    /*
     fun read(wrapper: ByteBuf): DataPalette {
         val allowSingletonPalette = true
         val lengthPrefix: Boolean = true // False when 1.21.5+
         return DataPalette.read(NetStreamInputWrapper(wrapper), this, allowSingletonPalette, lengthPrefix)
     }
+     */
 }

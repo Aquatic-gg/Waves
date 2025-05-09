@@ -1,118 +1,66 @@
 package gg.aquatic.waves.util.bossbar
 
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBossBar
-import gg.aquatic.waves.util.toUser
+import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 
 class AquaticBossBar(
     message: Component,
-    color: net.kyori.adventure.bossbar.BossBar.Color,
-    overlay: net.kyori.adventure.bossbar.BossBar.Overlay,
-    flags: MutableSet<net.kyori.adventure.bossbar.BossBar.Flag>,
+    color: BossBar.Color,
+    overlay: BossBar.Overlay,
+    flags: MutableSet<BossBar.Flag>,
     progress: Float
 ) {
 
     private val uuid: UUID = UUID.randomUUID()
-    private val viewers = ConcurrentHashMap.newKeySet<Player>()
+    private val bossBar: BossBar = BossBar.bossBar(message, progress, color, overlay, flags)
 
     var message: Component = message
         set(value) {
             field = value
-
-            val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.UPDATE_TITLE)
-            packet.title = value
-
-            for (viewer in viewers) {
-                viewer.toUser()?.sendPacket(packet)
-            }
+            bossBar.name(value)
         }
-    var color: net.kyori.adventure.bossbar.BossBar.Color = color
+    var color: BossBar.Color = color
         set(value) {
             field = value
-
-            val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.UPDATE_STYLE)
-            packet.color = value
-            packet.overlay = overlay
-
-            for (viewer in viewers) {
-                viewer.toUser()?.sendPacket(packet)
-            }
+            bossBar.color(value)
         }
 
-    var overlay: net.kyori.adventure.bossbar.BossBar.Overlay = overlay
+    var overlay: BossBar.Overlay = overlay
         set(value) {
             field = value
-            val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.UPDATE_STYLE)
-            packet.overlay = value
-            packet.color = color
-            for (viewer in viewers) {
-                viewer.toUser()?.sendPacket(packet)
-            }
+            bossBar.overlay(value)
         }
 
-    private var flags: EnumSet<net.kyori.adventure.bossbar.BossBar.Flag> = EnumSet.noneOf(net.kyori.adventure.bossbar.BossBar.Flag::class.java).apply { addAll(flags) }
-    fun flags(): Set<net.kyori.adventure.bossbar.BossBar.Flag> = flags.toSet()
-    fun addFlag(flag: net.kyori.adventure.bossbar.BossBar.Flag) {
+    private var flags: EnumSet<BossBar.Flag> = EnumSet.noneOf(BossBar.Flag::class.java).apply { addAll(flags) }
+    fun flags(): Set<BossBar.Flag> = flags.toSet()
+    fun addFlag(flag: BossBar.Flag) {
         flags += flag
-
-        val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.UPDATE_FLAGS)
-        packet.flags = flags
-        for (viewer in viewers) {
-            viewer.toUser()?.sendPacket(packet)
-        }
+        bossBar.flags(flags)
     }
-    fun removeFlag(flag: net.kyori.adventure.bossbar.BossBar.Flag) {
+    fun removeFlag(flag: BossBar.Flag) {
         flags -= flag
-
-        val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.UPDATE_FLAGS)
-        packet.flags = flags
-        for (viewer in viewers) {
-            viewer.toUser()?.sendPacket(packet)
-        }
+        bossBar.flags(flags)
     }
 
-    fun setFlags(flags: Set<net.kyori.adventure.bossbar.BossBar.Flag>) {
-        this.flags = EnumSet.noneOf(net.kyori.adventure.bossbar.BossBar.Flag::class.java).apply { addAll(flags) }
-
-        val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.UPDATE_FLAGS)
-        packet.flags = this.flags
-        for (viewer in viewers) {
-            viewer.toUser()?.sendPacket(packet)
-        }
+    fun setFlags(flags: Set<BossBar.Flag>) {
+        this.flags = EnumSet.noneOf(BossBar.Flag::class.java).apply { addAll(flags) }
+        bossBar.flags(flags)
     }
 
     var progress: Float = progress
         set(value) {
             field = value
-            val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.UPDATE_HEALTH)
-            packet.health = value
-            for (viewer in viewers) {
-                viewer.toUser()?.sendPacket(packet)
-            }
+            bossBar.progress(value)
         }
 
     fun addViewer(player: Player) {
-        viewers += player
-
-        val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.ADD)
-        packet.uuid = uuid
-        packet.title = message
-        packet.health = progress
-        packet.color = color
-        packet.overlay = overlay
-        packet.flags = flags
-        player.toUser()?.sendPacket(packet)
+        bossBar.addViewer(player)
     }
 
     fun removeViewer(player: Player) {
-        viewers -= player
-
-        val packet = WrapperPlayServerBossBar(uuid,WrapperPlayServerBossBar.Action.REMOVE)
-        packet.uuid = uuid
-        player.toUser()?.sendPacket(packet)
+        bossBar.removeViewer(player)
     }
 
 }

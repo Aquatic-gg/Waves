@@ -34,7 +34,7 @@ interface NMSHandler {
     )
 
     fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity?
-    fun createEntity(location: Location, entityType: EntityType, uuid: UUID?): PacketEntity?
+    fun createEntity(location: Location, entityType: EntityType, uuid: UUID? = null): PacketEntity?
     fun recreateEntityPacket(packetEntity: PacketEntity, location: Location): Any
     fun updateEntity(packetEntity: PacketEntity, consumer: (Entity) -> Unit, vararg players: Player)
     fun createEntityUpdatePacket(packetEntity: PacketEntity, consumer: (Entity) -> Unit): Any
