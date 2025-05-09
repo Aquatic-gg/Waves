@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "gg.aquatic.waves"
-version = "1.2.6"
+version = "1.2.8"
 
 val ktor_version: String by project
 
@@ -35,9 +35,6 @@ tasks.writeDependencies {
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.openjdk.nashorn", "gg.aquatic.waves.libs.nashorn")
-
-    relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
-    relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")
 }
 
 
@@ -165,10 +162,7 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
     //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
-    exclude("com/github/retrooper/**", "io/github/retrooper/**")
     exclude("net/radstevee/**")
-    relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
-    relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")
     //relocate("kotlin", "gg.aquatic.waves.shadow.kotlin")
 
     // Exclude the original (unrelocated) kotlinx-coroutines-core package
@@ -206,7 +200,6 @@ tasks.register<ShadowJar>("shadowJarPublish") {
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
     //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
-    exclude("com/github/retrooper/**", "io/github/retrooper/**")
     exclude("net/radstevee/**")
     //relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
     //relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")

@@ -2,29 +2,21 @@ package gg.aquatic.waves.nms_1_21_4
 
 import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.event.call
-import gg.aquatic.waves.api.event.packet.PacketBlockChangeEvent
-import gg.aquatic.waves.api.event.packet.PacketChunkLoadEvent
-import gg.aquatic.waves.api.event.packet.PacketContainerClickEvent
-import gg.aquatic.waves.api.event.packet.PacketContainerCloseEvent
-import gg.aquatic.waves.api.event.packet.PacketInteractEvent
+import gg.aquatic.waves.api.event.packet.*
 import gg.aquatic.waves.api.nms.ProtectedPacket
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
+import net.minecraft.core.NonNullList
 import net.minecraft.network.protocol.Packet
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket
-import net.minecraft.network.protocol.game.ClientboundContainerClosePacket
-import net.minecraft.network.protocol.game.ClientboundLevelChunkWithLightPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket
-import net.minecraft.network.protocol.game.ServerboundContainerClosePacket
-import net.minecraft.network.protocol.game.ServerboundInteractPacket
+import net.minecraft.network.protocol.game.*
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 class PacketListener(
-    val player: Player
+    val player: Player,
 ) : ChannelDuplexHandler() {
 
     private val blockUpdateBlockStateField =
@@ -68,6 +60,51 @@ class PacketListener(
                     msg,
                     (event.blockData as CraftBlockData).state
                 )
+            }
+
+            is ClientboundContainerSetSlotPacket -> {
+                val event = PacketContainerSetSlotEvent(
+                    player,
+                    msg.containerId,
+                    msg.stateId,
+                    CraftItemStack.asCraftMirror(msg.item)
+                )
+                event.call()
+                if (event.isCancelled) {
+                    return
+                }
+
+                val newPacket = ClientboundContainerSetSlotPacket(
+                    msg.containerId,
+                    msg.stateId,
+                    msg.slot,
+                    CraftItemStack.asNMSCopy(event.item)
+                )
+                super.write(ctx, newPacket, promise)
+                return
+            }
+
+            is ClientboundContainerSetContentPacket -> {
+                val event = PacketContainerContentEvent(
+                    player,
+                    msg.containerId,
+                    msg.items.map { (CraftItemStack.asCraftMirror(it)) }.toMutableList(),
+                    CraftItemStack.asCraftMirror(msg.carriedItem)
+                )
+                event.call()
+                if (event.isCancelled) {
+                    return
+                }
+                val newPacket = ClientboundContainerSetContentPacket(
+                    msg.containerId,
+                    msg.stateId,
+                    NonNullList.create<net.minecraft.world.item.ItemStack>().apply {
+                        addAll(event.contents.map { (CraftItemStack.asNMSCopy(it)) })
+                    },
+                    CraftItemStack.asNMSCopy(event.carriedItem)
+                )
+                super.write(ctx, newPacket, promise)
+                return
             }
         }
         super.write(ctx, msg, promise)
