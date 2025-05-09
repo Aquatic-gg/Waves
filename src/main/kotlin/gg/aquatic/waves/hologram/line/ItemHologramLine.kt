@@ -1,32 +1,26 @@
 package gg.aquatic.waves.hologram.line
 
-import com.github.retrooper.packetevents.protocol.entity.data.EntityData
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
-import com.github.retrooper.packetevents.util.Vector3f
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerDestroyEntities
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityTeleport
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerSpawnEntity
 import gg.aquatic.waves.Waves
+import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.hologram.*
 import gg.aquatic.waves.item.AquaticItem
-import gg.aquatic.waves.packetevents.EntityDataBuilder
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
 import gg.aquatic.waves.util.item.loadFromYml
+import gg.aquatic.waves.util.modify
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
-import gg.aquatic.waves.util.toUser
-import io.github.retrooper.packetevents.util.SpigotConversionUtil
-import io.github.retrooper.packetevents.util.SpigotReflectionUtil
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
+import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay.ItemDisplayTransform
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import java.util.*
+import org.bukkit.util.Transformation
+import org.joml.Quaternionf
+import org.joml.Vector3f
 
 class ItemHologramLine(
     val item: ItemStack,
@@ -67,42 +61,47 @@ class ItemHologramLine(
     }
 
     override fun move(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.player.toUser()?.sendPacket(
-            WrapperPlayServerEntityTeleport(
-                spawnedHologramLine.entityId,
-                SpigotConversionUtil.fromBukkitLocation(spawnedHologramLine.currentLocation),
-                false
-            )
+        spawnedHologramLine.packetEntity.teleport(
+            Waves.NMS_HANDLER,
+            spawnedHologramLine.currentLocation,
+            false,
+            spawnedHologramLine.player
         )
     }
 
     override fun createEntity(spawnedHologramLine: SpawnedHologramLine) {
-        val id = spawnedHologramLine.entityId
-        val location = spawnedHologramLine.currentLocation
-        val spawnPacket = WrapperPlayServerSpawnEntity(
-            id,
-            UUID.randomUUID(),
-            EntityTypes.ITEM_DISPLAY,
-            SpigotConversionUtil.fromBukkitLocation(location),
-            location.yaw,
-            0,
-            null
-        )
+        val packetEntity = spawnedHologramLine.packetEntity
         val entityData = buildData(spawnedHologramLine)
-        val metadataPacket = WrapperPlayServerEntityMetadata(id, entityData)
 
-        val user = spawnedHologramLine.player.toUser() ?: return
-        user.sendPacket(spawnPacket)
-        user.sendPacket(metadataPacket)
+        packetEntity.modify {
+            for (data in entityData) {
+                data.apply(it)
+            }
+        }
+
+        packetEntity.sendSpawnComplete(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
     override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityData> {
-        return EntityDataBuilder.ITEM_DISPLAY()
-            .setItem(item)
-            .setItemTransformation(itemDisplayTransform)
-            .setScale(Vector3f(scale, scale, scale))
-            .setBillboard(billboard)
-            .build()
+        return listOf(
+            object : EntityData {
+                override val id: String = "hologram-data"
+
+                override fun apply(entity: Entity) {
+                    val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
+                    itemDisplay.setItemStack(item)
+                    itemDisplay.billboard = billboard
+                    itemDisplay.itemDisplayTransform = itemDisplayTransform
+                    itemDisplay.transformation = Transformation(
+                        Vector3f(),
+                        Quaternionf(),
+                        Vector3f(scale, scale, scale),
+                        Quaternionf()
+                    )
+                }
+
+            }
+        )
     }
 
     class Settings(
