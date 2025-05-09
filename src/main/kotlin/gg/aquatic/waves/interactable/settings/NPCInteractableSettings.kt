@@ -1,23 +1,21 @@
 package gg.aquatic.waves.interactable.settings
 
-import com.github.retrooper.packetevents.protocol.player.GameMode
-import com.github.retrooper.packetevents.protocol.player.TextureProperty
-import com.github.retrooper.packetevents.protocol.player.UserProfile
+import gg.aquatic.waves.api.nms.profile.UserProfile
 import gg.aquatic.waves.fake.npc.FakePlayer
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.settings.entityproperty.EntityArmorProperty
 import gg.aquatic.waves.interactable.type.NPCInteractable
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.toMMComponent
-import io.github.retrooper.packetevents.util.SpigotConversionUtil
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.GameMode
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import java.util.*
-import kotlin.collections.ArrayList
 
 class NPCInteractableSettings(
     val userProfile: UserProfile,
@@ -37,7 +35,7 @@ class NPCInteractableSettings(
     ): NPCInteractable {
         val fakePlayer = FakePlayer(
             userProfile,
-            tabName?.toMMComponent(),
+            (tabName ?: "").toMMComponent(),
             namedTextColor,
             prefixName?.toMMComponent(),
             suffixName?.toMMComponent(),
@@ -49,14 +47,12 @@ class NPCInteractableSettings(
             50,
             audience
         )
-        fakePlayer.npc.helmet = SpigotConversionUtil.fromBukkitItemStack(equipment.helmet?.getItem() ?: ItemStack(Material.AIR))
-        fakePlayer.npc.chestplate = SpigotConversionUtil.fromBukkitItemStack(equipment.chestplate?.getItem() ?: ItemStack(Material.AIR))
-        fakePlayer.npc.leggings = SpigotConversionUtil.fromBukkitItemStack(equipment.leggings?.getItem() ?: ItemStack(Material.AIR))
-        fakePlayer.npc.boots = SpigotConversionUtil.fromBukkitItemStack(equipment.boots?.getItem() ?: ItemStack(Material.AIR))
-        fakePlayer.npc.mainHand = SpigotConversionUtil.fromBukkitItemStack(equipment.mainHand?.getItem() ?: ItemStack(Material.AIR))
-        fakePlayer.npc.offHand = SpigotConversionUtil.fromBukkitItemStack(equipment.offHand?.getItem() ?: ItemStack(Material.AIR))
-
-        fakePlayer.npc.updateEquipment()
+        fakePlayer.npc.equipment[EquipmentSlot.HEAD] = equipment.helmet?.getItem() ?: ItemStack(Material.AIR)
+        fakePlayer.npc.equipment[EquipmentSlot.CHEST] = equipment.chestplate?.getItem() ?: ItemStack(Material.AIR)
+        fakePlayer.npc.equipment[EquipmentSlot.LEGS] = equipment.leggings?.getItem() ?: ItemStack(Material.AIR)
+        fakePlayer.npc.equipment[EquipmentSlot.FEET] = equipment.boots?.getItem() ?: ItemStack(Material.AIR)
+        fakePlayer.npc.equipment[EquipmentSlot.HAND] = equipment.mainHand?.getItem() ?: ItemStack(Material.AIR)
+        fakePlayer.npc.equipment[EquipmentSlot.OFF_HAND] = equipment.offHand?.getItem() ?: ItemStack(Material.AIR)
 
         fakePlayer.register()
 
@@ -68,11 +64,11 @@ class NPCInteractableSettings(
 
     companion object : InteractableSettingsFactory {
         override fun load(section: ConfigurationSection): NPCInteractableSettings? {
-            val textures = ArrayList<TextureProperty>()
+            val textures = ArrayList<UserProfile.TextureProperty>()
 
             val skin = section.getString("skin.value") ?: return null
             val signature = section.getString("skin.signature") ?: return null
-            textures.add(TextureProperty("textures", skin, signature))
+            textures.add(UserProfile.TextureProperty("textures", skin, signature))
 
             val npcName = section.getString("name") ?: return null
 

@@ -1,20 +1,23 @@
 package gg.aquatic.waves.interactable.settings
 
-import com.github.retrooper.packetevents.protocol.entity.type.EntityTypes
 import gg.aquatic.waves.fake.entity.FakeEntity
+import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.interactable.Interactable
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.type.EntityInteractable
 import gg.aquatic.waves.item.AquaticItem
-import gg.aquatic.waves.packetevents.EntityDataBuilder
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.item.loadFromYml
-import gg.aquatic.waves.util.collection.mapPair
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
+import org.bukkit.entity.Entity
+import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay.ItemDisplayTransform
+import org.bukkit.util.Transformation
 import org.bukkit.util.Vector
+import org.joml.Quaternionf
+import org.joml.Vector3f
 
 class ItemDisplayInteractableSettings(
     val offset: Vector,
@@ -22,29 +25,37 @@ class ItemDisplayInteractableSettings(
     val itemTransform: ItemDisplayTransform,
     val scale: Vector,
     val billboard: Billboard
-): InteractableSettings {
+) : InteractableSettings {
     override fun build(
         location: Location,
         audience: AquaticAudience,
         onInteract: (InteractableInteractEvent) -> Unit
     ): Interactable {
-        val fakeEntity = FakeEntity(EntityTypes.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer =  {
-            entityData += EntityDataBuilder.ITEM_DISPLAY()
-                .setItem(item.getItem())
-                .setItemTransformation(itemTransform)
-                .setScale(scale.x, scale.y, scale.z)
-                .setBillboard(billboard)
-                .build()
-                .mapPair { it.index to it }
+        val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer = {
+            entityData += "hologram-data" to object : EntityData {
+                override val id: String
+                    get() = "hologram-data"
+
+                override fun apply(entity: Entity) {
+                    val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
+                    itemDisplay.billboard = billboard
+                    itemDisplay.itemDisplayTransform = itemTransform
+                    itemDisplay.transformation = Transformation(
+                        Vector3f(),
+                        Quaternionf(), Vector3f(scale.x.toFloat(), scale.y.toFloat(), scale.z.toFloat()), Quaternionf()
+                    )
+                    itemDisplay.setItemStack(item.getItem())
+                }
+            }
         })
 
         val interactable = EntityInteractable(fakeEntity, onInteract)
         return interactable
     }
 
-    companion object: InteractableSettingsFactory {
+    companion object : InteractableSettingsFactory {
         override fun load(section: ConfigurationSection): InteractableSettings? {
-            val offsetStr = section.getString("offset","0;0;0")!!.split(";")
+            val offsetStr = section.getString("offset", "0;0;0")!!.split(";")
             val offset = Vector(
                 offsetStr[0].toDouble(),
                 offsetStr[1].toDouble(),
@@ -52,7 +63,7 @@ class ItemDisplayInteractableSettings(
             )
             val item = AquaticItem.loadFromYml(section.getConfigurationSection("item")) ?: return null
             val itemTransform = ItemDisplayTransform.valueOf(section.getString("item-transform") ?: "NONE")
-            val scaleStr = section.getString("scale","1;1;1")!!.split(";")
+            val scaleStr = section.getString("scale", "1;1;1")!!.split(";")
             val scale = Vector(
                 scaleStr[0].toDouble(),
                 scaleStr[1].toDouble(),
