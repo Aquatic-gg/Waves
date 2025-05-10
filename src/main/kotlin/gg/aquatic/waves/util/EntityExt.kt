@@ -80,8 +80,8 @@ fun PacketEntity.setPassengers(vararg entities: Entity) {
     }
 }
 fun PacketEntity.setEquipment(equipment: Map<EquipmentSlot, ItemStack>) {
-    val packet = Waves.NMS_HANDLER.createEquipmentPacket(this, equipment)
-    this.equipmentPacket = packet
+    //val packet = Waves.NMS_HANDLER.createEquipmentPacket(this, equipment)
+    this.equipment += equipment
 }
 
 fun Player.sendPacket(packet: Any, silent: Boolean = false) {

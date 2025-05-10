@@ -7,6 +7,7 @@ class PacketChunkLoadEvent(
     val player: Player,
     val x: Int,
     val z: Int,
-    val packet: Any
+    val packet: Any,
+    val extraPackets: MutableList<Any>
 ): CancellableAquaticEvent(true) {
 }

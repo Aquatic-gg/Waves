@@ -1,5 +1,6 @@
 package gg.aquatic.waves.fake.block
 
+import gg.aquatic.waves.Waves
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.trackedBy
 import gg.aquatic.waves.fake.FakeObject
@@ -10,6 +11,7 @@ import gg.aquatic.waves.util.block.AquaticBlock
 import gg.aquatic.waves.util.blockLocation
 import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runSync
+import gg.aquatic.waves.util.sendPacket
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -67,7 +69,6 @@ open class FakeBlock(
                 }
             }
         }
-
     }
 
     fun register() {
@@ -130,12 +131,14 @@ open class FakeBlock(
         )
         player.toUser().sendPacket(packet)
          */
-        player.sendBlockChange(location, block.blockData)
+        val packet = Waves.NMS_HANDLER.createBlockChangePacket(location, block.blockData)
+        player.sendPacket(packet, true)
     }
 
     override fun hide(player: Player) {
         isViewing.remove(player)
-        player.sendBlockChange(location, location.block.blockData)
+        val packet = Waves.NMS_HANDLER.createBlockChangePacket(location, location.block.blockData)
+        player.sendPacket(packet, true)
     }
 
     override fun tick() {

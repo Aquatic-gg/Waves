@@ -1,17 +1,16 @@
 package gg.aquatic.waves.fake
 
-import com.destroystokyo.paper.event.player.PlayerUseUnknownEntityEvent
 import gg.aquatic.waves.Waves
-import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
-import gg.aquatic.waves.fake.block.FakeBlock
-import gg.aquatic.waves.fake.block.FakeBlockInteractEvent
-import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
-import gg.aquatic.waves.module.WavesModule
-import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.api.event.packet.PacketBlockChangeEvent
 import gg.aquatic.waves.api.event.packet.PacketChunkLoadEvent
 import gg.aquatic.waves.api.event.packet.PacketInteractEvent
+import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
+import gg.aquatic.waves.fake.block.FakeBlock
+import gg.aquatic.waves.fake.block.FakeBlockInteractEvent
+import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
+import gg.aquatic.waves.module.WaveModules
+import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runAsyncTimer
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
@@ -41,6 +40,9 @@ object FakeObjectHandler : WavesModule {
                 objectRemovalQueue.clear()
             }
             for (tickableObject in tickableObjects) {
+                if (tickableObject.destroyed) {
+                    objectRemovalQueue += tickableObject
+                }
                 tickableObject.handleTick()
             }
         }
@@ -60,6 +62,7 @@ object FakeObjectHandler : WavesModule {
             val packet = it.packet
             Waves.NMS_HANDLER.modifyChunkPacketBlocks(it.player.world, packet) { sections ->
                 for (block in obj.blocks) {
+                    if (block.destroyed) continue
                     if (block.viewers.contains(it.player)) {
                         val index = (block.location.y.toInt() + 64) / 16
                         val section = sections[index]
@@ -70,6 +73,7 @@ object FakeObjectHandler : WavesModule {
                             block.block.blockData
                         )
                         block.isViewing += it.player
+                        it.extraPackets += Waves.NMS_HANDLER.createBlockChangePacket(block.location, block.block.blockData)
                     }
                 }
             }
@@ -95,11 +99,15 @@ object FakeObjectHandler : WavesModule {
         }
         event<PacketBlockChangeEvent> {
             val player = it.player
-            val blocks = locationToBlocks[player.world.getBlockAt(
-                it.x,
-                it.y,
-                it.z
-            ).location] ?: return@event
+            val blocks = locationToBlocks[Location(
+                player.world,
+                it.x.toDouble(),
+                it.y.toDouble(),
+                it.z.toDouble()
+            ).toBlockLocation()]
+            if (blocks == null || blocks.isEmpty()) {
+                return@event
+            }
             for (block in blocks) {
                 if (block.viewers.contains(player)) {
                     if (!block.destroyed) {
@@ -115,6 +123,7 @@ object FakeObjectHandler : WavesModule {
             if (it.hand == EquipmentSlot.OFF_HAND) return@event
             val blocks = locationToBlocks[it.clickedBlock?.location ?: return@event] ?: return@event
             for (block in blocks) {
+                if (block.destroyed) continue
                 if (block.viewers.contains(it.player)) {
                     it.isCancelled = true
                     val event = FakeBlockInteractEvent(
@@ -125,11 +134,6 @@ object FakeObjectHandler : WavesModule {
                     block.onInteract(event)
                     if (!block.destroyed) {
                         if (it.action == Action.RIGHT_CLICK_AIR || it.action == Action.RIGHT_CLICK_BLOCK) {
-                            /*
-                            runLaterSync(1) {
-                                block.show(it.player)
-                            }
-                             */
                         } else {
                             block.show(it.player)
                         }

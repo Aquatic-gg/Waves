@@ -38,7 +38,6 @@ import net.minecraft.world.level.biome.Biome
 import net.minecraft.world.level.biome.Biomes
 import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
-import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.level.chunk.PalettedContainer
 import net.minecraft.world.phys.Vec3
@@ -51,8 +50,6 @@ import org.bukkit.World
 import org.bukkit.block.data.BlockData
 import org.bukkit.craftbukkit.CraftServer
 import org.bukkit.craftbukkit.CraftWorld
-import org.bukkit.craftbukkit.block.CraftBlockState
-import org.bukkit.craftbukkit.block.CraftBlockStates
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
@@ -64,7 +61,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
 import java.util.*
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.absoluteValue
@@ -75,10 +71,9 @@ object NMSHandlerImpl : NMSHandler {
         ReflectionUtils.getField("connection", ServerCommonPacketListenerImpl::class.java)
     private val entityCounterField = ReflectionUtils.getStatic<AtomicInteger>("ENTITY_COUNTER", Entity::class.java)
     private val setPassengersConstructor =
-        ClientboundSetPassengersPacket::class.java.getConstructor(FriendlyByteBuf::class.java).apply {
+        ClientboundSetPassengersPacket::class.java.getDeclaredConstructor(FriendlyByteBuf::class.java).apply {
             isAccessible = true
         }
-    private val listeners = ConcurrentHashMap<UUID, PacketListener>()
 
     override fun injectPacketListener(player: Player) {
         val craftPlayer = (player as CraftPlayer)
@@ -200,7 +195,7 @@ object NMSHandlerImpl : NMSHandler {
         val entity = entityType.create(worldServer, EntitySpawnReason.COMMAND)
         entity?.let {
             it.moveTo(blockPos.x.toDouble(), blockPos.y.toDouble(), blockPos.z.toDouble(), 0.0f, 0.0f)
-            worldServer.addFreshEntityWithPassengers(it)
+            //worldServer.addFreshEntityWithPassengers(it)
 
             if (uuid != null) {
                 it.uuid = uuid
@@ -279,7 +274,7 @@ object NMSHandlerImpl : NMSHandler {
         vararg players: Player,
     ) {
         val packet = createEquipmentPacket(packetEntity, equipment) as Packet<*>
-        packetEntity.equipmentPacket = packet
+        //packetEntity.equipmentPacket = packet
 
         for (player in players) {
             player.sendPacket(packet)
@@ -363,14 +358,16 @@ object NMSHandlerImpl : NMSHandler {
     )
 
     override fun createChangeGameStatePacket(action: GameEventAction, value: Float): Any {
-        val mappedAction = gameStateTypesMapper[action] ?: throw IllegalArgumentException("Unknown game event action: $action")
+        val mappedAction =
+            gameStateTypesMapper[action] ?: throw IllegalArgumentException("Unknown game event action: $action")
         val packet = ClientboundGameEventPacket(mappedAction, value)
         return packet
     }
 
-    private val cameraPacketConstructor = ClientboundSetCameraPacket::class.java.getConstructor(FriendlyByteBuf::class.java).apply {
-        isAccessible = true
-    }
+    private val cameraPacketConstructor =
+        ClientboundSetCameraPacket::class.java.getDeclaredConstructor(FriendlyByteBuf::class.java).apply {
+            isAccessible = true
+        }
 
     override fun createCameraPacket(entityId: Int): Any {
         val bytebuf = FriendlyByteBuf(Unpooled.buffer())
@@ -378,9 +375,22 @@ object NMSHandlerImpl : NMSHandler {
         return cameraPacketConstructor.newInstance(bytebuf)
     }
 
+    override fun createBlockChangePacket(location: Location, blockState: BlockData): Any {
+        val packet = ClientboundBlockUpdatePacket(
+            BlockPos(location.blockX, location.blockY, location.blockZ),
+            (blockState as CraftBlockData).state
+        )
+        return packet
+    }
+
     override fun createEntityMotionPacket(entityId: Int, motion: Vector): Any {
         val packet = ClientboundSetEntityMotionPacket(entityId, Vec3(motion.x, motion.y, motion.z))
         return packet
+    }
+
+    override fun getBukkitEntity(packetEntity: PacketEntity): org.bukkit.entity.Entity {
+        val entity = packetEntity.entityInstance as Entity
+        return entity.bukkitEntity
     }
 
     private val chunkDataBufferField =
@@ -394,7 +404,7 @@ object NMSHandlerImpl : NMSHandler {
         val chunkData = chunkBundlePacket.chunkData
         val readBuffer = chunkData.readBuffer
 
-        val wrappedSections = HashMap<WrappedChunkSection, LevelChunkSection>()
+        val wrappedSections = mutableListOf<kotlin.Pair<WrappedChunkSection, LevelChunkSection>>()
         val registries = (world as CraftWorld).handle.registryAccess()
         val registry: Registry<Biome?> = registries.lookupOrThrow<Biome?>(Registries.BIOME)
         for (i in 0 until sections) {
@@ -413,7 +423,7 @@ object NMSHandlerImpl : NMSHandler {
             )
             val section = LevelChunkSection(container1, container2)
             section.read(readBuffer)
-            wrappedSections += object : WrappedChunkSection {
+            val pair = ((object : WrappedChunkSection {
                 override fun set(x: Int, y: Int, z: Int, blockState: BlockData) {
                     section.setBlockState(x, y, z, (blockState as CraftBlockData).state, false)
                     //palettedContainer.set(x, y, z, (blockState as CraftBlockState).handle)
@@ -423,15 +433,16 @@ object NMSHandlerImpl : NMSHandler {
                     val state = CraftBlockData.fromData(section.getBlockState(x, y, z))
                     return state
                 }
-            } to section
+            } as WrappedChunkSection) to section)
+            wrappedSections.add(pair)
         }
-        func(wrappedSections.keys.toList())
+        func(wrappedSections.map { it.first })
 
-        val bytes = ByteArray(calculateChunkSize(wrappedSections.values))
+        val bytes = ByteArray(calculateChunkSize(wrappedSections.map { it.second }))
         val writeBuffer: ByteBuf = Unpooled.wrappedBuffer(bytes)
         writeBuffer.writerIndex(0)
 
-        extractChunkData(wrappedSections.values, writeBuffer)
+        extractChunkData(wrappedSections.map { it.second }, writeBuffer)
         chunkDataBufferField.set(chunkData, bytes)
     }
 
@@ -506,7 +517,7 @@ object NMSHandlerImpl : NMSHandler {
         vararg players: Player,
     ) {
         val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
-        nmsItems += items.mapNotNull { it?.toNMS() }
+        nmsItems += items.map { it?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY }
         val packet = ClientboundContainerSetContentPacket(
             inventoryId,
             stateId,

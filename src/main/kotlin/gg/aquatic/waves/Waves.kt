@@ -4,6 +4,7 @@ import com.tcoded.folialib.FoliaLib
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.event.call
+import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.command.AquaticBaseCommand
 import gg.aquatic.waves.command.impl.GeneratePackCommand
 import gg.aquatic.waves.command.impl.ItemConvertCommand
@@ -24,6 +25,8 @@ import gg.aquatic.waves.profile.ProfilesModule
 import gg.aquatic.waves.sync.SyncHandler
 import gg.aquatic.waves.sync.SyncSettings
 import gg.aquatic.waves.util.Config
+import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 import java.io.File
 
 class Waves : WavesPlugin() {
@@ -88,6 +91,13 @@ class Waves : WavesPlugin() {
                 "itemconvert" to ItemConvertCommand,
                 "generatepack" to GeneratePackCommand
             ), listOf()).register("waves")
+
+        event<PlayerJoinEvent> {
+            NMS_HANDLER.injectPacketListener(it.player)
+        }
+        event<PlayerQuitEvent> {
+            NMS_HANDLER.unregisterPacketListener(it.player)
+        }
     }
 
     override fun onDisable() {

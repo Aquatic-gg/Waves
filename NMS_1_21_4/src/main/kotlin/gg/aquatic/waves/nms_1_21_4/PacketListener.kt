@@ -10,11 +10,9 @@ import io.netty.channel.ChannelPromise
 import net.minecraft.core.NonNullList
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
-import net.minecraft.world.inventory.ClickAction
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
-import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.inventory.ItemStack
 
 class PacketListener(
@@ -27,25 +25,26 @@ class PacketListener(
     override fun write(ctx: ChannelHandlerContext?, msg: Any?, promise: ChannelPromise?) {
         if (msg is ProtectedPacket) {
             super.write(ctx, msg.packet, promise)
+            return
         }
-        if (ctx !is Packet<*>) {
+        if (msg !is Packet<*>) {
             super.write(ctx, msg, promise)
             return
         }
 
         when (msg) {
             is ClientboundLevelChunkWithLightPacket -> {
-                val event = PacketChunkLoadEvent(player, msg.x, msg.z, msg)
+                val event = PacketChunkLoadEvent(player, msg.x, msg.z, msg,msg.chunkData.extraPackets.toMutableList())
                 event.call()
-
-                msg.chunkData
 
                 if (event.isCancelled) {
                     return
                 }
+                msg.chunkData.extraPackets += (event.extraPackets.map { it -> it as Packet<*> }.toMutableList())
             }
 
             is ClientboundBlockUpdatePacket -> {
+
                 val event = PacketBlockChangeEvent(
                     player,
                     msg.pos.x,
@@ -57,11 +56,9 @@ class PacketListener(
                 if (event.isCancelled) {
                     return
                 }
-
-                blockUpdateBlockStateField.set(
-                    msg,
-                    (event.blockData as CraftBlockData).state
-                )
+                val newPacket = ClientboundBlockUpdatePacket(msg.pos, (event.blockData as CraftBlockData).state)
+                super.write(ctx, newPacket, promise)
+                return
             }
 
             is ClientboundContainerSetSlotPacket -> {
@@ -122,10 +119,6 @@ class PacketListener(
     override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
         if (msg is ProtectedPacket) {
             super.channelRead(ctx, msg.packet)
-            return
-        }
-        if (msg !is Packet<*>) {
-            super.channelRead(ctx, msg)
             return
         }
 

@@ -7,6 +7,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
+import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
@@ -48,6 +49,9 @@ interface NMSHandler {
     fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any
     fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any
     fun createEntityMotionPacket(entityId: Int, motion: Vector): Any
+
+    fun createBlockChangePacket(location: Location, blockState: BlockData): Any
+    fun getBukkitEntity(packetEntity: PacketEntity): Entity
 
     fun createChangeGameStatePacket(action: GameEventAction, value: Float): Any
     fun createCameraPacket(entityId: Int): Any

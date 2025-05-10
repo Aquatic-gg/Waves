@@ -1,7 +1,11 @@
 package gg.aquatic.waves.api.nms
 
 import org.bukkit.Location
+import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
+import org.bukkit.inventory.EquipmentSlot
+import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 
 class PacketEntity(
@@ -11,18 +15,22 @@ class PacketEntity(
     var spawnPacket: Any,
     var updatePacket: Any? = null,
     var passengerPacket: Any? = null,
-    var equipmentPacket: Any? = null,
-    val despawnpacket: Any
+    val despawnpacket: Any,
 ) {
+    val equipment = HashMap<EquipmentSlot, ItemStack?>()
 
     var location: Location = location
         private set
+
+    fun bukkitEntity(nmsHandler: NMSHandler): Entity? {
+        return nmsHandler.getBukkitEntity(this)
+    }
 
     fun sendSpawnComplete(nmsHandler: NMSHandler, silent: Boolean = false, vararg players: Player) {
         sendSpawn(nmsHandler, silent, *players)
         sendDataUpdate(nmsHandler, silent, *players)
         sendPassengerUpdate(nmsHandler, silent, *players)
-        sendEquipmentUpdate(nmsHandler, silent, *players)
+        sendEquipmentUpdate(nmsHandler, *players)
     }
 
     fun sendSpawn(nmsHandler: NMSHandler, silent: Boolean = false, vararg players: Player) {
@@ -41,9 +49,11 @@ class PacketEntity(
         }
     }
 
-    fun sendEquipmentUpdate(nmsHandler: NMSHandler, silent: Boolean = false, vararg players: Player) {
-        equipmentPacket?.let {
-            nmsHandler.sendPacket(it, silent, *players)
+    fun sendEquipmentUpdate(nmsHandler: NMSHandler, vararg players: Player) {
+        for (player in players) {
+            player.sendEquipmentChange(
+                bukkitEntity(nmsHandler) as? LivingEntity ?: return,
+                equipment.mapValues { it.value ?: ItemStack.empty() })
         }
     }
 
@@ -59,7 +69,7 @@ class PacketEntity(
 
     fun setLocation(nmsHandler: NMSHandler, location: Location) {
         this.location = location
-        val recreatedPacket = nmsHandler.recreateEntityPacket(this,location)
+        val recreatedPacket = nmsHandler.recreateEntityPacket(this, location)
         spawnPacket = recreatedPacket
     }
 }

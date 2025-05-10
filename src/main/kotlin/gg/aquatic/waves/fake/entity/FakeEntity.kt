@@ -140,15 +140,16 @@ open class FakeEntity(
         if (!(!hadPassengers && passengers.isEmpty())) {
             packetEntity.sendPassengerUpdate(Waves.NMS_HANDLER, false,*players)
         }
-        packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,false,*players)
+        packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,*players)
     }
 
     private fun sendUpdate(player: Player) {
         if (entityData.isNotEmpty()) {
             packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false,player)
         }
+        packetEntity.equipment += equipment
         packetEntity.sendPassengerUpdate(Waves.NMS_HANDLER, false,player)
-        packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,false,player)
+        packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,player)
         onUpdate(player)
     }
 
