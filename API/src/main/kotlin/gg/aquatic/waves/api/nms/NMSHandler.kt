@@ -47,6 +47,7 @@ interface NMSHandler {
     fun createPlayerInfoUpdatePacket(actionIds: Collection<Int>, profileEntries: Collection<ProfileEntry>): Any
     fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any
     fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any
+    fun createEntityMotionPacket(entityId: Int, motion: Vector): Any
 
     fun createChangeGameStatePacket(action: GameEventAction, value: Float): Any
     fun createCameraPacket(entityId: Int): Any

@@ -378,6 +378,11 @@ object NMSHandlerImpl : NMSHandler {
         return cameraPacketConstructor.newInstance(bytebuf)
     }
 
+    override fun createEntityMotionPacket(entityId: Int, motion: Vector): Any {
+        val packet = ClientboundSetEntityMotionPacket(entityId, Vec3(motion.x, motion.y, motion.z))
+        return packet
+    }
+
     private val chunkDataBufferField =
         ReflectionUtils.getField("buffer", ClientboundLevelChunkPacketData::class.java).apply {
             isAccessible = true
