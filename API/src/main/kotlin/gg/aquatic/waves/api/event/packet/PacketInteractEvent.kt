@@ -7,6 +7,14 @@ class PacketInteractEvent(
     val player: Player,
     val isAttack: Boolean,
     val isSecondary: Boolean,
-    val entityId: Int
+    val entityId: Int,
+    val interactType: InteractType
 ): CancellableAquaticEvent(true) {
+
+    enum class InteractType {
+        INTERACT,
+        ATTACK,
+        INTERACT_AT
+    }
+
 }

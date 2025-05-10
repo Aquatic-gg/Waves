@@ -10,6 +10,7 @@ import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.ProtectedPacket
 import gg.aquatic.waves.api.nms.chunk.WrappedChunkSection
+import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
@@ -174,25 +175,27 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun recreateEntityPacket(
         packetEntity: PacketEntity,
-        location: Location
+        location: Location,
     ): Any {
         val entity = packetEntity.entityInstance as Entity
         entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
-        return entity.getAddEntityPacket(ServerEntity(
-            (location.world as CraftWorld).handle,
-            entity,
-            entity.type.updateInterval(),
-            true,
-            { },
-            HashSet()
-        ))
+        return entity.getAddEntityPacket(
+            ServerEntity(
+                (location.world as CraftWorld).handle,
+                entity,
+                entity.type.updateInterval(),
+                true,
+                { },
+                HashSet()
+            )
+        )
     }
 
     private fun <T : Entity> createEntity(
         entityType: net.minecraft.world.entity.EntityType<T>,
         uuid: UUID?,
         worldServer: ServerLevel,
-        blockPos: BlockPos
+        blockPos: BlockPos,
     ): T? {
         val entity = entityType.create(worldServer, EntitySpawnReason.COMMAND)
         entity?.let {
@@ -214,7 +217,7 @@ object NMSHandlerImpl : NMSHandler {
     override fun updateEntity(
         packetEntity: PacketEntity,
         consumer: (org.bukkit.entity.Entity) -> Unit,
-        vararg players: Player
+        vararg players: Player,
     ) {
         val packet = createEntityUpdatePacket(packetEntity, consumer) as Packet<*>
         packetEntity.updatePacket = packet
@@ -239,7 +242,7 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun createEntityUpdatePacket(
         packetEntity: PacketEntity,
-        consumer: (org.bukkit.entity.Entity) -> Unit
+        consumer: (org.bukkit.entity.Entity) -> Unit,
     ): Any {
         val entity = (packetEntity.entityInstance as Entity).bukkitEntity.apply {
             consumer(this)
@@ -273,7 +276,7 @@ object NMSHandlerImpl : NMSHandler {
     override fun setEquipment(
         packetEntity: PacketEntity,
         equipment: Map<EquipmentSlot, ItemStack?>,
-        vararg players: Player
+        vararg players: Player,
     ) {
         val packet = createEquipmentPacket(packetEntity, equipment) as Packet<*>
         packetEntity.equipmentPacket = packet
@@ -310,7 +313,7 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun createPlayerInfoUpdatePacket(
         actionIds: Collection<Int>,
-        profileEntries: Collection<ProfileEntry>
+        profileEntries: Collection<ProfileEntry>,
     ): Any {
         val entries = ArrayList<ClientboundPlayerInfoUpdatePacket.Entry>()
 
@@ -342,9 +345,43 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
-    private val chunkDataBufferField = ReflectionUtils.getField("buffer", ClientboundLevelChunkPacketData::class.java).apply {
+    private val gameStateTypesMapper = hashMapOf(
+        GameEventAction.NO_RESPAWN_BLOCK_AVAILABLE to ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE,
+        GameEventAction.START_RAINING to ClientboundGameEventPacket.START_RAINING,
+        GameEventAction.STOP_RAINING to ClientboundGameEventPacket.STOP_RAINING,
+        GameEventAction.CHANGE_GAME_MODE to ClientboundGameEventPacket.CHANGE_GAME_MODE,
+        GameEventAction.WIN_GAME to ClientboundGameEventPacket.WIN_GAME,
+        GameEventAction.DEMO_EVENT to ClientboundGameEventPacket.DEMO_EVENT,
+        GameEventAction.ARROW_HIT_PLAYER to ClientboundGameEventPacket.ARROW_HIT_PLAYER,
+        GameEventAction.RAIN_LEVEL_CHANGE to ClientboundGameEventPacket.RAIN_LEVEL_CHANGE,
+        GameEventAction.THUNDER_LEVEL_CHANGE to ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE,
+        GameEventAction.PUFFER_FISH_STING to ClientboundGameEventPacket.PUFFER_FISH_STING,
+        GameEventAction.GUARDIAN_ELDER_EFFECT to ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT,
+        GameEventAction.IMMEDIATE_RESPAWN to ClientboundGameEventPacket.IMMEDIATE_RESPAWN,
+        GameEventAction.LIMITED_CRAFTING to ClientboundGameEventPacket.LIMITED_CRAFTING,
+        GameEventAction.LEVEL_CHUNKS_LOAD_START to ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START
+    )
+
+    override fun createChangeGameStatePacket(action: GameEventAction, value: Float): Any {
+        val mappedAction = gameStateTypesMapper[action] ?: throw IllegalArgumentException("Unknown game event action: $action")
+        val packet = ClientboundGameEventPacket(mappedAction, value)
+        return packet
+    }
+
+    private val cameraPacketConstructor = ClientboundSetCameraPacket::class.java.getConstructor(FriendlyByteBuf::class.java).apply {
         isAccessible = true
     }
+
+    override fun createCameraPacket(entityId: Int): Any {
+        val bytebuf = FriendlyByteBuf(Unpooled.buffer())
+        bytebuf.writeVarInt(entityId)
+        return cameraPacketConstructor.newInstance(bytebuf)
+    }
+
+    private val chunkDataBufferField =
+        ReflectionUtils.getField("buffer", ClientboundLevelChunkPacketData::class.java).apply {
+            isAccessible = true
+        }
 
     override fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit) {
         val sections = (world.minHeight.absoluteValue + world.maxHeight) shr 4
@@ -406,7 +443,7 @@ object NMSHandlerImpl : NMSHandler {
     private fun extractChunkData(sections: Collection<LevelChunkSection>, wrapper: ByteBuf) {
         var chunkSectionIndex = 0
 
-        val buffer= FriendlyByteBuf(wrapper)
+        val buffer = FriendlyByteBuf(wrapper)
 
         for (levelChunkSection in sections) {
             levelChunkSection.write(buffer, null, chunkSectionIndex)
@@ -417,7 +454,7 @@ object NMSHandlerImpl : NMSHandler {
     override fun createTeamsPacket(
         team: gg.aquatic.waves.api.nms.scoreboard.Team,
         actionId: Int,
-        playerName: String
+        playerName: String,
     ): Any {
         val scoreboard = Scoreboard()
         val playerTeam = PlayerTeam(
@@ -442,7 +479,7 @@ object NMSHandlerImpl : NMSHandler {
         stateId: Int,
         slot: Int,
         itemStack: ItemStack?,
-        vararg players: Player
+        vararg players: Player,
     ) {
         val packet = ClientboundContainerSetSlotPacket(
             inventoryId,
@@ -461,7 +498,7 @@ object NMSHandlerImpl : NMSHandler {
         stateId: Int,
         items: Collection<ItemStack?>,
         carriedItem: ItemStack?,
-        vararg players: Player
+        vararg players: Player,
     ) {
         val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
         nmsItems += items.mapNotNull { it?.toNMS() }
@@ -493,7 +530,7 @@ object NMSHandlerImpl : NMSHandler {
         inventoryId: Int,
         menuType: MenuType,
         title: Component,
-        vararg players: Player
+        vararg players: Player,
     ) {
         val packet = openWindowPacket(inventoryId, menuType, title) as Packet<*>
 
@@ -510,7 +547,7 @@ object NMSHandlerImpl : NMSHandler {
         clickTypeNum: Int,
         carriedItem: ItemStack?,
         changedSlots: Map<Int, ItemStack?>,
-        vararg players: Player
+        vararg players: Player,
     ) {
         val map = Int2ObjectOpenHashMap<net.minecraft.world.item.ItemStack>()
         changedSlots.forEach { (key, value) ->

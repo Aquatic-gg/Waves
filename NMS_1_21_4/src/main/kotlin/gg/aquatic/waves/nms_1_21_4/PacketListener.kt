@@ -10,9 +10,11 @@ import io.netty.channel.ChannelPromise
 import net.minecraft.core.NonNullList
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
+import net.minecraft.world.inventory.ClickAction
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerInteractEntityEvent
 import org.bukkit.inventory.ItemStack
 
 class PacketListener(
@@ -110,6 +112,13 @@ class PacketListener(
         super.write(ctx, msg, promise)
     }
 
+    private val interactActionField = ReflectionUtils.getField("action", ServerboundInteractPacket::class.java).apply {
+        isAccessible = true
+    }
+    private val interactTypeMethod = ReflectionUtils.getMethod("getType", interactActionField.type).apply {
+        isAccessible = true
+    }
+
     override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
         if (msg is ProtectedPacket) {
             super.channelRead(ctx, msg.packet)
@@ -122,7 +131,17 @@ class PacketListener(
 
         when (msg) {
             is ServerboundInteractPacket -> {
-                val event = PacketInteractEvent(player, msg.isAttack, msg.isUsingSecondaryAction, msg.entityId)
+                val action = interactActionField.get(msg)
+                val actionType = interactTypeMethod.invoke(action) as Enum<*>
+                val actionTypeId = actionType.ordinal
+
+                val event = PacketInteractEvent(
+                    player,
+                    msg.isAttack,
+                    msg.isUsingSecondaryAction,
+                    msg.entityId,
+                    PacketInteractEvent.InteractType.entries[actionTypeId]
+                )
                 event.call()
                 if (event.isCancelled) {
                     return

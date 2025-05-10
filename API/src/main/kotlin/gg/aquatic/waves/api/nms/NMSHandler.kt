@@ -1,6 +1,7 @@
 package gg.aquatic.waves.api.nms
 
 import gg.aquatic.waves.api.nms.chunk.WrappedChunkSection
+import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
@@ -47,6 +48,8 @@ interface NMSHandler {
     fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any
     fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any
 
+    fun createChangeGameStatePacket(action: GameEventAction, value: Float): Any
+    fun createCameraPacket(entityId: Int): Any
     fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit)
 
     fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
