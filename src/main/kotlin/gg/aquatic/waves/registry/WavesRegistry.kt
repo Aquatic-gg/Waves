@@ -211,13 +211,9 @@ object WavesRegistry {
         crossinline factory: (ConfigurationSection, (String) -> String, T) -> Unit
     ): Pair<String, (ConfigurationSection, (String) -> String) -> EntityData> {
         return id to { section: ConfigurationSection, updater: (String) -> String ->
-            object : EntityData {
-                override val id: String = id
-
-                override fun apply(entity: Entity) {
-                    if (entity !is T) return
-                    factory(section, updater, entity)
-                }
+            EntityData.create(id) { entity, updater ->
+                if (entity !is T) return@create
+                factory(section, updater, entity)
             }
         }
     }

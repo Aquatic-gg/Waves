@@ -76,7 +76,7 @@ class ItemHologramLine(
 
         packetEntity.modify {
             for (data in entityData) {
-                data.apply(it)
+                data.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
             }
         }
 
@@ -88,7 +88,7 @@ class ItemHologramLine(
             object : EntityData {
                 override val id: String = "hologram-data"
 
-                override fun apply(entity: Entity) {
+                override fun apply(entity: Entity, updater: (String) -> String) {
                     val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
                     itemDisplay.setItemStack(item)
                     itemDisplay.billboard = billboard

@@ -77,7 +77,7 @@ open class FakeEntity(
 
     init {
         if (type == EntityType.ITEM) {
-            entityData += "item" to EntityData.create("item") { e ->
+            entityData += "item" to EntityData.create("item") { e, updater ->
                 if (e !is Item) return@create
                 e.itemStack = ItemStack(Material.STONE)
             }
@@ -126,7 +126,7 @@ open class FakeEntity(
 
         packetEntity.modify { e->
             for (data in entityData.values) {
-                data.apply(e)
+                data.apply(e) { str -> str }
             }
         }
         if (passengers.isNotEmpty()) {
@@ -144,13 +144,13 @@ open class FakeEntity(
     }
 
     private fun sendUpdate(player: Player) {
+        onUpdate(player)
         if (entityData.isNotEmpty()) {
             packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false,player)
         }
         packetEntity.equipment += equipment
         packetEntity.sendPassengerUpdate(Waves.NMS_HANDLER, false,player)
         packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,player)
-        onUpdate(player)
     }
 
     override fun addViewer(player: Player) {
@@ -178,8 +178,8 @@ open class FakeEntity(
         if (isViewing.contains(player)) return
         isViewing.add(player)
 
-        packetEntity.sendSpawnComplete(Waves.NMS_HANDLER,false,player)
         onUpdate(player)
+        packetEntity.sendSpawnComplete(Waves.NMS_HANDLER,false,player)
     }
 
     override fun hide(player: Player) {

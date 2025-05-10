@@ -30,7 +30,7 @@ class OraxenEntityInteractableSettings(
                 override val id: String
                     get() = "display-data"
 
-                override fun apply(entity: Entity) {
+                override fun apply(entity: Entity, updater: (String) -> String) {
                     val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
                     itemDisplay.billboard = displaySettings.trackingRotation
                     itemDisplay.itemDisplayTransform = displaySettings.displayTransform

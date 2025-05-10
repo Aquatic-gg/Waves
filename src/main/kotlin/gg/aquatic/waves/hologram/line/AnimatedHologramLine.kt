@@ -18,7 +18,7 @@ class AnimatedHologramLine(
     val frames: MutableList<Pair<Int, HologramLine>>,
     override val height: Double,
     override val filter: (Player) -> Boolean,
-    override val failLine: HologramLine?
+    override val failLine: HologramLine?,
 ) : HologramLine() {
 
     val ticks = ConcurrentHashMap<UUID, AnimationHandle>()
@@ -26,7 +26,7 @@ class AnimatedHologramLine(
     override fun spawn(
         location: Location,
         player: Player,
-        textUpdater: (Player, String) -> String
+        textUpdater: (Player, String) -> String,
     ): SpawnedHologramLine {
         val spawned = SpawnedHologramLine(
             player,
@@ -68,7 +68,7 @@ class AnimatedHologramLine(
             val data = buildData(spawnedHologramLine)
             spawnedHologramLine.packetEntity.modify {
                 for (entityData in data) {
-                    entityData.apply(it)
+                    entityData.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
                 }
             }
             spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
@@ -94,7 +94,9 @@ class AnimatedHologramLine(
     }
 
     override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityData> {
-        return frames[ticks.getOrPut(spawnedHologramLine.player.uniqueId) { AnimationHandle() }.index].second.buildData(spawnedHologramLine)
+        return frames[ticks.getOrPut(spawnedHologramLine.player.uniqueId) { AnimationHandle() }.index].second.buildData(
+            spawnedHologramLine
+        )
     }
 
     class AnimationHandle {

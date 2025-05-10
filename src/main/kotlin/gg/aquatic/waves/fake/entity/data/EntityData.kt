@@ -5,13 +5,15 @@ import org.bukkit.entity.Entity
 interface EntityData {
 
     val id: String
-    fun apply(entity: Entity)
+    fun apply(entity: Entity, updater: (String) -> String)
 
     companion object {
-        fun create(id: String, apply: (Entity) -> Unit): EntityData {
+        fun create(id: String, apply: (Entity, (String) -> String) -> Unit): EntityData {
             return object : EntityData {
                 override val id: String = id
-                override fun apply(entity: Entity) = apply(entity)
+                override fun apply(entity: Entity, updater: (String) -> String) {
+                    apply(entity, updater)
+                }
             }
         }
     }

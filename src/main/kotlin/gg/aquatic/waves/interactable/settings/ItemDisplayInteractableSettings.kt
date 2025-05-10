@@ -36,7 +36,7 @@ class ItemDisplayInteractableSettings(
                 override val id: String
                     get() = "hologram-data"
 
-                override fun apply(entity: Entity) {
+                override fun apply(entity: Entity, updater: (String) -> String) {
                     val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
                     itemDisplay.billboard = billboard
                     itemDisplay.itemDisplayTransform = itemTransform

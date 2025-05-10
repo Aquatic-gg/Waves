@@ -80,7 +80,7 @@ class TextHologramLine(
 
         packetEntity.modify {
             for (data in entityData) {
-                data.apply(it)
+                data.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
             }
         }
 
@@ -92,12 +92,12 @@ class TextHologramLine(
             object : EntityData {
                 override val id: String = "hologram-data"
 
-                override fun apply(entity: Entity) {
-                    val textDisplay = entity as? org.bukkit.entity.TextDisplay ?: return
+                override fun apply(entity: Entity, updater: (String) -> String) {
+                    val textDisplay = entity as? TextDisplay ?: return
                     textDisplay.interpolationDelay = 0
                     textDisplay.interpolationDuration = transformationDuration
                     textDisplay.teleportDuration = transformationDuration
-                    textDisplay.text(text.toMMComponent())
+                    textDisplay.text(updater(text).toMMComponent())
                     textDisplay.lineWidth = lineWidth
                     textDisplay.billboard = billboard
                     textDisplay.isShadowed = hasShadow
