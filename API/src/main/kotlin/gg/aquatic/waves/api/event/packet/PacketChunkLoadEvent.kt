@@ -1,6 +1,7 @@
 package gg.aquatic.waves.api.event.packet
 
 import gg.aquatic.waves.api.event.CancellableAquaticEvent
+import gg.aquatic.waves.api.event.PacketEvent
 import org.bukkit.entity.Player
 
 class PacketChunkLoadEvent(
@@ -9,5 +10,5 @@ class PacketChunkLoadEvent(
     val z: Int,
     val packet: Any,
     val extraPackets: MutableList<Any>
-): CancellableAquaticEvent(true) {
+): PacketEvent() {
 }

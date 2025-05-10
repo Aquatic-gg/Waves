@@ -1,6 +1,7 @@
 package gg.aquatic.waves.api.event.packet
 
 import gg.aquatic.waves.api.event.CancellableAquaticEvent
+import gg.aquatic.waves.api.event.PacketEvent
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
@@ -13,5 +14,5 @@ class PacketContainerClickEvent(
     var clickTypeId: Int,
     var carriedItem: ItemStack?,
     var changedSlots: Map<Int, ItemStack?>
-): CancellableAquaticEvent(true) {
+): PacketEvent() {
 }

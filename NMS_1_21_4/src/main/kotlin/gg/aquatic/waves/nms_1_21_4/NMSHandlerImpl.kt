@@ -7,6 +7,7 @@ import com.mojang.authlib.properties.PropertyMap
 import com.mojang.datafixers.util.Pair
 import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.nms.NMSHandler
+import gg.aquatic.waves.api.nms.PacketBundle
 import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.ProtectedPacket
 import gg.aquatic.waves.api.nms.chunk.WrappedChunkSection
@@ -490,6 +491,16 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
+    override fun createSetSlotItemPacket(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?): Any {
+        val packet = ClientboundContainerSetSlotPacket(
+            inventoryId,
+            stateId,
+            slot,
+            itemStack?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+        )
+        return packet
+    }
+
     override fun setSlotItem(
         inventoryId: Int,
         stateId: Int,
@@ -497,16 +508,27 @@ object NMSHandlerImpl : NMSHandler {
         itemStack: ItemStack?,
         vararg players: Player,
     ) {
-        val packet = ClientboundContainerSetSlotPacket(
-            inventoryId,
-            stateId,
-            slot,
-            itemStack?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
-        )
-
+        val packet = createSetSlotItemPacket(inventoryId, stateId, slot, itemStack) as Packet<*>
         for (player in players) {
             player.sendPacket(packet)
         }
+    }
+
+    override fun createSetWindowItemsPacket(
+        inventoryId: Int,
+        stateId: Int,
+        items: Collection<ItemStack?>,
+        carriedItem: ItemStack?
+    ): Any {
+        val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
+        nmsItems += items.map { it?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY }
+        val packet = ClientboundContainerSetContentPacket(
+            inventoryId,
+            stateId,
+            nmsItems,
+            carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+        )
+        return packet
     }
 
     override fun setWindowItems(
@@ -516,14 +538,7 @@ object NMSHandlerImpl : NMSHandler {
         carriedItem: ItemStack?,
         vararg players: Player,
     ) {
-        val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
-        nmsItems += items.map { it?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY }
-        val packet = ClientboundContainerSetContentPacket(
-            inventoryId,
-            stateId,
-            nmsItems,
-            carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
-        )
+        val packet = createSetWindowItemsPacket(inventoryId, stateId, items, carriedItem) as Packet<*>
         for (player in players) {
             player.sendPacket(packet)
         }
@@ -610,6 +625,11 @@ object NMSHandlerImpl : NMSHandler {
                 player.sendPacket(packet)
             }
         }
+    }
+
+    override fun sendPacketBundle(bundle: PacketBundle, silent: Boolean, vararg players: Player) {
+        val packet = ClientboundBundlePacket(bundle.packets.map { it as Packet<ClientGamePacketListener> })
+        sendPacket(packet, silent, *players)
     }
 
     fun Component.toNMSComponent(): net.minecraft.network.chat.Component {

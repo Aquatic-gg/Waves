@@ -41,6 +41,9 @@ class PacketListener(
                     return
                 }
                 msg.chunkData.extraPackets += (event.extraPackets.map { it -> it as Packet<*> }.toMutableList())
+                super.write(ctx, msg, promise)
+                event.then()
+                return
             }
 
             is ClientboundBlockUpdatePacket -> {
@@ -58,6 +61,7 @@ class PacketListener(
                 }
                 val newPacket = ClientboundBlockUpdatePacket(msg.pos, (event.blockData as CraftBlockData).state)
                 super.write(ctx, newPacket, promise)
+                event.then()
                 return
             }
 
@@ -80,6 +84,7 @@ class PacketListener(
                     CraftItemStack.asNMSCopy(event.item)
                 )
                 super.write(ctx, newPacket, promise)
+                event.then()
                 return
             }
 
@@ -103,6 +108,17 @@ class PacketListener(
                     CraftItemStack.asNMSCopy(event.carriedItem)
                 )
                 super.write(ctx, newPacket, promise)
+                event.then()
+                return
+            }
+            is ClientboundOpenScreenPacket -> {
+                val event = PacketContainerOpenEvent(player, msg.containerId)
+                event.call()
+                if (event.isCancelled) {
+                    return
+                }
+                super.write(ctx, msg, promise)
+                event.then()
                 return
             }
         }
@@ -139,6 +155,9 @@ class PacketListener(
                 if (event.isCancelled) {
                     return
                 }
+                super.channelRead(ctx, msg)
+                event.then()
+                return
             }
 
             is ServerboundContainerClosePacket -> {
@@ -147,6 +166,9 @@ class PacketListener(
                 if (event.isCancelled) {
                     return
                 }
+                super.channelRead(ctx, msg)
+                event.then()
+                return
             }
 
             is ServerboundContainerClickPacket -> {
@@ -164,6 +186,9 @@ class PacketListener(
                 if (event.isCancelled) {
                     return
                 }
+                super.channelRead(ctx, msg)
+                event.then()
+                return
             }
         }
 

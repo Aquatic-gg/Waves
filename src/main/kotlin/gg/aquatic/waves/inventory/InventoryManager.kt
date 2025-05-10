@@ -3,14 +3,14 @@ package gg.aquatic.waves.inventory
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.event
-import gg.aquatic.waves.api.event.packet.PacketContainerClickEvent
-import gg.aquatic.waves.api.event.packet.PacketContainerCloseEvent
+import gg.aquatic.waves.api.event.packet.*
 import gg.aquatic.waves.inventory.event.AsyncPacketInventoryCloseEvent
 import gg.aquatic.waves.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runLaterSync
+import gg.aquatic.waves.util.sendPacket
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerQuitEvent
@@ -25,7 +25,7 @@ object InventoryManager : WavesModule {
     override fun initialize(waves: Waves) {
         event<PlayerQuitEvent> {
             runAsync {
-                onCloseMenu(it.player)
+                onCloseMenu(it.player, false)
             }
         }
         /*
@@ -44,7 +44,27 @@ object InventoryManager : WavesModule {
         }
          */
         event<PacketContainerCloseEvent> {
-            onCloseMenu(it.player)
+            onCloseMenu(it.player, true)
+        }
+        event<PacketContainerOpenEvent> { event ->
+            if (shouldIgnore(event.containerId, event.player)) return@event
+            val inventory = openedInventories[event.player] ?: return@event
+            val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
+
+            event.then = {
+                updateInventoryContent(inventory, viewer)
+            }
+        }
+        event<PacketContainerSetSlotEvent> { event ->
+            val inventory = openedInventories[event.player] ?: return@event
+            val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
+            event.isCancelled = true
+        }
+        event<PacketContainerContentEvent> { event ->
+            val inventory = openedInventories[event.player] ?: return@event
+            val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
+            event.isCancelled = true
+            //updateInventoryContent(inventory, viewer)
         }
         event<PacketContainerClickEvent> { event ->
             if (shouldIgnore(event.containerId, event.player)) return@event
@@ -91,12 +111,22 @@ object InventoryManager : WavesModule {
     }
 
     fun openMenu(player: Player, inventory: PacketInventory) {
+        val previousMenu = openedInventories[player]
+        if (previousMenu != null) {
+            onCloseMenu(player, false)
+        }
+
         openedInventories[player] = inventory
         val viewer = InventoryViewer(player)
         inventory.viewers[player.uniqueId] = viewer
 
         inventory.sendInventoryOpenPacket(player)
-        updateInventoryContent(inventory, viewer)
+        /*
+        NOTE:
+
+        This is not needed anymore as the packet is sent in the event listener.
+         */
+        //updateInventoryContent(inventory, viewer)
     }
 
     private fun menuSlotFromPlayerSlot(slot: Int, inventory: PacketInventory): Int {
@@ -112,15 +142,18 @@ object InventoryManager : WavesModule {
         return if (offsetSlot < 27) offsetSlot + 9 else offsetSlot - 27
     }
 
-    fun onCloseMenu(player: Player) {
-        val removed = openedInventories.remove(player)
-        removed?.viewers?.remove(player.uniqueId)
+    fun onCloseMenu(player: Player, updateContent: Boolean) {
+        val removed = openedInventories.remove(player) ?: return
+        removed.viewers.remove(player.uniqueId)
 
-        runLaterSync(2) {
-            if (openedInventories.containsKey(player)) return@runLaterSync
-            player.updateInventory()
+        if (updateContent) {
+            runLaterSync(2) {
+                if (openedInventories.containsKey(player)) return@runLaterSync
+                player.updateInventory()
+            }
         }
-        AsyncPacketInventoryCloseEvent(player, removed ?: return).call()
+
+        AsyncPacketInventoryCloseEvent(player, removed).call()
     }
 
     fun handleClickInventory(player: Player, packet: PacketContainerClickEvent, clickType: ClickType) {
@@ -150,8 +183,22 @@ object InventoryManager : WavesModule {
         // Offhand item
         val offHandItem = inventory.content[inventory.type.size + 36] ?: viewer.player.inventory.itemInOffHand
 
-        Waves.NMS_HANDLER.setWindowItems(126, 0, items, viewer.carriedItem, viewer.player)
-        Waves.NMS_HANDLER.setSlotItem(0, 0, 45, offHandItem, viewer.player)
+        val contentPacket = Waves.NMS_HANDLER.createSetWindowItemsPacket(126, 0, items, viewer.carriedItem)
+        val slotPacket = Waves.NMS_HANDLER.createSetSlotItemPacket(0, 0, 45, offHandItem)
+        viewer.player.sendPacket(contentPacket, true)
+        viewer.player.sendPacket(slotPacket, true)
+    }
+
+    internal fun updateInventorySlot(inventory: PacketInventory, viewer: InventoryViewer, slot: Int) {
+        val contentItem = inventory.content[slot]
+        val packet = if (contentItem == null) {
+            val playerItemIndex = playerSlotFromMenuSlot(slot, inventory)
+            val playerItem = viewer.player.inventory.getItem(playerItemIndex)
+            Waves.NMS_HANDLER.createSetSlotItemPacket(126, 0, slot, playerItem)
+        } else {
+            Waves.NMS_HANDLER.createSetSlotItemPacket(126, 0, slot, contentItem)
+        }
+        Waves.NMS_HANDLER.sendPacket(packet, true, viewer.player)
     }
 
     fun handleClickMenu(click: WindowClick) {
@@ -173,14 +220,15 @@ object InventoryManager : WavesModule {
         } else {
             inventory.addItem(slot, item)
         }
-
-        Waves.NMS_HANDLER.setSlotItem(
+        val packet = Waves.NMS_HANDLER.createSetSlotItemPacket(
             126,
             0,
             slot,
-            item,
-            *inventory.viewerPlayers
+            item
         )
+        for (player in inventory.viewerPlayers) {
+            player.sendPacket(packet, true)
+        }
     }
 
     fun updateItems(inventory: PacketInventory, iS: Map<Int, ItemStack?>) {

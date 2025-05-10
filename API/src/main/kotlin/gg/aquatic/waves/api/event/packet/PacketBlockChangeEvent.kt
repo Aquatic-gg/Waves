@@ -1,6 +1,6 @@
 package gg.aquatic.waves.api.event.packet
 
-import gg.aquatic.waves.api.event.CancellableAquaticEvent
+import gg.aquatic.waves.api.event.PacketEvent
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 
@@ -10,5 +10,5 @@ class PacketBlockChangeEvent(
     val y: Int,
     val z: Int,
     var blockData: BlockData
-): CancellableAquaticEvent(true) {
+): PacketEvent() {
 }

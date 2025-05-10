@@ -26,7 +26,9 @@ interface NMSHandler {
     fun chunkViewers(chunk: Chunk): Collection<Player>
     fun trackedChunks(player: Player): Collection<Chunk>
 
+    fun createSetSlotItemPacket(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?): Any
     fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player)
+    fun createSetWindowItemsPacket(inventoryId: Int, stateId: Int, items: Collection<ItemStack?>, carriedItem: ItemStack?): Any
     fun setWindowItems(
         inventoryId: Int,
         stateId: Int,
@@ -60,6 +62,7 @@ interface NMSHandler {
     fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
     fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
     fun sendPacket(packet: Any, silent: Boolean = false, vararg players: Player)
+    fun sendPacketBundle(budnle: PacketBundle, silent: Boolean = false, vararg players: Player)
 
     fun receiveWindowClick(
         inventoryId: Int,

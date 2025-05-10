@@ -1,6 +1,7 @@
 package gg.aquatic.waves.api.event.packet
 
 import gg.aquatic.waves.api.event.CancellableAquaticEvent
+import gg.aquatic.waves.api.event.PacketEvent
 import org.bukkit.entity.Player
 
 class PacketInteractEvent(
@@ -9,7 +10,7 @@ class PacketInteractEvent(
     val isSecondary: Boolean,
     val entityId: Int,
     val interactType: InteractType
-): CancellableAquaticEvent(true) {
+): PacketEvent() {
 
     enum class InteractType {
         INTERACT,
