@@ -1,6 +1,6 @@
 package gg.aquatic.waves.api.nms
 
-import gg.aquatic.waves.api.nms.chunk.WrappedChunkSection
+import gg.aquatic.waves.api.nms.WrappedChunkSection
 import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import net.kyori.adventure.text.Component

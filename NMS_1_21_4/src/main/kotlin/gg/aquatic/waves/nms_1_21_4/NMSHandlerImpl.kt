@@ -10,7 +10,7 @@ import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketBundle
 import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.ProtectedPacket
-import gg.aquatic.waves.api.nms.chunk.WrappedChunkSection
+import gg.aquatic.waves.api.nms.WrappedChunkSection
 import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import io.netty.buffer.ByteBuf
@@ -627,6 +627,7 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun sendPacketBundle(bundle: PacketBundle, silent: Boolean, vararg players: Player) {
         val packet = ClientboundBundlePacket(bundle.packets.map { it as Packet<ClientGamePacketListener> })
         sendPacket(packet, silent, *players)

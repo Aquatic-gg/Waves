@@ -1,4 +1,4 @@
-package gg.aquatic.waves.api.nms.chunk
+package gg.aquatic.waves.api.nms
 
 import org.bukkit.block.data.BlockData
 
