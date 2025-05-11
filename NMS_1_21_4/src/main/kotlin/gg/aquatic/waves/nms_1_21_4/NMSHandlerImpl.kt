@@ -6,11 +6,7 @@ import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import com.mojang.datafixers.util.Pair
 import gg.aquatic.waves.api.ReflectionUtils
-import gg.aquatic.waves.api.nms.NMSHandler
-import gg.aquatic.waves.api.nms.PacketBundle
-import gg.aquatic.waves.api.nms.PacketEntity
-import gg.aquatic.waves.api.nms.ProtectedPacket
-import gg.aquatic.waves.api.nms.WrappedChunkSection
+import gg.aquatic.waves.api.nms.*
 import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import io.netty.buffer.ByteBuf
