@@ -70,7 +70,13 @@ class Waves : WavesPlugin() {
 
     override fun onLoad() {
         WavesPlugin.INSTANCE = this
-        NMS_HANDLER = NMSHandlerImpl
+        when(server.bukkitVersion) {
+            "1.21.4-R0.1-SNAPSHOT" -> {
+                NMS_HANDLER = NMSHandlerImpl
+            } else -> {
+                NMS_HANDLER = gg.aquatic.waves.nms_1_21_5.NMSHandlerImpl
+            }
+        }
 
         foliaLib = FoliaLib(this)
 
