@@ -84,6 +84,11 @@ object InventoryManager : WavesModule {
                 event.isCancelled = true
                 return@event
             }
+            val changedSlots = event.changedSlots.mapValues {
+                inventory.content[it.key] ?: player.inventory.getItem(playerSlotFromMenuSlot(it.key, inventory))
+                ?: ItemStack.empty()
+            }
+
             val menuClickData = isMenuClick(event, Pair(clickData.first, clickData.second), player)
             if (menuClickData) {
                 handleClickMenu(WindowClick(player, clickData.second, event.slotNum))
@@ -92,15 +97,16 @@ object InventoryManager : WavesModule {
                     inventory,
                     event.slotNum,
                     clickData.first,
-                    event.carriedItem,
-                    event.changedSlots.mapValues { it.value ?: ItemStack.empty() }
+                    ItemStack.empty(),
+                    changedSlots
                 )
                 event.call()
             } else { // isInventoryClick
                 handleClickInventory(
                     player,
                     event,
-                    clickData.second
+                    clickData.second,
+                    changedSlots
                 )
             }
         }
@@ -156,15 +162,15 @@ object InventoryManager : WavesModule {
         AsyncPacketInventoryCloseEvent(player, removed).call()
     }
 
-    fun handleClickInventory(player: Player, packet: PacketContainerClickEvent, clickType: ClickType) {
+    fun handleClickInventory(player: Player, packet: PacketContainerClickEvent, clickType: ClickType, changedSlots: Map<Int, ItemStack>) {
         val menu = openedInventories[player] ?: error("Menu under player key not found.")
-        updateCarriedItem(player, packet.carriedItem, clickType)
+        updateCarriedItem(player, null, clickType)
 
         if (clickType == ClickType.DRAG_END) {
             handleDragEnd(player, menu)
         }
 
-        createAdjustedClickPacket(packet, menu, player)
+        createAdjustedClickPacket(packet, menu, player, changedSlots)
     }
 
     internal fun updateInventoryContent(inventory: PacketInventory, viewer: InventoryViewer) {
@@ -261,7 +267,7 @@ object InventoryManager : WavesModule {
     private fun createDragPacket(
         originalPacket: PacketContainerClickEvent,
         slotOffset: Int,
-        player: Player
+        player: Player,
     ) {
         Waves.NMS_HANDLER.receiveWindowClick(
             0,
@@ -284,10 +290,11 @@ object InventoryManager : WavesModule {
     private fun createAdjustedClickPacket(
         packet: PacketContainerClickEvent,
         inventory: PacketInventory,
-        player: Player
+        player: Player,
+        changedSlots: Map<Int, ItemStack>
     ) {
         val slotOffset = if (packet.slotNum != -999) packet.slotNum - inventory.type.size + 9 else -999
-        val adjustedSlots = packet.changedSlots.mapKeys { (slot, _) ->
+        val adjustedSlots = changedSlots.mapKeys { (slot, _) ->
             slot - inventory.type.size + 9
         }
 
@@ -321,7 +328,7 @@ object InventoryManager : WavesModule {
     private fun updateCarriedItem(
         player: Player,
         carriedItemStack: ItemStack?,
-        clickType: ClickType
+        clickType: ClickType,
     ) {
         val inv = openedInventories[player] ?: return
         val viewer = inv.viewers[player.uniqueId] ?: return
@@ -419,7 +426,7 @@ object InventoryManager : WavesModule {
     fun isMenuClick(
         wrapper: PacketContainerClickEvent,
         clickType: Pair<ButtonType, ClickType>,
-        player: Player
+        player: Player,
     ): Boolean {
         val menu = openedInventories[player] ?: error("Menu under player key not found.")
         val slotRange = 0..menu.type.lastIndex
@@ -429,7 +436,8 @@ object InventoryManager : WavesModule {
             in listOf(
                 ClickType.PICKUP,
                 ClickType.PLACE
-            ) -> wrapper.slotNum in slotRange || wrapper.slotNum in menu.content.keys
+            ),
+                -> wrapper.slotNum in slotRange || wrapper.slotNum in menu.content.keys
 
             ClickType.DRAG_END, ClickType.PICKUP_ALL ->
                 (wrapper.slotNum in slotRange || wrapper.slotNum in menu.content.keys) || wrapper.changedSlots.keys.any { it in slotRange }

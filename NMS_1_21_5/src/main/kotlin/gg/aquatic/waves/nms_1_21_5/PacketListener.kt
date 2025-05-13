@@ -8,6 +8,8 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import net.minecraft.core.NonNullList
+import net.minecraft.network.HashedPatchMap
+import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import org.bukkit.craftbukkit.block.data.CraftBlockData
@@ -176,12 +178,13 @@ class PacketListener(
                     player,
                     msg.containerId,
                     msg.stateId,
-                    msg.slotNum,
-                    msg.buttonNum,
+                    msg.slotNum.toInt(),
+                    msg.buttonNum.toInt(),
                     msg.clickType.ordinal,
-                    CraftItemStack.asCraftMirror(msg.carriedItem),
-                    msg.changedSlots.mapValues { (if (it.value.isEmpty) null else CraftItemStack.asCraftMirror(it.value)) as ItemStack? }
+                    null,
+                    msg.changedSlots.mapValues { null as ItemStack? },
                 )
+
                 event.call()
                 if (event.isCancelled) {
                     return
