@@ -120,6 +120,9 @@ object WavesRegistry {
             createProperty<Entity>("no-gravity") { section, updater, entity ->
                 entity.setGravity(!section.updatedBoolean("no-gravity", updater))
             },
+            createProperty<Entity>("gravity") { section, updater, entity ->
+                entity.setGravity(section.updatedBoolean("gravity", updater))
+            },
             createProperty<Entity>("pose") { section, updater, entity ->
                 val poseId = updater(section.getString("pose")!!)
                 val pose = Pose.valueOf(poseId.uppercase())
