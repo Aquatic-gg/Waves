@@ -1,6 +1,7 @@
 package gg.aquatic.waves.api.nms
 
 import gg.aquatic.waves.api.nms.WrappedChunkSection
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import net.kyori.adventure.text.Component
@@ -42,6 +43,7 @@ interface NMSHandler {
     fun recreateEntityPacket(packetEntity: PacketEntity, location: Location): Any
     fun updateEntity(packetEntity: PacketEntity, consumer: (Entity) -> Unit, vararg players: Player)
     fun createEntityUpdatePacket(packetEntity: PacketEntity, consumer: (Entity) -> Unit): Any
+    fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any
     fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player)
     fun createPassengersPacket(packetEntity: PacketEntity, passengerIds: IntArray): Any
     fun setEquipment(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>, vararg players: Player)

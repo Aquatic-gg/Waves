@@ -8,6 +8,8 @@ import com.mojang.authlib.properties.PropertyMap
 import com.mojang.datafixers.util.Pair
 import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.nms.*
+import gg.aquatic.waves.api.nms.entity.DataSerializerTypes
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import io.netty.buffer.ByteBuf
@@ -20,6 +22,7 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.NonNullList
 import net.minecraft.core.Registry
 import net.minecraft.core.RegistryAccess
+import net.minecraft.core.Rotations
 import net.minecraft.core.component.TypedDataComponent
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.Connection
@@ -28,6 +31,8 @@ import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
+import net.minecraft.network.syncher.EntityDataSerializers
+import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.resources.RegistryOps
 import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
@@ -61,10 +66,13 @@ import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.craftbukkit.inventory.CraftMenuType
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.entity.Pose
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
+import org.joml.Quaternionf
+import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
@@ -249,6 +257,175 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
+    private fun mapEntityDataValue(original: EntityDataValue): SynchedEntityData.DataValue<*>? {
+        when(original.serializerType) {
+            DataSerializerTypes.BYTE -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.BYTE,
+                    original.value as Byte
+                )
+            }
+            DataSerializerTypes.INT -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.INT,
+                    original.value as Int
+                )
+            }
+            DataSerializerTypes.FLOAT -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.FLOAT,
+                    original.value as Float
+                )
+            }
+            DataSerializerTypes.STRING -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.STRING,
+                    original.value as String
+                )
+            }
+
+            DataSerializerTypes.BOOLEAN -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.BOOLEAN,
+                    original.value as Boolean
+                )
+            }
+            DataSerializerTypes.OPTIONAL_COMPONENT -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.OPTIONAL_COMPONENT,
+                    (original.value as Optional<Component>).getOrNull().let {
+                        val nmsComponent = it?.toNMSComponent()
+                        Optional.ofNullable(nmsComponent)
+                    }
+                )
+            }
+            DataSerializerTypes.ITEM_STACK -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.ITEM_STACK,
+                    (original.value as CraftItemStack).handle
+                )
+            }
+            DataSerializerTypes.ROTATIONS -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.ROTATIONS,
+                    (original.value as Vector).let {
+                        Rotations(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
+                    }
+                )
+            }
+            DataSerializerTypes.BLOCK_POS -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.BLOCK_POS,
+                    (original.value as gg.aquatic.waves.api.nms.BlockPos).let {
+                        BlockPos(it.x, it.y, it.z)
+                    }
+                )
+            }
+
+            DataSerializerTypes.BLOCK_STATE -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.BLOCK_STATE,
+                    (original.value as CraftBlockData).state
+                )
+            }
+
+            DataSerializerTypes.COMPONENT -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.COMPONENT,
+                    (original.value as Component).toNMSComponent()
+                )
+            }
+            DataSerializerTypes.LONG -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.LONG,
+                    original.value as Long
+                )
+            }
+
+            DataSerializerTypes.POSE -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.POSE,
+                    (original.value as Pose).let {
+                        net.minecraft.world.entity.Pose.entries[it.ordinal]
+                    }
+                )
+            }
+            DataSerializerTypes.VECTOR3 -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.VECTOR3,
+                    (original.value as Vector3f)
+                )
+            }
+            DataSerializerTypes.DIRECTION -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.DIRECTION,
+                    (original.value as Direction).let {
+                        net.minecraft.core.Direction.entries[it.ordinal]
+                    }
+                )
+            }
+            DataSerializerTypes.OPTIONAL_BLOCK_POS -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.OPTIONAL_BLOCK_POS,
+                    (original.value as Optional<gg.aquatic.waves.api.nms.BlockPos>).let {
+                        Optional.ofNullable(it.getOrNull()?.let { pos -> BlockPos(pos.x, pos.y, pos.z) })
+                    }
+                )
+            }
+            DataSerializerTypes.OPTIONAL_BLOCK_STATE -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.OPTIONAL_BLOCK_STATE,
+                    (original.value as Optional<BlockData>).let {
+                        Optional.ofNullable(it.getOrNull()?.let { blockData -> (blockData as CraftBlockData).state })
+                    }
+                )
+            }
+
+            DataSerializerTypes.QUATERNION -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.QUATERNION,
+                    original.value as Quaternionf
+                )
+            }
+            DataSerializerTypes.OPTIONAL_UNSIGNED_INT -> {
+                return SynchedEntityData.DataValue(
+                    original.id,
+                    EntityDataSerializers.OPTIONAL_UNSIGNED_INT,
+                    (original.value as Optional<Int>).getOrNull().let {
+                        if (it == null) {
+                            OptionalInt.empty()
+                        } else OptionalInt.of(it)
+                    }
+                )
+            }
+        }
+        return null
+    }
+
+    override fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any {
+        val data = values.mapNotNull { mapEntityDataValue(it) }
+        val packet = ClientboundSetEntityDataPacket(id,data)
+        return packet
+    }
+
     override fun createEntityUpdatePacket(
         packetEntity: PacketEntity,
         consumer: (org.bukkit.entity.Entity) -> Unit,
@@ -260,7 +437,7 @@ object NMSHandlerImpl : NMSHandler {
         val packet = ClientboundSetEntityDataPacket(
             entity.id,
             entity.entityData.nonDefaultValues
-                ?: emptyList<net.minecraft.network.syncher.SynchedEntityData.DataValue<*>>()
+                ?: emptyList<SynchedEntityData.DataValue<*>>()
         )
         return packet
     }
