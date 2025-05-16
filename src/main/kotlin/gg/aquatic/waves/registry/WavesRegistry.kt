@@ -23,11 +23,13 @@ import gg.aquatic.waves.util.statistic.StatisticType
 import gg.aquatic.waves.util.statistic.impl.BlockBreakStatistic
 import gg.aquatic.waves.util.toMMComponent
 import org.bukkit.Bukkit
+import org.bukkit.attribute.Attribute
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Item
 import org.bukkit.entity.ItemDisplay
+import org.bukkit.entity.LivingEntity
 import org.bukkit.entity.Player
 import org.bukkit.entity.Pose
 import org.bukkit.entity.TextDisplay
@@ -136,6 +138,10 @@ object WavesRegistry {
                     entity.setItemStack(item.getItem())
                 }
             },
+            createProperty<LivingEntity>("scale") { section, updater, entity ->
+                entity.registerAttribute(Attribute.SCALE)
+                entity.getAttribute(Attribute.SCALE)!!.baseValue = section.updatedDouble("scale", updater)
+            },
             createProperty<ItemDisplay>("item-transform") { section, updater, entity ->
                 val transformId = section.getString("item-transform") ?: return@createProperty
                 val tranform = ItemDisplay.ItemDisplayTransform.valueOf(transformId.uppercase())
@@ -236,6 +242,14 @@ object WavesRegistry {
     ): Int {
         return this.getString(id)!!.let {
             updater(it).toInt()
+        }
+    }
+    private fun ConfigurationSection.updatedDouble(
+        id: String,
+        updater: (String) -> String
+    ): Double {
+        return this.getString(id)!!.let {
+            updater(it).toDouble()
         }
     }
     val ITEM = HashMap<String, AquaticItem>()
