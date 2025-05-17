@@ -42,6 +42,7 @@ class Waves : WavesPlugin() {
         WaveModules.INPUT to InputModule
     )
     lateinit var configValues: WavesConfig
+
     /**
      * Indicates whether the `Waves` plugin has been fully initialized.
      * This variable is set to `true` when the plugin completes the initialization process
@@ -63,6 +64,7 @@ class Waves : WavesPlugin() {
         fun getModule(type: WaveModules): WavesModule? {
             return INSTANCE.modules[type]
         }
+
         lateinit var NMS_HANDLER: NMSHandler
     }
 
@@ -70,11 +72,17 @@ class Waves : WavesPlugin() {
 
     override fun onLoad() {
         WavesPlugin.INSTANCE = this
-        when(server.bukkitVersion) {
+        NMS_HANDLER = when (server.bukkitVersion) {
+            "1.21.1-R0.1-SNAPSHOT" -> {
+                gg.aquatic.waves.nms_1_21_1.NMSHandlerImpl
+            }
+
             "1.21.4-R0.1-SNAPSHOT" -> {
-                NMS_HANDLER = NMSHandlerImpl
-            } else -> {
-                NMS_HANDLER = gg.aquatic.waves.nms_1_21_5.NMSHandlerImpl
+                NMSHandlerImpl
+            }
+
+            else -> {
+                gg.aquatic.waves.nms_1_21_5.NMSHandlerImpl
             }
         }
 
@@ -92,11 +100,13 @@ class Waves : WavesPlugin() {
         initialized = true
         WavesInitializeEvent().call()
 
-        AquaticBaseCommand("waves", "Waves base command", mutableListOf(),
+        AquaticBaseCommand(
+            "waves", "Waves base command", mutableListOf(),
             mutableMapOf(
                 "itemconvert" to ItemConvertCommand,
                 "generatepack" to GeneratePackCommand
-            ), listOf()).register("waves")
+            ), listOf()
+        ).register("waves")
 
         event<PlayerJoinEvent> {
             NMS_HANDLER.injectPacketListener(it.player)

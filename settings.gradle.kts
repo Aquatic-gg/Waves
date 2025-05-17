@@ -7,3 +7,4 @@ rootProject.name = "Waves"
 include("NMS_1_21_4")
 include("API")
 include("NMS_1_21_5")
+include("NMS_1_21_1")
