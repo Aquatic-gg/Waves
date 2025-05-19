@@ -36,7 +36,7 @@ class PacketListener(
 
         when (msg) {
             is ClientboundAddEntityPacket -> {
-                val event = PacketEntitySpawnEvent(msg.id, msg.uuid, CraftEntityType.minecraftToBukkit(msg.type),
+                val event = PacketEntitySpawnEvent(player,msg.id, msg.uuid, CraftEntityType.minecraftToBukkit(msg.type),
                     Location(player.world, msg.x, msg.y, msg.z, msg.yRot, msg.yRot))
                 event.call()
                 if (event.isCancelled) {
@@ -47,7 +47,7 @@ class PacketListener(
                 return
             }
             is ClientboundRemoveEntitiesPacket -> {
-                val event = PacketDestroyEntitiesPacket(msg.entityIds.toIntArray())
+                val event = PacketDestroyEntitiesPacket(player,msg.entityIds.toIntArray())
                 event.call()
                 if (event.isCancelled) {
                     return
