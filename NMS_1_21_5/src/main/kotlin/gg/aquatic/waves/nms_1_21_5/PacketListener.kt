@@ -8,11 +8,11 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import net.minecraft.core.NonNullList
-import net.minecraft.network.HashedPatchMap
-import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
+import org.bukkit.Location
 import org.bukkit.craftbukkit.block.data.CraftBlockData
+import org.bukkit.craftbukkit.entity.CraftEntityType
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -35,6 +35,27 @@ class PacketListener(
         }
 
         when (msg) {
+            is ClientboundAddEntityPacket -> {
+                val event = PacketEntitySpawnEvent(msg.id, msg.uuid, CraftEntityType.minecraftToBukkit(msg.type),
+                    Location(player.world, msg.x, msg.y, msg.z, msg.yRot, msg.yRot))
+                event.call()
+                if (event.isCancelled) {
+                    return
+                }
+                super.write(ctx, msg, promise)
+                event.then()
+                return
+            }
+            is ClientboundRemoveEntitiesPacket -> {
+                val event = PacketDestroyEntitiesPacket(msg.entityIds.toIntArray())
+                event.call()
+                if (event.isCancelled) {
+                    return
+                }
+                super.write(ctx, msg, promise)
+                event.then()
+                return
+            }
             is ClientboundLevelChunkWithLightPacket -> {
                 val event = PacketChunkLoadEvent(player, msg.x, msg.z, msg,msg.chunkData.extraPackets.toMutableList())
                 event.call()
