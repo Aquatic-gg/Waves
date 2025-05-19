@@ -435,16 +435,16 @@ object NMSHandlerImpl : NMSHandler {
     }
 
     override fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player) {
-        val packet = createPassengersPacket(packetEntity, passengerIds) as Packet<*>
+        val packet = createPassengersPacket(packetEntity.entityId, passengerIds) as Packet<*>
         packetEntity.passengerPacket = packet
         for (player in players) {
             player.sendPacket(packet)
         }
     }
 
-    override fun createPassengersPacket(packetEntity: PacketEntity, passengerIds: IntArray): Any {
+    override fun createPassengersPacket(holderId: Int, passengerIds: IntArray): Any {
         val bytebuf = FriendlyByteBuf(Unpooled.buffer())
-        bytebuf.writeVarInt(packetEntity.entityId)
+        bytebuf.writeVarInt(holderId)
         bytebuf.writeVarIntArray(passengerIds)
 
         val packet = setPassengersConstructor.newInstance(bytebuf)

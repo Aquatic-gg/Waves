@@ -45,7 +45,7 @@ interface NMSHandler {
     fun createEntityUpdatePacket(packetEntity: PacketEntity, consumer: (Entity) -> Unit): Any
     fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any
     fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player)
-    fun createPassengersPacket(packetEntity: PacketEntity, passengerIds: IntArray): Any
+    fun createPassengersPacket(holderId: Int, passengerIds: IntArray): Any
     fun setEquipment(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>, vararg players: Player)
     fun createEquipmentPacket(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>): Any
     fun createTeleportPacket(entityId: Int, location: Location, previousLocation: Vector): Any
