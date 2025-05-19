@@ -71,7 +71,7 @@ fun PacketEntity.modify(consumer: (Entity) -> Unit) {
     this.updatePacket = packet
 }
 fun PacketEntity.setPassengers(ids: IntArray) {
-    val packet = Waves.NMS_HANDLER.createPassengersPacket(this,ids)
+    val packet = Waves.NMS_HANDLER.createPassengersPacket(this.entityId,ids)
     this.updatePacket = packet
 }
 fun PacketEntity.setPassengers(vararg entities: Entity) {
