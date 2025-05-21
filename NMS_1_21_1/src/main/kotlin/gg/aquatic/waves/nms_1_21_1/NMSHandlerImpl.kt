@@ -84,7 +84,6 @@ object NMSHandlerImpl : NMSHandler {
         val packetListener = PacketListener(craftPlayer)
         val connection = playerConnectionField.get(craftPlayer.handle.connection) as Connection
         val pipeline = connection.channel.pipeline()
-
         for ((_, handler) in pipeline.toMap()) {
             if (handler is Connection) {
                 pipeline.addBefore("packet_handler", "waves_packet_listener", packetListener)

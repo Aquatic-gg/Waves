@@ -4,12 +4,14 @@ import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.packet.*
 import gg.aquatic.waves.api.nms.ProtectedPacket
+import gg.aquatic.waves.api.nms.meg.MEGPacketHandler
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import net.minecraft.core.NonNullList
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
+import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftEntityType
@@ -21,50 +23,55 @@ class PacketListener(
     val player: Player,
 ) : ChannelDuplexHandler() {
 
-    private val blockUpdateBlockStateField =
-        ReflectionUtils.getField("blockState", ClientboundBlockUpdatePacket::class.java)
+    override fun write(ctx: ChannelHandlerContext?, msg: Any, promise: ChannelPromise?) {
+        var isMegPacket = false
+        val packet = if (Bukkit.getPluginManager().getPlugin("ModelEngine") != null) {
+            if (MEGPacketHandler.isMegPacket(msg)) {
+                isMegPacket = true
+                MEGPacketHandler.unpackPacket(msg)
+            } else msg
+        } else msg
 
-    override fun write(ctx: ChannelHandlerContext?, msg: Any?, promise: ChannelPromise?) {
-        if (msg is ProtectedPacket) {
-            super.write(ctx, msg.packet, promise)
+        if (packet is ProtectedPacket) {
+            super.write(ctx, packet.packet, promise)
             return
         }
-        if (msg !is Packet<*>) {
-            super.write(ctx, msg, promise)
+        if (packet !is Packet<*>) {
+            super.write(ctx, packet, promise)
             return
         }
 
-        when (msg) {
+        when (packet) {
             is ClientboundAddEntityPacket -> {
-                val event = PacketEntitySpawnEvent(player,msg.id, msg.uuid, CraftEntityType.minecraftToBukkit(msg.type),
-                    Location(player.world, msg.x, msg.y, msg.z, msg.yRot, msg.yRot))
+                val event = PacketEntitySpawnEvent(player,packet.id, packet.uuid, CraftEntityType.minecraftToBukkit(packet.type),
+                    Location(player.world, packet.x, packet.y, packet.z, packet.yRot, packet.yRot))
                 event.call()
                 if (event.isCancelled) {
                     return
                 }
-                super.write(ctx, msg, promise)
+                super.write(ctx, if (isMegPacket) msg else packet, promise)
                 event.then()
                 return
             }
             is ClientboundRemoveEntitiesPacket -> {
-                val event = PacketDestroyEntitiesPacket(player,msg.entityIds.toIntArray())
+                val event = PacketDestroyEntitiesPacket(player,packet.entityIds.toIntArray())
                 event.call()
                 if (event.isCancelled) {
                     return
                 }
-                super.write(ctx, msg, promise)
+                super.write(ctx, if (isMegPacket) msg else packet, promise)
                 event.then()
                 return
             }
             is ClientboundLevelChunkWithLightPacket -> {
-                val event = PacketChunkLoadEvent(player, msg.x, msg.z, msg,msg.chunkData.extraPackets.toMutableList())
+                val event = PacketChunkLoadEvent(player, packet.x, packet.z, packet,packet.chunkData.extraPackets.toMutableList())
                 event.call()
 
                 if (event.isCancelled) {
                     return
                 }
-                msg.chunkData.extraPackets += (event.extraPackets.map { it -> it as Packet<*> }.toMutableList())
-                super.write(ctx, msg, promise)
+                packet.chunkData.extraPackets += (event.extraPackets.map { it -> it as Packet<*> }.toMutableList())
+                super.write(ctx, if (isMegPacket) msg else packet, promise)
                 event.then()
                 return
             }
@@ -73,16 +80,16 @@ class PacketListener(
 
                 val event = PacketBlockChangeEvent(
                     player,
-                    msg.pos.x,
-                    msg.pos.y,
-                    msg.pos.z,
-                    msg.blockState.createCraftBlockData()
+                    packet.pos.x,
+                    packet.pos.y,
+                    packet.pos.z,
+                    packet.blockState.createCraftBlockData()
                 )
                 event.call()
                 if (event.isCancelled) {
                     return
                 }
-                val newPacket = ClientboundBlockUpdatePacket(msg.pos, (event.blockData as CraftBlockData).state)
+                val newPacket = ClientboundBlockUpdatePacket(packet.pos, (event.blockData as CraftBlockData).state)
                 super.write(ctx, newPacket, promise)
                 event.then()
                 return
@@ -91,9 +98,9 @@ class PacketListener(
             is ClientboundContainerSetSlotPacket -> {
                 val event = PacketContainerSetSlotEvent(
                     player,
-                    msg.containerId,
-                    msg.stateId,
-                    CraftItemStack.asCraftMirror(msg.item)
+                    packet.containerId,
+                    packet.stateId,
+                    CraftItemStack.asCraftMirror(packet.item)
                 )
                 event.call()
                 if (event.isCancelled) {
@@ -101,9 +108,9 @@ class PacketListener(
                 }
 
                 val newPacket = ClientboundContainerSetSlotPacket(
-                    msg.containerId,
-                    msg.stateId,
-                    msg.slot,
+                    packet.containerId,
+                    packet.stateId,
+                    packet.slot,
                     CraftItemStack.asNMSCopy(event.item)
                 )
                 super.write(ctx, newPacket, promise)
@@ -114,17 +121,17 @@ class PacketListener(
             is ClientboundContainerSetContentPacket -> {
                 val event = PacketContainerContentEvent(
                     player,
-                    msg.containerId,
-                    msg.items.map { (CraftItemStack.asCraftMirror(it)) }.toMutableList(),
-                    CraftItemStack.asCraftMirror(msg.carriedItem)
+                    packet.containerId,
+                    packet.items.map { (CraftItemStack.asCraftMirror(it)) }.toMutableList(),
+                    CraftItemStack.asCraftMirror(packet.carriedItem)
                 )
                 event.call()
                 if (event.isCancelled) {
                     return
                 }
                 val newPacket = ClientboundContainerSetContentPacket(
-                    msg.containerId,
-                    msg.stateId,
+                    packet.containerId,
+                    packet.stateId,
                     NonNullList.create<net.minecraft.world.item.ItemStack>().apply {
                         addAll(event.contents.map { (CraftItemStack.asNMSCopy(it)) })
                     },
@@ -135,17 +142,17 @@ class PacketListener(
                 return
             }
             is ClientboundOpenScreenPacket -> {
-                val event = PacketContainerOpenEvent(player, msg.containerId)
+                val event = PacketContainerOpenEvent(player, packet.containerId)
                 event.call()
                 if (event.isCancelled) {
                     return
                 }
-                super.write(ctx, msg, promise)
+                super.write(ctx, packet, promise)
                 event.then()
                 return
             }
         }
-        super.write(ctx, msg, promise)
+        super.write(ctx, packet, promise)
     }
 
     private val interactActionField = ReflectionUtils.getField("action", ServerboundInteractPacket::class.java).apply {
@@ -155,30 +162,38 @@ class PacketListener(
         isAccessible = true
     }
 
-    override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
-        if (msg is ProtectedPacket) {
-            super.channelRead(ctx, msg.packet)
+    override fun channelRead(ctx: ChannelHandlerContext?, msg: Any) {
+        var isMegPacket = false
+        val packet = if (Bukkit.getPluginManager().getPlugin("ModelEngine") != null) {
+            if (MEGPacketHandler.isMegPacket(msg)) {
+                isMegPacket = true
+                MEGPacketHandler.unpackPacket(msg)
+            } else msg
+        } else msg
+
+        if (packet is ProtectedPacket) {
+            super.channelRead(ctx, packet.packet)
             return
         }
 
-        when (msg) {
+        when (packet) {
             is ServerboundInteractPacket -> {
-                val action = interactActionField.get(msg)
+                val action = interactActionField.get(packet)
                 val actionType = interactTypeMethod.invoke(action) as Enum<*>
                 val actionTypeId = actionType.ordinal
 
                 val event = PacketInteractEvent(
                     player,
-                    msg.isAttack,
-                    msg.isUsingSecondaryAction,
-                    msg.entityId,
+                    packet.isAttack,
+                    packet.isUsingSecondaryAction,
+                    packet.entityId,
                     PacketInteractEvent.InteractType.entries[actionTypeId]
                 )
                 event.call()
                 if (event.isCancelled) {
                     return
                 }
-                super.channelRead(ctx, msg)
+                super.channelRead(ctx, if (isMegPacket) msg else packet)
                 event.then()
                 return
             }
@@ -189,7 +204,7 @@ class PacketListener(
                 if (event.isCancelled) {
                     return
                 }
-                super.channelRead(ctx, msg)
+                super.channelRead(ctx, packet)
                 event.then()
                 return
             }
@@ -197,25 +212,25 @@ class PacketListener(
             is ServerboundContainerClickPacket -> {
                 val event = PacketContainerClickEvent(
                     player,
-                    msg.containerId,
-                    msg.stateId,
-                    msg.slotNum,
-                    msg.buttonNum,
-                    msg.clickType.ordinal,
-                    CraftItemStack.asCraftMirror(msg.carriedItem),
-                    msg.changedSlots.mapValues { (if (it.value.isEmpty) null else CraftItemStack.asCraftMirror(it.value)) as ItemStack? }
+                    packet.containerId,
+                    packet.stateId,
+                    packet.slotNum,
+                    packet.buttonNum,
+                    packet.clickType.ordinal,
+                    CraftItemStack.asCraftMirror(packet.carriedItem),
+                    packet.changedSlots.mapValues { (if (it.value.isEmpty) null else CraftItemStack.asCraftMirror(it.value)) as ItemStack? }
                 )
                 event.call()
                 if (event.isCancelled) {
                     return
                 }
-                super.channelRead(ctx, msg)
+                super.channelRead(ctx, packet)
                 event.then()
                 return
             }
         }
 
-        super.channelRead(ctx, msg)
+        super.channelRead(ctx, packet)
 
     }
 }

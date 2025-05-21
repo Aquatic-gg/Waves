@@ -7,6 +7,7 @@ plugins {
     id("com.gradleup.shadow") version "9.0.0-beta11"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
     id("xyz.jpenilla.gremlin-gradle") version "0.0.7"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17" apply false
 }
 
 group = "gg.aquatic.waves"
@@ -103,7 +104,6 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp-jvm:2.3.12")
     implementation("io.ktor:ktor-client-auth:$ktor_version")
 
-    //compileOnly("com.zaxxer:HikariCP:5.1.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
@@ -138,7 +138,6 @@ dependencies {
     implementation(project(":NMS_1_21_1"))
     implementation(project(":NMS_1_21_4"))
     implementation(project(":NMS_1_21_5"))
-    //implementation("net.wesjd:anvilgui:1.10.4-SNAPSHOT")
 }
 
 sourceSets {
@@ -164,12 +163,8 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     from(sourceSets.main.get().output)
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
-    //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
     exclude("net/radstevee/**")
-    //relocate("kotlin", "gg.aquatic.waves.shadow.kotlin")
 
-    // Exclude the original (unrelocated) kotlinx-coroutines-core package
-    //exclude("kotlin/**")
     exclude("com/zaxxer/**")
     exclude("kotlin/**", "kotlinx/**", "io/ktor/**", "assets/mappings/**")
     exclude("org/intellij/**")
@@ -202,14 +197,8 @@ tasks.register<ShadowJar>("shadowJarPublish") {
     from(sourceSets.main.get().output)
     configurations = listOf(project.configurations.runtimeClasspath.get())
 
-    //relocate("kotlinx.coroutines", "gg.aquatic.waves.shadow.kotlinx.coroutines")
     exclude("net/radstevee/**")
-    //relocate("com.github.retrooper", "gg.aquatic.waves.shadow.com.retrooper")
-    //relocate("io.github.retrooper", "gg.aquatic.waves.shadow.io.retrooper")
-    //relocate("kotlin", "gg.aquatic.waves.shadow.kotlin")
 
-    // Exclude the original (unrelocated) kotlinx-coroutines-core package
-    //exclude("kotlin/**")
     exclude("com/zaxxer/**")
     exclude("kotlin/**", "kotlinx/**", "io/ktor/**", "assets/mappings/**")
     exclude("org/intellij/**")
