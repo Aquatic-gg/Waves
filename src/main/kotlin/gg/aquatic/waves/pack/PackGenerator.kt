@@ -6,6 +6,7 @@ import gg.aquatic.waves.util.getSectionList
 import net.radstevee.packed.core.font.Font
 import net.radstevee.packed.core.font.FontProvider
 import net.radstevee.packed.core.key.Key
+import org.bukkit.Bukkit
 import org.bukkit.configuration.file.FileConfiguration
 import java.awt.image.BufferedImage
 import java.io.File
@@ -167,7 +168,8 @@ object PackGenerator {
                 id,
                 fontSection.getInt("char-spacing", 1),
                 fontSection.getInt("base-height"),
-                namespace
+                namespace,
+                fontAscent
             )
             dialogueFont.glyphs += fontIcons
             Glyphs.fonts[id] = dialogueFont

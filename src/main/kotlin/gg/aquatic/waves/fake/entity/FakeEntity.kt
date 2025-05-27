@@ -82,7 +82,7 @@ open class FakeEntity(
                 e.itemStack = ItemStack(Material.STONE)
             }
         }
-        consumer(this)
+        updateEntity(consumer)
         this.audience = audience
         FakeObjectHandler.tickableObjects += this
         FakeObjectHandler.idToEntity += entityId to this

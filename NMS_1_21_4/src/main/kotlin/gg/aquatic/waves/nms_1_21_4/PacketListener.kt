@@ -23,10 +23,8 @@ class PacketListener(
     val player: Player,
 ) : ChannelDuplexHandler() {
 
-    private val blockUpdateBlockStateField =
-        ReflectionUtils.getField("blockState", ClientboundBlockUpdatePacket::class.java)
-
-    override fun write(ctx: ChannelHandlerContext?, msg: Any, promise: ChannelPromise?) {
+    override fun write(ctx: ChannelHandlerContext?, msg: Any?, promise: ChannelPromise?) {
+        if (msg == null) return super.write(ctx, msg, promise)
         var isMegPacket = false
         val packet = if (Bukkit.getPluginManager().getPlugin("ModelEngine") != null) {
             if (MEGPacketHandler.isMegPacket(msg)) {
@@ -155,7 +153,7 @@ class PacketListener(
                 return
             }
         }
-        super.write(ctx, packet, promise)
+        super.write(ctx, msg, promise)
     }
 
     private val interactActionField = ReflectionUtils.getField("action", ServerboundInteractPacket::class.java).apply {
@@ -226,6 +224,5 @@ class PacketListener(
         }
 
         super.channelRead(ctx, msg)
-
     }
 }
