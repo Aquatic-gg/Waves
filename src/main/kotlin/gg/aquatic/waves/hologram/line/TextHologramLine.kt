@@ -56,13 +56,12 @@ class TextHologramLine(
     }
 
     override fun update(spawnedHologramLine: SpawnedHologramLine) {
-        val text = spawnedHologramLine.textUpdater(spawnedHologramLine.player, this.text)
+        val data = buildData(spawnedHologramLine)
         spawnedHologramLine.packetEntity.modify {
             if (it !is TextDisplay) return@modify
-            it.text(text.toMMComponent())
-            it.lineWidth = lineWidth
-            it.billboard = billboard
-            it.transformation = Transformation(Vector3f(), Quaternionf(), Vector3f(scale, scale, scale), Quaternionf())
+            for (entityData in data) {
+                entityData.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
+            }
         }
         spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
@@ -108,7 +107,6 @@ class TextHologramLine(
                         Quaternionf(), Vector3f(scale, scale, scale), Quaternionf()
                     )
                 }
-
             }
         )
     }

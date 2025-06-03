@@ -62,6 +62,7 @@ gremlin {
         implementation("com.zaxxer:HikariCP:5.1.0")
         implementation("net.radstevee.packed:packed-core:1.1.1")
         implementation("net.radstevee.packed:packed-negative-spaces:1.1.1")
+        implementation("org.reflections:reflections:0.10.2")
     }
 }
 
@@ -103,6 +104,7 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp:$ktor_version")
     implementation("io.ktor:ktor-client-okhttp-jvm:2.3.12")
     implementation("io.ktor:ktor-client-auth:$ktor_version")
+    implementation("org.reflections:reflections:0.10.2")
 
     compileOnly("me.clip:placeholderapi:2.11.6")
 

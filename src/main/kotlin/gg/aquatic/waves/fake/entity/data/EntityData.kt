@@ -1,20 +1,14 @@
 package gg.aquatic.waves.fake.entity.data
 
-import org.bukkit.entity.Entity
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
+import gg.aquatic.waves.util.argument.AquaticObjectArgument
+import gg.aquatic.waves.util.argument.ObjectArguments
 
 interface EntityData {
 
     val id: String
-    fun apply(entity: Entity, updater: (String) -> String)
 
-    companion object {
-        fun create(id: String, apply: (Entity, (String) -> String) -> Unit): EntityData {
-            return object : EntityData {
-                override val id: String = id
-                override fun apply(entity: Entity, updater: (String) -> String) {
-                    apply(entity, updater)
-                }
-            }
-        }
-    }
+    fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue>
+    val arguments: List<AquaticObjectArgument<*>>
+
 }

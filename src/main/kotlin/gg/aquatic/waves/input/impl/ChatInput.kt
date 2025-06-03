@@ -19,6 +19,7 @@ object ChatInput : Input {
     private fun initialize() {
         listener = event<AsyncChatEvent> {
             val handle = awaiting.remove(it.player) ?: return@event
+            it.isCancelled = true
             (handle.handle as Handle).handle(it, handle)
         }
     }

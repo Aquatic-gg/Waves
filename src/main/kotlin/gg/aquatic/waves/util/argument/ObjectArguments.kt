@@ -1,11 +1,20 @@
 package gg.aquatic.waves.util.argument
 
-import gg.aquatic.waves.item.AquaticItem
 import org.bukkit.util.Vector
+import org.joml.Vector3f
 
 class ObjectArguments(
     private val arguments: Map<String, Any?>
 ) {
+
+    inline fun <reified T> enum(id: String, noinline updater: (String) -> String): T? where T: Enum<T> {
+        val str = string(id, updater) ?: return null
+        return try {
+            enumValueOf<T>(str.uppercase())
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     fun string(id: String, updater: (String) -> String = { it }): String? {
         return updater(arguments[id]?.toString() ?: return null)
@@ -46,6 +55,15 @@ class ObjectArguments(
             updatedStrs.getOrNull(0)?.toDoubleOrNull() ?: 0.0,
             updatedStrs.getOrNull(1)?.toDoubleOrNull() ?: 0.0,
             updatedStrs.getOrNull(2)?.toDoubleOrNull() ?: 0.0
+        )
+    }
+    fun vector3f(id: String, updater: (String) -> String = { it }): Vector3f? {
+        val updatedStrs = updater(arguments[id]?.toString() ?: return null).split(";")
+
+        return Vector3f(
+            updatedStrs.getOrNull(0)?.toFloatOrNull() ?: 0.0f,
+            updatedStrs.getOrNull(1)?.toFloatOrNull() ?: 0.0f,
+            updatedStrs.getOrNull(2)?.toFloatOrNull() ?: 0.0f
         )
     }
 

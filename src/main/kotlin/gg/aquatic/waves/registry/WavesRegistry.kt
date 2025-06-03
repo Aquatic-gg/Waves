@@ -2,7 +2,9 @@ package gg.aquatic.waves.registry
 
 import gg.aquatic.waves.util.price.AbstractPrice
 import gg.aquatic.waves.economy.RegisteredCurrency
+import gg.aquatic.waves.fake.entity.data.EntityClassLookup
 import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.DisplayEntityData
 import gg.aquatic.waves.hologram.line.AnimatedHologramLine
 import gg.aquatic.waves.hologram.line.ItemHologramLine
 import gg.aquatic.waves.hologram.line.TextHologramLine
@@ -95,137 +97,13 @@ object WavesRegistry {
         "animated" to AnimatedHologramLine.Companion,
     )
 
-    val ENTITY_PROPERTY_FACTORIES =
-        hashMapOf(
-            createProperty<Entity>("is-on-fire") { section, updater, entity ->
-                entity.isVisualFire = section.updatedBoolean("is-on-fire", updater)
-            },
-            createProperty<Entity>("is-sneaking") { section, updater, entity ->
-                entity.isSneaking = section.updatedBoolean("is-sneaking", updater)
-            },
-            createProperty<Entity>("invisible") { section, updater, entity ->
-                entity.isInvisible = section.updatedBoolean("invisible", updater)
-            },
-            createProperty<Entity>("glowing") { section, updater, entity ->
-                entity.isGlowing = section.updatedBoolean("glowing", updater)
-            },
-            createProperty<Entity>("custom-name") { section, updater, entity ->
-                entity.customName(section.getString("custom-name")?.let { updater(it).toMMComponent() })
-            },
-            createProperty<Entity>("custom-name-visible") { section, updater, entity ->
-                entity.isCustomNameVisible =
-                    section.updatedBoolean("custom-name-visible", updater)
-            },
-            createProperty<Entity>("is-silent") { section, updater, entity ->
-                entity.isSilent = section.updatedBoolean("is-silent", updater)
-            },
-            createProperty<Entity>("no-gravity") { section, updater, entity ->
-                entity.setGravity(!section.updatedBoolean("no-gravity", updater))
-            },
-            createProperty<Entity>("gravity") { section, updater, entity ->
-                entity.setGravity(section.updatedBoolean("gravity", updater))
-            },
-            createProperty<Entity>("pose") { section, updater, entity ->
-                val poseId = updater(section.getString("pose")!!)
-                val pose = Pose.valueOf(poseId.uppercase())
-                entity.pose = pose
-            },
-            createProperty<Entity>("item") { section, updater, entity ->
-                val item = AquaticItem.loadFromYml(section.getConfigurationSection("item")) ?: return@createProperty
-                if (entity is Item) {
-                    entity.itemStack = item.getItem()
-                } else if (entity is ItemDisplay) {
-                    entity.setItemStack(item.getItem())
-                }
-            },
-            createProperty<LivingEntity>("scale") { section, updater, entity ->
-                entity.registerAttribute(Attribute.SCALE)
-                entity.getAttribute(Attribute.SCALE)!!.baseValue = section.updatedDouble("scale", updater)
-            },
-            createProperty<ItemDisplay>("item-transform") { section, updater, entity ->
-                val transformId = section.getString("item-transform") ?: return@createProperty
-                val tranform = ItemDisplay.ItemDisplayTransform.valueOf(transformId.uppercase())
-                entity.itemDisplayTransform = tranform
-            },
-            createProperty<Display>("billboard") { section, updater, entity ->
-                val billboardId = section.getString("billboard") ?: return@createProperty
-                val billboard = Display.Billboard.valueOf(billboardId.uppercase())
-                entity.billboard = billboard
-            },
-            createProperty<Display>("interpolation-delay") { section, updater, entity ->
-                entity.interpolationDelay = section.updatedInt("interpolation-delay", updater)
-            },
-            createProperty<Display>("interpolation-duration") { section, updater, entity ->
-                entity.interpolationDuration = section.updatedInt("interpolation-duration", updater)
-            },
-            createProperty<Display>("teleport-duration") { section, updater, entity ->
-                entity.teleportDuration = section.updatedInt("teleport-duration", updater)
-            },
-            createProperty<Display>("transformation") { section, updater, entity ->
-                val s = section.getConfigurationSection("transformation") ?: return@createProperty
+    val ENTITY_DATA = HashMap<String, EntityData>()
 
-                val scaleStr = s.getString("scale")
-                val scale = if (scaleStr != null) {
-                    val split = scaleStr.split(";")
-                    Vector3f(split[0].toFloat(), split[1].toFloat(), split[2].toFloat())
-                } else Vector3f(1f, 1f, 1f)
-
-                val translationStr = s.getString("translation")
-                val translation = if (translationStr != null) {
-                    val split = translationStr.split(";")
-                    Vector3f(split[0].toFloat(), split[1].toFloat(), split[2].toFloat())
-                } else Vector3f(0f, 0f, 0f)
-
-                val rotationStr = s.getString("rotation")
-                val rotation = if (rotationStr != null) {
-                    val split = rotationStr.split(";")
-                    if (split.size > 3) {
-                        Quaternionf(split[0].toFloat(), split[1].toFloat(), split[2].toFloat(), split[3].toFloat())
-                    } else Quaternionf().rotationXYZ(
-                        split[0].toFloat().toRadians(),
-                        split[1].toFloat().toRadians(),
-                        split[2].toFloat().toRadians()
-                    )
-                } else Quaternionf()
-
-                entity.transformation = Transformation(translation, rotation, scale, Quaternionf())
-            },
-            createProperty<TextDisplay>("text") { section, updater, entity ->
-                entity.text(updater(section.getString("text")!!).toMMComponent())
-            },
-            createProperty<TextDisplay>("is-see-through") { section, updater, entity ->
-                entity.isSeeThrough = section.updatedBoolean("is-see-through", updater)
-            },
-            createProperty<TextDisplay>("background-color") { section, updater, entity ->
-                val colorStr = section.getString("background-color") ?: "0;0;0"
-                val color = colorStr.split(";").mapNotNull { it.toIntOrNull() }
-                val colorInst = org.bukkit.Color.fromARGB(color.getOrElse(3) { 255 }, color[0], color[1], color[2])
-                entity.isDefaultBackground = false
-                entity.backgroundColor = colorInst
-            },
-            createProperty<TextDisplay>("text-opacity") { section, updater, entity ->
-                entity.textOpacity = section.updatedInt("text-opacity", updater).toByte()
-            },
-            createProperty<TextDisplay>("has-shadow") { section, updater, entity ->
-                entity.isShadowed = section.updatedBoolean("has-shadow", updater)
-            },
-            createProperty<TextDisplay>("line-width") { section, updater, entity ->
-                entity.lineWidth = section.updatedInt("line-width", updater)
-            }
-        )
+    init {
+        registerEntityData("gg.aquatic.waves.fake.entity.data.impl")
+    }
 
     private fun Float.toRadians() = Math.toRadians(this.toDouble()).toFloat()
-    private inline fun <reified T : Entity> createProperty(
-        id: String,
-        crossinline factory: (ConfigurationSection, (String) -> String, T) -> Unit
-    ): Pair<String, (ConfigurationSection, (String) -> String) -> EntityData> {
-        return id to { section: ConfigurationSection, updater: (String) -> String ->
-            EntityData.create(id) { entity, updater ->
-                if (entity !is T) return@create
-                factory(section, updater, entity)
-            }
-        }
-    }
 
     private fun ConfigurationSection.updatedBoolean(
         id: String,

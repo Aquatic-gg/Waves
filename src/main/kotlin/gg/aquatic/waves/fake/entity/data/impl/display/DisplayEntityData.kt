@@ -1,0 +1,449 @@
+package gg.aquatic.waves.fake.entity.data.impl.display
+
+import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.nms.entity.DataSerializerTypes
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
+import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.util.argument.AquaticObjectArgument
+import gg.aquatic.waves.util.argument.ObjectArguments
+import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
+import gg.aquatic.waves.util.version.ServerVersion
+import org.bukkit.entity.Display
+import org.joml.Vector3f
+
+open class DisplayEntityData internal constructor() {
+
+    object InterpolationDelay : EntityData {
+        override val id: String = "interpolation-delay"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.int(id, updater) ?: 0)
+        }
+
+        fun generate(interpolationDelay: Int): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            8,
+                            DataSerializerTypes.INT,
+                            interpolationDelay
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "0", false),
+        )
+    }
+
+    object TransformationInterpolationDuration : EntityData {
+        override val id: String = "interpolation-duration"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.int(id, updater) ?: 0)
+        }
+
+        fun generate(interpolationDuration: Int): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            9,
+                            DataSerializerTypes.INT,
+                            interpolationDuration
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "0", false),
+        )
+    }
+
+    object TeleportationDuration : EntityData {
+        override val id: String = "teleportation-duration"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.int(id, updater) ?: 0)
+        }
+
+        fun generate(teleportationDuration: Int): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            10,
+                            DataSerializerTypes.INT,
+                            teleportationDuration
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "0", false),
+        )
+    }
+
+    object Translation : EntityData {
+        override val id: String = "translation"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.vector3f(id, updater) ?: Vector3f())
+        }
+
+        fun generate(translation: Vector3f): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            11,
+                            DataSerializerTypes.VECTOR3,
+                            translation
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "0;0;0", false),
+        )
+    }
+
+    object Scale : EntityData {
+        override val id: String = "scale"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.vector3f(id, updater) ?: Vector3f(1f, 1f, 1f))
+        }
+
+        fun generate(scale: Vector3f): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            12,
+                            DataSerializerTypes.VECTOR3,
+                            scale
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "1;1;1", false),
+        )
+    }
+
+    object Rotation : EntityData {
+        override val id: String = "rotation"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.vector3f(id, updater) ?: Vector3f(0f, 0f, 0f))
+        }
+
+        fun generate(rotation: Vector3f): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            13,
+                            DataSerializerTypes.VECTOR3,
+                            rotation
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "0;0;0", false),
+        )
+    }
+
+    object RightRotation : EntityData {
+        override val id: String = "right-rotation"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.vector3f(id, updater) ?: Vector3f(0f, 0f, 0f))
+        }
+
+        fun generate(rotation: Vector3f): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            14,
+                            DataSerializerTypes.VECTOR3,
+                            rotation
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "0;0;0", false),
+        )
+    }
+
+    object Billboard : EntityData {
+        override val id: String = "billboard"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(
+                (arguments.enum<Display.Billboard>(id, updater)
+                    ?: Display.Billboard.FIXED)
+            )
+        }
+
+        fun generate(billboard: Display.Billboard): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            15,
+                            DataSerializerTypes.BYTE,
+                            billboard.ordinal.toByte()
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, "FIXED", false),
+        )
+    }
+
+    object Brightness : EntityData {
+        override val id: String = "brightness"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            val blockLight = arguments.int("$id.block-light", updater) ?: 0
+            val skyLight = arguments.int("$id.sky-light", updater) ?: 0
+            return generate(blockLight, skyLight)
+        }
+
+        fun generate(blockLight: Int, skyLight: Int): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+
+                    val packedLight = (blockLight shl 4) or (skyLight shl 20)
+                    return listOf(
+                        EntityDataValue.create(
+                            16,
+                            DataSerializerTypes.BYTE,
+                            packedLight.toByte()
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        fun getLight(byte: Byte): Pair<Int, Int> {
+            val blockLight = byte.toInt() shr 4 and 0xF
+            val skyLight = byte.toInt() shr 20 and 0xF
+            return Pair(blockLight, skyLight)
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument("$id.block-light", "0", false),
+            PrimitiveObjectArgument("$id.sky-light", "0", false),
+        )
+    }
+
+    object ViewRange : EntityData {
+        override val id: String = "view-range"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.float(id, updater) ?: 100f)
+        }
+
+        fun generate(viewRange: Float): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            17,
+                            DataSerializerTypes.FLOAT,
+                            viewRange
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, 100f, false),
+        )
+    }
+
+    object ShadowRadius : EntityData {
+        override val id: String = "shadow-radius"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.float(id, updater) ?: 0f)
+        }
+
+        fun generate(shadowRadius: Float): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            18,
+                            DataSerializerTypes.FLOAT,
+                            shadowRadius
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, 0f, false),
+        )
+    }
+
+    object ShadowStrength : EntityData {
+        override val id: String = "shadow-strength"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.float(id, updater) ?: 1f)
+        }
+
+        fun generate(shadowStrength: Float): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            19,
+                            DataSerializerTypes.FLOAT,
+                            shadowStrength
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, 1f, false),
+        )
+    }
+
+    object Width : EntityData {
+        override val id: String = "width"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.float(id, updater) ?: 0f)
+        }
+
+        fun generate(width: Float): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            20,
+                            DataSerializerTypes.FLOAT,
+                            width
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, 0f, false),
+        )
+    }
+
+    object Height : EntityData {
+        override val id: String = "height"
+
+        override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
+            return generate(arguments.float(id, updater) ?: 0f)
+        }
+
+        fun generate(height: Float): Collection<EntityDataValue> {
+            when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
+                ServerVersion.V_1_21_1 -> {}
+                ServerVersion.V_1_21_4 -> {
+                    return listOf(
+                        EntityDataValue.create(
+                            21,
+                            DataSerializerTypes.FLOAT,
+                            height
+                        )
+                    )
+                }
+
+                else -> {}
+            }
+            return emptyList()
+        }
+
+        override val arguments: List<AquaticObjectArgument<*>> = listOf(
+            PrimitiveObjectArgument(id, 0f, false),
+        )
+    }
+}
