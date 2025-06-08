@@ -1,13 +1,17 @@
 package gg.aquatic.waves.hologram.line
 
 import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.DisplayEntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.TextDisplayEntityData
 import gg.aquatic.waves.hologram.*
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
 import gg.aquatic.waves.util.modify
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
+import gg.aquatic.waves.util.setData
 import gg.aquatic.waves.util.toMMComponent
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
@@ -57,12 +61,8 @@ class TextHologramLine(
 
     override fun update(spawnedHologramLine: SpawnedHologramLine) {
         val data = buildData(spawnedHologramLine)
-        spawnedHologramLine.packetEntity.modify {
-            if (it !is TextDisplay) return@modify
-            for (entityData in data) {
-                entityData.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
-            }
-        }
+
+        spawnedHologramLine.packetEntity.setData(data)
         spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
@@ -77,38 +77,26 @@ class TextHologramLine(
         spawnedHologramLine.packetEntity = packetEntity
         val entityData = buildData(spawnedHologramLine)
 
-        packetEntity.modify {
-            for (data in entityData) {
-                data.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
-            }
-        }
-
+        packetEntity.setData(entityData)
         packetEntity.sendSpawnComplete(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
-    override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityData> {
-        return listOf(
-            object : EntityData {
-                override val id: String = "hologram-data"
+    override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityDataValue> {
+        val data = ArrayList<EntityDataValue>()
 
-                override fun apply(entity: Entity, updater: (String) -> String) {
-                    val textDisplay = entity as? TextDisplay ?: return
-                    textDisplay.interpolationDelay = 0
-                    textDisplay.interpolationDuration = transformationDuration
-                    textDisplay.teleportDuration = transformationDuration
-                    textDisplay.text(updater(text).toMMComponent())
-                    textDisplay.lineWidth = lineWidth
-                    textDisplay.billboard = billboard
-                    textDisplay.isShadowed = hasShadow
-                    textDisplay.isDefaultBackground = defaultBackground
-                    textDisplay.backgroundColor = backgroundColor ?: org.bukkit.Color.WHITE
-                    textDisplay.isSeeThrough = isSeeThrough
-                    textDisplay.transformation = Transformation(Vector3f(),
-                        Quaternionf(), Vector3f(scale, scale, scale), Quaternionf()
-                    )
-                }
-            }
-        )
+        data += DisplayEntityData.InterpolationDelay.generate(0)
+        data += DisplayEntityData.TransformationInterpolationDuration.generate(transformationDuration)
+        data += DisplayEntityData.TeleportationDuration.generate(transformationDuration)
+        data += TextDisplayEntityData.Text.generate(spawnedHologramLine.textUpdater(spawnedHologramLine.player, text).toMMComponent())
+        data += TextDisplayEntityData.Width.generate(lineWidth)
+        data += DisplayEntityData.Billboard.generate(billboard)
+        data += TextDisplayEntityData.Flags.generate(hasShadow, isSeeThrough, defaultBackground)
+        backgroundColor?.let {
+            TextDisplayEntityData.BackgroundColor.generate(it)
+        }
+        data += DisplayEntityData.Scale.generate(Vector3f(scale, scale, scale))
+
+        return data
     }
 
     class Settings(

@@ -8,6 +8,7 @@ import gg.aquatic.waves.api.nms.meg.MEGPacketHandler
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
+import net.kyori.adventure.text.Component
 import net.minecraft.core.NonNullList
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
@@ -37,16 +38,15 @@ class PacketListener(
             super.write(ctx, packet.packet, promise)
             return
         }
-        if (packet !is Packet<*>) {
-            super.write(ctx, packet, promise)
-            return
-        }
 
         when (packet) {
             is ClientboundAddEntityPacket -> {
+                Bukkit.broadcast(Component.text("Sending add entity packet"))
                 val event = PacketEntitySpawnEvent(player,packet.id, packet.uuid, CraftEntityType.minecraftToBukkit(packet.type),
                     Location(player.world, packet.x, packet.y, packet.z, packet.yRot, packet.yRot))
                 event.call()
+
+                Bukkit.broadcast(Component.text("Sending add entity packet - 2"))
                 if (event.isCancelled) {
                     return
                 }

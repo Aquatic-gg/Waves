@@ -1,13 +1,14 @@
 package gg.aquatic.waves.util.argument
 
+import org.bukkit.Color
 import org.bukkit.util.Vector
 import org.joml.Vector3f
 
 class ObjectArguments(
-    private val arguments: Map<String, Any?>
+    private val arguments: Map<String, Any?>,
 ) {
 
-    inline fun <reified T> enum(id: String, noinline updater: (String) -> String): T? where T: Enum<T> {
+    inline fun <reified T> enum(id: String, noinline updater: (String) -> String): T? where T : Enum<T> {
         val str = string(id, updater) ?: return null
         return try {
             enumValueOf<T>(str.uppercase())
@@ -57,6 +58,7 @@ class ObjectArguments(
             updatedStrs.getOrNull(2)?.toDoubleOrNull() ?: 0.0
         )
     }
+
     fun vector3f(id: String, updater: (String) -> String = { it }): Vector3f? {
         val updatedStrs = updater(arguments[id]?.toString() ?: return null).split(";")
 
@@ -65,6 +67,21 @@ class ObjectArguments(
             updatedStrs.getOrNull(1)?.toFloatOrNull() ?: 0.0f,
             updatedStrs.getOrNull(2)?.toFloatOrNull() ?: 0.0f
         )
+    }
+
+    fun color(id: String, updater: (String) -> String = { it }): Color? {
+        val updatedStrs = updater(arguments[id]?.toString() ?: return null).split(";")
+        if (updatedStrs.size == 3) {
+            return Color.fromRGB(updatedStrs[0].toInt(), updatedStrs[1].toInt(), updatedStrs[2].toInt())
+        } else if (updatedStrs.size == 4) {
+            return Color.fromARGB(
+                updatedStrs[3].toInt(),
+                updatedStrs[0].toInt(),
+                updatedStrs[1].toInt(),
+                updatedStrs[2].toInt(),
+            )
+        }
+        return null
     }
 
     fun any(id: String, updater: (String) -> String = { it }): Any? {

@@ -4,6 +4,7 @@ import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.nms.entity.DataSerializerTypes
 import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.fake.entity.data.impl.living.BaseEntityData
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
@@ -11,7 +12,7 @@ import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.entity.Display
 import org.joml.Vector3f
 
-open class DisplayEntityData internal constructor() {
+open class DisplayEntityData internal constructor(): BaseEntityData() {
 
     object InterpolationDelay : EntityData {
         override val id: String = "interpolation-delay"

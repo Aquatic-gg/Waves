@@ -3,6 +3,7 @@ package gg.aquatic.waves.util
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
@@ -68,6 +69,10 @@ fun Entity.setEntityData(data: List<EntityData>) {
 
 fun PacketEntity.modify(consumer: (Entity) -> Unit) {
     val packet = Waves.NMS_HANDLER.createEntityUpdatePacket(this,consumer)
+    this.updatePacket = packet
+}
+fun PacketEntity.setData(data: Collection<EntityDataValue>) {
+    val packet = Waves.NMS_HANDLER.createEntityUpdatePacket(this.entityId,data)
     this.updatePacket = packet
 }
 fun PacketEntity.setPassengers(ids: IntArray) {

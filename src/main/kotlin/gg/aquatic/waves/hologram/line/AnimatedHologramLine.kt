@@ -1,6 +1,7 @@
 package gg.aquatic.waves.hologram.line
 
 import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.hologram.*
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
@@ -8,6 +9,7 @@ import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
 import gg.aquatic.waves.util.modify
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
+import gg.aquatic.waves.util.setData
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
@@ -66,11 +68,8 @@ class AnimatedHologramLine(
                 return
             }
             val data = buildData(spawnedHologramLine)
-            spawnedHologramLine.packetEntity.modify {
-                for (entityData in data) {
-                    entityData.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
-                }
-            }
+
+            spawnedHologramLine.packetEntity.setData(data)
             spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
             return
         }
@@ -93,7 +92,7 @@ class AnimatedHologramLine(
         frame.createEntity(spawnedHologramLine)
     }
 
-    override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityData> {
+    override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityDataValue> {
         return frames[ticks.getOrPut(spawnedHologramLine.player.uniqueId) { AnimationHandle() }.index].second.buildData(
             spawnedHologramLine
         )

@@ -1,10 +1,9 @@
 package gg.aquatic.waves
 
-import com.tcoded.folialib.FoliaLib
-import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.event
+import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.command.AquaticBaseCommand
 import gg.aquatic.waves.command.impl.GeneratePackCommand
 import gg.aquatic.waves.command.impl.ItemConvertCommand
@@ -68,8 +67,6 @@ class Waves : WavesPlugin() {
         lateinit var NMS_HANDLER: NMSHandler
     }
 
-    lateinit var foliaLib: FoliaLib
-
     override fun onLoad() {
         WavesPlugin.INSTANCE = this
         NMS_HANDLER = when (server.bukkitVersion) {
@@ -85,8 +82,6 @@ class Waves : WavesPlugin() {
                 gg.aquatic.waves.nms_1_21_5.NMSHandlerImpl
             }
         }
-
-        foliaLib = FoliaLib(this)
 
         loadConfig()
     }

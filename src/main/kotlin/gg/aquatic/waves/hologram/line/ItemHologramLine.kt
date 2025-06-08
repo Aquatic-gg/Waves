@@ -1,25 +1,24 @@
 package gg.aquatic.waves.hologram.line
 
 import gg.aquatic.waves.Waves
-import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
+import gg.aquatic.waves.fake.entity.data.impl.display.DisplayEntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.ItemDisplayEntityData
 import gg.aquatic.waves.hologram.*
 import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
 import gg.aquatic.waves.util.item.loadFromYml
-import gg.aquatic.waves.util.modify
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
+import gg.aquatic.waves.util.setData
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
-import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay.ItemDisplayTransform
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import org.bukkit.util.Transformation
-import org.joml.Quaternionf
 import org.joml.Vector3f
 
 class ItemHologramLine(
@@ -74,35 +73,19 @@ class ItemHologramLine(
         spawnedHologramLine.packetEntity = packetEntity
         val entityData = buildData(spawnedHologramLine)
 
-        packetEntity.modify {
-            for (data in entityData) {
-                data.apply(it) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
-            }
-        }
-
+        packetEntity.setData(entityData)
         packetEntity.sendSpawnComplete(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
     }
 
-    override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityData> {
-        return listOf(
-            object : EntityData {
-                override val id: String = "hologram-data"
+    override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityDataValue> {
+        val data = ArrayList<EntityDataValue>()
 
-                override fun apply(entity: Entity, updater: (String) -> String) {
-                    val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
-                    itemDisplay.setItemStack(item)
-                    itemDisplay.billboard = billboard
-                    itemDisplay.itemDisplayTransform = itemDisplayTransform
-                    itemDisplay.transformation = Transformation(
-                        Vector3f(),
-                        Quaternionf(),
-                        Vector3f(scale, scale, scale),
-                        Quaternionf()
-                    )
-                }
+        data += ItemDisplayEntityData.Item.generate(item)
+        data += DisplayEntityData.Billboard.generate(billboard)
+        data += ItemDisplayEntityData.ItemDisplayTransform.generate(itemDisplayTransform)
+        data += DisplayEntityData.Scale.generate(Vector3f(scale, scale, scale))
 
-            }
-        )
+        return data
     }
 
     class Settings(

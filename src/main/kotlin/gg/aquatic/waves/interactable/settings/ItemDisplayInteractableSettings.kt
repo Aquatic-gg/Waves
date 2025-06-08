@@ -1,7 +1,9 @@
 package gg.aquatic.waves.interactable.settings
 
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.fake.entity.FakeEntity
-import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.DisplayEntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.ItemDisplayEntityData
 import gg.aquatic.waves.interactable.Interactable
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.type.EntityInteractable
@@ -11,12 +13,9 @@ import gg.aquatic.waves.util.item.loadFromYml
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
-import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.ItemDisplay.ItemDisplayTransform
-import org.bukkit.util.Transformation
 import org.bukkit.util.Vector
-import org.joml.Quaternionf
 import org.joml.Vector3f
 
 class ItemDisplayInteractableSettings(
@@ -32,21 +31,12 @@ class ItemDisplayInteractableSettings(
         onInteract: (InteractableInteractEvent) -> Unit
     ): Interactable {
         val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer = {
-            entityData += "hologram-data" to object : EntityData {
-                override val id: String
-                    get() = "hologram-data"
-
-                override fun apply(entity: Entity, updater: (String) -> String) {
-                    val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
-                    itemDisplay.billboard = billboard
-                    itemDisplay.itemDisplayTransform = itemTransform
-                    itemDisplay.transformation = Transformation(
-                        Vector3f(),
-                        Quaternionf(), Vector3f(scale.x.toFloat(), scale.y.toFloat(), scale.z.toFloat()), Quaternionf()
-                    )
-                    itemDisplay.setItemStack(item.getItem())
-                }
-            }
+            val data = ArrayList<EntityDataValue>()
+            data += DisplayEntityData.Billboard.generate(billboard)
+            data += ItemDisplayEntityData.ItemDisplayTransform.generate(itemTransform)
+            data += DisplayEntityData.Scale.generate(Vector3f(scale.x.toFloat(), scale.y.toFloat(), scale.z.toFloat()))
+            data += ItemDisplayEntityData.Item.generate(item.getItem())
+            setEntityData(data)
         })
 
         val interactable = EntityInteractable(fakeEntity, onInteract)

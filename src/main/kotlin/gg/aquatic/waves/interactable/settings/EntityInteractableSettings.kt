@@ -1,12 +1,15 @@
 package gg.aquatic.waves.interactable.settings
 
 import gg.aquatic.waves.fake.entity.FakeEntity
+import gg.aquatic.waves.fake.entity.data.ConfiguredEntityData
 import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.interactable.Interactable
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.settings.entityproperty.EntityArmorProperty
 import gg.aquatic.waves.interactable.type.EntityInteractable
 import gg.aquatic.waves.registry.WavesRegistry
+import gg.aquatic.waves.util.argument.ArgumentSerializer
+import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.collection.mapPair
 import org.bukkit.Location
@@ -16,21 +19,21 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.util.Vector
 
 class EntityInteractableSettings(
-    val props: HashSet<EntityData>,
+    val props: HashSet<ConfiguredEntityData>,
     val offset: Vector,
     val yawPitch: Pair<Float, Float>,
-    val equipment: EntityArmorProperty
+    val equipment: EntityArmorProperty,
 ) : InteractableSettings {
     override fun build(
         location: Location,
         audience: AquaticAudience,
-        onInteract: (InteractableInteractEvent) -> Unit
+        onInteract: (InteractableInteractEvent) -> Unit,
     ): Interactable {
         val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset).apply {
             yaw = yawPitch.first
             pitch = yawPitch.second
         }, 50, audience, consumer = {
-            entityData += props.mapPair { it.id to it }
+            setEntityData(props.flatMap { it.generate { str -> str } }.toList())
             this@EntityInteractableSettings.equipment.helmet?.getItem()?.let { equipment += EquipmentSlot.HEAD to it }
             this@EntityInteractableSettings.equipment.chestplate?.getItem()
                 ?.let { equipment += EquipmentSlot.CHEST to it }
@@ -53,8 +56,10 @@ class EntityInteractableSettings(
         override fun load(section: ConfigurationSection): InteractableSettings {
             val props = section.getConfigurationSection("properties")?.getKeys(false)?.mapNotNull { key ->
                 val s = section.getConfigurationSection("properties") ?: return@mapNotNull null
-                val factory = WavesRegistry.ENTITY_PROPERTY_FACTORIES[key] ?: return@mapNotNull null
-                factory.invoke(s) { str -> str}
+                val entityDataType = WavesRegistry.ENTITY_DATA[key] ?: return@mapNotNull null
+                val arguments = ArgumentSerializer.load(s, entityDataType.arguments)
+                val entityData = ConfiguredEntityData(entityDataType,ObjectArguments(arguments))
+                entityData
             } ?: emptyList()
             val offsetStrs = section.getString("offset", "0;0;0")!!.split(";")
             val offset = Vector(

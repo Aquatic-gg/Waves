@@ -2,20 +2,20 @@ package gg.aquatic.waves.fake.entity
 
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.nms.PacketEntity
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.trackedBy
 import gg.aquatic.waves.fake.EntityBased
 import gg.aquatic.waves.fake.FakeObject
 import gg.aquatic.waves.fake.FakeObjectChunkBundle
 import gg.aquatic.waves.fake.FakeObjectHandler
-import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.fake.entity.data.impl.ItemEntityData
 import gg.aquatic.waves.util.*
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.audience.FilterAudience
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.entity.EntityType
-import org.bukkit.entity.Item
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
@@ -71,16 +71,28 @@ open class FakeEntity(
     }
 
     override val entityId: Int get() = packetEntity.entityId
-    val entityData = ConcurrentHashMap<String, EntityData>()
+
+    val entityData = ConcurrentHashMap<Int, EntityDataValue>()
     val equipment = ConcurrentHashMap<EquipmentSlot, ItemStack>()
     val passengers = ConcurrentHashMap.newKeySet<Int>()
 
+    fun setEntityData(dataValue: EntityDataValue) {
+        entityData += dataValue.id to dataValue
+    }
+    fun setEntityData(vararg dataValue: EntityDataValue) {
+        for (data in dataValue) {
+            setEntityData(data)
+        }
+    }
+    fun setEntityData(dataValues: Collection<EntityDataValue>) {
+        for (data in dataValues) {
+            setEntityData(data)
+        }
+    }
+
     init {
         if (type == EntityType.ITEM) {
-            entityData += "item" to EntityData.create("item") { e, updater ->
-                if (e !is Item) return@create
-                e.itemStack = ItemStack(Material.STONE)
-            }
+            setEntityData(ItemEntityData.Item.generate(ItemStack(Material.STONE)))
         }
         updateEntity(consumer)
         this.audience = audience
@@ -124,11 +136,8 @@ open class FakeEntity(
         val hadPassengers = passengers.isNotEmpty()
         func(this)
 
-        packetEntity.modify { e->
-            for (data in entityData.values) {
-                data.apply(e) { str -> str }
-            }
-        }
+        packetEntity.setData(entityData.values)
+
         if (passengers.isNotEmpty()) {
             packetEntity.setPassengers(passengers.toIntArray())
         }

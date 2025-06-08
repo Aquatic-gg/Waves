@@ -1,7 +1,9 @@
 package gg.aquatic.waves.interactable.settings
 
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.fake.entity.FakeEntity
-import gg.aquatic.waves.fake.entity.data.EntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.DisplayEntityData
+import gg.aquatic.waves.fake.entity.data.impl.display.ItemDisplayEntityData
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.type.EntityInteractable
 import gg.aquatic.waves.util.audience.AquaticAudience
@@ -10,12 +12,8 @@ import io.th0rgal.oraxen.api.OraxenItems
 import io.th0rgal.oraxen.mechanics.provided.gameplay.furniture.FurnitureMechanic
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
-import org.bukkit.util.Transformation
 import org.bukkit.util.Vector
-import org.joml.Quaternionf
-import org.joml.Vector3f
 
 class OraxenEntityInteractableSettings(
     val furniture: FurnitureMechanic,
@@ -26,25 +24,15 @@ class OraxenEntityInteractableSettings(
         val item = OraxenItems.getItemById(furniture.itemID).build()
         val displaySettings = furniture.displayEntityProperties
         val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer =  {
-            entityData += "display-data" to object : EntityData {
-                override val id: String
-                    get() = "display-data"
+            val data = ArrayList<EntityDataValue>()
+            data += DisplayEntityData.Billboard.generate(displaySettings.trackingRotation)
+            data += ItemDisplayEntityData.ItemDisplayTransform.generate(displaySettings.displayTransform)
+            data += DisplayEntityData.Scale.generate(displaySettings.scale)
+            data += ItemDisplayEntityData.Item.generate(item)
+            data += DisplayEntityData.Width.generate(displaySettings.displayWidth)
+            data += DisplayEntityData.Height.generate(displaySettings.displayHeight)
 
-                override fun apply(entity: Entity, updater: (String) -> String) {
-                    val itemDisplay = entity as? org.bukkit.entity.ItemDisplay ?: return
-                    itemDisplay.billboard = displaySettings.trackingRotation
-                    itemDisplay.itemDisplayTransform = displaySettings.displayTransform
-                    itemDisplay.transformation = Transformation(
-                        Vector3f(),
-                        Quaternionf(),
-                        Vector3f(displaySettings.scale.x, displaySettings.scale.y, displaySettings.scale.z),
-                        Quaternionf()
-                    )
-                    itemDisplay.displayWidth = displaySettings.displayWidth
-                    itemDisplay.displayHeight = displaySettings.displayHeight
-                    itemDisplay.setItemStack(item)
-                }
-            }
+            setEntityData(data)
         })
 
         val interactable = EntityInteractable(fakeEntity, onInteract)

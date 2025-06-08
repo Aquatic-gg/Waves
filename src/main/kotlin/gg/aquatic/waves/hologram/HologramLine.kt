@@ -1,5 +1,6 @@
 package gg.aquatic.waves.hologram
 
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.fake.entity.data.EntityData
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -20,5 +21,5 @@ abstract class HologramLine {
 
     internal abstract fun createEntity(spawnedHologramLine: SpawnedHologramLine)
 
-    internal abstract fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityData>
+    internal abstract fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityDataValue>
 }

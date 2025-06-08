@@ -67,6 +67,7 @@ gremlin {
 }
 
 repositories {
+    maven("https://jitpack.io")
     mavenCentral()
     mavenLocal()
     maven {
@@ -75,7 +76,6 @@ repositories {
     }
     maven("https://mvn.lumine.io/repository/maven-public/")
     maven("https://repo.oraxen.com/releases")
-    maven("https://jitpack.io")
     maven {
         url = uri("https://repo.nekroplex.com/releases")
     }
@@ -120,7 +120,6 @@ dependencies {
     implementation("com.github.micartey:webhookly:master-SNAPSHOT")
     implementation("net.kyori:adventure-text-minimessage:4.20.0")
     implementation("net.kyori:adventure-api:4.20.0")
-    implementation("com.github.technicallycoded:FoliaLib:main-SNAPSHOT")
     compileOnly("com.willfp:eco:6.74.5")
     compileOnly("io.github.toxicity188:BetterModel:1.6.0")
     implementation("org.bstats:bstats-bukkit:3.1.0")
