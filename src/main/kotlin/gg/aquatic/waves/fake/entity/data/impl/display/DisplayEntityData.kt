@@ -10,11 +10,16 @@ import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.entity.Display
+import org.bukkit.entity.Entity
 import org.joml.Vector3f
 
 open class DisplayEntityData internal constructor(): BaseEntityData() {
 
-    object InterpolationDelay : EntityData {
+    abstract class Base(): EntityData {
+        override val entityClass: Class<out Entity> = Display::class.java
+    }
+
+    object InterpolationDelay : Base() {
         override val id: String = "interpolation-delay"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -44,7 +49,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object TransformationInterpolationDuration : EntityData {
+    object TransformationInterpolationDuration : Base() {
         override val id: String = "interpolation-duration"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -74,7 +79,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object TeleportationDuration : EntityData {
+    object TeleportationDuration : Base() {
         override val id: String = "teleportation-duration"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -104,7 +109,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Translation : EntityData {
+    object Translation : Base() {
         override val id: String = "translation"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -134,7 +139,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Scale : EntityData {
+    object Scale : Base() {
         override val id: String = "scale"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -164,7 +169,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Rotation : EntityData {
+    object Rotation : Base() {
         override val id: String = "rotation"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -194,7 +199,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object RightRotation : EntityData {
+    object RightRotation : Base() {
         override val id: String = "right-rotation"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -224,7 +229,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Billboard : EntityData {
+    object Billboard : Base() {
         override val id: String = "billboard"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -257,7 +262,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Brightness : EntityData {
+    object Brightness : Base() {
         override val id: String = "brightness"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -298,7 +303,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object ViewRange : EntityData {
+    object ViewRange : Base() {
         override val id: String = "view-range"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -328,7 +333,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object ShadowRadius : EntityData {
+    object ShadowRadius : Base() {
         override val id: String = "shadow-radius"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -358,7 +363,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object ShadowStrength : EntityData {
+    object ShadowStrength : Base() {
         override val id: String = "shadow-strength"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -388,7 +393,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Width : EntityData {
+    object Width : Base() {
         override val id: String = "width"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -418,7 +423,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Height : EntityData {
+    object Height : Base() {
         override val id: String = "height"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {

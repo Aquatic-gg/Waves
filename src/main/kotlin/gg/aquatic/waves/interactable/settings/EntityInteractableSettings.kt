@@ -8,6 +8,7 @@ import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.settings.entityproperty.EntityArmorProperty
 import gg.aquatic.waves.interactable.type.EntityInteractable
 import gg.aquatic.waves.registry.WavesRegistry
+import gg.aquatic.waves.registry.serializer.EntityDataSerializer
 import gg.aquatic.waves.util.argument.ArgumentSerializer
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.audience.AquaticAudience
@@ -54,13 +55,10 @@ class EntityInteractableSettings(
 
     companion object : InteractableSettingsFactory {
         override fun load(section: ConfigurationSection): InteractableSettings {
-            val props = section.getConfigurationSection("properties")?.getKeys(false)?.mapNotNull { key ->
-                val s = section.getConfigurationSection("properties") ?: return@mapNotNull null
-                val entityDataType = WavesRegistry.ENTITY_DATA[key] ?: return@mapNotNull null
-                val arguments = ArgumentSerializer.load(s, entityDataType.arguments)
-                val entityData = ConfiguredEntityData(entityDataType,ObjectArguments(arguments))
-                entityData
+            val props = section.getConfigurationSection("properties")?.let {
+                EntityDataSerializer.load(it)
             } ?: emptyList()
+
             val offsetStrs = section.getString("offset", "0;0;0")!!.split(";")
             val offset = Vector(
                 offsetStrs.getOrElse(0) { "0" }.toDouble(),

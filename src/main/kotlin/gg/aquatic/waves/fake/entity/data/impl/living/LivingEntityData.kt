@@ -9,12 +9,17 @@ import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.version.ServerVersion
-import org.bukkit.Location
-import java.util.Optional
+import org.bukkit.entity.Entity
+import org.bukkit.entity.LivingEntity
+import java.util.*
 
 open class LivingEntityData internal constructor(): BaseEntityData() {
 
-    object Hand: EntityData {
+    abstract class Base: EntityData {
+        override val entityClass: Class<out Entity> = LivingEntity::class.java
+    }
+
+    object Hand: Base() {
         override val id: String = "hand"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -82,7 +87,7 @@ open class LivingEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object Health: EntityData {
+    object Health: Base() {
         override val id: String = "health"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -112,7 +117,7 @@ open class LivingEntityData internal constructor(): BaseEntityData() {
         )
     }
 
-    object SleepingPosition: EntityData {
+    object SleepingPosition: Base() {
         override val id: String = "sleeping-position"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {

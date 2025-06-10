@@ -10,11 +10,16 @@ import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.toMMComponent
 import gg.aquatic.waves.util.version.ServerVersion
 import net.kyori.adventure.text.Component
+import org.bukkit.entity.Entity
 import java.util.*
 
 open class BaseEntityData internal constructor() {
 
-    object Visuals: EntityData {
+    abstract class Base: EntityData {
+        override val entityClass: Class<out Entity> = Entity::class.java
+    }
+
+    object Visuals: Base() {
         override val id: String = "visuals"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -110,7 +115,7 @@ open class BaseEntityData internal constructor() {
         )
     }
 
-    object AirTicks: EntityData {
+    object AirTicks: Base() {
         override val id: String = "air-ticks"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -140,7 +145,7 @@ open class BaseEntityData internal constructor() {
         )
     }
 
-    object CustomName: EntityData {
+    object CustomName: Base() {
         override val id: String = "custom-name"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -170,7 +175,7 @@ open class BaseEntityData internal constructor() {
         )
     }
 
-    object CustomNameVisible: EntityData {
+    object CustomNameVisible: Base() {
         override val id: String = "custom-name-visible"
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
             return generate(arguments.boolean(id, updater) ?: false)
@@ -198,7 +203,7 @@ open class BaseEntityData internal constructor() {
             PrimitiveObjectArgument(id, defaultValue = false, required = false),
         )
     }
-    object Silent: EntityData {
+    object Silent: Base() {
         override val id: String = "silent"
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
             return generate(arguments.boolean(id, updater) ?: false)
@@ -226,7 +231,7 @@ open class BaseEntityData internal constructor() {
             PrimitiveObjectArgument(id, defaultValue = false, required = false),
         )
     }
-    object HasGravity: EntityData {
+    object HasGravity: Base() {
         override val id: String = "has-gravity"
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
             return generate(arguments.boolean(id, updater) ?: false)
@@ -254,7 +259,7 @@ open class BaseEntityData internal constructor() {
             PrimitiveObjectArgument(id, defaultValue = false, required = false),
         )
     }
-    object Pose: EntityData {
+    object Pose: Base() {
         override val id: String = "pose"
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
             return generate(arguments.enum<org.bukkit.entity.Pose>(id, updater) ?: org.bukkit.entity.Pose.STANDING)
@@ -283,7 +288,7 @@ open class BaseEntityData internal constructor() {
         )
     }
 
-    object FrozenTicks: EntityData {
+    object FrozenTicks: Base() {
         override val id: String = "frozen-ticks"
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
             return generate(arguments.int(id, updater) ?: 0)

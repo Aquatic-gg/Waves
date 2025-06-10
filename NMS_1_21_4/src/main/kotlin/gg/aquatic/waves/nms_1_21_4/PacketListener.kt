@@ -39,7 +39,14 @@ class PacketListener(
             return
         }
 
-        val packets = if (packet is ClientboundBundlePacket) packet.subPackets() else listOf<Packet<in ClientGamePacketListener>>(packet as? Packet<ClientGamePacketListener> ?: return super.write(ctx, if (isMegPacket) msg else packet, promise))
+        val packets =
+            if (packet is ClientboundBundlePacket) packet.subPackets() else listOf<Packet<in ClientGamePacketListener>>(
+                packet as? Packet<ClientGamePacketListener> ?: return super.write(
+                    ctx,
+                    if (isMegPacket) msg else packet,
+                    promise
+                )
+            )
         val newPackets = ArrayList<Packet<in ClientGamePacketListener>>()
         for (subPacket in packets) {
             val pair = handlePacket(subPacket)

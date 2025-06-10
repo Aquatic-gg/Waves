@@ -9,12 +9,15 @@ import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.ItemObjectArgument
 import gg.aquatic.waves.util.version.ServerVersion
+import org.bukkit.entity.Entity
 import org.bukkit.inventory.ItemStack
 
 object ItemEntityData {
 
     object Item: EntityData {
         override val id: String = "item"
+        val clazz = org.bukkit.entity.Item::class.java
+        override val entityClass: Class<out Entity> = org.bukkit.entity.Item::class.java
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
             return generate((arguments.any(id, updater) as? AquaticItem)?.getItem() ?: return emptyList())

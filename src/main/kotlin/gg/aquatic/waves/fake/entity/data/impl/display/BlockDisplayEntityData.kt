@@ -12,10 +12,16 @@ import gg.aquatic.waves.util.block.impl.VanillaBlock
 import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
+import org.bukkit.entity.BlockDisplay
+import org.bukkit.entity.Entity
 
 object BlockDisplayEntityData: DisplayEntityData() {
 
-    object BlockState: EntityData {
+    abstract class Base: EntityData {
+        override val entityClass: Class<out Entity> = BlockDisplay::class.java
+    }
+
+    object BlockState: Base() {
         override val id: String = "block"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {

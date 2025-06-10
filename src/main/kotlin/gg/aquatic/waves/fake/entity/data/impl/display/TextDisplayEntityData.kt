@@ -12,11 +12,14 @@ import gg.aquatic.waves.util.toMMComponent
 import gg.aquatic.waves.util.version.ServerVersion
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.TextDisplay
-import java.awt.Color
 
 object TextDisplayEntityData: BaseEntityData() {
 
-    object Text: EntityData {
+    abstract class Base: EntityData {
+        override val entityClass: Class<out TextDisplay> = TextDisplay::class.java
+    }
+
+    object Text: Base() {
         override val id: String = "text"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -45,7 +48,7 @@ object TextDisplayEntityData: BaseEntityData() {
             PrimitiveObjectArgument(id, null, false),
         )
     }
-    object Width: EntityData {
+    object Width: Base() {
         override val id: String = "line-width"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -74,7 +77,7 @@ object TextDisplayEntityData: BaseEntityData() {
             PrimitiveObjectArgument(id, null, false),
         )
     }
-    object BackgroundColor: EntityData {
+    object BackgroundColor: Base() {
         override val id: String = "background-color"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -103,7 +106,7 @@ object TextDisplayEntityData: BaseEntityData() {
             PrimitiveObjectArgument(id, null, false),
         )
     }
-    object TextOpacity: EntityData {
+    object TextOpacity: Base() {
         override val id: String = "text-opacity"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -132,7 +135,7 @@ object TextDisplayEntityData: BaseEntityData() {
             PrimitiveObjectArgument(id, null, false),
         )
     }
-    object Flags: EntityData {
+    object Flags: Base() {
         override val id: String = "text-display-flags"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {

@@ -9,12 +9,17 @@ import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.ItemObjectArgument
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.version.ServerVersion
+import org.bukkit.entity.Entity
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.inventory.ItemStack
 
 object ItemDisplayEntityData: DisplayEntityData() {
 
-    object Item: EntityData {
+    abstract class Base: EntityData {
+        override val entityClass: Class<out Entity> = ItemDisplay::class.java
+    }
+
+    object Item: Base() {
         override val id: String = "display-item"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -43,7 +48,7 @@ object ItemDisplayEntityData: DisplayEntityData() {
             ItemObjectArgument(id, null, false),
         )
     }
-    object ItemDisplayTransform: EntityData {
+    object ItemDisplayTransform: Base() {
         override val id: String = "item-display-transform"
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {

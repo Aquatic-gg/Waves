@@ -97,7 +97,8 @@ object WavesRegistry {
         "animated" to AnimatedHologramLine.Companion,
     )
 
-    val ENTITY_DATA = HashMap<String, EntityData>()
+    val ENTITY_DATA = HashMap<Class<out Entity>, HashMap<String, EntityData>>()
+    //val ENTITY_DATA = HashMap<String, EntityData>()
 
     init {
         registerEntityData("gg.aquatic.waves.fake.entity.data.impl")
