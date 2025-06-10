@@ -1,6 +1,7 @@
 package gg.aquatic.waves.nms_1_21_1
 
 import gg.aquatic.waves.api.ReflectionUtils
+import gg.aquatic.waves.api.event.PacketEvent
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.packet.*
 import gg.aquatic.waves.api.nms.ProtectedPacket
@@ -41,39 +42,65 @@ class PacketListener(
             return
         }
 
+        val packets =
+            if (packet is ClientboundBundlePacket) packet.subPackets() else listOf<Packet<in ClientGamePacketListener>>(
+                packet as? Packet<ClientGamePacketListener> ?: return super.write(
+                    ctx,
+                    if (isMegPacket) msg else packet,
+                    promise
+                )
+            )
+        val newPackets = ArrayList<Packet<in ClientGamePacketListener>>()
+        for (subPacket in packets) {
+            val pair = handlePacket(subPacket)
+            if (pair == null) {
+                return
+            }
+            val (resultPacket, resultEvent) = pair
+            if (resultEvent != null) {
+                resultEvent.then()
+            }
+            newPackets.add(resultPacket)
+        }
+        if (newPackets.isEmpty()) {
+            return
+        }
+        if (newPackets.size == 1) {
+            super.write(ctx, if (isMegPacket) msg else newPackets[0], promise)
+            return
+        }
+
+        super.write(ctx, if (isMegPacket) msg else ClientboundBundlePacket(newPackets), promise)
+    }
+
+    fun handlePacket(packet: Packet<in ClientGamePacketListener>): Pair<Packet<in ClientGamePacketListener>, PacketEvent?>? {
         when (packet) {
             is ClientboundAddEntityPacket -> {
                 val event = PacketEntitySpawnEvent(player,packet.id, packet.uuid, CraftEntityType.minecraftToBukkit(packet.type),
                     Location(player.world, packet.x, packet.y, packet.z, packet.yRot, packet.yRot))
                 event.call()
                 if (event.isCancelled) {
-                    return
+                    return null
                 }
-                super.write(ctx, if (isMegPacket) msg else packet, promise)
-                event.then()
-                return
+                return packet to event
             }
             is ClientboundRemoveEntitiesPacket -> {
                 val event = PacketDestroyEntitiesPacket(player,packet.entityIds.toIntArray())
                 event.call()
                 if (event.isCancelled) {
-                    return
+                    return null
                 }
-                super.write(ctx, if (isMegPacket) msg else packet, promise)
-                event.then()
-                return
+                return packet to event
             }
             is ClientboundLevelChunkWithLightPacket -> {
                 val event = PacketChunkLoadEvent(player, packet.x, packet.z, packet,packet.chunkData.extraPackets.toMutableList())
                 event.call()
 
                 if (event.isCancelled) {
-                    return
+                    return null
                 }
                 packet.chunkData.extraPackets += (event.extraPackets.map { it -> it as Packet<*> }.toMutableList())
-                super.write(ctx, if (isMegPacket) msg else packet, promise)
-                event.then()
-                return
+                return packet to event
             }
 
             is ClientboundBlockUpdatePacket -> {
@@ -87,12 +114,10 @@ class PacketListener(
                 )
                 event.call()
                 if (event.isCancelled) {
-                    return
+                    return null
                 }
                 val newPacket = ClientboundBlockUpdatePacket(packet.pos, (event.blockData as CraftBlockData).state)
-                super.write(ctx, newPacket, promise)
-                event.then()
-                return
+                return newPacket to event
             }
 
             is ClientboundContainerSetSlotPacket -> {
@@ -104,7 +129,7 @@ class PacketListener(
                 )
                 event.call()
                 if (event.isCancelled) {
-                    return
+                    return null
                 }
 
                 val newPacket = ClientboundContainerSetSlotPacket(
@@ -113,9 +138,7 @@ class PacketListener(
                     packet.slot,
                     CraftItemStack.asNMSCopy(event.item)
                 )
-                super.write(ctx, newPacket, promise)
-                event.then()
-                return
+                return newPacket to event
             }
 
             is ClientboundContainerSetContentPacket -> {
@@ -127,7 +150,7 @@ class PacketListener(
                 )
                 event.call()
                 if (event.isCancelled) {
-                    return
+                    return null
                 }
                 val newPacket = ClientboundContainerSetContentPacket(
                     packet.containerId,
@@ -137,22 +160,18 @@ class PacketListener(
                     },
                     CraftItemStack.asNMSCopy(event.carriedItem)
                 )
-                super.write(ctx, newPacket, promise)
-                event.then()
-                return
+                return newPacket to event
             }
             is ClientboundOpenScreenPacket -> {
                 val event = PacketContainerOpenEvent(player, packet.containerId)
                 event.call()
                 if (event.isCancelled) {
-                    return
+                    return null
                 }
-                super.write(ctx, packet, promise)
-                event.then()
-                return
+                return packet to event
             }
         }
-        super.write(ctx, packet, promise)
+        return packet to null
     }
 
     private val interactActionField = ReflectionUtils.getField("action", ServerboundInteractPacket::class.java).apply {
