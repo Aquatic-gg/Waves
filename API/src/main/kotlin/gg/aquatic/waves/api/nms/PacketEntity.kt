@@ -27,9 +27,15 @@ class PacketEntity(
     }
 
     fun sendSpawnComplete(nmsHandler: NMSHandler, silent: Boolean = false, vararg players: Player) {
-        sendSpawn(nmsHandler, silent, *players)
-        sendDataUpdate(nmsHandler, silent, *players)
-        sendPassengerUpdate(nmsHandler, silent, *players)
+        val packets = ArrayList<Any>()
+        packets += spawnPacket
+        updatePacket?.let { packets += it }
+        passengerPacket?.let { packets += it }
+
+        val bundlePacket = nmsHandler.createBundlePacket(packets)
+        for (player in players) {
+            nmsHandler.sendPacket(bundlePacket, silent, player)
+        }
         sendEquipmentUpdate(nmsHandler, *players)
     }
 

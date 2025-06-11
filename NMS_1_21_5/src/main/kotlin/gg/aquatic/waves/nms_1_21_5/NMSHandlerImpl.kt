@@ -142,6 +142,13 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
+    override fun createBundlePacket(packets: Collection<Any>): Any {
+        val packet = ClientboundBundlePacket(
+            packets.map { it as Packet<ClientGamePacketListener> }
+        )
+        return packet
+    }
+
     override fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity? {
         val packetEntity = createEntity(location, entityType, null) ?: return null
 

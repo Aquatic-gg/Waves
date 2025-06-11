@@ -27,6 +27,7 @@ interface NMSHandler {
     fun chunkViewers(chunk: Chunk): Collection<Player>
     fun trackedChunks(player: Player): Collection<Chunk>
 
+    fun createBundlePacket(packets: Collection<Any>): Any
     fun createSetSlotItemPacket(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?): Any
     fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player)
     fun createSetWindowItemsPacket(inventoryId: Int, stateId: Int, items: Collection<ItemStack?>, carriedItem: ItemStack?): Any
