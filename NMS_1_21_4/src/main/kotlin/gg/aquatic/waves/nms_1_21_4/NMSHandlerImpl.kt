@@ -288,7 +288,7 @@ object NMSHandlerImpl : NMSHandler {
                 return SynchedEntityData.DataValue(
                     original.id,
                     EntityDataSerializers.ITEM_STACK,
-                    (original.value as CraftItemStack).handle
+                    CraftItemStack.asNMSCopy(original.value as ItemStack)
                 )
             }
             DataSerializerTypes.OPTIONAL_UUID -> {

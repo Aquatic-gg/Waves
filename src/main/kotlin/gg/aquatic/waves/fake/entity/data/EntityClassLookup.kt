@@ -63,6 +63,10 @@ object EntityClassLookup {
                 // Not a Kotlin object, continue to other approaches
             }
 
+            return null
+
+            /*
+
             // Check if it has a companion object with getInstance() or similar method
             val kotlinClass = entityDataClass.kotlin
             val companion = kotlinClass.companionObject
@@ -92,6 +96,7 @@ object EntityClassLookup {
             val constructor = entityDataClass.getDeclaredConstructor()
             constructor.isAccessible = true
             return constructor.newInstance()
+             */
 
         } catch (e: Exception) {
             // Log exception for debugging purposes

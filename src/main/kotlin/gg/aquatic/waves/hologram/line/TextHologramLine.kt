@@ -92,7 +92,7 @@ class TextHologramLine(
         data += DisplayEntityData.Billboard.generate(billboard)
         data += TextDisplayEntityData.Flags.generate(hasShadow, isSeeThrough, defaultBackground)
         backgroundColor?.let {
-            TextDisplayEntityData.BackgroundColor.generate(it)
+            data += TextDisplayEntityData.BackgroundColor.generate(it)
         }
         data += DisplayEntityData.Scale.generate(Vector3f(scale, scale, scale))
 
