@@ -41,7 +41,7 @@ class TextHologramLine(
     override fun spawn(
         location: Location,
         player: Player,
-        textUpdater: (Player, String) -> String
+        textUpdater: (Player, String) -> String,
     ): SpawnedHologramLine {
         val spawned = SpawnedHologramLine(
             player,
@@ -67,7 +67,12 @@ class TextHologramLine(
     }
 
     override fun move(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.packetEntity.teleport(Waves.NMS_HANDLER, spawnedHologramLine.currentLocation, false, spawnedHologramLine.player)
+        spawnedHologramLine.packetEntity.teleport(
+            Waves.NMS_HANDLER,
+            spawnedHologramLine.currentLocation,
+            false,
+            spawnedHologramLine.player
+        )
     }
 
     override fun createEntity(spawnedHologramLine: SpawnedHologramLine) {
@@ -87,7 +92,9 @@ class TextHologramLine(
         data += DisplayEntityData.InterpolationDelay.generate(0)
         data += DisplayEntityData.TransformationInterpolationDuration.generate(transformationDuration)
         data += DisplayEntityData.TeleportationDuration.generate(transformationDuration)
-        data += TextDisplayEntityData.Text.generate(spawnedHologramLine.textUpdater(spawnedHologramLine.player, text).toMMComponent())
+        data += TextDisplayEntityData.Text.generate(
+            spawnedHologramLine.textUpdater(spawnedHologramLine.player, text).toMMComponent()
+        )
         data += TextDisplayEntityData.Width.generate(lineWidth)
         data += DisplayEntityData.Billboard.generate(billboard)
         data += TextDisplayEntityData.Flags.generate(hasShadow, isSeeThrough, defaultBackground)
@@ -112,7 +119,7 @@ class TextHologramLine(
         val isSeeThrough: Boolean,
         val transformationDuration: Int,
         val failLine: LineSettings?,
-    ): LineSettings {
+    ) : LineSettings {
         override fun create(): HologramLine {
             return TextHologramLine(
                 height,
@@ -133,7 +140,7 @@ class TextHologramLine(
         }
     }
 
-    companion object: LineFactory {
+    companion object : LineFactory {
         override fun load(section: ConfigurationSection): LineSettings? {
             val text = section.getString("text") ?: return null
             val height = section.getDouble("height", 0.5)
@@ -151,7 +158,7 @@ class TextHologramLine(
             val transformationDuration = section.getInt("transformation-duration", 0)
             val backgroundColor = if (backgroundColorStr != null) {
                 val args = backgroundColorStr.split(";").map { it.toIntOrNull() ?: 0 }
-                org.bukkit.Color.fromARGB(args[0], args[1], args[2], args.getOrNull(3) ?: 255)
+                org.bukkit.Color.fromARGB(args.getOrNull(3) ?: 255, args[0], args[1], args[2])
             } else null
             return Settings(
                 height,
