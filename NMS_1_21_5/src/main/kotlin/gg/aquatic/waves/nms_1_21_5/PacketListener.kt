@@ -54,7 +54,7 @@ class PacketListener(
         for (subPacket in packets) {
             val pair = handlePacket(subPacket)
             if (pair == null) {
-                return
+                continue
             }
             val (resultPacket, resultEvent) = pair
             resultEvent?.let { thens.add { it.then() } }
