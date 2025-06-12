@@ -11,6 +11,7 @@ import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.entity.Display
 import org.bukkit.entity.Entity
+import org.joml.Quaternionf
 import org.joml.Vector3f
 
 open class DisplayEntityData internal constructor(): BaseEntityData() {
@@ -183,8 +184,8 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
                     return listOf(
                         EntityDataValue.create(
                             13,
-                            DataSerializerTypes.VECTOR3,
-                            rotation
+                            DataSerializerTypes.QUATERNION,
+                            Quaternionf().rotateXYZ(rotation.x, rotation.y, rotation.z)
                         )
                     )
                 }
@@ -213,8 +214,8 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
                     return listOf(
                         EntityDataValue.create(
                             14,
-                            DataSerializerTypes.VECTOR3,
-                            rotation
+                            DataSerializerTypes.QUATERNION,
+                            Quaternionf().rotateXYZ(rotation.x, rotation.y, rotation.z)
                         )
                     )
                 }
