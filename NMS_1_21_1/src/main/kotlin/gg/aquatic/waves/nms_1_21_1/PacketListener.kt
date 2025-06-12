@@ -51,15 +51,14 @@ class PacketListener(
                 )
             )
         val newPackets = ArrayList<Packet<in ClientGamePacketListener>>()
+        val thens = ArrayList<() -> Unit>()
         for (subPacket in packets) {
             val pair = handlePacket(subPacket)
             if (pair == null) {
                 return
             }
             val (resultPacket, resultEvent) = pair
-            if (resultEvent != null) {
-                resultEvent.then()
-            }
+            resultEvent?.let { thens.add { it.then() } }
             newPackets.add(resultPacket)
         }
         if (newPackets.isEmpty()) {
@@ -67,10 +66,12 @@ class PacketListener(
         }
         if (newPackets.size == 1) {
             super.write(ctx, if (isMegPacket) msg else newPackets[0], promise)
+            thens.forEach { it() }
             return
         }
 
         super.write(ctx, if (isMegPacket) msg else ClientboundBundlePacket(newPackets), promise)
+        thens.forEach { it() }
     }
 
     fun handlePacket(packet: Packet<in ClientGamePacketListener>): Pair<Packet<in ClientGamePacketListener>, PacketEvent?>? {
