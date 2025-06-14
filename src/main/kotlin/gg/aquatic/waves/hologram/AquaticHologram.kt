@@ -21,12 +21,13 @@ class AquaticHologram(
     @Volatile
     private var rangeTick = 0
 
+    val lines = ConcurrentHashMap.newKeySet<HologramLine>().apply { addAll(lines) }
+    val viewers = ConcurrentHashMap<Player, MutableSet<SpawnedHologramLine>>()
+
     init {
         HologramHandler.spawnedHolograms += this
     }
 
-    val lines = ConcurrentHashMap.newKeySet<HologramLine>().apply { addAll(lines) }
-    val viewers = ConcurrentHashMap<Player, MutableSet<SpawnedHologramLine>>()
 
     fun tick() {
         tickRange()
