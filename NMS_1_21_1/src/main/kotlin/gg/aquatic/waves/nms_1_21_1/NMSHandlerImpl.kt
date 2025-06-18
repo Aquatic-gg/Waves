@@ -284,7 +284,7 @@ object NMSHandlerImpl : NMSHandler {
                 return SynchedEntityData.DataValue(
                     original.id,
                     EntityDataSerializers.ITEM_STACK,
-                    (original.value as CraftItemStack).handle
+                    CraftItemStack.asNMSCopy(original.value as ItemStack)
                 )
             }
             DataSerializerTypes.OPTIONAL_UUID -> {
@@ -298,7 +298,7 @@ object NMSHandlerImpl : NMSHandler {
                 return SynchedEntityData.DataValue(
                     original.id,
                     EntityDataSerializers.ROTATIONS,
-                    (original.value as org.bukkit.util.Vector).let {
+                    (original.value as Vector).let {
                         Rotations(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
                     }
                 )
