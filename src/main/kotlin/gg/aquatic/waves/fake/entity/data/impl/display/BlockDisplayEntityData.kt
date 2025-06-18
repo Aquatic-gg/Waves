@@ -31,8 +31,7 @@ object BlockDisplayEntityData: DisplayEntityData() {
 
         fun generate(state: BlockData): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             23,

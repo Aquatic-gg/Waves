@@ -29,8 +29,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(interpolationDelay: Int): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4, ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             8,
@@ -59,8 +58,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(interpolationDuration: Int): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             9,
@@ -89,8 +87,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(teleportationDuration: Int): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             10,
@@ -119,8 +116,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(translation: Vector3f): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1  -> {
                     return listOf(
                         EntityDataValue.create(
                             11,
@@ -149,8 +145,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(scale: Vector3f): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             12,
@@ -179,8 +174,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(rotation: Vector3f): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             13,
@@ -209,8 +203,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(rotation: Vector3f): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_1,ServerVersion.V_1_21_4 -> {
                     return listOf(
                         EntityDataValue.create(
                             14,
@@ -242,8 +235,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(billboard: Display.Billboard): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             15,
@@ -274,8 +266,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(blockLight: Int, skyLight: Int): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
 
                     val packedLight = (blockLight shl 4) or (skyLight shl 20)
                     return listOf(
@@ -313,8 +304,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(viewRange: Float): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             17,
@@ -343,8 +333,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(shadowRadius: Float): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             18,
@@ -373,8 +362,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(shadowStrength: Float): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             19,
@@ -403,8 +391,7 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(width: Float): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             20,
@@ -433,8 +420,8 @@ open class DisplayEntityData internal constructor(): BaseEntityData() {
 
         fun generate(height: Float): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+
+                ServerVersion.V_1_21_1,ServerVersion.V_1_21_4 -> {
                     return listOf(
                         EntityDataValue.create(
                             21,

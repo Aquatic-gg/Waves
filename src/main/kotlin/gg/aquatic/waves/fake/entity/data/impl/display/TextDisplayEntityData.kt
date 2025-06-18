@@ -28,8 +28,7 @@ object TextDisplayEntityData: BaseEntityData() {
 
         fun generate(component: Component): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             23,
@@ -57,8 +56,7 @@ object TextDisplayEntityData: BaseEntityData() {
 
         fun generate(width: Int): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             24,
@@ -86,8 +84,7 @@ object TextDisplayEntityData: BaseEntityData() {
 
         fun generate(color: org.bukkit.Color): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             25,
@@ -115,8 +112,7 @@ object TextDisplayEntityData: BaseEntityData() {
 
         fun generate(opacity: Byte): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             26,
@@ -162,8 +158,7 @@ object TextDisplayEntityData: BaseEntityData() {
             )
 
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             27,

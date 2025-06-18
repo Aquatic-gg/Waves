@@ -64,8 +64,7 @@ open class BaseEntityData internal constructor() {
             )
 
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             0,
@@ -124,8 +123,7 @@ open class BaseEntityData internal constructor() {
 
         fun generate(airTicks: Int): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             1,
@@ -154,8 +152,7 @@ open class BaseEntityData internal constructor() {
 
         fun generate(customName: Optional<Component>): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_1,ServerVersion.V_1_21_4 -> {
                     return listOf(
                         EntityDataValue.create(
                             2,
@@ -183,8 +180,7 @@ open class BaseEntityData internal constructor() {
 
         fun generate(isVisible: Boolean): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             3,
@@ -211,8 +207,7 @@ open class BaseEntityData internal constructor() {
 
         fun generate(silent: Boolean): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             4,
@@ -239,8 +234,7 @@ open class BaseEntityData internal constructor() {
 
         fun generate(hasGravity: Boolean): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             5,
@@ -267,8 +261,7 @@ open class BaseEntityData internal constructor() {
 
         fun generate(pose: org.bukkit.entity.Pose): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             6,
@@ -296,8 +289,7 @@ open class BaseEntityData internal constructor() {
 
         fun generate(ticks: Int): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             7,

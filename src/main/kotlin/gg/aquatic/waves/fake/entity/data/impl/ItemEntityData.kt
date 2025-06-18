@@ -16,7 +16,6 @@ object ItemEntityData {
 
     object Item: EntityData {
         override val id: String = "item"
-        val clazz = org.bukkit.entity.Item::class.java
         override val entityClass: Class<out Entity> = org.bukkit.entity.Item::class.java
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
@@ -25,8 +24,7 @@ object ItemEntityData {
 
         fun generate(itemStack: ItemStack): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_1 -> {}
-                ServerVersion.V_1_21_4 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
                     return listOf(
                         EntityDataValue.create(
                             8,
