@@ -95,6 +95,7 @@ object ItemSerializer {
         } ?: return null
 
         return ItemHandler.create(
+            namespace,
             itemStack,
             name,
             description,

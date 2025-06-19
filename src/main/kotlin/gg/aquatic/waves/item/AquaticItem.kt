@@ -20,6 +20,7 @@ import org.bukkit.inventory.meta.EnchantmentStorageMeta
 import java.util.*
 
 class AquaticItem(
+    val internalId: String? = null,
     private val item: ItemStack,
     val name: String?,
     val description: MutableList<String>?,
@@ -75,10 +76,10 @@ class AquaticItem(
             im.addItemFlags(*this.toTypedArray())
         }
 
-        enchantments?.apply {
+        if (enchantments != null) {
             if (iS.type == Material.ENCHANTED_BOOK) {
                 val esm = im as EnchantmentStorageMeta
-                for ((ench, level) in this) {
+                for ((ench, level) in enchantments) {
                     if (ench.uppercase().startsWith("AE-")) continue
                     if (ench.uppercase() == "AE-SLOTS") continue
 
@@ -89,7 +90,7 @@ class AquaticItem(
                 iS.itemMeta = esm
             } else {
                 iS.itemMeta = im
-                for ((ench, level) in this) {
+                for ((ench, level) in enchantments) {
                     if (ench.uppercase() == "AE-SLOTS") {
                         AEAPI.setTotalSlots(
                             iS,
@@ -106,7 +107,7 @@ class AquaticItem(
                     }
                 }
             }
-        }
+        } else iS.itemMeta = im
 
         iS.amount = amount
         if (itemModel != null) {

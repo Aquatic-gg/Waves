@@ -114,6 +114,7 @@ object ItemHandler : WavesModule {
     }
 
     fun create(
+        internalId: String?,
         item: ItemStack,
         name: String? = null,
         description: MutableList<String>? = null,
@@ -125,6 +126,7 @@ object ItemHandler : WavesModule {
         spawnerEntityType: EntityType? = null
     ): AquaticItem {
         return AquaticItem(
+            internalId,
             item,
             name,
             description,
