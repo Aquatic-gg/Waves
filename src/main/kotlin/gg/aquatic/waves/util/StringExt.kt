@@ -6,6 +6,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 fun String.toMMComponent(): Component {
     return MiniMessage.miniMessage().deserialize(
         this
+            .replace("§","&")
             .replace("&a", "<green>")
             .replace("&c", "<red>")
             .replace("&b", "<aqua>")

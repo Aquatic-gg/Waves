@@ -1,9 +1,11 @@
 package gg.aquatic.waves.interactable.type
 
+import com.destroystokyo.paper.profile.PlayerProfile
 import com.ticxo.modelengine.api.ModelEngineAPI
 import com.ticxo.modelengine.api.model.ActiveModel
 import com.ticxo.modelengine.api.model.ModeledEntity
 import com.ticxo.modelengine.api.model.bone.BoneBehaviorTypes
+import com.ticxo.modelengine.api.model.bone.type.PlayerLimb
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.interactable.Interactable
 import gg.aquatic.waves.interactable.InteractableHandler
@@ -46,10 +48,13 @@ class MEGInteractable(
     }
 
     fun setSkin(player: Player) {
+        setSkin(player.playerProfile)
+    }
+    fun setSkin(playerProfile: PlayerProfile) {
         activeModel?.apply {
             for (value in bones.values) {
                 value.getBoneBehavior(BoneBehaviorTypes.PLAYER_LIMB).ifPresent {
-                    setSkin(player)
+                    (it as PlayerLimb).setTexture(playerProfile)
                 }
             }
         }

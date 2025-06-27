@@ -28,7 +28,7 @@ object ItemDisplayEntityData: DisplayEntityData() {
 
         fun generate(item: ItemStack): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1, ServerVersion.V_1_21_5 -> {
                     return listOf(
                         EntityDataValue.create(
                             23,
@@ -56,7 +56,7 @@ object ItemDisplayEntityData: DisplayEntityData() {
 
         fun generate(display: ItemDisplay.ItemDisplayTransform): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1 -> {
+                ServerVersion.V_1_21_4,ServerVersion.V_1_21_1, ServerVersion.V_1_21_5 -> {
                     return listOf(
                         EntityDataValue.create(
                             24,
