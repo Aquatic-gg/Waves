@@ -9,8 +9,10 @@ import gg.aquatic.waves.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.util.runAsync
+import gg.aquatic.waves.util.runLaterAsync
 import gg.aquatic.waves.util.runLaterSync
 import gg.aquatic.waves.util.sendPacket
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.player.PlayerQuitEvent
@@ -159,7 +161,14 @@ object InventoryManager : WavesModule {
             }
         }
 
-        AsyncPacketInventoryCloseEvent(player, removed).call()
+        val execute = {
+            AsyncPacketInventoryCloseEvent(player, removed).call()
+        }
+        if (Bukkit.isPrimaryThread()) {
+            runAsync { execute() }
+        } else {
+            execute()
+        }
     }
 
     fun handleClickInventory(player: Player, packet: PacketContainerClickEvent, clickType: ClickType, changedSlots: Map<Int, ItemStack>) {

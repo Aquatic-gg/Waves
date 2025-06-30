@@ -8,6 +8,6 @@ import org.bukkit.inventory.ItemStack
 object MMFactory: ItemHandler.Factory {
     override fun create(id: String): ItemStack? {
         return (MythicProvider.get().itemManager.getItem(id).get()
-            .generateItemStack(1) as BukkitItemStack).build()
+            .generateItemStack(1) as BukkitItemStack).itemStack
     }
 }

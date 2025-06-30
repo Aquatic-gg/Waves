@@ -113,7 +113,7 @@ dependencies {
     compileOnly("io.th0rgal:oraxen:1.171.0")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
-    compileOnly("io.lumine:Mythic-Dist:5.6.1")
+    compileOnly("io.lumine:Mythic-Dist:5.9.1")
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
