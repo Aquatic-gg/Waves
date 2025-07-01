@@ -4,6 +4,7 @@ import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.entity.EntityDataValue
+import org.bukkit.EntityEffect
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
@@ -91,4 +92,10 @@ fun PacketEntity.setEquipment(equipment: Map<EquipmentSlot, ItemStack>) {
 
 fun Player.sendPacket(packet: Any, silent: Boolean = false) {
     Waves.NMS_HANDLER.sendPacket(packet, silent, this)
+}
+
+fun Player.sendTotemAnimation(itemStack: ItemStack) {
+    Waves.NMS_HANDLER.setSlotItem(0,0,45,itemStack, this)
+    sendEntityEffect(EntityEffect.PROTECTED_FROM_DEATH, this)
+    updateInventory()
 }
