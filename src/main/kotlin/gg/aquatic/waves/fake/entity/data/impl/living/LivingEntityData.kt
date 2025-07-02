@@ -49,7 +49,7 @@ open class LivingEntityData internal constructor(): BaseEntityData() {
             )
 
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_4, ServerVersion.V_1_21_5, ServerVersion.V_1_21_1 -> {
+                ServerVersion.V_1_21_4, ServerVersion.V_1_21_5, ServerVersion.V_1_21_1, ServerVersion.V_1_21_7 -> {
                     return listOf(
                         EntityDataValue.create(
                             0,
@@ -95,7 +95,7 @@ open class LivingEntityData internal constructor(): BaseEntityData() {
 
         fun generate(health: Float): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_4, ServerVersion.V_1_21_5, ServerVersion.V_1_21_1 -> {
+                ServerVersion.V_1_21_4, ServerVersion.V_1_21_5, ServerVersion.V_1_21_1, ServerVersion.V_1_21_7 -> {
                     return listOf(
                         EntityDataValue.create(
                             9,
@@ -128,7 +128,7 @@ open class LivingEntityData internal constructor(): BaseEntityData() {
 
         fun generate(position: Optional<BlockPos>): Collection<EntityDataValue> {
             when (ServerVersion.ofAquatic(Waves.INSTANCE)) {
-                ServerVersion.V_1_21_4, ServerVersion.V_1_21_5, ServerVersion.V_1_21_1 -> {
+                ServerVersion.V_1_21_4, ServerVersion.V_1_21_5, ServerVersion.V_1_21_1, ServerVersion.V_1_21_7 -> {
                     return listOf(
                         EntityDataValue.create(
                             9,
