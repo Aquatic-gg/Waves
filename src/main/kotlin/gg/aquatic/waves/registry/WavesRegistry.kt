@@ -88,6 +88,7 @@ object WavesRegistry {
         "NPC" to NPCInteractableSettings.Companion,
         "BLOCK" to BlockInteractableSettings.Companion,
         "MODELENGINE" to MEGInteractableSettings.Companion,
+        "BETTERMODEL" to BMInteractableSettings.Companion,
         "ITEM_MODEL" to ItemDisplayInteractableSettings.Companion
     )
 

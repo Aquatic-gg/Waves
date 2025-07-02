@@ -52,17 +52,18 @@ class BMInteractable(
      */
 
     init {
-        this.audience = audience
         tracker = model.create(location)
         tracker.setUuid(uuid)
 
-        InteractableHandler.bmIntreactables += uuid to this
+        InteractableHandler.bmIntreactables += this
+        this.audience = audience
     }
 
 
     override fun addViewer(player: Player) {
         viewers.add(player)
         tracker.show(player)
+        tracker.spawn(Bukkit.getOnlinePlayers().first())
     }
 
     override fun removeViewer(player: Player) {
@@ -73,7 +74,7 @@ class BMInteractable(
 
     override fun destroy() {
         tracker.despawn()
-        InteractableHandler.bmIntreactables -= uuid
+        InteractableHandler.bmIntreactables -= this
         viewers.clear()
     }
 

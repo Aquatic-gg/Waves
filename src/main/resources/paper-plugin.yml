@@ -11,6 +11,9 @@ dependencies:
     ModelEngine:
       load: BEFORE
       required: false
+    BetterModel:
+      load: BEFORE
+      required: false
     ItemsAdder:
       load: BEFORE
       required: false

@@ -121,7 +121,7 @@ dependencies {
     implementation("net.kyori:adventure-text-minimessage:4.20.0")
     implementation("net.kyori:adventure-api:4.20.0")
     compileOnly("com.willfp:eco:6.74.5")
-    compileOnly("io.github.toxicity188:BetterModel:1.6.0")
+    compileOnly("io.github.toxicity188:BetterModel:1.8.0")
     implementation("org.bstats:bstats-bukkit:3.1.0")
 
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
