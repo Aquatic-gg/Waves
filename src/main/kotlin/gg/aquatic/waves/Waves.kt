@@ -24,6 +24,7 @@ import gg.aquatic.waves.profile.ProfilesModule
 import gg.aquatic.waves.sync.SyncHandler
 import gg.aquatic.waves.sync.SyncSettings
 import gg.aquatic.waves.util.Config
+import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import java.io.File
@@ -69,17 +70,22 @@ class Waves : WavesPlugin() {
 
     override fun onLoad() {
         WavesPlugin.INSTANCE = this
-        NMS_HANDLER = when (server.bukkitVersion) {
-            "1.21.1-R0.1-SNAPSHOT" -> {
+        NMS_HANDLER = when (ServerVersion.ofAquatic(this)) {
+            ServerVersion.V_1_21_1 -> {
                 gg.aquatic.waves.nms_1_21_1.NMSHandlerImpl
             }
 
-            "1.21.4-R0.1-SNAPSHOT" -> {
+            ServerVersion.V_1_21_4 -> {
                 NMSHandlerImpl
             }
 
-            else -> {
+
+            ServerVersion.V_1_21_5 -> {
                 gg.aquatic.waves.nms_1_21_5.NMSHandlerImpl
+            }
+
+            else -> {
+                gg.aquatic.waves.nms_1_21_7.NMSHandlerImpl
             }
         }
 

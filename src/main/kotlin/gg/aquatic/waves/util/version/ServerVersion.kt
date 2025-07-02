@@ -6,7 +6,8 @@ enum class ServerVersion {
 
     V_1_21_1,
     V_1_21_4,
-    V_1_21_5;
+    V_1_21_5,
+    V_1_21_7;
 
     fun isOlder(version: ServerVersion): Boolean {
         return this.ordinal < version.ordinal
@@ -36,6 +37,7 @@ enum class ServerVersion {
                 "1.21.1" -> V_1_21_1
                 "1.21.4" -> V_1_21_4
                 "1.21.5" -> V_1_21_5
+                "1.21.7" -> V_1_21_7
                 else -> null
             }
         }

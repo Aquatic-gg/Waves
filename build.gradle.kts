@@ -139,6 +139,7 @@ dependencies {
     implementation(project(":NMS_1_21_1"))
     implementation(project(":NMS_1_21_4"))
     implementation(project(":NMS_1_21_5"))
+    implementation(project(":NMS_1_21_7"))
 }
 
 sourceSets {
