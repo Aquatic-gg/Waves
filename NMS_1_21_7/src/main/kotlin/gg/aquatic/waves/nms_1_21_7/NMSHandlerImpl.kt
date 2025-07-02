@@ -1,6 +1,8 @@
 package gg.aquatic.waves.nms_1_21_7
 
 import com.google.common.collect.LinkedHashMultimap
+import com.google.common.hash.HashCode
+import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
@@ -20,18 +22,24 @@ import net.minecraft.ChatFormatting
 import net.minecraft.core.NonNullList
 import net.minecraft.core.Registry
 import net.minecraft.core.Rotations
+import net.minecraft.core.component.TypedDataComponent
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.Connection
 import net.minecraft.network.FriendlyByteBuf
+import net.minecraft.network.HashedPatchMap
+import net.minecraft.network.HashedStack
+import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
+import net.minecraft.resources.RegistryOps
 import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.server.network.ServerPlayerConnection
+import net.minecraft.util.HashOps
 import net.minecraft.world.entity.*
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.level.ChunkPos
@@ -176,6 +184,7 @@ object NMSHandlerImpl : NMSHandler {
             entity.type.updateInterval(),
             true,
             { },
+            { _, _ -> },
             seenBy,
         )
         return PacketEntity(
@@ -200,6 +209,7 @@ object NMSHandlerImpl : NMSHandler {
                 entity.type.updateInterval(),
                 true,
                 { },
+                { _, _ -> },
                 HashSet()
             )
         )
@@ -535,7 +545,7 @@ object NMSHandlerImpl : NMSHandler {
         GameEventAction.CHANGE_GAME_MODE to ClientboundGameEventPacket.CHANGE_GAME_MODE,
         GameEventAction.WIN_GAME to ClientboundGameEventPacket.WIN_GAME,
         GameEventAction.DEMO_EVENT to ClientboundGameEventPacket.DEMO_EVENT,
-        GameEventAction.ARROW_HIT_PLAYER to ClientboundGameEventPacket.ARROW_HIT_PLAYER,
+        GameEventAction.ARROW_HIT_PLAYER to ClientboundGameEventPacket.PLAY_ARROW_HIT_SOUND,
         GameEventAction.RAIN_LEVEL_CHANGE to ClientboundGameEventPacket.RAIN_LEVEL_CHANGE,
         GameEventAction.THUNDER_LEVEL_CHANGE to ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE,
         GameEventAction.PUFFER_FISH_STING to ClientboundGameEventPacket.PUFFER_FISH_STING,
@@ -767,17 +777,30 @@ object NMSHandlerImpl : NMSHandler {
         changedSlots: Map<Int, ItemStack?>,
         vararg players: Player,
     ) {
-        val map = Int2ObjectOpenHashMap<net.minecraft.world.item.ItemStack>()
-        map.putAll(changedSlots.mapValues { it.value?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY })
+        val registryAccess = (Bukkit.getWorlds().first() as CraftWorld).handle.registryAccess()
+        val registryOps: RegistryOps<HashCode> = registryAccess.createSerializationContext(HashOps.CRC32C_INSTANCE);
+        val hashOpsGenerator: HashedPatchMap.HashGenerator = object : HashedPatchMap.HashGenerator {
+            override fun apply(typedDataComponent: TypedDataComponent<*>): Int {
+                return typedDataComponent.encodeValue(registryOps).getOrThrow { string ->
+                    IllegalArgumentException("Failed to hash $typedDataComponent: $string")
+                }.asInt()
+            }
+        }
+
+        val map = Int2ObjectOpenHashMap<HashedStack>()
+        changedSlots.forEach { (key, value) ->
+            val nmsItem = value?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+            map[key] = HashedStack.create(nmsItem, hashOpsGenerator)
+        }
 
         val packet = ServerboundContainerClickPacket(
             inventoryId,
             stateId,
-            slot,
-            buttonNum,
+            slot.toShort(),
+            buttonNum.toByte(),
             ClickType.entries[clickTypeNum],
-            carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY,
-            map
+            map,
+            HashedStack.create(carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY, hashOpsGenerator)
         )
 
         for (player in players) {
@@ -820,9 +843,6 @@ object NMSHandlerImpl : NMSHandler {
 
     fun Component.toNMSComponent(): net.minecraft.network.chat.Component {
         val kyoriJson = GsonComponentSerializer.gson().serialize(this)
-        return net.minecraft.network.chat.Component.Serializer.fromJson(
-            kyoriJson,
-            ((Bukkit.getServer() as CraftServer).worlds.first() as CraftWorld).handle.registryAccess()
-        )!!
+        return ComponentSerialization.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, JsonParser.parseString(kyoriJson)).orThrow
     }
 }
