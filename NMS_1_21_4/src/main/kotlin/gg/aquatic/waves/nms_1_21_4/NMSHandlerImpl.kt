@@ -237,7 +237,7 @@ object NMSHandlerImpl : NMSHandler {
     }
 
     private fun mapEntityDataValue(original: EntityDataValue): SynchedEntityData.DataValue<*>? {
-        when(original.serializerType) {
+        when (original.serializerType) {
             DataSerializerTypes.BYTE -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -245,6 +245,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Byte
                 )
             }
+
             DataSerializerTypes.INT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -252,6 +253,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Int
                 )
             }
+
             DataSerializerTypes.FLOAT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -259,6 +261,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Float
                 )
             }
+
             DataSerializerTypes.STRING -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -274,6 +277,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Boolean
                 )
             }
+
             DataSerializerTypes.OPTIONAL_COMPONENT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -284,6 +288,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.ITEM_STACK -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -291,6 +296,7 @@ object NMSHandlerImpl : NMSHandler {
                     CraftItemStack.asNMSCopy(original.value as ItemStack)
                 )
             }
+
             DataSerializerTypes.OPTIONAL_UUID -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -298,6 +304,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Optional<UUID>)
                 )
             }
+
             DataSerializerTypes.ROTATIONS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -307,6 +314,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.BLOCK_POS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -332,6 +340,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Component).toNMSComponent()
                 )
             }
+
             DataSerializerTypes.LONG -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -349,6 +358,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.VECTOR3 -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -356,6 +366,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Vector3f)
                 )
             }
+
             DataSerializerTypes.DIRECTION -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -365,6 +376,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.OPTIONAL_BLOCK_POS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -374,6 +386,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.OPTIONAL_BLOCK_STATE -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -391,6 +404,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Quaternionf
                 )
             }
+
             DataSerializerTypes.OPTIONAL_UNSIGNED_INT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -408,19 +422,18 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any {
         val data = values.mapNotNull { mapEntityDataValue(it) }
-        val packet = ClientboundSetEntityDataPacket(id,data)
+        val packet = ClientboundSetEntityDataPacket(id, data)
         return packet
     }
 
-    override fun createTeleportPacket(entityId: Int, location: Location, previousLocation: Vector): Any {
-        val delta = previousLocation.clone().subtract(location.toVector())
+    override fun createTeleportPacket(entityId: Int, location: Location, delta: Vector): Any {
         val packet = ClientboundTeleportEntityPacket(
             entityId, PositionMoveRotation(
                 Vec3(location.x, location.y, location.z),
                 Vec3(delta.x, delta.y, delta.z),
                 location.yaw,
                 location.pitch
-            ), Relative.ALL, false
+            ), setOf(Relative.X, Relative.Y, Relative.Z, Relative.X_ROT, Relative.Y_ROT), false
         )
         return packet
     }
@@ -707,7 +720,7 @@ object NMSHandlerImpl : NMSHandler {
         inventoryId: Int,
         stateId: Int,
         items: Collection<ItemStack?>,
-        carriedItem: ItemStack?
+        carriedItem: ItemStack?,
     ): Any {
         val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
         nmsItems += items.map { it?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY }

@@ -63,7 +63,7 @@ class BMInteractable(
     override fun addViewer(player: Player) {
         viewers.add(player)
         tracker.show(player)
-        tracker.spawn(Bukkit.getOnlinePlayers().first())
+        tracker.spawn(player)
     }
 
     override fun removeViewer(player: Player) {
