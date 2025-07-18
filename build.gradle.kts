@@ -89,6 +89,7 @@ repositories {
     maven("https://repo.auxilor.io/repository/maven-public/")
     maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
     maven("https://maven.radsteve.net/public")
+    maven("https://repo.nexomc.com/releases")
 }
 
 dependencies {
@@ -133,6 +134,7 @@ dependencies {
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
 
+    compileOnly("com.nexomc:nexo:1.8.0") //Nexo 1.X -> 1.X.0
     compileOnly("io.netty:netty-all:4.1.24.Final")
 
     implementation(project(":API"))

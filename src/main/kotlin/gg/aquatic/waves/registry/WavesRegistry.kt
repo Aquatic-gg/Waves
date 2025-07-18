@@ -74,7 +74,8 @@ object WavesRegistry {
         "ITEMSADDER" to IAFactory,
         "ECO" to EcoFactory,
         "BASE64" to Base64Factory,
-        "MMOITEM" to MMOFactory
+        "MMOITEM" to MMOFactory,
+        "NEXO" to NexoFactory
     )
 
     val BLOCK_FACTORIES = hashMapOf(
