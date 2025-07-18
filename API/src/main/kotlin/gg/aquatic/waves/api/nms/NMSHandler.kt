@@ -16,6 +16,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
+import org.joml.Vector3d
 import java.util.UUID
 
 interface NMSHandler {
@@ -41,15 +42,18 @@ interface NMSHandler {
 
     fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity?
     fun createEntity(location: Location, entityType: EntityType, uuid: UUID? = null): PacketEntity?
+    fun createEntitySpawnPacket(entityId: Int, uuid: UUID, entityType: EntityType, pos: Vector3d, yaw: Float, pitch: Float): Any
     fun recreateEntityPacket(packetEntity: PacketEntity, location: Location): Any
     fun updateEntity(packetEntity: PacketEntity, consumer: (Entity) -> Unit, vararg players: Player)
     fun createEntityUpdatePacket(packetEntity: PacketEntity, consumer: (Entity) -> Unit): Any
     fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any
     fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player)
     fun createPassengersPacket(holderId: Int, passengerIds: IntArray): Any
+    fun createDestroyEntitiesPacket(vararg entityIds: Int): Any
+    fun createPositionSyncPacket(entityId: Int, location: Location): Any
     fun setEquipment(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>, vararg players: Player)
     fun createEquipmentPacket(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>): Any
-    fun createTeleportPacket(entityId: Int, location: Location, previousLocation: Vector): Any
+    fun createTeleportPacket(entityId: Int, location: Location): Any
     fun createPlayerInfoUpdatePacket(actionIds: Collection<Int>, profileEntries: Collection<ProfileEntry>): Any
     fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any
     fun createTeamsPacket(team: gg.aquatic.waves.api.nms.scoreboard.Team, actionId: Int, playerName: String): Any

@@ -71,6 +71,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
 import org.joml.Quaternionf
+import org.joml.Vector3d
 import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -195,6 +196,29 @@ object NMSHandlerImpl : NMSHandler {
         )
     }
 
+    override fun createEntitySpawnPacket(
+        entityId: Int,
+        uuid: UUID,
+        entityType: EntityType,
+        pos: Vector3d,
+        yaw: Float,
+        pitch: Float,
+    ): Any {
+        return ClientboundAddEntityPacket(
+            entityId,
+            uuid,
+            pos.x,
+            pos.y,
+            pos.z,
+            pitch,
+            yaw,
+            net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase()).getOrNull()!!,
+            0,
+            Vec3.ZERO,
+            yaw.toDouble()
+        )
+    }
+
     override fun recreateEntityPacket(
         packetEntity: PacketEntity,
         location: Location,
@@ -250,21 +274,17 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
-    override fun createTeleportPacket(entityId: Int, location: Location, previousLocation: org.bukkit.util.Vector): Any {
-        val delta = previousLocation.clone().subtract(location.toVector())
-        val packet = ClientboundTeleportEntityPacket(
-            entityId, PositionMoveRotation(
-                Vec3(location.x, location.y, location.z),
-                Vec3(delta.x, delta.y, delta.z),
-                location.yaw,
-                location.pitch
-            ), Relative.ALL, false
-        )
+    override fun createTeleportPacket(entityId: Int, location: Location): Any {
+        val container = EntityContainer(entityId)
+        container.setPosRaw(location.x, location.y, location.z)
+        container.setRot(location.yaw, location.pitch)
+        val packet = ClientboundTeleportEntityPacket(entityId, PositionMoveRotation.of(container), Relative.ALL, false)
+
         return packet
     }
 
     private fun mapEntityDataValue(original: EntityDataValue): SynchedEntityData.DataValue<*>? {
-        when(original.serializerType) {
+        when (original.serializerType) {
             DataSerializerTypes.BYTE -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -272,6 +292,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Byte
                 )
             }
+
             DataSerializerTypes.INT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -279,6 +300,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Int
                 )
             }
+
             DataSerializerTypes.FLOAT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -286,6 +308,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Float
                 )
             }
+
             DataSerializerTypes.STRING -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -301,6 +324,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Boolean
                 )
             }
+
             DataSerializerTypes.OPTIONAL_COMPONENT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -311,6 +335,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.ITEM_STACK -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -318,6 +343,7 @@ object NMSHandlerImpl : NMSHandler {
                     CraftItemStack.asNMSCopy(original.value as ItemStack)
                 )
             }
+
             DataSerializerTypes.ROTATIONS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -327,6 +353,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.BLOCK_POS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -352,6 +379,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Component).toNMSComponent()
                 )
             }
+
             DataSerializerTypes.LONG -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -369,6 +397,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.VECTOR3 -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -376,6 +405,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Vector3f)
                 )
             }
+
             DataSerializerTypes.DIRECTION -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -385,15 +415,18 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.OPTIONAL_BLOCK_POS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
                     EntityDataSerializers.OPTIONAL_BLOCK_POS,
                     (original.value as Optional<BlockPos>).let {
-                        Optional.ofNullable(it.getOrNull()?.let { pos -> net.minecraft.core.BlockPos(pos.x, pos.y, pos.z) })
+                        Optional.ofNullable(
+                            it.getOrNull()?.let { pos -> net.minecraft.core.BlockPos(pos.x, pos.y, pos.z) })
                     }
                 )
             }
+
             DataSerializerTypes.OPTIONAL_BLOCK_STATE -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -411,6 +444,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Quaternionf
                 )
             }
+
             DataSerializerTypes.OPTIONAL_UNSIGNED_INT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -428,7 +462,7 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any {
         val data = values.mapNotNull { mapEntityDataValue(it) }
-        val packet = ClientboundSetEntityDataPacket(id,data)
+        val packet = ClientboundSetEntityDataPacket(id, data)
         return packet
     }
 
@@ -465,6 +499,22 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
+    override fun createDestroyEntitiesPacket(vararg entityIds: Int): Any {
+        return ClientboundRemoveEntitiesPacket(*entityIds)
+    }
+
+    override fun createPositionSyncPacket(entityId: Int, location: Location): Any {
+        val container = EntityContainer(entityId)
+        container.setPosRaw(location.x, location.y, location.z)
+        container.setRot(location.yaw, location.pitch)
+        val teleportPacket = ClientboundEntityPositionSyncPacket(
+            entityId,
+            PositionMoveRotation.of(container),
+            container.onGround
+        )
+        return teleportPacket
+    }
+
     override fun setEquipment(
         packetEntity: PacketEntity,
         equipment: Map<EquipmentSlot, ItemStack?>,
@@ -480,11 +530,13 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun createEquipmentPacket(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>): Any {
         val mappedEquipment = equipment.map {
-            com.mojang.datafixers.util.Pair(net.minecraft.world.entity.EquipmentSlot.entries[it.key.ordinal], (it.value?.let { item ->
-                CraftItemStack.asNMSCopy(
-                    item
-                )
-            } ?: net.minecraft.world.item.ItemStack.EMPTY))
+            com.mojang.datafixers.util.Pair(
+                net.minecraft.world.entity.EquipmentSlot.entries[it.key.ordinal],
+                (it.value?.let { item ->
+                    CraftItemStack.asNMSCopy(
+                        item
+                    )
+                } ?: net.minecraft.world.item.ItemStack.EMPTY))
         }
         val packet = ClientboundSetEquipmentPacket(packetEntity.entityId, mappedEquipment)
         return packet
@@ -842,6 +894,9 @@ object NMSHandlerImpl : NMSHandler {
 
     fun Component.toNMSComponent(): net.minecraft.network.chat.Component {
         val kyoriJson = GsonComponentSerializer.gson().serialize(this)
-        return ComponentSerialization.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE, JsonParser.parseString(kyoriJson)).orThrow
+        return ComponentSerialization.CODEC.parse(
+            com.mojang.serialization.JsonOps.INSTANCE,
+            JsonParser.parseString(kyoriJson)
+        ).orThrow
     }
 }

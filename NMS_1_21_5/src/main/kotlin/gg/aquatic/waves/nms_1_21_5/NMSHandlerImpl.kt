@@ -72,6 +72,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
 import org.joml.Quaternionf
+import org.joml.Vector3d
 import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -196,6 +197,29 @@ object NMSHandlerImpl : NMSHandler {
         )
     }
 
+    override fun createEntitySpawnPacket(
+        entityId: Int,
+        uuid: UUID,
+        entityType: EntityType,
+        pos: Vector3d,
+        yaw: Float,
+        pitch: Float,
+    ): Any {
+        return ClientboundAddEntityPacket(
+            entityId,
+            uuid,
+            pos.x,
+            pos.y,
+            pos.z,
+            pitch,
+            yaw,
+            net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase()).getOrNull()!!,
+            0,
+            Vec3.ZERO,
+            yaw.toDouble()
+        )
+    }
+
     override fun recreateEntityPacket(
         packetEntity: PacketEntity,
         location: Location,
@@ -251,16 +275,23 @@ object NMSHandlerImpl : NMSHandler {
         }
     }
 
-    override fun createTeleportPacket(entityId: Int, location: Location, previousLocation: Vector): Any {
-        val delta = previousLocation.clone().subtract(location.toVector())
-        val packet = ClientboundTeleportEntityPacket(
-            entityId, PositionMoveRotation(
-                Vec3(location.x, location.y, location.z),
-                Vec3(delta.x, delta.y, delta.z),
-                location.yaw,
-                location.pitch
-            ), Relative.ALL, false
+    override fun createPositionSyncPacket(entityId: Int, location: Location): Any {
+        val container = EntityContainer(entityId)
+        container.setPosRaw(location.x, location.y, location.z)
+        container.setRot(location.yaw, location.pitch)
+        val teleportPacket = ClientboundEntityPositionSyncPacket(
+            entityId,
+            PositionMoveRotation.of(container),
+            container.onGround
         )
+        return teleportPacket
+    }
+
+    override fun createTeleportPacket(entityId: Int, location: Location): Any {
+        val container = EntityContainer(entityId)
+        container.setPosRaw(location.x, location.y, location.z)
+        container.setRot(location.yaw, location.pitch)
+        val packet = ClientboundTeleportEntityPacket(entityId, PositionMoveRotation.of(container), Relative.ALL, false)
         return packet
     }
 
@@ -464,6 +495,10 @@ object NMSHandlerImpl : NMSHandler {
 
         val packet = setPassengersConstructor.newInstance(bytebuf)
         return packet
+    }
+
+    override fun createDestroyEntitiesPacket(vararg entityIds: Int): Any {
+        return ClientboundRemoveEntitiesPacket(*entityIds)
     }
 
     override fun setEquipment(

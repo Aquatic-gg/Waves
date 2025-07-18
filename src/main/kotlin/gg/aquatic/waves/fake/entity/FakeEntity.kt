@@ -206,7 +206,7 @@ open class FakeEntity(
             unregister()
             register()
         }
-        val packet = Waves.NMS_HANDLER.createTeleportPacket(packetEntity.entityId,location, Vector())
+        val packet = Waves.NMS_HANDLER.createTeleportPacket(packetEntity.entityId,location)
         for (player in isViewing) {
             player.sendPacket(packet,false)
         }

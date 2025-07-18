@@ -69,7 +69,7 @@ class PacketEntity(
 
     fun teleport(nmsHandler: NMSHandler, location: Location, silent: Boolean = false, vararg players: Player) {
         setLocation(nmsHandler, location)
-        val packet = nmsHandler.createTeleportPacket(entityId, location, Vector())
+        val packet = nmsHandler.createTeleportPacket(entityId, location)
         nmsHandler.sendPacket(packet, silent, *players)
     }
 

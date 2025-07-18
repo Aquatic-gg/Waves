@@ -63,6 +63,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
 import org.joml.Quaternionf
+import org.joml.Vector3d
 import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -146,6 +147,29 @@ object NMSHandlerImpl : NMSHandler {
             item.sendPacket(packetEntity.spawnPacket as Packet<*>)
         }
         return packetEntity
+    }
+
+    override fun createEntitySpawnPacket(
+        entityId: Int,
+        uuid: UUID,
+        entityType: EntityType,
+        pos: Vector3d,
+        yaw: Float,
+        pitch: Float,
+    ): Any {
+        return ClientboundAddEntityPacket(
+            entityId,
+            uuid,
+            pos.x,
+            pos.y,
+            pos.z,
+            pitch,
+            yaw,
+            net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase()).getOrNull()!!,
+            0,
+            Vec3.ZERO,
+            yaw.toDouble()
+        )
     }
 
     override fun createEntity(location: Location, entityType: EntityType, uuid: UUID?): PacketEntity? {
@@ -233,7 +257,7 @@ object NMSHandlerImpl : NMSHandler {
     }
 
     private fun mapEntityDataValue(original: EntityDataValue): SynchedEntityData.DataValue<*>? {
-        when(original.serializerType) {
+        when (original.serializerType) {
             DataSerializerTypes.BYTE -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -241,6 +265,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Byte
                 )
             }
+
             DataSerializerTypes.INT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -248,6 +273,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Int
                 )
             }
+
             DataSerializerTypes.FLOAT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -255,6 +281,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Float
                 )
             }
+
             DataSerializerTypes.STRING -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -270,6 +297,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Boolean
                 )
             }
+
             DataSerializerTypes.OPTIONAL_COMPONENT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -280,6 +308,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.ITEM_STACK -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -287,6 +316,7 @@ object NMSHandlerImpl : NMSHandler {
                     CraftItemStack.asNMSCopy(original.value as ItemStack)
                 )
             }
+
             DataSerializerTypes.OPTIONAL_UUID -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -294,6 +324,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Optional<UUID>)
                 )
             }
+
             DataSerializerTypes.ROTATIONS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -303,6 +334,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.BLOCK_POS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -328,6 +360,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Component).toNMSComponent()
                 )
             }
+
             DataSerializerTypes.LONG -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -345,6 +378,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.VECTOR3 -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -352,6 +386,7 @@ object NMSHandlerImpl : NMSHandler {
                     (original.value as Vector3f)
                 )
             }
+
             DataSerializerTypes.DIRECTION -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -361,6 +396,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.OPTIONAL_BLOCK_POS -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -370,6 +406,7 @@ object NMSHandlerImpl : NMSHandler {
                     }
                 )
             }
+
             DataSerializerTypes.OPTIONAL_BLOCK_STATE -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -387,6 +424,7 @@ object NMSHandlerImpl : NMSHandler {
                     original.value as Quaternionf
                 )
             }
+
             DataSerializerTypes.OPTIONAL_UNSIGNED_INT -> {
                 return SynchedEntityData.DataValue(
                     original.id,
@@ -404,7 +442,7 @@ object NMSHandlerImpl : NMSHandler {
 
     override fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any {
         val data = values.mapNotNull { mapEntityDataValue(it) }
-        val packet = ClientboundSetEntityDataPacket(id,data)
+        val packet = ClientboundSetEntityDataPacket(id, data)
         return packet
     }
 
@@ -414,19 +452,11 @@ object NMSHandlerImpl : NMSHandler {
         isAccessible = true
     }
 
-    override fun createTeleportPacket(entityId: Int, location: Location, previousLocation: org.bukkit.util.Vector): Any {
-        val delta = previousLocation.clone().subtract(location.toVector())
-
-        val bytebuf = Unpooled.buffer()
-        bytebuf.writeVarInt(entityId)
-        bytebuf.writeDouble(location.x)
-        bytebuf.writeDouble(location.y)
-        bytebuf.writeDouble(location.z)
-        bytebuf.writeByte(location.yaw.toInt())
-        bytebuf.writeByte(location.pitch.toInt())
-        bytebuf.writeBoolean(false)
-
-        val packet = teleportEntityPacketConstructor.newInstance(bytebuf)
+    override fun createTeleportPacket(entityId: Int, location: Location): Any {
+        val container = EntityContainer(entityId)
+        container.setPosRaw(location.x, location.y, location.z)
+        container.setRot(location.yaw, location.pitch)
+        val packet = ClientboundTeleportEntityPacket(container)
         return packet
     }
 
@@ -461,6 +491,16 @@ object NMSHandlerImpl : NMSHandler {
 
         val packet = setPassengersConstructor.newInstance(bytebuf)
         return packet
+    }
+
+    override fun createDestroyEntitiesPacket(vararg entityIds: Int): Any {
+        return ClientboundRemoveEntitiesPacket(*entityIds)
+    }
+
+    override fun createPositionSyncPacket(entityId: Int, location: Location): Any {
+        val container = EntityContainer(entityId)
+        container.setPosRaw(location.x, location.y, location.z)
+        return ClientboundTeleportEntityPacket(container)
     }
 
     override fun setEquipment(
@@ -710,7 +750,7 @@ object NMSHandlerImpl : NMSHandler {
         inventoryId: Int,
         stateId: Int,
         items: Collection<ItemStack?>,
-        carriedItem: ItemStack?
+        carriedItem: ItemStack?,
     ): Any {
         val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
         nmsItems += items.map { it?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY }
