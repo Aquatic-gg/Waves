@@ -273,6 +273,10 @@ publishing {
             artifact(tasks["shadowJarPublish"]) {
                 classifier = "publish"
             }
+
+            artifact(tasks["shadowJarPlugin"]) {
+                classifier = "plugin"
+            }
         }
     }
 }
