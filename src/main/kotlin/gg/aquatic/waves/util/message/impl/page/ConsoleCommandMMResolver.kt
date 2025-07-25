@@ -11,9 +11,9 @@ object ConsoleCommandMMResolver {
         val command = args.pop().value()
 
         return Tag.styling {
-            ClickEvent.callback {
+            it.clickEvent(ClickEvent.callback {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command)
-            }
+            })
         }
     }
 }

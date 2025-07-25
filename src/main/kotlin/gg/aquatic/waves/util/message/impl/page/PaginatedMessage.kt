@@ -83,7 +83,7 @@ class PaginatedMessage(
                     .replace("%aq-page%", page.toString())
                     .replace("%aq-prev-page%", max((page - 1), 0).toString())
                     .replace(
-                        "aq-next-page%",
+                        "%aq-next-page%",
                         min((ceil(messages.size.toDouble() / pageSize.toDouble()).toInt() - 1), page + 1).toString()
                     )
             )

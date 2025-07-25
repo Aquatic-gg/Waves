@@ -25,7 +25,7 @@ object MessageCommand : ICommand {
             sender.sendMessage("Player not found!")
             return
         }
-        val message = Messages.registeredMessages[args[2]]
+        val message = Messages[args[2]]
         if (message == null) {
             sender.sendMessage("Message not found!")
             return
@@ -57,7 +57,7 @@ object MessageCommand : ICommand {
         }
         if (args.size == 3) {
             val messageId = args[1]
-            val message = Messages.registeredMessages[messageId] ?: return listOf()
+            val message = Messages[messageId] ?: return listOf()
             if (message !is PaginatedMessage) return listOf()
             return (0..ceil(message.messages.size.toDouble() / message.pageSize.toDouble()).toInt() - 1).map { it.toString() }
         }
