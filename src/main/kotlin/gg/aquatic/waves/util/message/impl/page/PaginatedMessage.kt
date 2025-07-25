@@ -5,6 +5,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import org.bukkit.entity.Player
 import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.min
@@ -40,16 +41,16 @@ class PaginatedMessage(
         }
 
         if (header != null) {
-            sender.sendMessage(header.toMMComponent(page))
+            sender.sendMessage(header.toMMComponent(page,sender))
         }
         for (i in startIndex until endIndex) {
             if (i >= messages.size) {
                 break
             }
-            sender.sendMessage(messages.elementAt(i).toMMComponent(page))
+            sender.sendMessage(messages.elementAt(i).toMMComponent(page,sender))
         }
         if (footer != null) {
-            sender.sendMessage(footer.toMMComponent(page))
+            sender.sendMessage(footer.toMMComponent(page,sender))
         }
     }
 
@@ -70,7 +71,7 @@ class PaginatedMessage(
         }
     }
 
-    private fun String.toMMComponent(page: Int): Component {
+    private fun String.toMMComponent(page: Int, sender: CommandSender): Component {
         return MiniMessage.builder()
             .editTags { b ->
                 b.tag("ccmd") { a, b ->
@@ -78,6 +79,7 @@ class PaginatedMessage(
                 }
             }.build().deserialize(
                 this
+                    .replace("%aq-player%", if (sender is Player) sender.name else "*console")
                     .replace("%aq-page%", page.toString())
                     .replace("%aq-prev-page%", max((page - 1), 0).toString())
                     .replace(
