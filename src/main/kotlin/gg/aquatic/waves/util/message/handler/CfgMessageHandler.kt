@@ -1,7 +1,7 @@
 package gg.aquatic.waves.util.message.handler
 
 import gg.aquatic.waves.util.message.Message
-import gg.aquatic.waves.util.message.impl.PaginatedMessage
+import gg.aquatic.waves.util.message.impl.page.PaginatedMessage
 import gg.aquatic.waves.util.message.impl.SimpleMessage
 import org.bukkit.configuration.file.FileConfiguration
 

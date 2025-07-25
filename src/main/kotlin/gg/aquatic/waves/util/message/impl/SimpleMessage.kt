@@ -1,14 +1,16 @@
 package gg.aquatic.waves.util.message.impl
 
 import gg.aquatic.waves.util.message.Message
-import gg.aquatic.waves.util.toMMComponent
+import gg.aquatic.waves.util.message.impl.page.ConsoleCommandMMResolver
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import java.util.function.Consumer
 
-class SimpleMessage(override var messages: Collection<String>): Message {
+class SimpleMessage(override var messages: Collection<String>) : Message {
 
-    constructor(message: String?): this(message?.let { mutableListOf(it) } ?: mutableListOf())
+    constructor(message: String?) : this(message?.let { mutableListOf(it) } ?: mutableListOf())
 
     override fun replace(updater: (String) -> String): SimpleMessage {
         this.messages = messages.map { updater(it) }.toMutableList()
@@ -36,6 +38,17 @@ class SimpleMessage(override var messages: Collection<String>): Message {
             })
         }
 
+    }
+
+    private fun String.toMMComponent(): Component {
+        return MiniMessage.builder()
+            .editTags { b ->
+                b.tag("ccmd") { a, b ->
+                    ConsoleCommandMMResolver.resolve(a, b)
+                }
+            }.build().deserialize(
+                this
+            )
     }
 
 }

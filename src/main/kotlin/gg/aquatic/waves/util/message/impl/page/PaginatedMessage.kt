@@ -1,9 +1,13 @@
-package gg.aquatic.waves.util.message.impl
+package gg.aquatic.waves.util.message.impl.page
 
 import gg.aquatic.waves.util.message.Message
-import gg.aquatic.waves.util.toMMComponent
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
+import kotlin.math.ceil
+import kotlin.math.max
+import kotlin.math.min
 
 class PaginatedMessage(
     override var messages: Collection<String>,
@@ -36,16 +40,16 @@ class PaginatedMessage(
         }
 
         if (header != null) {
-            sender.sendMessage(header.toMMComponent())
+            sender.sendMessage(header.toMMComponent(page))
         }
         for (i in startIndex until endIndex) {
             if (i >= messages.size) {
                 break
             }
-            sender.sendMessage(messages.elementAt(i).toMMComponent())
+            sender.sendMessage(messages.elementAt(i).toMMComponent(page))
         }
         if (footer != null) {
-            sender.sendMessage(footer.toMMComponent())
+            sender.sendMessage(footer.toMMComponent(page))
         }
     }
 
@@ -64,5 +68,22 @@ class PaginatedMessage(
         for (onlinePlayer in Bukkit.getOnlinePlayers()) {
             send(onlinePlayer, page)
         }
+    }
+
+    private fun String.toMMComponent(page: Int): Component {
+        return MiniMessage.builder()
+            .editTags { b ->
+                b.tag("ccmd") { a, b ->
+                    ConsoleCommandMMResolver.resolve(a, b)
+                }
+            }.build().deserialize(
+                this
+                    .replace("%aq-page%", page.toString())
+                    .replace("%aq-prev-page%", max((page - 1), 0).toString())
+                    .replace(
+                        "aq-next-page%",
+                        min((ceil(messages.size.toDouble() / pageSize.toDouble()).toInt() - 1), page + 1).toString()
+                    )
+            )
     }
 }

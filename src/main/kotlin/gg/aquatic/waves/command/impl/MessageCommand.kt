@@ -2,7 +2,7 @@ package gg.aquatic.waves.command.impl
 
 import gg.aquatic.waves.command.ICommand
 import gg.aquatic.waves.util.message.Messages
-import gg.aquatic.waves.util.message.impl.PaginatedMessage
+import gg.aquatic.waves.util.message.impl.page.PaginatedMessage
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import kotlin.math.ceil
