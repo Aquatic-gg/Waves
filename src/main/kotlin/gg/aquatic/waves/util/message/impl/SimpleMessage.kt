@@ -1,40 +1,32 @@
-package gg.aquatic.waves.util
+package gg.aquatic.waves.util.message.impl
 
+import gg.aquatic.waves.util.message.Message
+import gg.aquatic.waves.util.toMMComponent
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import java.util.function.Consumer
 
-class Message(var messages: Collection<String>) {
+class SimpleMessage(override var messages: Collection<String>): Message {
 
     constructor(message: String?): this(message?.let { mutableListOf(it) } ?: mutableListOf())
 
-    fun replace(updater: (String) -> String): Message {
+    override fun replace(updater: (String) -> String): SimpleMessage {
         this.messages = messages.map { updater(it) }.toMutableList()
         return this
     }
 
-    fun replace(from: String, to: String): Message {
+    override fun replace(from: String, to: String): SimpleMessage {
         messages = messages.map { it.replace(from, to) }.toMutableList()
         return this
     }
 
-    fun send(player: Player) {
-        if (messages.size == 1 && messages.first().isEmpty()) {
-            return
-        }
-        for (string in messages) {
-            player.sendMessage(string.toMMComponent())
-        }
-    }
-
-    fun send(sender: CommandSender) {
+    override fun send(sender: CommandSender) {
         for (string in messages) {
             sender.sendMessage(string.toMMComponent())
         }
     }
 
-    fun broadcast() {
+    override fun broadcast() {
         if (messages.size == 1 && messages.first().isEmpty() || messages.isEmpty()) {
             return
         }

@@ -7,6 +7,7 @@ import gg.aquatic.waves.api.nms.NMSHandler
 import gg.aquatic.waves.command.AquaticBaseCommand
 import gg.aquatic.waves.command.impl.GeneratePackCommand
 import gg.aquatic.waves.command.impl.ItemConvertCommand
+import gg.aquatic.waves.command.impl.MessageCommand
 import gg.aquatic.waves.command.register
 import gg.aquatic.waves.data.MySqlDriver
 import gg.aquatic.waves.data.SQLiteDriver
@@ -24,6 +25,8 @@ import gg.aquatic.waves.profile.ProfilesModule
 import gg.aquatic.waves.sync.SyncHandler
 import gg.aquatic.waves.sync.SyncSettings
 import gg.aquatic.waves.util.Config
+import gg.aquatic.waves.util.message.impl.EmptyMessage
+import gg.aquatic.waves.util.message.impl.SimpleMessage
 import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -104,9 +107,10 @@ class Waves : WavesPlugin() {
         AquaticBaseCommand(
             "waves", "Waves base command", mutableListOf(),
             mutableMapOf(
+                "configmessage" to MessageCommand,
                 "itemconvert" to ItemConvertCommand,
                 "generatepack" to GeneratePackCommand
-            ), listOf()
+            ), EmptyMessage()
         ).register("waves")
 
         event<PlayerJoinEvent> {

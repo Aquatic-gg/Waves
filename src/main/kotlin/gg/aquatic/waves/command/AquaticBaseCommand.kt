@@ -1,6 +1,6 @@
 package gg.aquatic.waves.command
 
-import net.kyori.adventure.text.Component
+import gg.aquatic.waves.util.message.Message
 import org.bukkit.command.Command
 import org.bukkit.command.CommandSender
 
@@ -9,18 +9,18 @@ class AquaticBaseCommand(
     description: String,
     aliases: MutableList<String>,
     val subCommands: MutableMap<String,ICommand>,
-    val helpMessage: List<Component>
+    val helpMessage: Message
 ) : Command(name, description, "/$name", aliases) {
 
     override fun execute(sender: CommandSender, commandLabel: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
-            helpMessage.forEach { sender.sendMessage(it) }
+            helpMessage.send(sender)
             return true
         }
 
         val cmd = subCommands[args[0]]
         if (cmd == null) {
-            helpMessage.forEach { sender.sendMessage(it) }
+            helpMessage.send(sender)
             return true
         }
         cmd.run(sender, args)
