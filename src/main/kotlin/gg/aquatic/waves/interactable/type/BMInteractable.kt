@@ -53,8 +53,6 @@ class BMInteractable(
 
     init {
         tracker = model.create(location)
-        tracker.setUuid(uuid)
-
         InteractableHandler.bmIntreactables += this
         this.audience = audience
     }

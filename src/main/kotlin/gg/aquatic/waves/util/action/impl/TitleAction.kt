@@ -1,5 +1,6 @@
 package gg.aquatic.waves.util.action.impl
 
+import gg.aquatic.waves.util.action.RegisterAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
@@ -10,6 +11,7 @@ import net.kyori.adventure.title.Title
 import org.bukkit.entity.Player
 import java.time.Duration
 
+@RegisterAction("title")
 class TitleAction : Action<Player> {
 
     override fun execute(binder: Player, args: ObjectArguments, textUpdater: (Player, String) -> String) {

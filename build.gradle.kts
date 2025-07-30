@@ -1,7 +1,7 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.2.0"
     `maven-publish`
     java
     id("com.gradleup.shadow") version "9.0.0-beta11"
@@ -122,7 +122,7 @@ dependencies {
     implementation("net.kyori:adventure-text-minimessage:4.20.0")
     implementation("net.kyori:adventure-api:4.20.0")
     compileOnly("com.willfp:eco:6.74.5")
-    compileOnly("io.github.toxicity188:BetterModel:1.8.0")
+    compileOnly("io.github.toxicity188:BetterModel:1.10.1")
     implementation("org.bstats:bstats-bukkit:3.1.0")
 
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")

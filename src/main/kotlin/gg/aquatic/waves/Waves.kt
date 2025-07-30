@@ -25,8 +25,10 @@ import gg.aquatic.waves.profile.ProfilesModule
 import gg.aquatic.waves.sync.SyncHandler
 import gg.aquatic.waves.sync.SyncSettings
 import gg.aquatic.waves.util.Config
+import gg.aquatic.waves.util.action.ActionAnnotationProcessor
 import gg.aquatic.waves.util.message.impl.EmptyMessage
 import gg.aquatic.waves.util.message.impl.SimpleMessage
+import gg.aquatic.waves.util.runLaterSync
 import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -118,6 +120,10 @@ class Waves : WavesPlugin() {
         }
         event<PlayerQuitEvent> {
             NMS_HANDLER.unregisterPacketListener(it.player)
+        }
+
+        runLaterSync(100) {
+            ActionAnnotationProcessor.process("gg.aquatic.waves.util.action.impl")
         }
     }
 
