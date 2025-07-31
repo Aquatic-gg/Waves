@@ -20,7 +20,13 @@ interface CfgMessageHandler: MessageHandler {
             } else if (cfg.isList(path)) {
                 SimpleMessage((value as List<*>).map { it.toString() })
             } else {
-                val section = cfg.getConfigurationSection(path)!!
+                val section = cfg.getConfigurationSection(path)
+                if (section == null) {
+                    if (value is List<*>) {
+                        return SimpleMessage(value as List<String>)
+                    }
+                    return SimpleMessage(value.toString())
+                }
                 val isPaginated = section.getBoolean("paginated", false)
 
                 if (isPaginated) {

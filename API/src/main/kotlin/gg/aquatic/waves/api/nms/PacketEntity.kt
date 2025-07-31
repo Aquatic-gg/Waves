@@ -56,6 +56,9 @@ class PacketEntity(
     }
 
     fun sendEquipmentUpdate(nmsHandler: NMSHandler, vararg players: Player) {
+        if (equipment.isEmpty()) {
+            return
+        }
         for (player in players) {
             player.sendEquipmentChange(
                 bukkitEntity(nmsHandler) as? LivingEntity ?: return,
