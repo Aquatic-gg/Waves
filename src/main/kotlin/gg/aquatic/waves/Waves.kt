@@ -102,6 +102,7 @@ class Waves : WavesPlugin() {
             module.initialize(this@Waves)
         }
         PackHandler.loadPack()
+        ActionAnnotationProcessor.process("gg.aquatic.waves.util.action.impl")
 
         initialized = true
         WavesInitializeEvent().call()
@@ -120,10 +121,6 @@ class Waves : WavesPlugin() {
         }
         event<PlayerQuitEvent> {
             NMS_HANDLER.unregisterPacketListener(it.player)
-        }
-
-        runLaterSync(100) {
-            ActionAnnotationProcessor.process("gg.aquatic.waves.util.action.impl")
         }
     }
 
