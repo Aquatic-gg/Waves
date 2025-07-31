@@ -6,7 +6,7 @@ import org.yaml.snakeyaml.external.biz.base64Coder.Base64Coder
 object ItemEncoder {
 
     fun encode(itemStack: ItemStack): String {
-        return String(Base64Coder.encode(itemStack.serializeAsBytes()))
+        return String(Base64Coder.encode(itemStack.ensureServerConversions().serializeAsBytes()))
     }
 
     fun decode(base64: String): ItemStack {
@@ -15,7 +15,7 @@ object ItemEncoder {
 
 
     fun encodeItems(items: List<ItemStack>): String {
-        return String(ItemStack.serializeItemsAsBytes(items), Charsets.UTF_8)
+        return String(ItemStack.serializeItemsAsBytes(items.map { it.ensureServerConversions() }), Charsets.UTF_8)
     }
 
     fun decodeItems(base64: String): List<ItemStack> {
