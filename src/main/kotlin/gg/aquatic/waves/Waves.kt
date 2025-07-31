@@ -94,6 +94,7 @@ class Waves : WavesPlugin() {
             }
         }
 
+        ActionAnnotationProcessor.process("gg.aquatic.waves.util.action.impl")
         loadConfig()
     }
 
@@ -102,7 +103,6 @@ class Waves : WavesPlugin() {
             module.initialize(this@Waves)
         }
         PackHandler.loadPack()
-        ActionAnnotationProcessor.process("gg.aquatic.waves.util.action.impl")
 
         initialized = true
         WavesInitializeEvent().call()
