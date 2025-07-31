@@ -4,6 +4,7 @@ import gg.aquatic.waves.Waves
 import gg.aquatic.waves.registry.WavesRegistry
 import gg.aquatic.waves.util.generic.Action
 import gg.aquatic.waves.util.generic.ExecutableAnnotationProcessor
+import java.util.concurrent.ConcurrentHashMap
 
 object ActionAnnotationProcessor {
 
@@ -15,7 +16,7 @@ object ActionAnnotationProcessor {
             Action::class.java,
             { ann -> ann.id },
             { id, inst, binderClass ->
-                WavesRegistry.ACTION.getOrPut(binderClass) { hashMapOf() } += id to inst
+                WavesRegistry.ACTION.getOrPut(binderClass) { ConcurrentHashMap() } += id to inst
             }) {
             val logger = Waves.INSTANCE.logger
 

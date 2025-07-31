@@ -1,9 +1,10 @@
 package gg.aquatic.waves.registry
 
 import gg.aquatic.waves.util.generic.Action
+import java.util.concurrent.ConcurrentHashMap
 
 inline fun <reified T: Any> WavesRegistry.registerAction(id: String, action: Action<T>) {
-    val map = ACTION.getOrPut(T::class.java) { HashMap() }
+    val map = ACTION.getOrPut(T::class.java) { ConcurrentHashMap() }
     map += id to action
 }
 

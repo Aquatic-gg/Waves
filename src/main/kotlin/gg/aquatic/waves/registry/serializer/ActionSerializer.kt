@@ -1,7 +1,6 @@
 package gg.aquatic.waves.registry.serializer
 
 import gg.aquatic.waves.registry.WavesRegistry
-import gg.aquatic.waves.registry.getAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.generic.Action
@@ -10,7 +9,7 @@ import org.bukkit.configuration.ConfigurationSection
 
 object ActionSerializer {
 
-    inline fun <reified T : Any> fromSection(
+    inline fun <reified T : Any> fromSectionSimple(
         section: ConfigurationSection,
     ): ConfiguredExecutableObject<T, Unit>? {
         val type = section.getString("type") ?: return null
@@ -41,15 +40,17 @@ object ActionSerializer {
         return configuredAction
     }
 
-    inline fun <reified T : Any> fromSections(sections: List<ConfigurationSection>): List<ConfiguredExecutableObject<T, Unit>> {
+    /*
+    private inline fun <reified T : Any> fromSections(sections: List<ConfigurationSection>): List<ConfiguredExecutableObject<T, Unit>> {
         return sections.mapNotNull { fromSection(it) }
     }
+     */
 
     inline fun <reified T : Any> fromSection(
         section: ConfigurationSection,
         vararg classTransforms: ClassTransform<T, *>,
     ): ConfiguredExecutableObject<T, Unit>? {
-        val action = fromSection<T>(section)
+        val action = fromSectionSimple<T>(section)
         if (action != null) return action
         val type = section.getString("type") ?: return null
 

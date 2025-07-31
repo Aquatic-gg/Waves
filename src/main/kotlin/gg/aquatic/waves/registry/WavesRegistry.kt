@@ -24,13 +24,14 @@ import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import java.util.concurrent.ConcurrentHashMap
 
 object WavesRegistry {
 
     val INDEX_TO_CURRENCY = HashMap<Int, RegisteredCurrency>()
     val ECONOMY = HashMap<String, Currency>()
-    val ACTION = HashMap<Class<*>, MutableMap<String, Action<*>>>().apply {
-        val p = getOrPut(Player::class.java) { HashMap() }
+    val ACTION = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Action<*>>>().apply {
+        val p = getOrPut(Player::class.java) { ConcurrentHashMap() }
         //p["actionbar"] = ActionbarAction()
         //p["bossbar"] = BossbarAction()
         //p["broadcast"] = BroadcastAction()
@@ -41,7 +42,7 @@ object WavesRegistry {
         //p["sound"] = SoundAction()
         //p["discord-webhook"] = DiscordWebhookAction()
     }
-    val REQUIREMENT = HashMap<Class<*>, MutableMap<String, Condition<*>>>().apply {
+    val REQUIREMENT = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Condition<*>>>().apply {
         //val p = getOrPut(Player::class.java) { HashMap() }
         //p += "expression" to ExpressionPlayerRequirement()
     }
@@ -85,40 +86,13 @@ object WavesRegistry {
         "animated" to AnimatedHologramLine.Companion,
     )
 
-    val ENTITY_DATA = HashMap<Class<out Entity>, HashMap<String, EntityData>>()
+    val ENTITY_DATA = ConcurrentHashMap<Class<out Entity>, ConcurrentHashMap<String, EntityData>>()
     //val ENTITY_DATA = HashMap<String, EntityData>()
 
     init {
         registerEntityData("gg.aquatic.waves.fake.entity.data.impl")
     }
 
-    private fun Float.toRadians() = Math.toRadians(this.toDouble()).toFloat()
-
-    private fun ConfigurationSection.updatedBoolean(
-        id: String,
-        updater: (String) -> String
-    ): Boolean {
-        return this.getString(id)!!.let {
-            updater(it).toBoolean()
-        }
-    }
-
-    private fun ConfigurationSection.updatedInt(
-        id: String,
-        updater: (String) -> String
-    ): Int {
-        return this.getString(id)!!.let {
-            updater(it).toInt()
-        }
-    }
-    private fun ConfigurationSection.updatedDouble(
-        id: String,
-        updater: (String) -> String
-    ): Double {
-        return this.getString(id)!!.let {
-            updater(it).toDouble()
-        }
-    }
     val ITEM = HashMap<String, AquaticItem>()
 
     val STATISTIC_TYPES = HashMap<Class<*>, MutableMap<String, StatisticType<*>>>().apply {
