@@ -26,7 +26,8 @@ object ActionSerializer {
 
         val action = actions[type]
         if (action == null) {
-            val voidAction = WavesRegistry.ACTION[Unit::class.java] ?: return null
+            val voidActions = WavesRegistry.ACTION[Unit::class.java] ?: return null
+            val voidAction = voidActions[type] ?: return null
             val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> {} }
 
             val args = AquaticObjectArgument.loadRequirementArguments(section, voidAction.arguments)
@@ -88,7 +89,8 @@ object ActionSerializer {
         fun createTransformedAction(id: String): TransformedAction<T, D>? {
             val action = registeredActions[id]
             if (action == null) {
-                val voidAction = WavesRegistry.ACTION[Unit::class.java] ?: return null
+                val voidActions = WavesRegistry.ACTION[Unit::class.java] ?: return null
+                val voidAction = voidActions[id] ?: return null
                 return TransformedAction(TransformedAction(voidAction as Action<Unit>) { d -> {} }, transform)
             }
             return TransformedAction(action as Action<D>, transform)

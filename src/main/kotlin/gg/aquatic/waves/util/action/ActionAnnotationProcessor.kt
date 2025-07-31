@@ -7,8 +7,9 @@ import gg.aquatic.waves.util.generic.ExecutableAnnotationProcessor
 
 object ActionAnnotationProcessor {
 
-    fun process(pckg: String) {
+    fun process(plugin: Any,pckg: String) {
         ExecutableAnnotationProcessor.process(
+            plugin,
             RegisterAction::class.java,
             pckg,
             Action::class.java,

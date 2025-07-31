@@ -12,7 +12,7 @@ object RequirementSerializer {
         val type = section.getString("type") ?: return null
         val requirement = WavesRegistry.getRequirement<T>(type)
         if (requirement == null) {
-            println("[Waves] Action type $type does not exist!")
+            println("[Waves] Requirement type $type does not exist!")
             return null
         }
 

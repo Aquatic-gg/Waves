@@ -94,7 +94,7 @@ class Waves : WavesPlugin() {
             }
         }
 
-        ActionAnnotationProcessor.process("gg.aquatic.waves.util.action.impl")
+        ActionAnnotationProcessor.process(this,"gg.aquatic.waves.util.action.impl")
         loadConfig()
     }
 

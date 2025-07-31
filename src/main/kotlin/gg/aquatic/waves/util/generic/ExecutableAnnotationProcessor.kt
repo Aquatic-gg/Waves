@@ -8,6 +8,7 @@ import java.lang.reflect.Modifier
 object ExecutableAnnotationProcessor {
 
     internal inline fun <T : ExecutableObject<*, *>, reified D : Annotation> process(
+        plugin: Any,
         annotationClass: Class<D>,
         pckg: String,
         executableClass: Class<T>,
@@ -17,7 +18,7 @@ object ExecutableAnnotationProcessor {
     ) {
         val logger = Waves.INSTANCE.logger
         logger.info("Trying to register Executables in the $pckg package... Please make sure your classes are annotated with the @${annotationClass.name} annotation!")
-        val annotatedClasses = AnnotationLookup.lookup<D>(pckg)
+        val annotatedClasses = AnnotationLookup.lookup<D>(plugin,pckg)
         logger.info("Found ${annotatedClasses.size} classes with @${annotationClass.name}")
         for (clazz in annotatedClasses) {
             try {
@@ -41,6 +42,8 @@ object ExecutableAnnotationProcessor {
                         GenericTypeResolver.findGenericParameter(clazz, ExecutableObject::class.java, 0) ?: continue
                     register(id, executableClass.cast(instance) ?: continue, binderClass)
                     logger.info("Registered executable: $id for ${clazz.simpleName}<${binderClass.simpleName}>")
+                } else {
+                    logger.warning("Failed to register ${clazz.name}: is not an instance of ${executableClass.name}")
                 }
             } catch (e: Exception) {
                 errorHandler.handleTryCatch(clazz, e)
@@ -52,6 +55,7 @@ object ExecutableAnnotationProcessor {
     }
 
     internal inline fun <T : ExecutableObject<*, *>, reified D : Annotation> process(
+        plugin: Any,
         annotationClass: Class<D>,
         pckg: String,
         executableClass: Class<T>,
@@ -59,7 +63,7 @@ object ExecutableAnnotationProcessor {
         register: (String, T, Class<*>) -> Unit,
         noinline errorHandler: ErrorHandlerBuilder.() -> Unit,
     ) {
-        process(annotationClass, pckg, executableClass, idRetriever, register, this.errorHandler(errorHandler))
+        process(plugin,annotationClass, pckg, executableClass, idRetriever, register, this.errorHandler(errorHandler))
     }
 
     interface AnnotationLookupErrorHandler {
