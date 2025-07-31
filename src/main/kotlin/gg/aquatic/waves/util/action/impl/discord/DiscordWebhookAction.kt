@@ -7,13 +7,12 @@ import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
 import gg.aquatic.waves.util.runAsync
 import me.micartey.webhookly.DiscordWebhook
-import org.bukkit.entity.Player
 
 @RegisterAction("discord-webhook")
-class DiscordWebhookAction : Action<Player> {
+class DiscordWebhookAction : Action<Unit> {
 
     @Suppress("UNCHECKED_CAST")
-    override fun execute(binder: Player, args: ObjectArguments, textUpdater: (Player, String) -> String) {
+    override fun execute(binder: Unit, args: ObjectArguments, textUpdater: (Unit, String) -> String) {
         val url = args.string("url") { str -> textUpdater(binder, str) } ?: return
         val content = args.string("content") { str -> textUpdater(binder, str) } ?: return
         val username = args.string("username") { str -> textUpdater(binder, str) } ?: return

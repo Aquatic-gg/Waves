@@ -6,7 +6,6 @@ import gg.aquatic.waves.util.getSectionList
 import me.micartey.webhookly.embeds.*
 import org.bukkit.configuration.ConfigurationSection
 import java.awt.Color
-import java.time.OffsetDateTime
 
 class DiscordEmbedArgument(id: String, defaultValue: List<WavesEmbedObject>?, required: Boolean) :
     AquaticObjectArgument<List<DiscordEmbedArgument.WavesEmbedObject>>(

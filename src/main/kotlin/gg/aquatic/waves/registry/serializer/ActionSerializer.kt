@@ -14,11 +14,29 @@ object ActionSerializer {
         section: ConfigurationSection,
     ): ConfiguredExecutableObject<T, Unit>? {
         val type = section.getString("type") ?: return null
-        val action = WavesRegistry.getAction<T>(type) ?: return null
+        //val action = WavesRegistry.getAction<T>(type) ?: return null
+
+        val actions = WavesRegistry.ACTION[T::class.java] ?: HashMap()
+        for (klass in WavesRegistry.ACTION.keys) {
+            if (klass == T::class.java) continue
+            if (klass.isAssignableFrom(T::class.java)) {
+                actions += WavesRegistry.ACTION[klass] ?: HashMap()
+            }
+        }
+
+        val action = actions[type]
+        if (action == null) {
+            val voidAction = WavesRegistry.ACTION[Unit::class.java] ?: return null
+            val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> {} }
+
+            val args = AquaticObjectArgument.loadRequirementArguments(section, voidAction.arguments)
+            val configuredAction = ConfiguredExecutableObject(action as Action<T>, args)
+            return configuredAction
+        }
 
         val args = AquaticObjectArgument.loadRequirementArguments(section, action.arguments)
 
-        val configuredAction = ConfiguredExecutableObject(action, args)
+        val configuredAction = ConfiguredExecutableObject(action as Action<T>, args)
         return configuredAction
     }
 
@@ -30,22 +48,17 @@ object ActionSerializer {
         section: ConfigurationSection,
         vararg classTransforms: ClassTransform<T, *>,
     ): ConfiguredExecutableObject<T, Unit>? {
+        val action = fromSection<T>(section)
+        if (action != null) return action
         val type = section.getString("type") ?: return null
 
-        val action = WavesRegistry.getAction<T>(type)
-        if (action == null) {
-            for (transform in classTransforms) {
-                val tranformAction = transform.createTransformedAction(type) ?: continue
-                val args = AquaticObjectArgument.loadRequirementArguments(section, tranformAction.arguments)
-                val configuredAction = ConfiguredExecutableObject(tranformAction, args)
-                return configuredAction
-            }
-            return null
+        for (transform in classTransforms) {
+            val tranformAction = transform.createTransformedAction(type) ?: continue
+            val args = AquaticObjectArgument.loadRequirementArguments(section, tranformAction.arguments)
+            val configuredAction = ConfiguredExecutableObject(tranformAction, args)
+            return configuredAction
         }
-        val args = AquaticObjectArgument.loadRequirementArguments(section, action.arguments)
-
-        val configuredAction = ConfiguredExecutableObject(action, args)
-        return configuredAction
+        return null
     }
 
     inline fun <reified T : Any> fromSections(
@@ -73,7 +86,11 @@ object ActionSerializer {
             }
 
         fun createTransformedAction(id: String): TransformedAction<T, D>? {
-            val action = registeredActions[id] ?: return null
+            val action = registeredActions[id]
+            if (action == null) {
+                val voidAction = WavesRegistry.ACTION[Unit::class.java] ?: return null
+                return TransformedAction(TransformedAction(voidAction as Action<Unit>) { d -> {} }, transform)
+            }
             return TransformedAction(action as Action<D>, transform)
         }
     }
