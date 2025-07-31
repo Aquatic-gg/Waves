@@ -25,9 +25,10 @@ object ActionSerializer {
 
         val action = actions[type]
         if (action == null) {
+            if (T::class.java == Unit::class.java) return null
             val voidActions = WavesRegistry.ACTION[Unit::class.java] ?: return null
             val voidAction = voidActions[type] ?: return null
-            val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> {} }
+            val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> let {  } }
 
             val args = AquaticObjectArgument.loadRequirementArguments(section, voidAction.arguments)
             val configuredAction = ConfiguredExecutableObject(action as Action<T>, args)
@@ -90,21 +91,22 @@ object ActionSerializer {
         fun createTransformedAction(id: String): TransformedAction<T, D>? {
             val action = registeredActions[id]
             if (action == null) {
+                if (clazz == Unit::class.java) return null
                 val voidActions = WavesRegistry.ACTION[Unit::class.java] ?: return null
                 val voidAction = voidActions[id] ?: return null
-                return TransformedAction(TransformedAction(voidAction as Action<Unit>) { d -> {} }, transform)
+                return TransformedAction(TransformedAction(voidAction as Action<Unit>) { d -> let {  } }, transform)
             }
             return TransformedAction(action as Action<D>, transform)
         }
     }
 
-    class TransformedAction<T : Any, D : Any>(val externalAction: Action<D>, val transform: (T) -> D) : Action<T> {
+    class TransformedAction<T : Any, D : Any>(val externalAction: Action<D>, val transform: (T) -> D?) : Action<T> {
         override fun execute(
             binder: T,
             args: ObjectArguments,
             textUpdater: (T, String) -> String,
         ) {
-            val transformed = transform(binder)
+            val transformed = transform(binder) ?: return
             externalAction.execute(transformed, args) { d, str -> textUpdater(binder, str) }
         }
 
