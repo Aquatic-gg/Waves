@@ -3,7 +3,6 @@ package gg.aquatic.waves.util.action.impl
 import gg.aquatic.waves.util.action.RegisterAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
-import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.bossbar.AquaticBossBar
 import gg.aquatic.waves.util.generic.Action
 import gg.aquatic.waves.util.runLaterSync
@@ -31,6 +30,14 @@ class BossbarAction : Action<Player> {
         }
     }
 
+    override val arguments: List<AquaticObjectArgument<*>> = arguments {
+        primitive("message", "", true)
+        primitive("progress", 0.0f)
+        primitive("color", "BLUE")
+        primitive("style", "SOLID")
+        primitive("duration", 60, true)
+    }
+    /*
     override val arguments: List<AquaticObjectArgument<*>> = listOf(
         PrimitiveObjectArgument("message", "", true),
         PrimitiveObjectArgument("progress", 0.0, false),
@@ -38,4 +45,6 @@ class BossbarAction : Action<Player> {
         PrimitiveObjectArgument("style", "SOLID", false),
         PrimitiveObjectArgument("duration", 60, true)
     )
+
+     */
 }

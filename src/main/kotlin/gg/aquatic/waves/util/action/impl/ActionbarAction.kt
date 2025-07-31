@@ -3,7 +3,6 @@ package gg.aquatic.waves.util.action.impl
 import gg.aquatic.waves.util.action.RegisterAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
-import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
 import gg.aquatic.waves.util.toMMComponent
 import gg.aquatic.waves.util.updatePAPIPlaceholders
@@ -17,5 +16,5 @@ class ActionbarAction : Action<Player> {
         binder.sendActionBar(textUpdater(binder, message).toMMComponent())
     }
 
-    override val arguments: List<AquaticObjectArgument<*>> = listOf(PrimitiveObjectArgument("message", "", true))
+    override val arguments: List<AquaticObjectArgument<*>> = arguments { primitive("message", "", true) }
 }

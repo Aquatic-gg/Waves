@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "gg.aquatic.waves"
-version = "1.2.26"
+version = "1.2.27"
 
 val ktor_version: String by project
 
