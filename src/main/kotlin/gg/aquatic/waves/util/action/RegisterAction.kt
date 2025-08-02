@@ -5,5 +5,6 @@ package gg.aquatic.waves.util.action
 @Retention(AnnotationRetention.RUNTIME)
 @Suppress("unused")
 annotation class RegisterAction(
-    val id: String
+    val id: String,
+    vararg val aliases: String = []
 )

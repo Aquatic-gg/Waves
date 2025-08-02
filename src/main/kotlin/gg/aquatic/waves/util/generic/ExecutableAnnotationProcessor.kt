@@ -13,17 +13,19 @@ object ExecutableAnnotationProcessor {
         pckg: String,
         executableClass: Class<T>,
         idRetriever: (D) -> String,
+        aliasesRetriever: (D) -> Array<out String>,
         register: (String, T, Class<*>) -> Unit,
         errorHandler: AnnotationLookupErrorHandler,
     ) {
         val logger = Waves.INSTANCE.logger
         logger.info("Trying to register Executables in the $pckg package... Please make sure your classes are annotated with the @${annotationClass.name} annotation!")
-        val annotatedClasses = AnnotationLookup.lookup<D>(plugin,pckg)
+        val annotatedClasses = AnnotationLookup.lookup<D>(plugin, pckg)
         logger.info("Found ${annotatedClasses.size} classes with @${annotationClass.name}")
         for (clazz in annotatedClasses) {
             try {
                 val annotation = clazz.getAnnotation(annotationClass) ?: continue
                 val id = idRetriever(annotation)
+                val aliases = aliasesRetriever(annotation)
 
                 if (Modifier.isAbstract(clazz.modifiers) || clazz.isInterface) {
                     errorHandler.handleNonClass(clazz)
@@ -41,7 +43,10 @@ object ExecutableAnnotationProcessor {
                     val binderClass =
                         GenericTypeResolver.findGenericParameter(clazz, ExecutableObject::class.java, 0) ?: continue
                     register(id, executableClass.cast(instance) ?: continue, binderClass)
-                    logger.info("Registered executable: $id for ${clazz.simpleName}<${binderClass.simpleName}>")
+                    for (string in aliases) {
+                        register(string, executableClass.cast(instance) ?: continue, binderClass)
+                    }
+                    logger.info("Registered executable: $id ${if (aliases.isNotEmpty()) "[${aliases.joinToString(", ")}]" else ""} for ${clazz.simpleName}<${binderClass.simpleName}>")
                 } else {
                     logger.warning("Failed to register ${clazz.name}: is not an instance of ${executableClass.name}")
                 }
@@ -60,10 +65,20 @@ object ExecutableAnnotationProcessor {
         pckg: String,
         executableClass: Class<T>,
         idRetriever: (D) -> String,
+        aliasesRetriever: (D) -> Array<out String>,
         register: (String, T, Class<*>) -> Unit,
         noinline errorHandler: ErrorHandlerBuilder.() -> Unit,
     ) {
-        process(plugin,annotationClass, pckg, executableClass, idRetriever, register, this.errorHandler(errorHandler))
+        process(
+            plugin,
+            annotationClass,
+            pckg,
+            executableClass,
+            idRetriever,
+            aliasesRetriever,
+            register,
+            this.errorHandler(errorHandler)
+        )
     }
 
     interface AnnotationLookupErrorHandler {

@@ -7,7 +7,7 @@ import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
 import org.bukkit.entity.Player
 
-@RegisterAction("sound")
+@RegisterAction("sound","play-sound")
 class SoundAction : Action<Player> {
     override fun execute(binder: Player, args: ObjectArguments, textUpdater: (Player, String) -> String) {
         val sound = args.string("sound") { str -> textUpdater(binder, str) } ?: return

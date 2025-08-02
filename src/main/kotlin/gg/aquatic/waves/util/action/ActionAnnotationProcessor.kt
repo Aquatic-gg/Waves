@@ -9,16 +9,21 @@ import java.util.concurrent.ConcurrentHashMap
 object ActionAnnotationProcessor {
 
     fun process(plugin: Any,pckg: String) {
+        val logger = Waves.INSTANCE.logger
         ExecutableAnnotationProcessor.process(
             plugin,
             RegisterAction::class.java,
             pckg,
             Action::class.java,
             { ann -> ann.id },
+            { ann -> ann.aliases},
             { id, inst, binderClass ->
-                WavesRegistry.ACTION.getOrPut(binderClass) { ConcurrentHashMap() } += id to inst
+                val map = WavesRegistry.ACTION.getOrPut(binderClass) { ConcurrentHashMap() }
+                if (map.containsKey(id)) {
+                    logger.warning("Action with ID of $id has a duplicated Key! Such Action ID was already used by ${map[id]!!.javaClass.name}")
+                }
+                map += id to inst
             }) {
-            val logger = Waves.INSTANCE.logger
 
             this.onNonClass {
                 logger.warning("Failed to register ${it.name}: is abstract or an interface")
