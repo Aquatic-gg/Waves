@@ -16,7 +16,7 @@ object AnnotationLookup {
                     ClasspathHelper.forPackage(pckg, classLoader)
                 ).setScanners(
                     Scanners.TypesAnnotated, Scanners.SubTypes
-                ).addClassLoaders(classLoader)
+                ).setClassLoaders(arrayOf(classLoader))
         )
         val annotatedClasses = reflections.getTypesAnnotatedWith(T::class.java)
         classLoader.close()
