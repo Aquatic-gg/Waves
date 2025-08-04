@@ -11,7 +11,13 @@ import org.bukkit.configuration.file.FileConfiguration
 
 object MessageSerializer {
 
+    private val previousMessages = HashSet<String>()
+
     fun loadWavesCustomMessages() {
+        for (string in previousMessages) {
+            Messages.registeredMessages.remove(string)
+        }
+        previousMessages.clear()
         val files = Waves.INSTANCE.dataFolder.resolve("custom-messages").apply { mkdirs() }.deepFilesLookup { it.extension == "yml" }
         for (file in files) {
             val config = Config(file, Waves.INSTANCE)
@@ -23,6 +29,7 @@ object MessageSerializer {
     internal fun loadWavesCustomMessages(config: Config) {
         val cfg = config.getConfiguration()!!
         for (key in cfg.getKeys(false)) {
+            previousMessages += "waves:$key"
             Messages.registeredMessages["waves:$key"] = {
                 loadMessageInstance(cfg,key,"")
             }
