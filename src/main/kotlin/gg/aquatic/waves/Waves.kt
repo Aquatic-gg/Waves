@@ -8,6 +8,7 @@ import gg.aquatic.waves.command.AquaticBaseCommand
 import gg.aquatic.waves.command.impl.GeneratePackCommand
 import gg.aquatic.waves.command.impl.ItemConvertCommand
 import gg.aquatic.waves.command.impl.MessageCommand
+import gg.aquatic.waves.command.impl.ReloadMessagesCommand
 import gg.aquatic.waves.command.register
 import gg.aquatic.waves.data.MySqlDriver
 import gg.aquatic.waves.data.SQLiteDriver
@@ -111,6 +112,7 @@ class Waves : WavesPlugin() {
             "waves", "Waves base command", mutableListOf(),
             mutableMapOf(
                 "configmessage" to MessageCommand,
+                "reloadmessages" to ReloadMessagesCommand,
                 "itemconvert" to ItemConvertCommand,
                 "generatepack" to GeneratePackCommand
             ), EmptyMessage()
