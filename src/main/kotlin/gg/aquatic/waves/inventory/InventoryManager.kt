@@ -69,49 +69,58 @@ object InventoryManager : WavesModule {
             //updateInventoryContent(inventory, viewer)
         }
         event<PacketContainerClickEvent> { event ->
-            if (shouldIgnore(event.containerId, event.player)) return@event
-            event.isCancelled = true
-
-            val inventory = openedInventories[event.player] ?: return@event
-            val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
-
-            val clickData = getClickType(event, viewer)
-            val player = event.player
-            if (clickData.second == ClickType.DRAG_START || clickData.second == ClickType.DRAG_ADD) {
-                accumulateDrag(player, event, clickData.second)
-                return@event
-            }
-            if (event.slotNum == -999) {
-                inventory.updateItems(player)
+            try {
+                if (shouldIgnore(event.containerId, event.player)) return@event
                 event.isCancelled = true
-                return@event
-            }
-            val changedSlots = event.changedSlots.mapValues {
-                inventory.content[it.key] ?: player.inventory.getItem(playerSlotFromMenuSlot(it.key, inventory))
-                ?: ItemStack.empty()
-            }
 
-            val menuClickData = isMenuClick(event, Pair(clickData.first, clickData.second), player)
-            if (menuClickData) {
-                handleClickMenu(WindowClick(player, clickData.second, event.slotNum))
-                val event = AsyncPacketInventoryInteractEvent(
-                    viewer,
-                    inventory,
-                    event.slotNum,
-                    clickData.first,
-                    ItemStack.empty(),
-                    changedSlots
-                )
-                event.call()
-            } else { // isInventoryClick
-                handleClickInventory(
-                    player,
-                    event,
-                    clickData.second,
-                    changedSlots
-                )
+                val inventory = openedInventories[event.player] ?: return@event
+                val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
+
+                val clickData = getClickType(event, viewer)
+                val player = event.player
+                if (clickData.second == ClickType.DRAG_START || clickData.second == ClickType.DRAG_ADD) {
+                    accumulateDrag(player, event, clickData.second)
+                    return@event
+                }
+                if (event.slotNum == -999) {
+                    inventory.updateItems(player)
+                    event.isCancelled = true
+                    return@event
+                }
+                val changedSlots = event.changedSlots.mapValues {
+                    val playerSlot = playerSlotFromMenuSlot(it.key, inventory)
+                    val invContent = inventory.content[playerSlot]
+                    if (invContent != null) return@mapValues invContent
+
+                    if (playerSlot < -1) return@mapValues ItemStack.empty()
+                    player.inventory.getItem(playerSlotFromMenuSlot(it.key, inventory)) ?: ItemStack.empty()
+                }
+
+                val menuClickData = isMenuClick(event, Pair(clickData.first, clickData.second), player)
+                if (menuClickData) {
+                    handleClickMenu(WindowClick(player, clickData.second, event.slotNum))
+                    val event = AsyncPacketInventoryInteractEvent(
+                        viewer,
+                        inventory,
+                        event.slotNum,
+                        clickData.first,
+                        ItemStack.empty(),
+                        changedSlots
+                    )
+                    event.call()
+                } else { // isInventoryClick
+                    handleClickInventory(
+                        player,
+                        event,
+                        clickData.second,
+                        changedSlots
+                    )
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
+
     }
 
     override fun disable(waves: Waves) {
@@ -171,7 +180,12 @@ object InventoryManager : WavesModule {
         }
     }
 
-    fun handleClickInventory(player: Player, packet: PacketContainerClickEvent, clickType: ClickType, changedSlots: Map<Int, ItemStack>) {
+    fun handleClickInventory(
+        player: Player,
+        packet: PacketContainerClickEvent,
+        clickType: ClickType,
+        changedSlots: Map<Int, ItemStack>,
+    ) {
         val menu = openedInventories[player] ?: error("Menu under player key not found.")
         updateCarriedItem(player, null, clickType)
 
@@ -300,7 +314,7 @@ object InventoryManager : WavesModule {
         packet: PacketContainerClickEvent,
         inventory: PacketInventory,
         player: Player,
-        changedSlots: Map<Int, ItemStack>
+        changedSlots: Map<Int, ItemStack>,
     ) {
         val slotOffset = if (packet.slotNum != -999) packet.slotNum - inventory.type.size + 9 else -999
         val adjustedSlots = changedSlots.mapKeys { (slot, _) ->

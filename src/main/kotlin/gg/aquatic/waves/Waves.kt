@@ -17,6 +17,7 @@ import gg.aquatic.waves.input.InputModule
 import gg.aquatic.waves.interactable.InteractableHandler
 import gg.aquatic.waves.item.ItemHandler
 import gg.aquatic.waves.menu.MenuHandler
+import gg.aquatic.waves.message.MessageSerializer
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.nms_1_21_4.NMSHandlerImpl
@@ -27,8 +28,6 @@ import gg.aquatic.waves.sync.SyncSettings
 import gg.aquatic.waves.util.Config
 import gg.aquatic.waves.util.action.ActionAnnotationProcessor
 import gg.aquatic.waves.util.message.impl.EmptyMessage
-import gg.aquatic.waves.util.message.impl.SimpleMessage
-import gg.aquatic.waves.util.runLaterSync
 import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -96,6 +95,7 @@ class Waves : WavesPlugin() {
 
         ActionAnnotationProcessor.process(this,"gg.aquatic.waves.util.action.impl")
         loadConfig()
+        MessageSerializer.loadWavesCustomMessages()
     }
 
     override fun onEnable() {
