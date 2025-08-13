@@ -27,22 +27,8 @@ object WavesRegistry {
 
     val INDEX_TO_CURRENCY = HashMap<Int, RegisteredCurrency>()
     val ECONOMY = HashMap<String, Currency>()
-    val ACTION = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Action<*>>>().apply {
-        val p = getOrPut(Player::class.java) { ConcurrentHashMap() }
-        //p["actionbar"] = ActionbarAction()
-        //p["bossbar"] = BossbarAction()
-        //p["broadcast"] = BroadcastAction()
-        //p["command"] = CommandAction()
-        //p["giveitem"] = GiveItemAction()
-        //p["message"] = MessageAction()
-        //p["title"] = TitleAction()
-        //p["sound"] = SoundAction()
-        //p["discord-webhook"] = DiscordWebhookAction()
-    }
-    val REQUIREMENT = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Condition<*>>>().apply {
-        //val p = getOrPut(Player::class.java) { HashMap() }
-        //p += "expression" to ExpressionPlayerRequirement()
-    }
+    val ACTION = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Action<*>>>()
+    val REQUIREMENT = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Condition<*>>>()
     val PRICE by lazy {
         HashMap<Class<*>, MutableMap<String, AbstractPrice<*>>>().apply {
             val p = getOrPut(Player::class.java) { HashMap() }
