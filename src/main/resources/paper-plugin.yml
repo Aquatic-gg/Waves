@@ -20,6 +20,9 @@ dependencies:
     PlaceholderAPI:
       load: BEFORE
       required: false
+    CraftEngine:
+      load: BEFORE
+      required: false
     Nexo:
       load: BEFORE
       required: false

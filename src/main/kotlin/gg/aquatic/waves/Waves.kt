@@ -115,7 +115,7 @@ class Waves : WavesPlugin() {
                 "reloadmessages" to ReloadMessagesCommand,
                 "itemconvert" to ItemConvertCommand,
                 "generatepack" to GeneratePackCommand
-            ), EmptyMessage()
+            ), { EmptyMessage() }
         ).register("waves")
 
         event<PlayerJoinEvent> {

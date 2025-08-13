@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "gg.aquatic.waves"
-version = "1.3.2"
+version = "1.3.3"
 
 val ktor_version: String by project
 
@@ -90,6 +90,7 @@ repositories {
     maven("https://nexus.phoenixdevt.fr/repository/maven-public/")
     maven("https://maven.radsteve.net/public")
     maven("https://repo.nexomc.com/releases")
+    maven("https://repo.momirealms.net/releases/")
 }
 
 dependencies {
@@ -133,6 +134,9 @@ dependencies {
     runtimeDownload("com.zaxxer:HikariCP:5.1.0")
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
+
+    compileOnly("net.momirealms:craft-engine-core:0.0.61")
+    compileOnly("net.momirealms:craft-engine-bukkit:0.0.61")
 
     compileOnly("com.nexomc:nexo:1.8.0") //Nexo 1.X -> 1.X.0
     compileOnly("io.netty:netty-all:4.1.24.Final")

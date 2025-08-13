@@ -10,8 +10,6 @@ import gg.aquatic.waves.input.impl.VanillaMenuInput
 import gg.aquatic.waves.interactable.settings.*
 import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.item.factory.*
-import gg.aquatic.waves.util.action.impl.*
-import gg.aquatic.waves.util.action.impl.discord.DiscordWebhookAction
 import gg.aquatic.waves.util.currency.Currency
 import gg.aquatic.waves.util.generic.Action
 import gg.aquatic.waves.util.generic.Condition
@@ -21,7 +19,6 @@ import gg.aquatic.waves.util.price.impl.VaultPrice
 import gg.aquatic.waves.util.statistic.StatisticType
 import gg.aquatic.waves.util.statistic.impl.BlockBreakStatistic
 import org.bukkit.Bukkit
-import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import java.util.concurrent.ConcurrentHashMap
@@ -60,6 +57,7 @@ object WavesRegistry {
         "HDB" to HDBFactory,
         "ITEMSADDER" to IAFactory,
         "ECO" to EcoFactory,
+        "CRAFTENGINE" to CraftEngineFactory,
         "BASE64" to Base64Factory,
         "MMOITEM" to MMOFactory,
         "NEXO" to NexoFactory

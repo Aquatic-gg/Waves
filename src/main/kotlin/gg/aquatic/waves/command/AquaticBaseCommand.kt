@@ -9,18 +9,18 @@ class AquaticBaseCommand(
     description: String,
     aliases: MutableList<String>,
     val subCommands: MutableMap<String,ICommand>,
-    val helpMessage: Message
+    val helpMessage: () -> Message
 ) : Command(name, description, "/$name", aliases) {
 
     override fun execute(sender: CommandSender, commandLabel: String, args: Array<out String>): Boolean {
         if (args.isEmpty()) {
-            helpMessage.send(sender)
+            helpMessage().send(sender)
             return true
         }
 
         val cmd = subCommands[args[0]]
         if (cmd == null) {
-            helpMessage.send(sender)
+            helpMessage().send(sender)
             return true
         }
         cmd.run(sender, args)
