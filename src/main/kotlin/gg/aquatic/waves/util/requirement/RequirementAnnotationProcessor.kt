@@ -1,26 +1,26 @@
-package gg.aquatic.waves.util.action
+package gg.aquatic.waves.util.requirement
 
+import RegisterRequirement
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.registry.WavesRegistry
-import gg.aquatic.waves.util.generic.Action
+import gg.aquatic.waves.util.generic.Condition
 import gg.aquatic.waves.util.generic.ExecutableAnnotationProcessor
 import java.util.concurrent.ConcurrentHashMap
 
-object ActionAnnotationProcessor {
-
+object RequirementAnnotationProcessor {
     fun process(plugin: Any,pckg: String) {
         val logger = Waves.INSTANCE.logger
         ExecutableAnnotationProcessor.process(
             plugin,
-            RegisterAction::class.java,
+            RegisterRequirement::class.java,
             pckg,
-            Action::class.java,
+            Condition::class.java,
             { ann -> ann.id },
             { ann -> ann.aliases},
             { id, inst, binderClass ->
-                val map = WavesRegistry.ACTION.getOrPut(binderClass) { ConcurrentHashMap() }
+                val map = WavesRegistry.REQUIREMENT.getOrPut(binderClass) { ConcurrentHashMap() }
                 if (map.containsKey(id)) {
-                    logger.warning("Action with ID of $id has a duplicated Key! Such Action ID was already used by ${map[id]!!.javaClass.name}")
+                    logger.warning("Requirement with ID of $id has a duplicated Key! Such Requirement ID was already used by ${map[id]!!.javaClass.name}")
                 }
                 map += id to inst
             }) {
