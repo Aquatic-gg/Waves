@@ -21,7 +21,7 @@ class BroadcastAction : Action<Player> {
     }
 
     override val arguments: List<AquaticObjectArgument<*>> = listOf(
-        MessageArgument("message", EmptyMessage(), false),
-        MessageArgument("messages", EmptyMessage(), false)
+        MessageArgument("message", null, false),
+        MessageArgument("messages", null, false)
     )
 }

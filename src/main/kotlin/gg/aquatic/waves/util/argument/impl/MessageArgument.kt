@@ -13,8 +13,8 @@ class MessageArgument(id: String, defaultValue: Message?, required: Boolean) : A
 ) {
     override val serializer: AbstractObjectArgumentSerializer<Message?> = Companion
 
-    override fun load(section: ConfigurationSection): Message {
-        return serializer.load(section, id) ?: defaultValue ?: EmptyMessage()
+    override fun load(section: ConfigurationSection): Message? {
+        return serializer.load(section, id) ?: defaultValue
     }
 
     companion object : AbstractObjectArgumentSerializer<Message?>() {
