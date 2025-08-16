@@ -54,16 +54,14 @@ object MessageSerializer {
             }
             if (section.contains("messages")) {
                 val messagesList = section.getList("messages")
-                if (messagesList is List<*> && messagesList.none { it is String }) {
+                if (messagesList is List<*>) {
                     return MessageParser.parse(section)
                 }
             }
 
-            val isPaginated = section.getBoolean("paginated", false)
-
-            if (isPaginated) {
+            if (section.contains("paginated")) {
                 val messageList =
-                    section.getList("messages") ?: emptyList<String>()
+                    section.getList("paginated") ?: emptyList<String>()
                 val messages = MessageParser.parse(messageList)
                 val pageSize = section.getInt("page-size", 10)
                 val header = section.getString("header")
