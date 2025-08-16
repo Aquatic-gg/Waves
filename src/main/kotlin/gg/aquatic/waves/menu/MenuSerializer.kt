@@ -78,7 +78,7 @@ object MenuSerializer {
     }
 
     fun loadClickSettings(sections: List<ConfigurationSection>): gg.aquatic.waves.menu.settings.ClickSettings {
-        val map = HashMap<ButtonType, MutableList<ConfiguredExecutableObjectsWithConditions<Player,Unit>>>()
+        val map = HashMap<ButtonType, MutableList<ConfiguredExecutableObjectsWithConditions<Player>>>()
         for (section in sections) {
             val actions = loadActionsWithConditions(section) ?: continue
             for (menuClickActionType in section.getStringList("types")
@@ -105,7 +105,7 @@ object MenuSerializer {
         return SlotSelection.of(slots)
     }
 
-    fun loadActionsWithConditions(section: ConfigurationSection): ConfiguredExecutableObjectsWithConditions<Player,Unit>? {
+    fun loadActionsWithConditions(section: ConfigurationSection): ConfiguredExecutableObjectsWithConditions<Player>? {
         val actions = ArrayList<ConfiguredExecutableObjectWithConditions<Player,Unit>>()
         val actionSections = section.getSectionList("actions")
 

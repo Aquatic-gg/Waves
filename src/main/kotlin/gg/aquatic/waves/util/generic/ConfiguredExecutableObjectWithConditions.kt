@@ -5,7 +5,7 @@ import gg.aquatic.waves.util.requirement.ConfiguredRequirementWithFailActions
 class ConfiguredExecutableObjectWithConditions<A, B>(
     val configuredObject: ConfiguredExecutableObject<A, B>,
     val conditions: Collection<ConfiguredRequirementWithFailActions<A,B>>,
-    val failConfiguredObjects: ConfiguredExecutableObjectsWithConditions<A, B>?
+    val failConfiguredObjects: ConfiguredExecutableObjectsWithConditions<A>?
 ) {
 
     fun tryExecute(binder: A, textUpdater: (A, String) -> String) {

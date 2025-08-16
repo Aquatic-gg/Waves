@@ -7,7 +7,7 @@ import gg.aquatic.waves.util.runSync
 import org.bukkit.entity.Player
 
 class ClickSettings(
-    val clicks: HashMap<ButtonType, MutableList<ConfiguredExecutableObjectsWithConditions<Player, Unit>>>,
+    val clicks: HashMap<ButtonType, MutableList<ConfiguredExecutableObjectsWithConditions<Player>>>,
 ) {
 
     fun handleClick(event: AsyncPacketInventoryInteractEvent, updater: (Player, String) -> String) {
