@@ -1,8 +1,8 @@
 package gg.aquatic.waves.util.message.impl.page
 
 import gg.aquatic.waves.util.message.Message
+import gg.aquatic.waves.util.toMMComponent
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -72,20 +72,13 @@ class PaginatedMessage(
     }
 
     private fun String.toMMComponent(page: Int, sender: CommandSender): Component {
-        return MiniMessage.builder()
-            .editTags { b ->
-                b.tag("ccmd") { a, b ->
-                    ConsoleCommandMMResolver.resolve(a, b)
-                }
-            }.build().deserialize(
-                this
-                    .replace("%aq-player%", if (sender is Player) sender.name else "*console")
-                    .replace("%aq-page%", page.toString())
-                    .replace("%aq-prev-page%", max((page - 1), 0).toString())
-                    .replace(
-                        "%aq-next-page%",
-                        min((ceil(messages.size.toDouble() / pageSize.toDouble()).toInt() - 1), page + 1).toString()
-                    )
-            )
+        return this
+            .replace("%aq-player%", if (sender is Player) sender.name else "*console")
+            .replace("%aq-page%", page.toString())
+            .replace("%aq-prev-page%", max((page - 1), 0).toString())
+            .replace(
+                "%aq-next-page%",
+                min((ceil(messages.size.toDouble() / pageSize.toDouble()).toInt() - 1), page + 1).toString()
+            ).toMMComponent()
     }
 }

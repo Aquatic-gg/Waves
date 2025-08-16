@@ -1,10 +1,16 @@
 package gg.aquatic.waves.util
 
+import gg.aquatic.waves.util.message.impl.page.ConsoleCommandMMResolver
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 
 fun String.toMMComponent(): Component {
-    return MiniMessage.miniMessage().deserialize(
+    return MiniMessage.builder()
+        .editTags { b ->
+            b.tag("ccmd") { a, b ->
+                ConsoleCommandMMResolver.resolve(a, b)
+            }
+        }.build().deserialize(
         this
             .replace("§","&")
             .replace("&a", "<green>")
@@ -16,7 +22,6 @@ fun String.toMMComponent(): Component {
             .replace("&f", "<white>")
             .replace("&3", "<dark_aqua>")
             .replace("&9", "<blue>")
-            .replace("&f", "<white>")
             .replace("&7", "<gray>")
             .replace("&8", "<dark_gray>")
             .replace("&4", "<dark_red>")

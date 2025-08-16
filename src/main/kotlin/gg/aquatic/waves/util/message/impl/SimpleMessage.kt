@@ -3,10 +3,8 @@ package gg.aquatic.waves.util.message.impl
 import gg.aquatic.waves.util.collection.executeActions
 import gg.aquatic.waves.util.generic.ConfiguredExecutableObject
 import gg.aquatic.waves.util.message.Message
-import gg.aquatic.waves.util.message.impl.page.ConsoleCommandMMResolver
+import gg.aquatic.waves.util.toMMComponent
 import gg.aquatic.waves.util.updatePAPIPlaceholders
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
@@ -49,17 +47,6 @@ class SimpleMessage(
             })
         }
 
-    }
-
-    private fun String.toMMComponent(): Component {
-        return MiniMessage.builder()
-            .editTags { b ->
-                b.tag("ccmd") { a, b ->
-                    ConsoleCommandMMResolver.resolve(a, b)
-                }
-            }.build().deserialize(
-                this
-            )
     }
 
 }
