@@ -3,8 +3,11 @@ package gg.aquatic.waves.util.action.impl
 import gg.aquatic.waves.util.action.RegisterAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
+import gg.aquatic.waves.util.argument.impl.MessageArgument
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
+import gg.aquatic.waves.util.message.Message
+import gg.aquatic.waves.util.message.impl.EmptyMessage
 import gg.aquatic.waves.util.toMMComponent
 import gg.aquatic.waves.util.updatePAPIPlaceholders
 import org.bukkit.entity.Player
@@ -13,14 +16,14 @@ import org.bukkit.entity.Player
 class MessageAction : Action<Player> {
 
     override fun execute(binder: Player, args: ObjectArguments, textUpdater: (Player, String) -> String) {
-        val messages = args.stringOrCollection("message") ?: return
-        for (msg in messages) {
-            binder.sendMessage(textUpdater(binder,msg.updatePAPIPlaceholders(binder)).toMMComponent())
-        }
+        val messages = args.any("message") as? Message ?: return
+        messages.replace { str ->
+            textUpdater(binder, str)
+        }.send(binder)
     }
 
     override val arguments: List<AquaticObjectArgument<*>> = listOf(
-        PrimitiveObjectArgument("message", "", true),
+        MessageArgument("message", EmptyMessage(), true),
     )
 
 

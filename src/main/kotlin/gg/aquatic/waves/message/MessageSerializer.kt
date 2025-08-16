@@ -8,6 +8,7 @@ import gg.aquatic.waves.util.message.Messages
 import gg.aquatic.waves.util.message.impl.SimpleMessage
 import gg.aquatic.waves.util.message.impl.page.PaginatedMessage
 import gg.aquatic.waves.util.message.parser.MessageParser
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.FileConfiguration
 
 object MessageSerializer {
@@ -38,7 +39,7 @@ object MessageSerializer {
         }
     }
 
-    fun loadMessageInstance(cfg: FileConfiguration, path: String, def: Any): Message {
+    fun loadMessageInstance(cfg: ConfigurationSection, path: String, def: Any): Message {
         val value = cfg.get(path, def)
         return if (cfg.isString(path)) {
             return SimpleMessage(value as String)

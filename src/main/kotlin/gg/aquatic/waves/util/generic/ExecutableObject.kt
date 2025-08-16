@@ -5,8 +5,10 @@ import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.BlockArgument
 import gg.aquatic.waves.util.argument.impl.ItemObjectArgument
+import gg.aquatic.waves.util.argument.impl.MessageArgument
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.block.AquaticBlock
+import gg.aquatic.waves.util.message.Message
 
 interface ExecutableObject<A, B> {
 
@@ -30,6 +32,9 @@ interface ExecutableObject<A, B> {
         }
         fun aquaticBlock(id: String, def: AquaticBlock? = null, required: Boolean = false) {
             arguments += BlockArgument(id, def, required)
+        }
+        fun message(id: String, def: Message? = null, required: Boolean = false) {
+            arguments += MessageArgument(id, def, required)
         }
 
         fun add(vararg arguments: AquaticObjectArgument<*>) {
