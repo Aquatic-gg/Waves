@@ -4,7 +4,6 @@ import gg.aquatic.waves.registry.WavesRegistry
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.generic.Condition
-import gg.aquatic.waves.util.generic.ConfiguredExecutableObject
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import org.bukkit.configuration.ConfigurationSection
 
@@ -113,7 +112,7 @@ object RequirementSerializer {
                 val voidRequirements = WavesRegistry.REQUIREMENT[Unit::class.java] ?: return null
                 val voidRequirement = voidRequirements[id] ?: return null
                 return TransformedRequirement(
-                    TransformedRequirement(voidRequirement as Condition<Unit>) { d -> let { } },
+                    TransformedRequirement(voidRequirement as Condition<Unit>) { _ -> let { } },
                     transform
                 )
             }

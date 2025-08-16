@@ -7,6 +7,7 @@ import gg.aquatic.waves.util.message.Message
 import gg.aquatic.waves.util.message.Messages
 import gg.aquatic.waves.util.message.impl.SimpleMessage
 import gg.aquatic.waves.util.message.impl.page.PaginatedMessage
+import gg.aquatic.waves.util.message.parser.MessageParser
 import org.bukkit.configuration.file.FileConfiguration
 
 object MessageSerializer {
@@ -50,6 +51,13 @@ object MessageSerializer {
                 }
                 return SimpleMessage(value.toString())
             }
+            if (section.contains("messages")) {
+                val messagesList = section.getList("messages")
+                if (messagesList is List<*> && messagesList.none { it is String }) {
+                    return MessageParser.parse(section)
+                }
+            }
+
             val isPaginated = section.getBoolean("paginated", false)
 
             if (isPaginated) {
