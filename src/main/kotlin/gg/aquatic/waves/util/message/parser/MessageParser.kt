@@ -1,9 +1,11 @@
 package gg.aquatic.waves.util.message.parser
 
 import gg.aquatic.waves.registry.serializer.ActionSerializer
+import gg.aquatic.waves.util.createConfigurationSectionFromMap
 import gg.aquatic.waves.util.getSectionList
 import gg.aquatic.waves.util.message.Message
 import gg.aquatic.waves.util.message.impl.SimpleMessage
+import gg.aquatic.waves.util.message.impl.view.MessageView
 import gg.aquatic.waves.util.message.parser.click.ClickAction
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
@@ -12,9 +14,32 @@ object MessageParser {
 
     fun parse(section: ConfigurationSection): Message {
         val actions = ActionSerializer.fromSections<Player>(section.getSectionList("actions"))
-        val messageSections = section.getSectionList("messages") + section.getSectionList("message")
-        val messages = messageSections.map { parseMessage(it) }.toList()
-        return SimpleMessage(messages, actions)
+        //val messageSections = section.getSectionList("messages") + section.getSectionList("message")
+        val messageList =
+            section.getList("messages") ?: (emptyList<Any>() + section.getList("message"))
+        val messages = parse(messageList)
+        val view = MessageView.load(section)
+
+        //val messages = messageSections.map { parseMessage(it) }.toList()
+        return SimpleMessage(messages, actions, view)
+    }
+
+    fun parse(list: List<*>): List<String> {
+        val messages = ArrayList<String>()
+        for (any in list) {
+            if (any is String) {
+                messages.add(any)
+                continue
+            }
+            if (any is ConfigurationSection) {
+                messages.add(parseMessage(any))
+                continue
+            } else if (any is Map<*, *>) {
+                messages.add(parseMessage(createConfigurationSectionFromMap(any)))
+                continue
+            }
+        }
+        return messages
     }
 
     private fun parseMessage(section: ConfigurationSection): String {
@@ -31,7 +56,7 @@ object MessageParser {
         val hover = section.getStringList("hover")
         text = clickAction?.bind(text) ?: text
         if (hover.isNotEmpty()) {
-            text = "<hover:show_text:'${hover.joinToString("<nl>")}'>$text</hover>"
+            text = "<hover:show_text:'${hover.joinToString("<newline>")}'>$text</hover>"
         }
         return text
     }

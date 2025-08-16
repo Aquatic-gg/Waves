@@ -3,16 +3,17 @@ package gg.aquatic.waves.util.message.impl
 import gg.aquatic.waves.util.collection.executeActions
 import gg.aquatic.waves.util.generic.ConfiguredExecutableObject
 import gg.aquatic.waves.util.message.Message
+import gg.aquatic.waves.util.message.impl.view.MessageView
 import gg.aquatic.waves.util.toMMComponent
 import gg.aquatic.waves.util.updatePAPIPlaceholders
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import java.util.function.Consumer
 
 class SimpleMessage(
     override var messages: Collection<String>,
     val actions: Collection<ConfiguredExecutableObject<Player, Unit>> = emptyList(),
+    val view: MessageView = MessageView.Chat
 ) : Message {
 
     constructor(message: String?) : this(message?.let { mutableListOf(it) } ?: mutableListOf())
@@ -28,11 +29,9 @@ class SimpleMessage(
     }
 
     override fun send(sender: CommandSender) {
-        for (string in messages) {
-            sender.sendMessage(string.toMMComponent())
-            if (sender is Player) {
-                actions.executeActions(sender) { _, str -> str.updatePAPIPlaceholders(sender) }
-            }
+        view.send(sender,messages.map { it.toMMComponent() })
+        if (sender is Player) {
+            actions.executeActions(sender) { _, str -> str.updatePAPIPlaceholders(sender) }
         }
     }
 
@@ -41,10 +40,8 @@ class SimpleMessage(
             return
         }
         for (onlinePlayer in Bukkit.getOnlinePlayers()) {
-            messages.forEach(Consumer { v: String ->
-                onlinePlayer.sendMessage(v.toMMComponent())
-                actions.executeActions(onlinePlayer) { _, str -> str.updatePAPIPlaceholders(onlinePlayer) }
-            })
+            view.send(onlinePlayer,messages.map { it.toMMComponent() })
+            actions.executeActions(onlinePlayer) { _, str -> str.updatePAPIPlaceholders(onlinePlayer) }
         }
 
     }

@@ -19,7 +19,8 @@ object MessageSerializer {
             Messages.registeredMessages.remove(string)
         }
         previousMessages.clear()
-        val files = Waves.INSTANCE.dataFolder.resolve("custom-messages").apply { mkdirs() }.deepFilesLookup { it.extension == "yml" }
+        val files = Waves.INSTANCE.dataFolder.resolve("custom-messages").apply { mkdirs() }
+            .deepFilesLookup { it.extension == "yml" }
         for (file in files) {
             val config = Config(file, Waves.INSTANCE)
             config.load()
@@ -32,7 +33,7 @@ object MessageSerializer {
         for (key in cfg.getKeys(false)) {
             previousMessages += "waves:$key"
             Messages.registeredMessages["waves:$key"] = {
-                loadMessageInstance(cfg,key,"")
+                loadMessageInstance(cfg, key, "")
             }
         }
     }
@@ -61,12 +62,14 @@ object MessageSerializer {
             val isPaginated = section.getBoolean("paginated", false)
 
             if (isPaginated) {
-                val messages = section.getStringList("messages")
+                val messageList =
+                    section.getList("messages") ?: emptyList<String>()
+                val messages = MessageParser.parse(messageList)
                 val pageSize = section.getInt("page-size", 10)
                 val header = section.getString("header")
                 val footer = section.getString("footer")
 
-                PaginatedMessage(messages,pageSize,header,footer)
+                PaginatedMessage(messages, pageSize, header, footer)
             } else SimpleMessage(emptyList())
         }
     }
