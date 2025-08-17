@@ -17,13 +17,11 @@ class PaginatedMessage(
     val footer: String? = null,
 ) : Message {
     override fun replace(updater: (String) -> String): PaginatedMessage {
-        this.messages = messages.map { updater(it) }.toMutableList()
-        return this
+        return PaginatedMessage(messages.map { updater(it) }.toMutableList(), pageSize, header, footer)
     }
 
     override fun replace(from: String, to: String): PaginatedMessage {
-        messages = messages.map { it.replace(from, to) }.toMutableList()
-        return this
+        return PaginatedMessage(messages.map { it.replace(from, to) }.toMutableList(), pageSize, header, footer)
     }
 
     fun send(sender: CommandSender, page: Int) {

@@ -19,13 +19,11 @@ class SimpleMessage(
     constructor(message: String?) : this(message?.let { mutableListOf(it) } ?: mutableListOf())
 
     override fun replace(updater: (String) -> String): SimpleMessage {
-        this.messages = messages.map { updater(it) }.toMutableList()
-        return this
+        return SimpleMessage(messages.map { updater(it) }.toMutableList(), actions, view)
     }
 
     override fun replace(from: String, to: String): SimpleMessage {
-        messages = messages.map { it.replace(from, to) }.toMutableList()
-        return this
+        return SimpleMessage(messages.map { it.replace(from, to) }.toMutableList(), actions, view)
     }
 
     override fun send(sender: CommandSender) {
