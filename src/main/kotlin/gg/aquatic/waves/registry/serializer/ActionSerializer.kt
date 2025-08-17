@@ -1,8 +1,9 @@
 package gg.aquatic.waves.registry.serializer
 
 import gg.aquatic.waves.registry.WavesRegistry
-import gg.aquatic.waves.util.action.impl.logical.ConfiguredActionsWithConditions
-import gg.aquatic.waves.util.action.impl.logical.ConfiguredRandomAction
+import gg.aquatic.waves.util.action.impl.logical.ConditionalActionsAction
+import gg.aquatic.waves.util.action.impl.logical.RandomActionAction
+import gg.aquatic.waves.util.action.impl.logical.SmartAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.generic.Action
@@ -12,19 +13,36 @@ import org.bukkit.configuration.ConfigurationSection
 
 object ActionSerializer {
 
+    val smartActions = mutableMapOf<String, (
+        clazz: Class<*>,
+        classTransforms: Collection<ClassTransform<*,*>>,
+    ) -> SmartAction<*>>(
+        "random-action" to { clazz, classTransforms -> RandomActionAction(clazz, classTransforms) },
+        "conditional-actions" to { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) },
+    )
+
+    fun <T: Any> getSmartAction(id: String,clazz: Class<T>, classTransforms: Collection<ClassTransform<T, *>>): SmartAction<T>? {
+        val type = smartActions[id] ?: return null
+        return type(clazz, classTransforms) as? SmartAction<T>
+    }
+
     inline fun <reified T : Any> fromSectionSimple(
         section: ConfigurationSection,
     ): ConfiguredExecutableObject<T, Unit>? {
         return fromSectionSimple(T::class.java, section)
     }
 
-    fun <T: Any> fromSectionSimple(clazz: Class<T>, section: ConfigurationSection): ConfiguredExecutableObject<T, Unit>? {
+    fun <T : Any> fromSectionSimple(
+        clazz: Class<T>,
+        section: ConfigurationSection,
+    ): ConfiguredExecutableObject<T, Unit>? {
         val type = section.getString("type") ?: return null
         //val action = WavesRegistry.getAction<T>(type) ?: return null
 
-        when(type.lowercase()) {
-            "conditional-actions" -> return ConfiguredActionsWithConditions.fromSection(clazz, section)
-            "random-actions" -> return ConfiguredRandomAction.fromSection(clazz, section)
+        val smartAction = getSmartAction(type, clazz, emptyList())
+        if (smartAction != null) {
+            val args = AquaticObjectArgument.loadRequirementArguments(section, smartAction.arguments)
+            return ConfiguredExecutableObject(smartAction, args)
         }
 
         val actions = WavesRegistry.ACTION[clazz] ?: HashMap()
@@ -40,7 +58,7 @@ object ActionSerializer {
             if (clazz == Unit::class.java) return null
             val voidActions = WavesRegistry.ACTION[Unit::class.java] ?: return null
             val voidAction = voidActions[type] ?: return null
-            val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> let {  } }
+            val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> let { } }
 
             val args = AquaticObjectArgument.loadRequirementArguments(section, voidAction.arguments)
             val configuredAction = ConfiguredExecutableObject(action as Action<T>, args)
@@ -60,14 +78,19 @@ object ActionSerializer {
         return fromSection(T::class.java, section, *classTransforms)
     }
 
-    fun <T: Any> fromSection(clazz: Class<T>, section: ConfigurationSection, vararg classTransforms: ClassTransform<T, *>): ConfiguredExecutableObject<T, Unit>? {
-        val action = fromSectionSimple(clazz,section)
+    fun <T : Any> fromSection(
+        clazz: Class<T>,
+        section: ConfigurationSection,
+        vararg classTransforms: ClassTransform<T, *>,
+    ): ConfiguredExecutableObject<T, Unit>? {
+        val action = fromSectionSimple(clazz, section)
         if (action != null) return action
         val type = section.getString("type") ?: return null
 
-        when(type.lowercase()) {
-            "conditional-actions" -> return ConfiguredActionsWithConditions.fromSection(clazz, section, *classTransforms)
-            "random-actions" -> return ConfiguredRandomAction.fromSection(clazz, section, *classTransforms)
+        val smartAction = getSmartAction(type, clazz, emptyList())
+        if (smartAction != null) {
+            val args = AquaticObjectArgument.loadRequirementArguments(section, smartAction.arguments)
+            return ConfiguredExecutableObject(smartAction, args)
         }
 
         for (transform in classTransforms) {
@@ -86,7 +109,11 @@ object ActionSerializer {
         return fromSections(T::class.java, sections, *classTransforms)
     }
 
-    fun <T: Any> fromSections(clazz: Class<T>, sections: List<ConfigurationSection>, vararg classTransforms: ClassTransform<T, *>): List<ConfiguredExecutableObject<T, Unit>> {
+    fun <T : Any> fromSections(
+        clazz: Class<T>,
+        sections: List<ConfigurationSection>,
+        vararg classTransforms: ClassTransform<T, *>,
+    ): List<ConfiguredExecutableObject<T, Unit>> {
         return sections.mapNotNull { fromSection(clazz, it, *classTransforms) }
     }
 
