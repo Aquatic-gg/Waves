@@ -21,7 +21,7 @@ object ActionSerializer {
         "conditional-actions" to { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) },
     )
 
-    fun <T: Any> getSmartAction(id: String,clazz: Class<T>, classTransforms: Collection<ClassTransform<T, *>>): SmartAction<T>? {
+    private fun <T: Any> getSmartAction(id: String,clazz: Class<T>, classTransforms: Collection<ClassTransform<T, *>>): SmartAction<T>? {
         val type = smartActions[id] ?: return null
         return type(clazz, classTransforms) as? SmartAction<T>
     }
