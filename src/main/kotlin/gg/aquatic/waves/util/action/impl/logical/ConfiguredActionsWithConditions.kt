@@ -1,4 +1,4 @@
-package gg.aquatic.waves.util.action
+package gg.aquatic.waves.util.action.impl.logical
 
 import gg.aquatic.waves.registry.serializer.ActionSerializer
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
@@ -8,6 +8,7 @@ import gg.aquatic.waves.util.generic.ConfiguredExecutableObjectsWithConditions
 import gg.aquatic.waves.util.getSectionList
 import gg.aquatic.waves.util.requirement.ConfiguredRequirementWithFailActions
 import org.bukkit.configuration.ConfigurationSection
+import kotlin.collections.plusAssign
 
 class ConfiguredActionsWithConditions<T>(
     executableObjects: Collection<ConfiguredExecutableObjectWithConditions<T, Unit>>,

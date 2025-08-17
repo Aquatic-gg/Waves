@@ -1,7 +1,8 @@
 package gg.aquatic.waves.registry.serializer
 
 import gg.aquatic.waves.registry.WavesRegistry
-import gg.aquatic.waves.util.action.ConfiguredActionsWithConditions
+import gg.aquatic.waves.util.action.impl.logical.ConfiguredActionsWithConditions
+import gg.aquatic.waves.util.action.impl.logical.ConfiguredRandomAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.generic.Action
@@ -21,8 +22,9 @@ object ActionSerializer {
         val type = section.getString("type") ?: return null
         //val action = WavesRegistry.getAction<T>(type) ?: return null
 
-        if (type.lowercase() == "conditional-actions") {
-            return ConfiguredActionsWithConditions.fromSection(clazz, section)
+        when(type.lowercase()) {
+            "conditional-actions" -> return ConfiguredActionsWithConditions.fromSection(clazz, section)
+            "random-actions" -> return ConfiguredRandomAction.fromSection(clazz, section)
         }
 
         val actions = WavesRegistry.ACTION[clazz] ?: HashMap()
@@ -63,8 +65,9 @@ object ActionSerializer {
         if (action != null) return action
         val type = section.getString("type") ?: return null
 
-        if (type.lowercase() == "conditional-actions") {
-            return ConfiguredActionsWithConditions.fromSection(clazz, section,*classTransforms)
+        when(type.lowercase()) {
+            "conditional-actions" -> return ConfiguredActionsWithConditions.fromSection(clazz, section, *classTransforms)
+            "random-actions" -> return ConfiguredRandomAction.fromSection(clazz, section, *classTransforms)
         }
 
         for (transform in classTransforms) {
