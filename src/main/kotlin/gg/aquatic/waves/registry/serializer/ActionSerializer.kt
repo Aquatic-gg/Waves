@@ -45,14 +45,7 @@ object ActionSerializer {
             return ConfiguredExecutableObject(smartAction, args)
         }
 
-        val actions = WavesRegistry.ACTION[clazz] ?: HashMap()
-        for (klass in WavesRegistry.ACTION.keys) {
-            if (klass == clazz) continue
-            if (klass.isAssignableFrom(clazz)) {
-                actions += WavesRegistry.ACTION[klass] ?: HashMap()
-            }
-        }
-
+        val actions = allActions(clazz)
         val action = actions[type]
         if (action == null) {
             if (clazz == Unit::class.java) return null
@@ -128,6 +121,16 @@ object ActionSerializer {
         }
 
         override val arguments: List<AquaticObjectArgument<*>> = externalAction.arguments
+    }
+
+    fun <T : Any> allActions(type: Class<T>): Map<String,Action<T>> {
+        val actions = hashMapOf<String,Action<T>>()
+        for ((clazz, typeActions) in WavesRegistry.ACTION) {
+            if (type == clazz || clazz.isAssignableFrom(type)) {
+                actions += typeActions as Map<String,Action<T>>
+            }
+        }
+        return actions
     }
 
 }

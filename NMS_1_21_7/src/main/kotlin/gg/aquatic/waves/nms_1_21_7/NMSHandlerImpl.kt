@@ -278,8 +278,8 @@ object NMSHandlerImpl : NMSHandler {
         val container = EntityContainer(entityId)
         container.setPosRaw(location.x, location.y, location.z)
         container.setRot(location.yaw, location.pitch)
-        val packet = ClientboundTeleportEntityPacket(entityId, PositionMoveRotation.of(container), Relative.ALL, false)
-
+        val packet = ClientboundEntityPositionSyncPacket(entityId, PositionMoveRotation.of(container), false)
+        //val packet = ClientboundTeleportEntityPacket(entityId, PositionMoveRotation.of(container), Relative.ALL, false)
         return packet
     }
 

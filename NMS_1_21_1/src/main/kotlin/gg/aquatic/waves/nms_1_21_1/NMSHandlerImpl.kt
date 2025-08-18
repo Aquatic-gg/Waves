@@ -446,12 +446,6 @@ object NMSHandlerImpl : NMSHandler {
         return packet
     }
 
-    private val teleportEntityPacketConstructor = ClientboundTeleportEntityPacket::class.java.getDeclaredConstructor(
-        FriendlyByteBuf::class.java,
-    ).apply {
-        isAccessible = true
-    }
-
     override fun createTeleportPacket(entityId: Int, location: Location): Any {
         val container = EntityContainer(entityId)
         container.setPosRaw(location.x, location.y, location.z)
