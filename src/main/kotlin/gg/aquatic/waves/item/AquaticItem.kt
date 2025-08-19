@@ -69,7 +69,7 @@ class AquaticItem(
 
         val modifiers = im.attributeModifiers
         if (modifiers == null) {
-            im.attributeModifiers = HashMultimap.create()
+            im.attributeModifiers = HashMultimap.create(iS.type.defaultAttributeModifiers)
         }
 
         flags?.apply {
