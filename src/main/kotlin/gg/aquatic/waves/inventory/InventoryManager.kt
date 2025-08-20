@@ -88,12 +88,13 @@ object InventoryManager : WavesModule {
                     return@event
                 }
                 val changedSlots = event.changedSlots.mapValues {
+                    if (it.key < inventory.type.size) return@mapValues ItemStack.empty()
                     val playerSlot = playerSlotFromMenuSlot(it.key, inventory)
                     val invContent = inventory.content[playerSlot]
                     if (invContent != null) return@mapValues invContent
 
                     if (playerSlot < -1) return@mapValues ItemStack.empty()
-                    player.inventory.getItem(playerSlotFromMenuSlot(it.key, inventory)) ?: ItemStack.empty()
+                    player.inventory.getItem(playerSlot) ?: ItemStack.empty()
                 }
 
                 val menuClickData = isMenuClick(event, Pair(clickData.first, clickData.second), player)
