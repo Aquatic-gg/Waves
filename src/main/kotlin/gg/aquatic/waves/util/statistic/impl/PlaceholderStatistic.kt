@@ -4,6 +4,7 @@ import gg.aquatic.waves.Waves
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.statistic.StatisticAddEvent
+import gg.aquatic.waves.util.statistic.StatisticHandle
 import gg.aquatic.waves.util.statistic.StatisticType
 import gg.aquatic.waves.util.updatePAPIPlaceholders
 import org.bukkit.Bukkit
@@ -21,13 +22,7 @@ object PlaceholderStatistic : StatisticType<Player>() {
 
     override fun initialize() {
         for (statisticHandle in handles) {
-            val args = statisticHandle.args
-            val placeholder = args.string("placeholder") ?: continue
-            val update = args.int("update") ?: continue
-
-            val cache = Cache(update, placeholder)
-
-            this.cache["$placeholder:$update"] = cache
+            register(statisticHandle)
         }
     }
 
@@ -36,9 +31,24 @@ object PlaceholderStatistic : StatisticType<Player>() {
         cache.clear()
     }
 
+    private fun register(statisticHandle: StatisticHandle<Player>) {
+        val args = statisticHandle.args
+        val placeholder = args.string("placeholder") ?: return
+        val update = args.int("update") ?: return
+
+        val cache = Cache(statisticHandle, update, placeholder)
+
+        this.cache["$placeholder:$update"] = cache
+    }
+
+    override fun onRegister(handle: StatisticHandle<Player>) {
+        register(handle)
+    }
+
     class Cache(
+        val handle: StatisticHandle<Player>,
         interval: Int,
-        val placeholder: String
+        val placeholder: String,
     ) {
 
         val map = HashMap<UUID, Float>()
@@ -56,7 +66,8 @@ object PlaceholderStatistic : StatisticType<Player>() {
 
                 if (previousValue != null) {
                     val difference = value - previousValue
-                    StatisticAddEvent(PlaceholderStatistic, difference, player)
+                    val event = StatisticAddEvent(PlaceholderStatistic, difference, player)
+                    handle.consumer(event)
                 }
             }
         }

@@ -6,7 +6,6 @@ import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.statistic.StatisticAddEvent
 import gg.aquatic.waves.util.statistic.StatisticHandle
 import gg.aquatic.waves.util.statistic.StatisticType
-import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
 
 object StatisticTypeSerializer {
