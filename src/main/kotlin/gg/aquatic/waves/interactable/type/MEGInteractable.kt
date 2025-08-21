@@ -6,12 +6,11 @@ import com.ticxo.modelengine.api.model.ActiveModel
 import com.ticxo.modelengine.api.model.ModeledEntity
 import com.ticxo.modelengine.api.model.bone.BoneBehaviorTypes
 import com.ticxo.modelengine.api.model.bone.type.PlayerLimb
-import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.interactable.Interactable
 import gg.aquatic.waves.interactable.InteractableHandler
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.MEGInteractableDummy
-import org.bukkit.Bukkit
+import gg.aquatic.waves.util.audience.AquaticAudience
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import kotlin.jvm.optionals.getOrNull
@@ -30,8 +29,7 @@ class MEGInteractable(
                     removeViewer(player)
                 }
             }
-            for (player in
-            Bukkit.getOnlinePlayers().filter { !viewers.contains(it) }) {
+            for (player in location.world.players.filter { !viewers.contains(it) }) {
                 if (!field.canBeApplied(player)) continue
                 addViewer(player)
             }
@@ -98,7 +96,7 @@ class MEGInteractable(
     }
 
     override fun updateViewers() {
-        location.world?.players?.forEach { player ->
+        location.world.players.forEach { player ->
             if (audience.canBeApplied(player)) {
                 addViewer(player)
             }

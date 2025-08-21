@@ -26,6 +26,8 @@ class AquaticHologram(
 
     init {
         HologramHandler.spawnedHolograms += this
+        checkPlayersRange()
+        tick()
     }
 
 
@@ -87,6 +89,10 @@ class AquaticHologram(
             return
         }
         rangeTick = 0
+        checkPlayersRange()
+    }
+
+    fun checkPlayersRange() {
         val remaining = viewers.toMutableMap()
         for (trackedByPlayer in location.chunk.trackedBy()) {
             if (!filter(trackedByPlayer)) continue
