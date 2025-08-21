@@ -11,6 +11,7 @@ import gg.aquatic.waves.interactable.InteractableHandler
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.MEGInteractableDummy
 import gg.aquatic.waves.util.audience.AquaticAudience
+import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import kotlin.jvm.optionals.getOrNull
@@ -45,6 +46,15 @@ class MEGInteractable(
         isDetectingPlayers = false
     }
 
+    val modeledEntity: ModeledEntity?
+        get() {
+            return ModelEngineAPI.getModeledEntity(dummy.uuid)
+        }
+    val activeModel: ActiveModel?
+        get() {
+            return modeledEntity?.getModel(modelId)?.getOrNull()
+        }
+
     fun setSkin(player: Player) {
         setSkin(player.playerProfile)
     }
@@ -58,14 +68,11 @@ class MEGInteractable(
         }
     }
 
-    val modeledEntity: ModeledEntity?
-        get() {
-            return ModelEngineAPI.getModeledEntity(dummy.uuid)
+    fun setTint(tint: Color) {
+        activeModel?.apply {
+            this.defaultTint = tint
         }
-    val activeModel: ActiveModel?
-        get() {
-            return modeledEntity?.getModel(modelId)?.getOrNull()
-        }
+    }
 
     init {
         this.audience = audience
