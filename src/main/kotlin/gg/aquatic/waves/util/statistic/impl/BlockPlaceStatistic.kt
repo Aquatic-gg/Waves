@@ -18,7 +18,6 @@ object BlockPlaceStatistic: StatisticType<Player>() {
     private var listener: Listener? = null
 
     override fun initialize() {
-        BlockPlaceEvent.getHandlerList()
         listener = event<BlockPlaceEvent>(ignoredCancelled = true) {
             val player = it.player
 

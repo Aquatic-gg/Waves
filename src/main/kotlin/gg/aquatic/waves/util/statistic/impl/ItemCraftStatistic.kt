@@ -16,7 +16,6 @@ object ItemCraftStatistic: StatisticType<Player>() {
     private var listener: Listener? = null
 
     override fun initialize() {
-        CraftItemEvent.getHandlerList()
         listener = event<CraftItemEvent>(ignoredCancelled = true) {
             val player = it.player as? Player ?: return@event
 

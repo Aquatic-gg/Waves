@@ -20,7 +20,6 @@ object TravelStatistic: StatisticType<Player>() {
     private var listener: Listener? = null
 
     override fun initialize() {
-        PlayerMoveEvent.getHandlerList()
         listener = event<PlayerMoveEvent>(ignoredCancelled = true) {
             val player = it.player
 

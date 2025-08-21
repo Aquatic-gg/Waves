@@ -18,6 +18,13 @@ import gg.aquatic.waves.util.price.impl.ItemPrice
 import gg.aquatic.waves.util.price.impl.VaultPrice
 import gg.aquatic.waves.util.statistic.StatisticType
 import gg.aquatic.waves.util.statistic.impl.BlockBreakStatistic
+import gg.aquatic.waves.util.statistic.impl.BlockPlaceStatistic
+import gg.aquatic.waves.util.statistic.impl.DamageDealtStatistic
+import gg.aquatic.waves.util.statistic.impl.DeathStatistic
+import gg.aquatic.waves.util.statistic.impl.ItemCraftStatistic
+import gg.aquatic.waves.util.statistic.impl.KillStatistic
+import gg.aquatic.waves.util.statistic.impl.PlaceholderStatistic
+import gg.aquatic.waves.util.statistic.impl.TravelStatistic
 import org.bukkit.Bukkit
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
@@ -82,6 +89,14 @@ object WavesRegistry {
     val STATISTIC_TYPES = HashMap<Class<*>, MutableMap<String, StatisticType<*>>>().apply {
         val p = getOrPut(Player::class.java) { HashMap() }
         p["BLOCK_BREAK"] = BlockBreakStatistic
+        p["KILL"] = KillStatistic
+        p["ITEM_CRAFT"] = ItemCraftStatistic
+        p["DAMAGE_DEALT"] = DamageDealtStatistic
+        p["DEATH"] = DeathStatistic
+        p["BLOCK_PLACE"] = BlockPlaceStatistic
+        p["PLACEHOLDER"] = PlaceholderStatistic
+        p["TRAVEL"] = TravelStatistic
+
     }
 
     val INPUT_TYPES = mutableMapOf(

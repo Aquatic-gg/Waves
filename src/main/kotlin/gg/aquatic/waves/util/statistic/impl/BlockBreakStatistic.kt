@@ -18,7 +18,6 @@ object BlockBreakStatistic: StatisticType<Player>() {
     private var listener: Listener? = null
 
     override fun initialize() {
-        BlockBreakEvent.getHandlerList()
         listener = event<BlockBreakEvent>(ignoredCancelled = true) {
             val player = it.player
             for (statisticHandle in handles) {

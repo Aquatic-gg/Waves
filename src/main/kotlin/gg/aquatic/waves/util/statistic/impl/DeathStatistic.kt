@@ -15,7 +15,6 @@ object DeathStatistic: StatisticType<Player>() {
     private var listener: Listener? = null
 
     override fun initialize() {
-        PlayerDeathEvent.getHandlerList()
         listener = event<PlayerDeathEvent>(ignoredCancelled = true) {
             val player = it.entity as? Player ?: return@event
 

@@ -17,14 +17,20 @@ abstract class StatisticType<T> {
             initialize()
         }
         handles.add(handle)
+        onRegister(handle)
     }
+
+    open fun onRegister(handle: StatisticHandle<T>) {}
 
     fun unregisterHandle(handle: StatisticHandle<T>) {
         handles.remove(handle)
+        onUnregister(handle)
         if (handles.isEmpty()) {
             terminate()
         }
     }
+
+    open fun onUnregister(handle: StatisticHandle<T>) {}
 }
 
 class StatisticHandle<T>(

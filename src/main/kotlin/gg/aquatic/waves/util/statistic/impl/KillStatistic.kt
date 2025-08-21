@@ -18,7 +18,6 @@ object KillStatistic : StatisticType<Player>() {
     private var listener: Listener? = null
 
     override fun initialize() {
-        EntityDamageByEntityEvent.getHandlerList()
         listener = event<EntityDamageByEntityEvent>(ignoredCancelled = true) {
             val player = it.damager as? Player ?: return@event
 
