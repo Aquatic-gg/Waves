@@ -49,7 +49,10 @@ object InventoryManager : WavesModule {
             onCloseMenu(it.player, true)
         }
         event<PacketContainerOpenEvent> { event ->
-            if (shouldIgnore(event.containerId, event.player)) return@event
+            if (shouldIgnore(event.containerId, event.player)) {
+                onCloseMenu(event.player, true)
+                return@event
+            }
             val inventory = openedInventories[event.player] ?: return@event
             val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
 
@@ -63,6 +66,9 @@ object InventoryManager : WavesModule {
             event.isCancelled = true
         }
         event<PacketContainerContentEvent> { event ->
+            if (event.inventoryId > 0 && shouldIgnore(event.inventoryId, event.player)) {
+                return@event
+            }
             val inventory = openedInventories[event.player] ?: return@event
             val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
             event.isCancelled = true
