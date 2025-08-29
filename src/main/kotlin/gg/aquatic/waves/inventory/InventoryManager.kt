@@ -9,8 +9,6 @@ import gg.aquatic.waves.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.util.runAsync
-import gg.aquatic.waves.util.runLaterAsync
-import gg.aquatic.waves.util.runLaterSync
 import gg.aquatic.waves.util.sendPacket
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -26,9 +24,7 @@ object InventoryManager : WavesModule {
 
     override fun initialize(waves: Waves) {
         event<PlayerQuitEvent> {
-            runAsync {
-                onCloseMenu(it.player, false)
-            }
+            onCloseMenu(it.player, false)
         }
         /*
         packetEvent<PacketSendEvent> {
@@ -46,7 +42,9 @@ object InventoryManager : WavesModule {
         }
          */
         event<PacketContainerCloseEvent> {
-            onCloseMenu(it.player, true)
+            it.then = {
+                onCloseMenu(it.player, true)
+            }
         }
         event<PacketContainerOpenEvent> { event ->
             if (shouldIgnore(event.containerId, event.player)) {
@@ -62,7 +60,7 @@ object InventoryManager : WavesModule {
         }
         event<PacketContainerSetSlotEvent> { event ->
             val inventory = openedInventories[event.player] ?: return@event
-            val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
+            inventory.viewers[event.player.uniqueId] ?: return@event
             event.isCancelled = true
         }
         event<PacketContainerContentEvent> { event ->
@@ -72,7 +70,7 @@ object InventoryManager : WavesModule {
             val inventory = openedInventories[event.player] ?: return@event
             val viewer = inventory.viewers[event.player.uniqueId] ?: return@event
             event.isCancelled = true
-            //updateInventoryContent(inventory, viewer)
+            updateInventoryContent(inventory, viewer)
         }
         event<PacketContainerClickEvent> { event ->
             try {
@@ -105,7 +103,7 @@ object InventoryManager : WavesModule {
 
                 val menuClickData = isMenuClick(event, Pair(clickData.first, clickData.second), player)
                 if (menuClickData) {
-                    handleClickMenu(WindowClick(player, clickData.second, event.slotNum))
+                    handleClickMenu(WindowClick(viewer, clickData.second, event.slotNum))
                     val event = AsyncPacketInventoryInteractEvent(
                         viewer,
                         inventory,
@@ -166,15 +164,12 @@ object InventoryManager : WavesModule {
         return if (offsetSlot < 27) offsetSlot + 9 else offsetSlot - 27
     }
 
-    fun onCloseMenu(player: Player, updateContent: Boolean) {
+    private fun onCloseMenu(player: Player, updateContent: Boolean) {
         val removed = openedInventories.remove(player) ?: return
         removed.viewers.remove(player.uniqueId)
 
         if (updateContent) {
-            runLaterSync(2) {
-                if (openedInventories.containsKey(player)) return@runLaterSync
-                player.updateInventory()
-            }
+            player.updateInventory()
         }
 
         val execute = {
@@ -187,19 +182,17 @@ object InventoryManager : WavesModule {
         }
     }
 
-    fun handleClickInventory(
+    private fun handleClickInventory(
         player: Player,
         packet: PacketContainerClickEvent,
         clickType: ClickType,
         changedSlots: Map<Int, ItemStack>,
     ) {
         val menu = openedInventories[player] ?: error("Menu under player key not found.")
-        updateCarriedItem(player, null, clickType)
-
+        updateCarriedItem(player, packet.carriedItem, clickType)
         if (clickType == ClickType.DRAG_END) {
             handleDragEnd(player, menu)
         }
-
         createAdjustedClickPacket(packet, menu, player, changedSlots)
     }
 
@@ -242,8 +235,8 @@ object InventoryManager : WavesModule {
         if (click.clickType == ClickType.DRAG_END) {
             clearAccumulatedDrag(click.player)
         }
-        val inventory = openedInventories[click.player] ?: error("Menu under player key not found.")
-        val viewer = inventory.viewers[click.player.uniqueId] ?: return
+        val inventory = openedInventories[click.player.player] ?: error("Menu under player key not found.")
+        val viewer = inventory.viewers[click.player.player.uniqueId] ?: return
 
         updateInventoryContent(inventory, viewer)
     }
@@ -291,7 +284,7 @@ object InventoryManager : WavesModule {
                 createDragPacket(drag.packet, -inventory.type.size + 9, player)
             }
         }
-        clearAccumulatedDrag(player)
+        clearAccumulatedDrag(viewer)
     }
 
     private fun createDragPacket(
@@ -299,6 +292,7 @@ object InventoryManager : WavesModule {
         slotOffset: Int,
         player: Player,
     ) {
+        player.sendMessage("Debug 1")
         Waves.NMS_HANDLER.receiveWindowClick(
             0,
             originalPacket.stateId,
@@ -309,11 +303,10 @@ object InventoryManager : WavesModule {
             originalPacket.changedSlots,
             player
         )
+        player.sendMessage("Debug 2")
     }
 
-    fun clearAccumulatedDrag(player: Player) {
-        val inventory = openedInventories[player] ?: return
-        val viewer = inventory.viewers[player.uniqueId] ?: return
+    fun clearAccumulatedDrag(viewer: InventoryViewer) {
         viewer.accumulatedDrag.clear()
     }
 

@@ -13,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 open class AquaticMenu(
     title: Component,
     type: InventoryType,
+    val cancelBukkitInteractions: Boolean
 ): PacketInventory(title,type) {
 
     val components = ConcurrentHashMap<String,MenuComponent>()

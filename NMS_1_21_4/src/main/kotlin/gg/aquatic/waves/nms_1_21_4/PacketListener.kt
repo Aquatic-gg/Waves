@@ -166,6 +166,15 @@ class PacketListener(
                 }
                 return packet to event
             }
+
+            is ClientboundContainerClosePacket -> {
+                val event = PacketContainerCloseEvent(player)
+                event.call()
+                if (event.isCancelled) {
+                    return null
+                }
+                return packet to event
+            }
         }
         return packet to null
     }

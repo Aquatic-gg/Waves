@@ -7,6 +7,7 @@ import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import com.mojang.datafixers.util.Pair
 import gg.aquatic.waves.api.ReflectionUtils
+import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.nms.*
 import gg.aquatic.waves.api.nms.entity.DataSerializerTypes
 import gg.aquatic.waves.api.nms.entity.EntityDataValue
@@ -838,9 +839,11 @@ object NMSHandlerImpl : NMSHandler {
             HashedStack.create(carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY, hashOpsGenerator)
         )
 
-        for (player in players) {
-            (player as CraftPlayer).handle.connection.handleContainerClick(packet)
-        }
+        Bukkit.getScheduler().runTask(WavesPlugin.INSTANCE, Runnable {
+            for (player in players) {
+                (player as CraftPlayer).handle.connection.handleContainerClick(packet)
+            }
+        })
     }
 
     override fun generateEntityId(): Int {

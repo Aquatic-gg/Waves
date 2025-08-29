@@ -38,7 +38,8 @@ object VanillaMenuInput : Input {
             val menu = PrivateAquaticMenu(
                 title.toMMComponent(),
                 inventoryType,
-                player
+                player,
+                true
             )
 
             for (button in buttons) {

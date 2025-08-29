@@ -10,10 +10,10 @@ import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.ChannelPromise
 import net.minecraft.core.NonNullList
+import net.minecraft.network.HashedStack
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
-import org.bukkit.Bukkit
-import org.bukkit.Location
+import org.bukkit.*
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftEntityType
 import org.bukkit.craftbukkit.inventory.CraftItemStack
@@ -170,6 +170,15 @@ class PacketListener(
                 }
                 return packet to event
             }
+
+            is ClientboundContainerClosePacket -> {
+                val event = PacketContainerCloseEvent(player)
+                event.call()
+                if (event.isCancelled) {
+                    return null
+                }
+                return packet to event
+            }
         }
         return packet to null
     }
@@ -221,6 +230,22 @@ class PacketListener(
             }
 
             is ServerboundContainerClickPacket -> {
+                val carriedItem = (msg.carriedItem as? HashedStack.ActualItem)?.let { carried ->
+                    val type = carried.item.registeredName
+                    carried.components.addedComponents
+
+                    var item = NamespacedKey.fromString(type)?.let { typeKey ->
+                        Registry.ITEM.get(typeKey)
+                    }?.createItemStack(carried.count)
+
+                    if (item != null) {
+                        if (item.type == Material.AIR) return@let null
+                        val nmsItem = CraftItemStack.asNMSCopy(item)
+                        nmsItem.applyComponents(nmsItem.components)
+                        item = CraftItemStack.asBukkitCopy(nmsItem)
+                    }
+                    item
+                }
                 val event = PacketContainerClickEvent(
                     player,
                     msg.containerId,
@@ -228,7 +253,7 @@ class PacketListener(
                     msg.slotNum.toInt(),
                     msg.buttonNum.toInt(),
                     msg.clickType.ordinal,
-                    null,
+                    carriedItem,
                     msg.changedSlots.mapValues { null as ItemStack? },
                 )
 

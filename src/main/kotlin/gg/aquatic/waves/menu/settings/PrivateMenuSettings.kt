@@ -12,7 +12,7 @@ class PrivateMenuSettings(
     val components: HashMap<String,IButtonSettings>
 ) {
 
-    fun create(player: Player, updater: (String, AquaticMenu) -> String) = PrivateAquaticMenu(title, type, player).apply {
+    fun create(player: Player, updater: (String, AquaticMenu) -> String, cancelBukkitInteractions: Boolean = true) = PrivateAquaticMenu(title, type, player, cancelBukkitInteractions).apply {
         components += this@PrivateMenuSettings.components.mapValues { it.value.create(updater) }
     }
 
