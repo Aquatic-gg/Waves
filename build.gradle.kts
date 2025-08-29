@@ -36,12 +36,14 @@ tasks.writeDependencies {
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.openjdk.nashorn", "gg.aquatic.waves.libs.nashorn")
+    relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
 }
 
 
 gremlin {
     //defaultRepositories.set(false) // Optional: if you want to manage repositories manually
     repositories {
+        maven("https://jitpack.io")
         maven("https://repo1.maven.org/maven2/") // Maven Central
         maven("https://maven.radsteve.net/public")
         maven {
@@ -49,6 +51,11 @@ gremlin {
         }
         maven {
             url = uri("https://repo.codemc.io/repository/maven-snapshots/")
+        }
+
+        maven {
+            name = "papermc"
+            url = uri("https://repo.papermc.io/repository/maven-public/")
         }
     }
 
@@ -63,6 +70,12 @@ gremlin {
         implementation("net.radstevee.packed:packed-core:1.1.1")
         implementation("net.radstevee.packed:packed-negative-spaces:1.1.1")
         implementation("org.reflections:reflections:0.10.2")
+        implementation("com.github.micartey:webhookly:master-SNAPSHOT")
+        implementation("net.kyori:adventure-text-minimessage:4.20.0")
+        implementation("net.kyori:adventure-api:4.20.0")
+        implementation("org.bstats:bstats-bukkit:3.1.0")
+        implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
+        implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
     }
 }
 
@@ -96,17 +109,17 @@ repositories {
 dependencies {
     implementation("xyz.jpenilla:gremlin-runtime:0.0.7")
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-    implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
-    implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
-    implementation("gg.aquatic.wavessync:wavessync-api:1.0.1:all")
+    //implementation("gg.aquatic.wavessync:wavessync-api:1.0.1:all")
 
+    /*
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
     implementation("io.ktor:ktor-client-websockets:$ktor_version")
     implementation("io.ktor:ktor-client-okhttp:$ktor_version")
     implementation("io.ktor:ktor-client-okhttp-jvm:2.3.12")
     implementation("io.ktor:ktor-client-auth:$ktor_version")
-    implementation("org.reflections:reflections:0.10.2")
+
+     */
 
     compileOnly("me.clip:placeholderapi:2.11.6")
 
@@ -119,13 +132,11 @@ dependencies {
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
-    implementation("com.github.micartey:webhookly:master-SNAPSHOT")
-    implementation("net.kyori:adventure-text-minimessage:4.20.0")
-    implementation("net.kyori:adventure-api:4.20.0")
     compileOnly("com.willfp:eco:6.74.5")
     compileOnly("io.github.toxicity188:BetterModel:1.10.1")
-    implementation("org.bstats:bstats-bukkit:3.1.0")
 
+    runtimeDownload("org.reflections:reflections:0.10.2")
+    runtimeDownload("com.github.micartey:webhookly:master-SNAPSHOT")
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10")
@@ -134,6 +145,11 @@ dependencies {
     runtimeDownload("com.zaxxer:HikariCP:5.1.0")
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
+    runtimeDownload("net.kyori:adventure-text-minimessage:4.20.0")
+    runtimeDownload("net.kyori:adventure-api:4.20.0")
+    runtimeDownload("org.bstats:bstats-bukkit:3.1.0")
+    runtimeDownload("net.kyori:adventure-text-serializer-gson:4.17.0")
+    runtimeDownload("net.kyori:adventure-text-serializer-plain:4.18.0")
 
     compileOnly("net.momirealms:craft-engine-core:0.0.61")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.61")
@@ -178,13 +194,19 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     exclude("org/intellij/**")
     exclude("org/jetbrains/**")
 
-    relocate("com.tcoded.folialib", "gg.aquatic.waves.shadow.lib.folialib")
-    relocate("net.wesjd.anvilgui", "gg.aquatic.waves.shadow.net.wesjd.anvilgui")
-
     exclude("com/google/**", "com/typesafe/**", "io/netty/**", "org/slf4j/**")
     exclude("plugin.yml")
-    relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
 
+    exclude("com/googlecode/**")
+    exclude("com/**")
+
+    exclude("javassist/**")
+    exclude("javax/**")
+    exclude("me/**")
+    exclude("net/**")
+    exclude("org/**")
+
+    relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
@@ -212,9 +234,6 @@ tasks.register<ShadowJar>("shadowJarPublish") {
     exclude("org/intellij/**")
     exclude("org/jetbrains/**")
 
-    relocate("com.tcoded.folialib", "gg.aquatic.waves.shadow.lib.folialib")
-    relocate("net.wesjd.anvilgui", "gg.aquatic.waves.shadow.net.wesjd.anvilgui")
-
     exclude(
         "META-INF/*.SF",
         "META-INF/*.DSA",
@@ -223,7 +242,6 @@ tasks.register<ShadowJar>("shadowJarPublish") {
 
     exclude("com/google/**", "com/typesafe/**", "io/netty/**", "org/slf4j/**")
     exclude("plugin.yml")
-    relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
 }
 
 tasks {
@@ -245,7 +263,7 @@ tasks {
         filteringCharset = Charsets.UTF_8.name()
         filesMatching("paper-plugin.yml") {
             expand(getProperties())
-            expand(mutableMapOf("version" to project.version))
+            expand(mutableMapOf("version" to version))
         }
     }
 }

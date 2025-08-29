@@ -24,8 +24,6 @@ import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.nms_1_21_4.NMSHandlerImpl
 import gg.aquatic.waves.pack.PackHandler
 import gg.aquatic.waves.profile.ProfilesModule
-import gg.aquatic.waves.sync.SyncHandler
-import gg.aquatic.waves.sync.SyncSettings
 import gg.aquatic.waves.util.Config
 import gg.aquatic.waves.util.action.ActionAnnotationProcessor
 import gg.aquatic.waves.util.message.impl.EmptyMessage
@@ -153,17 +151,7 @@ class Waves : WavesPlugin() {
             MySqlDriver(ip, port, database, userName, password, maxPoolSize, poolName)
         }
 
-        val syncEnabled = cfg.getBoolean("sync.enabled", false)
-        val syncIP = cfg.getString("sync.ip", "localhost")!!
-        val syncPort = cfg.getInt("sync.port", 8080)
-        val syncPassword = cfg.getString("sync.protection-key", "<PASSWORD>")!!
-        val syncServerId = cfg.getString("sync.server-id", "main")!!
-        val syncSettings = SyncSettings(syncEnabled, syncIP, syncPort, syncPassword, syncServerId)
-
-        configValues = WavesConfig(driver, syncSettings)
-        if (syncEnabled) {
-            SyncHandler.initializeClient(syncSettings)
-        }
+        configValues = WavesConfig(driver)
     }
 
 }

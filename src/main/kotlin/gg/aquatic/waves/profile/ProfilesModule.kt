@@ -8,8 +8,6 @@ import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.profile.event.AsyncProfileLoadEvent
 import gg.aquatic.waves.profile.event.ProfileUnloadEvent
 import gg.aquatic.waves.profile.module.ProfileModule
-import gg.aquatic.waves.sync.SyncHandler
-import gg.aquatic.waves.sync.SyncedPlayer
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.util.logger.type.InfoLogger
@@ -79,33 +77,8 @@ object ProfilesModule : WavesModule {
                 return player
             }
 
-            val syncSettings = Waves.INSTANCE.configValues.syncSettings
-            if (syncSettings.enabled) {
-                runAsync {
-                    val player = SyncHandler.client.getPlayerCache(it.player.uniqueId)
-                    if (player != null) {
-                        if (player.server == null) {
-                            loadPlayer()
-                        } else {
-                            playersAwaiting += it.player.uniqueId
-                        }
-                    } else {
-                        val aquaticPlayer = loadPlayer()
-                        val cachedPlayer =
-                            SyncedPlayer(
-                                aquaticPlayer.uuid,
-                                aquaticPlayer.username,
-                                syncSettings.serverId,
-                                HashMap()
-                            )
-                        SyncHandler.client.cachePlayer(cachedPlayer)
-                    }
-                }
-
-            } else {
-                runAsync {
-                    loadPlayer()
-                }
+            runAsync {
+                loadPlayer()
             }
 
 
@@ -121,24 +94,8 @@ object ProfilesModule : WavesModule {
                 cache.remove(it.player.uniqueId)
             }
 
-            val syncSettings = Waves.INSTANCE.configValues.syncSettings
-            if (syncSettings.enabled) {
-                runAsync {
-                    savePlayer()
-                    val player = SyncHandler.client.getPlayerCache(it.player.uniqueId)
-                    if (player != null) {
-                        if (player.server == null) {
-                            savePlayer()
-                        } else {
-                            playersAwaiting += it.player.uniqueId
-                        }
-                    }
-                }
-
-            } else {
-                runAsync {
-                    savePlayer()
-                }
+            runAsync {
+                savePlayer()
             }
         }
     }
