@@ -6,14 +6,17 @@ import gg.aquatic.waves.util.block.AquaticBlock
 import gg.aquatic.waves.util.block.AquaticBlockSerializer
 import org.bukkit.configuration.ConfigurationSection
 
-class BlockArgument(id: String, defaultValue: AquaticBlock?, required: Boolean) : AquaticObjectArgument<AquaticBlock>(id, defaultValue,
-    required
+class BlockArgument(
+    id: String,
+    defaultValue: AquaticBlock?,
+    required: Boolean,
+    aliases: Collection<String> = listOf(),
+) : AquaticObjectArgument<AquaticBlock>(
+    id, defaultValue,
+    required,
+    aliases
 ) {
     override val serializer: AbstractObjectArgumentSerializer<AquaticBlock?> = Serializer
-
-    override fun load(section: ConfigurationSection): AquaticBlock? {
-        return serializer.load(section, id)
-    }
 
     object Serializer : AbstractObjectArgumentSerializer<AquaticBlock?>() {
         override fun load(section: ConfigurationSection, id: String): AquaticBlock? {

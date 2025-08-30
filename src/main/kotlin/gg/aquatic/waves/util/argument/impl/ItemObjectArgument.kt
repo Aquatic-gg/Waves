@@ -6,17 +6,20 @@ import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.util.item.loadFromYml
 import org.bukkit.configuration.ConfigurationSection
 
-class ItemObjectArgument(id: String, defaultValue: AquaticItem?, required: Boolean) : AquaticObjectArgument<AquaticItem>(id, defaultValue,
-    required
+class ItemObjectArgument(
+    id: String,
+    defaultValue: AquaticItem?,
+    required: Boolean,
+    aliases: Collection<String> = listOf(),
+) : AquaticObjectArgument<AquaticItem>(
+    id, defaultValue,
+    required,
+    aliases
 ) {
     override val serializer: AbstractObjectArgumentSerializer<AquaticItem?>
         get() {
             return Serializer
         }
-
-    override fun load(section: ConfigurationSection): AquaticItem? {
-        return serializer.load(section, id) ?: defaultValue
-    }
 
     object Serializer : AbstractObjectArgumentSerializer<AquaticItem?>() {
         override fun load(section: ConfigurationSection, id: String): AquaticItem? {

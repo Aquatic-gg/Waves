@@ -30,13 +30,9 @@ class ClearPotionEffectsAction: Action<PlayerScenario> {
 
     class PotionsArgument(
         id: String,
-        defaultValue: List<PotionEffectType>?, required: Boolean
-    ) : AquaticObjectArgument<List<PotionEffectType>>(id, defaultValue, required) {
+        defaultValue: List<PotionEffectType>?, required: Boolean, aliases: Collection<String> = listOf()
+    ) : AquaticObjectArgument<List<PotionEffectType>>(id, defaultValue, required, aliases) {
         override val serializer: AbstractObjectArgumentSerializer<List<PotionEffectType>?> = Companion
-
-        override fun load(section: ConfigurationSection): List<PotionEffectType>? {
-            return serializer.load(section, id)
-        }
 
         companion object : AbstractObjectArgumentSerializer<List<PotionEffectType>?>() {
             override fun load(section: ConfigurationSection, id: String): List<PotionEffectType> {

@@ -7,16 +7,15 @@ import me.micartey.webhookly.embeds.*
 import org.bukkit.configuration.ConfigurationSection
 import java.awt.Color
 
-class DiscordEmbedArgument(id: String, defaultValue: List<WavesEmbedObject>?, required: Boolean) :
+class DiscordEmbedArgument(
+    id: String, defaultValue: List<WavesEmbedObject>?, required: Boolean,
+    aliases: Collection<String> = listOf(),
+) :
     AquaticObjectArgument<List<DiscordEmbedArgument.WavesEmbedObject>>(
         id,
-        defaultValue, required
+        defaultValue, required, aliases
     ) {
     override val serializer: AbstractObjectArgumentSerializer<List<WavesEmbedObject>?> = Companion
-
-    override fun load(section: ConfigurationSection): List<WavesEmbedObject>? {
-        return serializer.load(section, id) ?: return defaultValue
-    }
 
     companion object : AbstractObjectArgumentSerializer<List<WavesEmbedObject>?>() {
         override fun load(section: ConfigurationSection, id: String): List<WavesEmbedObject> {
@@ -73,7 +72,7 @@ class DiscordEmbedArgument(id: String, defaultValue: List<WavesEmbedObject>?, re
     }
 
     class WavesEmbedObject(
-        val embedObject: EmbedObject
+        val embedObject: EmbedObject,
     ) {
 
         fun convert(updater: (String) -> String): EmbedObject {

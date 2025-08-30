@@ -16,8 +16,8 @@ object EconomyProfileModule : ProfileModule {
 
     val leaderboards = HashMap<RegisteredCurrency, EconomyLeaderboard>()
 
-    override fun loadEntry(aquaticPlayer: AquaticPlayer): ProfileModuleEntry {
-        return CurrencyDriver.get(aquaticPlayer)
+    override fun loadEntry(player: AquaticPlayer): ProfileModuleEntry {
+        return CurrencyDriver.get(player)
     }
 
     fun initializeEconomy(currency: CustomCurrency): RegisteredCurrency {

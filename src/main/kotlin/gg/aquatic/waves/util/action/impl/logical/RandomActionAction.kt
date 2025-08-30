@@ -43,17 +43,13 @@ class RandomActionAction<T : Any>(
     class ChanceActionsArgument<T : Any>(
         id: String, defaultValue: Collection<ChanceAction<T>>?, required: Boolean,
         val clazz: Class<T>,
-        val transforms: Collection<ClassTransform<T, *>>,
+        val transforms: Collection<ClassTransform<T, *>>, aliases: Collection<String> = listOf(),
     ) : AquaticObjectArgument<Collection<ChanceAction<T>>>(
         id, defaultValue,
-        required,
+        required, aliases,
     ) {
         override val serializer: AbstractObjectArgumentSerializer<Collection<ChanceAction<T>>?> =
             Serializer()
-
-        override fun load(section: ConfigurationSection): Collection<ChanceAction<T>>? {
-            return serializer.load(section, id)
-        }
 
         inner class Serializer() :
             AbstractObjectArgumentSerializer<Collection<ChanceAction<T>>?>() {
@@ -74,6 +70,6 @@ class RandomActionAction<T : Any>(
 
     class ChanceAction<T>(
         override val chance: Double,
-        val action: ConfiguredExecutableObject<T, Unit>
-    ): IChance
+        val action: ConfiguredExecutableObject<T, Unit>,
+    ) : IChance
 }

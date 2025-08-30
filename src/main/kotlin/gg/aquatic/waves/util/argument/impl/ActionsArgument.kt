@@ -11,16 +11,13 @@ import org.bukkit.configuration.ConfigurationSection
 class ActionsArgument<T : Any>(
     id: String, defaultValue: Collection<ConfiguredExecutableObject<T, Unit>>?, required: Boolean,
     val clazz: Class<T>,
-    val transforms: Collection<ClassTransform<T,*>>
+    val transforms: Collection<ClassTransform<T, *>>, aliases: Collection<String> = listOf(),
 ) : AquaticObjectArgument<Collection<ConfiguredExecutableObject<T, Unit>>>(
     id, defaultValue,
-    required,
+    required, aliases,
 ) {
-    override val serializer: AbstractObjectArgumentSerializer<Collection<ConfiguredExecutableObject<T, Unit>>?> = Serializer()
-
-    override fun load(section: ConfigurationSection): Collection<ConfiguredExecutableObject<T, Unit>>? {
-        return serializer.load(section, id)
-    }
+    override val serializer: AbstractObjectArgumentSerializer<Collection<ConfiguredExecutableObject<T, Unit>>?> =
+        Serializer()
 
     inner class Serializer() : AbstractObjectArgumentSerializer<Collection<ConfiguredExecutableObject<T, Unit>>?>() {
         override fun load(

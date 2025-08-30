@@ -9,15 +9,10 @@ import java.util.TreeMap
 
 class PathPointsArgument(
     id: String,
-    defaultValue: TreeMap<Int, PathPoint>?, required: Boolean,
-) : AquaticObjectArgument<TreeMap<Int, PathPoint>>(id, defaultValue, required) {
+    defaultValue: TreeMap<Int, PathPoint>?, required: Boolean, aliases: Collection<String> = listOf(),
+) : AquaticObjectArgument<TreeMap<Int, PathPoint>>(id, defaultValue, required, aliases) {
 
     override val serializer: AbstractObjectArgumentSerializer<TreeMap<Int, PathPoint>?> = Serializer
-
-    override fun load(section: ConfigurationSection): TreeMap<Int, PathPoint>? {
-        Bukkit.getConsoleSender().sendMessage("Loading points!")
-        return serializer.load(section, id)
-    }
 
     object Serializer : AbstractObjectArgumentSerializer<TreeMap<Int, PathPoint>?>() {
         override fun load(section: ConfigurationSection, id: String): TreeMap<Int, PathPoint> {

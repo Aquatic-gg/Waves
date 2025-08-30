@@ -5,14 +5,11 @@ import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.util.Vector
 
-class VectorListArgument(id: String, defaultValue: List<Vector>?, required: Boolean) : AquaticObjectArgument<List<Vector>>(id, defaultValue,
-    required
+class VectorListArgument(id: String, defaultValue: List<Vector>?, required: Boolean, aliases: Collection<String> = listOf()) : AquaticObjectArgument<List<Vector>>(id, defaultValue,
+    required,
+    aliases
 ) {
     override val serializer: AbstractObjectArgumentSerializer<List<Vector>?> = Serializer
-
-    override fun load(section: ConfigurationSection): List<Vector>? {
-        return Serializer.load(section, id)
-    }
 
     object Serializer: AbstractObjectArgumentSerializer<List<Vector>?>() {
         override fun load(section: ConfigurationSection, id: String): List<Vector> {

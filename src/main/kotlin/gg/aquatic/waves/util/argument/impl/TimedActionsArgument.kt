@@ -11,17 +11,13 @@ import org.bukkit.configuration.ConfigurationSection
 class TimedActionsArgument<T : Any>(
     id: String, defaultValue: HashMap<Int, Collection<ConfiguredExecutableObject<T, Unit>>>?, required: Boolean,
     val clazz: Class<T>,
-    val transforms: Collection<ClassTransform<T,*>>
+    val transforms: Collection<ClassTransform<T,*>>, aliases: Collection<String> = listOf()
 ) : AquaticObjectArgument<HashMap<Int, Collection<ConfiguredExecutableObject<T, Unit>>>>(
     id, defaultValue,
-    required,
+    required, aliases,
 ) {
     override val serializer: AbstractObjectArgumentSerializer<HashMap<Int, Collection<ConfiguredExecutableObject<T, Unit>>>?>
         get() = Serializer()
-
-    override fun load(section: ConfigurationSection): HashMap<Int, Collection<ConfiguredExecutableObject<T, Unit>>>? {
-        return serializer.load(section, id)
-    }
 
     inner class Serializer : AbstractObjectArgumentSerializer<HashMap<Int, Collection<ConfiguredExecutableObject<T, Unit>>>?>() {
         override fun load(

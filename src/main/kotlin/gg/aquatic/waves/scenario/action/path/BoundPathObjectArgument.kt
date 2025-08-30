@@ -12,13 +12,12 @@ import org.bukkit.configuration.ConfigurationSection
 import java.util.concurrent.ConcurrentHashMap
 
 class BoundPathObjectArgument(id: String,
-                              defaultValue: ((Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>)?, required: Boolean
-) : AquaticObjectArgument<(Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>>(id, defaultValue, required) {
+                              defaultValue: ((Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>)?, required: Boolean,
+                              aliases: Collection<String> = listOf()
+) : AquaticObjectArgument<(Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>>(id, defaultValue, required,
+    aliases
+) {
     override val serializer: AbstractObjectArgumentSerializer<((Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>)?> = Serializer
-
-    override fun load(section: ConfigurationSection): ((Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>)? {
-        return serializer.load(section, id)
-    }
 
     object Serializer: AbstractObjectArgumentSerializer<((Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>)?>() {
         override fun load(section: ConfigurationSection, id: String): ((Scenario) -> ConcurrentHashMap<PathProp, PathBoundProperties>) {
