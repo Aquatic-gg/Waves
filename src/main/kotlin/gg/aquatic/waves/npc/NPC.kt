@@ -21,16 +21,21 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class NPC(
-    val profile: UserProfile,
+    profile: UserProfile,
     var gameMode: GameMode,
     var tabName: Component,
     var nameColor: NamedTextColor?,
     var prefix: Component?,
     var suffix: Component?,
-    var teamName: String = UUID.randomUUID().toString(),
     var ping: Int,
     location: Location,
 ) {
+
+    val profile = UserProfile(
+        UUID.randomUUID(),
+        profile.name,
+        profile.textureProperties
+    )
 
     var viewers = Collections.synchronizedSet<UUID>(HashSet())
     var equipment = ConcurrentHashMap<EquipmentSlot, ItemStack>()
@@ -80,10 +85,6 @@ class NPC(
         viewers.add(player.uniqueId)
     }
 
-    init {
-        setEntityData(EntityDataValue.create(17, DataSerializerTypes.BYTE, 127.toByte()))
-    }
-
     private fun show(player: Player) {
         val packet = Waves.NMS_HANDLER.createPlayerInfoUpdatePacket(
             0, ProfileEntry(
@@ -93,9 +94,11 @@ class NPC(
 
         Waves.NMS_HANDLER.sendPacket(packet, false, player)
         player.sendPacket(packetEntity.spawnPacket, false)
-        val updatePacket = Waves.NMS_HANDLER.createEntityUpdatePacket(packetEntity.entityId, entityData.values)
-        player.sendPacket(updatePacket, false)
 
+        packetEntity.updatePacket?.let { player.sendPacket(it, false) }
+        packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER, player)
+
+        val teamName = "team_${UUID.randomUUID()}"
         val teamPacket = Waves.NMS_HANDLER.createTeamsPacket(
             Team(
                 teamName,
@@ -108,7 +111,20 @@ class NPC(
             0,
             profile.name
         )
+        val teamPacket2 = Waves.NMS_HANDLER.createTeamsPacket(
+            Team(
+                teamName,
+                prefix ?: Component.empty(),
+                suffix ?: Component.empty(),
+                org.bukkit.scoreboard.Team.OptionStatus.NEVER,
+                org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY,
+                nameColor ?: NamedTextColor.WHITE
+            ),
+            3,
+            profile.name
+        )
         player.sendPacket(teamPacket, false)
+        player.sendPacket(teamPacket2, false)
     }
 
     fun despawn(player: Player) {

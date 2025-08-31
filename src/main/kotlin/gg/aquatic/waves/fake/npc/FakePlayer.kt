@@ -1,6 +1,8 @@
 package gg.aquatic.waves.fake.npc
 
 import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.nms.entity.DataSerializerTypes
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.api.nms.profile.UserProfile
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.trackedBy
@@ -34,7 +36,7 @@ class FakePlayer(
 ) : FakeObject(), EntityBased {
 
     val npc =
-        NPC(profile, gameMode, tabName, nameColor, prefixName, suffixName, "npc-${UUID.randomUUID()}", 1, location)
+        NPC(profile, gameMode, tabName, nameColor, prefixName, suffixName, 1, location)
     override var location: Location = location
         get() = npc.location
         private set(value) {
@@ -92,6 +94,10 @@ class FakePlayer(
     }
 
     init {
+        updateEntity {
+            setEntityData(EntityDataValue.create(17, DataSerializerTypes.BYTE, 127.toByte()))
+        }
+
         this.audience = audience
         FakeObjectHandler.tickableObjects += this
         FakeObjectHandler.idToEntity += entityId to this

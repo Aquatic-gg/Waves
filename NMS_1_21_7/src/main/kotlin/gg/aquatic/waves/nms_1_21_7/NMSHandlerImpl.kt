@@ -173,7 +173,8 @@ object NMSHandlerImpl : NMSHandler {
     fun createFakePlayer(location: Location, profile: UserProfile) {
         val server = (Bukkit.getServer() as CraftServer).server
         val level = (location.world as CraftWorld).handle
-        val serverPlayer = ServerPlayer(server,level, GameProfile(profile.uuid, profile.name), ClientInformation.createDefault())
+        val serverPlayer =
+            ServerPlayer(server, level, GameProfile(profile.uuid, profile.name), ClientInformation.createDefault())
         serverPlayer.setPos(location.x, location.y, location.z)
         serverPlayer.yRot = location.yaw
 
@@ -192,11 +193,7 @@ object NMSHandlerImpl : NMSHandler {
                 ?: return null
 
         entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
-        if (entity is ServerPlayer) {
-            entity.setYBodyRot(location.yaw)
-            entity.xRot = location.pitch
-            entity.yRot = location.yaw
-        }
+        entity.yHeadRot = location.yaw
 
         val seenBy = HashSet<ServerPlayerConnection>()
         val tracker = ServerEntity(
@@ -267,11 +264,12 @@ object NMSHandlerImpl : NMSHandler {
     ): T? {
         val entity = if (entityType == net.minecraft.world.entity.EntityType.PLAYER) {
             val server = (Bukkit.getServer() as CraftServer).server
-            val serverPlayer = ServerPlayer(server,worldServer, GameProfile(uuid ?: UUID.randomUUID(), "Player"), ClientInformation.createDefault())
-
-            val data = serverPlayer.entityData
-            data.set(EntityDataAccessor(17, EntityDataSerializers.BYTE), 127.toByte())
-
+            val serverPlayer = ServerPlayer(
+                server,
+                worldServer,
+                GameProfile(uuid ?: UUID.randomUUID(), "Player"),
+                ClientInformation.createDefault()
+            )
             serverPlayer
         } else {
             entityType.create(worldServer, EntitySpawnReason.COMMAND)
@@ -757,16 +755,32 @@ object NMSHandlerImpl : NMSHandler {
             scoreboard,
             team.teamName
         )
+        scoreboard.addPlayerTeam(team.teamName)
         playerTeam.playerPrefix = team.prefix.toNMSComponent()
         playerTeam.playerSuffix = team.suffix.toNMSComponent()
         playerTeam.collisionRule = net.minecraft.world.scores.Team.CollisionRule.entries[team.collisionRule.ordinal]
         playerTeam.nameTagVisibility =
             net.minecraft.world.scores.Team.Visibility.entries[team.nametagVisibility.ordinal]
         playerTeam.color = ChatFormatting.valueOf(team.nameColor.toString().uppercase())
-        val packet = ClientboundSetPlayerTeamPacket.createPlayerPacket(
-            playerTeam, playerName,
-            ClientboundSetPlayerTeamPacket.Action.entries[actionId]
-        )
+
+        val packet = when (actionId) {
+            0 -> { // CREATE_TEAM
+                if (playerName.isNotEmpty()) {
+                    playerTeam.players.add(playerName)
+                }
+                ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(playerTeam, true)
+            }
+            1 -> // REMOVE_TEAM
+                ClientboundSetPlayerTeamPacket.createRemovePacket(playerTeam)
+            2 -> // UPDATE_TEAM
+                ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(playerTeam, false)
+            3 -> { // ADD_PLAYER
+                ClientboundSetPlayerTeamPacket.createPlayerPacket(playerTeam, playerName, ClientboundSetPlayerTeamPacket.Action.ADD)
+            }
+            4 -> // REMOVE_PLAYER
+                ClientboundSetPlayerTeamPacket.createPlayerPacket(playerTeam, playerName, ClientboundSetPlayerTeamPacket.Action.REMOVE)
+            else -> throw IllegalArgumentException("Invalid team action ID: $actionId")
+        }
         return packet
     }
 
