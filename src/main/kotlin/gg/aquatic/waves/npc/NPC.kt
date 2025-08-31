@@ -2,10 +2,11 @@ package gg.aquatic.waves.npc
 
 import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.nms.PacketEntity
+import gg.aquatic.waves.api.nms.entity.DataSerializerTypes
+import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import gg.aquatic.waves.api.nms.profile.UserProfile
 import gg.aquatic.waves.api.nms.scoreboard.Team
-import gg.aquatic.waves.util.runLaterAsync
 import gg.aquatic.waves.util.sendPacket
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -33,6 +34,24 @@ class NPC(
 
     var viewers = Collections.synchronizedSet<UUID>(HashSet())
     var equipment = ConcurrentHashMap<EquipmentSlot, ItemStack>()
+    val entityData = ConcurrentHashMap<Int, EntityDataValue>()
+    val passengers = ConcurrentHashMap.newKeySet<Int>()
+
+    fun setEntityData(dataValue: EntityDataValue) {
+        entityData += dataValue.id to dataValue
+    }
+
+    fun setEntityData(vararg dataValue: EntityDataValue) {
+        for (data in dataValue) {
+            setEntityData(data)
+        }
+    }
+
+    fun setEntityData(dataValues: Collection<EntityDataValue>) {
+        for (data in dataValues) {
+            setEntityData(data)
+        }
+    }
 
     fun hasSpawned(player: Player): Boolean {
         return viewers.contains(player.uniqueId)
@@ -61,6 +80,10 @@ class NPC(
         viewers.add(player.uniqueId)
     }
 
+    init {
+        setEntityData(EntityDataValue.create(17, DataSerializerTypes.BYTE, 127.toByte()))
+    }
+
     private fun show(player: Player) {
         val packet = Waves.NMS_HANDLER.createPlayerInfoUpdatePacket(
             0, ProfileEntry(
@@ -70,22 +93,22 @@ class NPC(
 
         Waves.NMS_HANDLER.sendPacket(packet, false, player)
         player.sendPacket(packetEntity.spawnPacket, false)
+        val updatePacket = Waves.NMS_HANDLER.createEntityUpdatePacket(packetEntity.entityId, entityData.values)
+        player.sendPacket(updatePacket, false)
 
-        if (prefix != null || suffix != null || nameColor != null) {
-            val teamPacket = Waves.NMS_HANDLER.createTeamsPacket(
-                Team(
-                    teamName,
-                    prefix ?: Component.empty(),
-                    suffix ?: Component.empty(),
-                    org.bukkit.scoreboard.Team.OptionStatus.ALWAYS,
-                    org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY,
-                    nameColor ?: NamedTextColor.WHITE
-                ),
-                0,
-                profile.name
-            )
-            player.sendPacket(teamPacket, false)
-        }
+        val teamPacket = Waves.NMS_HANDLER.createTeamsPacket(
+            Team(
+                teamName,
+                prefix ?: Component.empty(),
+                suffix ?: Component.empty(),
+                org.bukkit.scoreboard.Team.OptionStatus.NEVER,
+                org.bukkit.scoreboard.Team.Option.NAME_TAG_VISIBILITY,
+                nameColor ?: NamedTextColor.WHITE
+            ),
+            0,
+            profile.name
+        )
+        player.sendPacket(teamPacket, false)
     }
 
     fun despawn(player: Player) {

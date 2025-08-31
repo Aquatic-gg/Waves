@@ -1,5 +1,6 @@
 package gg.aquatic.waves.fake.npc
 
+import gg.aquatic.waves.Waves
 import gg.aquatic.waves.api.nms.profile.UserProfile
 import gg.aquatic.waves.chunk.cache.ChunkCacheHandler
 import gg.aquatic.waves.chunk.trackedBy
@@ -9,10 +10,9 @@ import gg.aquatic.waves.fake.FakeObjectChunkBundle
 import gg.aquatic.waves.fake.FakeObjectHandler
 import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
 import gg.aquatic.waves.npc.NPC
+import gg.aquatic.waves.util.*
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.audience.FilterAudience
-import gg.aquatic.waves.util.runAsync
-import gg.aquatic.waves.util.runSync
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.GameMode
@@ -68,6 +68,27 @@ class FakePlayer(
         FakeObjectHandler.tickableObjects -= this
         unregister()
         FakeObjectHandler.idToEntity -= entityId
+    }
+
+
+    fun updateEntity(func: NPC.() -> Unit) {
+        val hadPassengers = npc.passengers.isNotEmpty()
+        func(npc)
+
+        npc.packetEntity.setData(npc.entityData.values)
+
+        if (npc.passengers.isNotEmpty()) {
+            npc.packetEntity.setPassengers(npc.passengers.toIntArray())
+        }
+
+        npc.packetEntity.setEquipment(npc.equipment)
+
+        val players = isViewing.toTypedArray()
+        npc.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false,*players)
+        if (!(!hadPassengers && npc.passengers.isEmpty())) {
+            npc.packetEntity.sendPassengerUpdate(Waves.NMS_HANDLER, false,*players)
+        }
+        npc.packetEntity.sendEquipmentUpdate(Waves.NMS_HANDLER,*players)
     }
 
     init {

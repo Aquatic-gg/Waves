@@ -41,8 +41,8 @@ class NPCInteractableSettings(
             suffixName?.toMMComponent(),
             gameMode,
             location.clone().add(offset).apply {
-                yaw = yawPitch.first
-                pitch = yawPitch.second
+                yaw += yawPitch.first
+                pitch += yawPitch.second
             },
             50,
             audience
@@ -70,7 +70,7 @@ class NPCInteractableSettings(
             val signature = section.getString("skin.signature") ?: return null
             textures.add(UserProfile.TextureProperty("textures", skin, signature))
 
-            val npcName = section.getString("name") ?: return null
+            val npcName = section.getString("name") ?: generateRandomUsername()
 
             val userProfile = UserProfile(
                 UUID.randomUUID(),
@@ -105,6 +105,13 @@ class NPCInteractableSettings(
                 yawPitch,
                 equipment
             )
+        }
+
+        private fun generateRandomUsername(length: Int = 12): String {
+            val allowedChars = ('a'..'z') + ('A'..'Z') + ('0'..'9') + '_'
+            return (1..length)
+                .map { allowedChars.random() }
+                .joinToString("")
         }
 
     }
