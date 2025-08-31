@@ -2,17 +2,12 @@ package gg.aquatic.waves.interactable.settings
 
 import gg.aquatic.waves.fake.entity.FakeEntity
 import gg.aquatic.waves.fake.entity.data.ConfiguredEntityData
-import gg.aquatic.waves.fake.entity.data.EntityData
 import gg.aquatic.waves.interactable.Interactable
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.settings.entityproperty.EntityArmorProperty
 import gg.aquatic.waves.interactable.type.EntityInteractable
-import gg.aquatic.waves.registry.WavesRegistry
 import gg.aquatic.waves.registry.serializer.EntityDataSerializer
-import gg.aquatic.waves.util.argument.ArgumentSerializer
-import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.audience.AquaticAudience
-import gg.aquatic.waves.util.collection.mapPair
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.EntityType
@@ -20,6 +15,7 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.util.Vector
 
 class EntityInteractableSettings(
+    val entityType: EntityType,
     val props: HashSet<ConfiguredEntityData>,
     val offset: Vector,
     val yawPitch: Pair<Float, Float>,
@@ -30,7 +26,7 @@ class EntityInteractableSettings(
         audience: AquaticAudience,
         onInteract: (InteractableInteractEvent) -> Unit,
     ): Interactable {
-        val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset).apply {
+        val fakeEntity = FakeEntity(entityType, location.clone().add(offset).apply {
             yaw = yawPitch.first
             pitch = yawPitch.second
         }, 50, audience, consumer = {
@@ -54,9 +50,12 @@ class EntityInteractableSettings(
     }
 
     companion object : InteractableSettingsFactory {
-        override fun load(section: ConfigurationSection): InteractableSettings {
+        override fun load(section: ConfigurationSection): InteractableSettings? {
+
+            val entityType = section.getString("type")?.let { EntityType.valueOf(it.uppercase()) } ?: return null
+
             val props = section.getConfigurationSection("properties")?.let {
-                EntityDataSerializer.load(it)
+                EntityDataSerializer.load(it, entityType)
             } ?: emptyList()
 
             val offsetStrs = section.getString("offset", "0;0;0")!!.split(";")
@@ -71,7 +70,7 @@ class EntityInteractableSettings(
                     offsetStrs.getOrElse(3) { "0" }.toFloat()
                     ) to (
                     offsetStrs.getOrElse(4) { "0" }.toFloat())
-            return EntityInteractableSettings(props.toHashSet(), offset, yawPitch, equipment)
+            return EntityInteractableSettings(entityType, props.toHashSet(), offset, yawPitch, equipment)
         }
 
     }

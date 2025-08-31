@@ -1,9 +1,13 @@
 package gg.aquatic.waves.registry.serializer
 
 import gg.aquatic.waves.registry.WavesRegistry
+import gg.aquatic.waves.scenario.Scenario
 import gg.aquatic.waves.util.action.impl.logical.ConditionalActionsAction
 import gg.aquatic.waves.util.action.impl.logical.RandomActionAction
 import gg.aquatic.waves.util.action.impl.logical.SmartAction
+import gg.aquatic.waves.util.action.impl.logical.scenario.LaterActionsAction
+import gg.aquatic.waves.util.action.impl.logical.scenario.StartTickerAction
+import gg.aquatic.waves.util.action.impl.logical.scenario.TimedActionsAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.generic.Action
@@ -19,6 +23,9 @@ object ActionSerializer {
     ) -> SmartAction<*>>(
         "random-action" to { clazz, classTransforms -> RandomActionAction(clazz, classTransforms) },
         "conditional-actions" to { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) },
+        "later-actions" to { clazz, classTransforms -> LaterActionsAction(clazz as Class<Scenario>, classTransforms) },
+        "timed-actions" to { clazz, classTransforms -> TimedActionsAction(clazz as Class<Scenario>, classTransforms) },
+        "start-ticker" to { clazz, classTransforms -> StartTickerAction(clazz as Class<Scenario>, classTransforms) },
     )
 
     private fun <T: Any> getSmartAction(id: String,clazz: Class<T>, classTransforms: Collection<ClassTransform<T, *>>): SmartAction<T>? {

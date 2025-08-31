@@ -1,8 +1,7 @@
 package gg.aquatic.waves.util.action.impl.logical.scenario
 
-import gg.aquatic.waves.scenario.prop.timer.TimedActionsAnimationProp
 import gg.aquatic.waves.scenario.Scenario
-import gg.aquatic.waves.util.action.RegisterAction
+import gg.aquatic.waves.scenario.prop.timer.TimedActionsAnimationProp
 import gg.aquatic.waves.util.action.impl.logical.SmartAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
@@ -12,7 +11,6 @@ import gg.aquatic.waves.util.generic.ConfiguredExecutableObject
 import net.kyori.adventure.key.Key
 import java.util.*
 
-@RegisterAction("timed-actions")
 class TimedActionsAction<T : Scenario>(
     clazz: Class<T>,
     classTransforms: Collection<ClassTransform<*, *>>,

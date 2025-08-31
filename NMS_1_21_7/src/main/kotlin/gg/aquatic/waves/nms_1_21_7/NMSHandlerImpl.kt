@@ -13,6 +13,7 @@ import gg.aquatic.waves.api.nms.entity.DataSerializerTypes
 import gg.aquatic.waves.api.nms.entity.EntityDataValue
 import gg.aquatic.waves.api.nms.profile.GameEventAction
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
+import gg.aquatic.waves.api.nms.profile.UserProfile
 import gg.aquatic.waves.api.nms.scoreboard.Team
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
@@ -32,9 +33,11 @@ import net.minecraft.network.HashedStack
 import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
+import net.minecraft.network.syncher.EntityDataAccessor
 import net.minecraft.network.syncher.EntityDataSerializers
 import net.minecraft.network.syncher.SynchedEntityData
 import net.minecraft.resources.RegistryOps
+import net.minecraft.server.level.ClientInformation
 import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
@@ -59,6 +62,7 @@ import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.World
 import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.CraftServer
 import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftPlayer
@@ -166,6 +170,17 @@ object NMSHandlerImpl : NMSHandler {
         this.setYBodyRot(yaw)
     }
 
+    fun createFakePlayer(location: Location, profile: UserProfile) {
+        val server = (Bukkit.getServer() as CraftServer).server
+        val level = (location.world as CraftWorld).handle
+        val serverPlayer = ServerPlayer(server,level, GameProfile(profile.uuid, profile.name), ClientInformation.createDefault())
+        serverPlayer.setPos(location.x, location.y, location.z)
+        serverPlayer.yRot = location.yaw
+
+        val data = serverPlayer.entityData
+        data.set(EntityDataAccessor(17, EntityDataSerializers.BYTE), 127.toByte())
+    }
+
     override fun createEntity(location: Location, entityType: EntityType, uuid: UUID?): PacketEntity? {
         val nmsEntityType =
             net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase()).getOrNull() ?: return null
@@ -177,6 +192,11 @@ object NMSHandlerImpl : NMSHandler {
                 ?: return null
 
         entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
+        if (entity is ServerPlayer) {
+            entity.setYBodyRot(location.yaw)
+            entity.xRot = location.pitch
+            entity.yRot = location.yaw
+        }
 
         val seenBy = HashSet<ServerPlayerConnection>()
         val tracker = ServerEntity(
@@ -245,7 +265,17 @@ object NMSHandlerImpl : NMSHandler {
         worldServer: ServerLevel,
         blockPos: BlockPos,
     ): T? {
-        val entity = entityType.create(worldServer, EntitySpawnReason.COMMAND)
+        val entity = if (entityType == net.minecraft.world.entity.EntityType.PLAYER) {
+            val server = (Bukkit.getServer() as CraftServer).server
+            val serverPlayer = ServerPlayer(server,worldServer, GameProfile(uuid ?: UUID.randomUUID(), "Player"), ClientInformation.createDefault())
+
+            val data = serverPlayer.entityData
+            data.set(EntityDataAccessor(17, EntityDataSerializers.BYTE), 127.toByte())
+
+            serverPlayer
+        } else {
+            entityType.create(worldServer, EntitySpawnReason.COMMAND)
+        }
         entity?.let {
             it.absMoveTo(blockPos.x.toDouble(), blockPos.y.toDouble(), blockPos.z.toDouble(), 0.0f, 0.0f)
             //worldServer.addFreshEntityWithPassengers(it)
@@ -259,7 +289,7 @@ object NMSHandlerImpl : NMSHandler {
                 it.yBodyRot = it.yRot
             }
         }
-        return entity
+        return entity as T?
     }
 
     override fun updateEntity(
@@ -732,7 +762,7 @@ object NMSHandlerImpl : NMSHandler {
         playerTeam.collisionRule = net.minecraft.world.scores.Team.CollisionRule.entries[team.collisionRule.ordinal]
         playerTeam.nameTagVisibility =
             net.minecraft.world.scores.Team.Visibility.entries[team.nametagVisibility.ordinal]
-        playerTeam.color = ChatFormatting.valueOf(team.nameColor.toString())
+        playerTeam.color = ChatFormatting.valueOf(team.nameColor.toString().uppercase())
         val packet = ClientboundSetPlayerTeamPacket.createPlayerPacket(
             playerTeam, playerName,
             ClientboundSetPlayerTeamPacket.Action.entries[actionId]

@@ -13,7 +13,6 @@ import gg.aquatic.waves.util.generic.ConfiguredExecutableObject
 import net.kyori.adventure.key.Key
 import java.util.*
 
-@RegisterAction("delayed-actions")
 class LaterActionsAction<T : Scenario>(
     clazz: Class<T>,
     classTransforms: Collection<ClassTransform<*, *>>,

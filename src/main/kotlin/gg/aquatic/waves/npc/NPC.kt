@@ -5,6 +5,7 @@ import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.profile.ProfileEntry
 import gg.aquatic.waves.api.nms.profile.UserProfile
 import gg.aquatic.waves.api.nms.scoreboard.Team
+import gg.aquatic.waves.util.runLaterAsync
 import gg.aquatic.waves.util.sendPacket
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -31,7 +32,7 @@ class NPC(
 ) {
 
     var viewers = Collections.synchronizedSet<UUID>(HashSet())
-    var equipment = ConcurrentHashMap<EquipmentSlot, ItemStack?>()
+    var equipment = ConcurrentHashMap<EquipmentSlot, ItemStack>()
 
     fun hasSpawned(player: Player): Boolean {
         return viewers.contains(player.uniqueId)
@@ -62,7 +63,7 @@ class NPC(
 
     private fun show(player: Player) {
         val packet = Waves.NMS_HANDLER.createPlayerInfoUpdatePacket(
-            1, ProfileEntry(
+            0, ProfileEntry(
                 profile, false, ping, gameMode, tabName, true, 0
             )
         )

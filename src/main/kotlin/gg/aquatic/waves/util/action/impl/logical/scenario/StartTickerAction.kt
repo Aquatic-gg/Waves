@@ -12,7 +12,6 @@ import gg.aquatic.waves.util.generic.ClassTransform
 import gg.aquatic.waves.util.generic.ConfiguredExecutableObject
 import net.kyori.adventure.key.Key
 
-@RegisterAction("start-ticker")
 class StartTickerAction<T : Scenario>(
     clazz: Class<T>,
     classTransforms: Collection<ClassTransform<*, *>>,
