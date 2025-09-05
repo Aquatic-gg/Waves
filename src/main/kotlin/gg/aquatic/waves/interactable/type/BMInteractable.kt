@@ -36,9 +36,9 @@ class BMInteractable(
             }
         }
 
-    val uuid = UUID.randomUUID()
+    val uuid: UUID = UUID.randomUUID()
     val model = BetterModel.model(modelId).getOrNull() ?: throw IllegalArgumentException("Model $modelId not found!")
-    val tracker: DummyTracker
+    val tracker: DummyTracker = model.create(location)
     /*
     fun setSkin(player: Player) {
         activeModel?.apply {
@@ -52,7 +52,6 @@ class BMInteractable(
      */
 
     init {
-        tracker = model.create(location)
         InteractableHandler.bmIntreactables += this
         this.audience = audience
     }

@@ -23,45 +23,49 @@ object ItemSerializer {
         section: ConfigurationSection?
     ): AquaticItem? {
         section ?: return null
-        val material = section.getString("material", "STONE")!!
-        var lore: MutableList<String>? = null
-        if (section.contains("lore")) {
-            lore = section.getStringList("lore")
-        }
-        val enchantments: MutableMap<String, Int> = HashMap()
-        if (section.contains("enchants")) {
-            for (str in section.getStringList("enchants")) {
-                val strs = str.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                if (strs.size < 2) {
-                    continue
+        return try {
+            val material = section.getString("material", "STONE")!!
+            var lore: MutableList<String>? = null
+            if (section.contains("lore")) {
+                lore = section.getStringList("lore")
+            }
+            val enchantments: MutableMap<String, Int> = HashMap()
+            if (section.contains("enchants")) {
+                for (str in section.getStringList("enchants")) {
+                    val strs = str.split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+                    if (strs.size < 2) {
+                        continue
+                    }
+                    val enchantment = strs[0]
+                    val level = strs[1].toInt()
+                    enchantments[enchantment] = level
                 }
-                val enchantment = strs[0]
-                val level = strs[1].toInt()
-                enchantments[enchantment] = level
             }
-        }
-        val flags: MutableList<ItemFlag> = ArrayList()
-        if (section.contains("flags")) {
-            for (flag in section.getStringList("flags")) {
-                val itemFlag = ItemFlag.valueOf(flag.uppercase())
-                flags.add(itemFlag)
+            val flags: MutableList<ItemFlag> = ArrayList()
+            if (section.contains("flags")) {
+                for (flag in section.getStringList("flags")) {
+                    val itemFlag = ItemFlag.valueOf(flag.uppercase())
+                    flags.add(itemFlag)
+                }
             }
+
+            val itemModel = section.getString("item-model")
+
+            val spawnerEntityType = section.getString("entity-type")?.let { EntityType.valueOf(it.uppercase()) }
+            return create(
+                material,
+                section.getString("display-name"),
+                lore,
+                section.getInt("amount", 1),
+                section.getInt("model-data"),
+                itemModel,
+                enchantments,
+                flags,
+                spawnerEntityType
+            )
+        } catch (_: Exception) {
+            null
         }
-
-        val itemModel = section.getString("item-model")
-
-        val spawnerEntityType = section.getString("entity-type")?.let { EntityType.valueOf(it.uppercase()) }
-        return create(
-            material,
-            section.getString("display-name"),
-            lore,
-            section.getInt("amount", 1),
-            section.getInt("model-data"),
-            itemModel,
-            enchantments,
-            flags,
-            spawnerEntityType
-        )
     }
 
     fun fromSections(sections: List<ConfigurationSection>): List<AquaticItem> {

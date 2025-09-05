@@ -59,7 +59,7 @@ class RandomActionAction<T : Any>(
             ): Collection<ChanceAction<T>> {
                 val actions = mutableListOf<ChanceAction<T>>()
                 for (section in section.getSectionList(id)) {
-                    val chance = section.getDouble("chance")
+                    val chance = section.getDouble("chance", 1.0)
                     val action = ActionSerializer.fromSection(clazz, section, *transforms.toTypedArray()) ?: continue
                     actions.add(ChanceAction(chance, action))
                 }

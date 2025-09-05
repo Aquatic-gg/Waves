@@ -31,6 +31,5 @@ class BMInteractableSettings(
             val modelId = section.getString("model") ?: ""
             return BMInteractableSettings(offset,modelId)
         }
-
     }
 }
