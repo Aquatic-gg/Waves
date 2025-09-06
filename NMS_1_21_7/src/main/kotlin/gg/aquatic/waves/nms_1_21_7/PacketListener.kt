@@ -24,9 +24,6 @@ class PacketListener(
     val player: Player,
 ) : ChannelDuplexHandler() {
 
-    private val blockUpdateBlockStateField =
-        ReflectionUtils.getField("blockState", ClientboundBlockUpdatePacket::class.java)
-
     override fun write(ctx: ChannelHandlerContext?, msg: Any, promise: ChannelPromise?) {
         var isMegPacket = false
         val packet = if (Bukkit.getPluginManager().getPlugin("ModelEngine") != null) {

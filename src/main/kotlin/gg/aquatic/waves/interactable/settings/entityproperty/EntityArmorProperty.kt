@@ -1,7 +1,6 @@
 package gg.aquatic.waves.interactable.settings.entityproperty
 
 import gg.aquatic.waves.item.AquaticItem
-import gg.aquatic.waves.util.item.loadFromYml
 import org.bukkit.configuration.ConfigurationSection
 
 class EntityArmorProperty(

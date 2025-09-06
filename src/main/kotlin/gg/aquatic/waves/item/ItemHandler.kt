@@ -7,6 +7,7 @@ import gg.aquatic.waves.registry.isAquaticItem
 import gg.aquatic.waves.registry.registryId
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.event
+import gg.aquatic.waves.item.option.ItemOptionHandle
 import gg.aquatic.waves.util.runSync
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.EntityType
@@ -116,26 +117,12 @@ object ItemHandler : WavesModule {
     fun create(
         internalId: String?,
         item: ItemStack,
-        name: String? = null,
-        description: MutableList<String>? = null,
-        amount: Int = 1,
-        modeldata: Int = -1,
-        itemModel: String? = null,
-        enchantments: MutableMap<String, Int>? = null,
-        flags: MutableList<ItemFlag>? = null,
-        spawnerEntityType: EntityType? = null
+        options: List<ItemOptionHandle>
     ): AquaticItem {
         return AquaticItem(
             internalId,
             item,
-            name,
-            description,
-            amount,
-            modeldata,
-            itemModel,
-            enchantments,
-            flags,
-            spawnerEntityType
+            options
         )
     }
 

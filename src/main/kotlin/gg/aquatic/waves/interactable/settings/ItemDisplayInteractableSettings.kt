@@ -9,7 +9,6 @@ import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.type.EntityInteractable
 import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.util.audience.AquaticAudience
-import gg.aquatic.waves.util.item.loadFromYml
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard

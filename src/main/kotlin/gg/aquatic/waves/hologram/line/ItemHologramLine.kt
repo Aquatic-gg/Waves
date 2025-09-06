@@ -9,7 +9,6 @@ import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
-import gg.aquatic.waves.util.item.loadFromYml
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import gg.aquatic.waves.util.setData
 import org.bukkit.Location

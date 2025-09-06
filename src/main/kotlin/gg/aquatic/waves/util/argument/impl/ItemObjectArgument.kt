@@ -1,9 +1,8 @@
 package gg.aquatic.waves.util.argument.impl
 
+import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.util.argument.AbstractObjectArgumentSerializer
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
-import gg.aquatic.waves.item.AquaticItem
-import gg.aquatic.waves.util.item.loadFromYml
 import org.bukkit.configuration.ConfigurationSection
 
 class ItemObjectArgument(
