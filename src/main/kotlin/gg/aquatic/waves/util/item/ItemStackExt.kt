@@ -34,7 +34,7 @@ fun ItemMeta.setSpawnerType(type: EntityType) {
 }
 
 fun Material.toCustomItem(): AquaticItem {
-    return ItemHandler.create(null,ItemStack(this), listOf())
+    return ItemHandler.create(null, ItemStack(this), null, listOf(), 1, listOf())
 }
 
 fun ItemStack.modifyMeta(block: (ItemMeta) -> Unit) {

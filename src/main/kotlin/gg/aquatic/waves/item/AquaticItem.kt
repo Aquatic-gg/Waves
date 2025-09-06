@@ -10,6 +10,9 @@ import org.bukkit.inventory.ItemStack
 class AquaticItem(
     val internalId: String? = null,
     private val item: ItemStack,
+    val name: String?,
+    val lore: List<String>,
+    val amount: Int,
     val options: List<ItemOptionHandle>
 ) {
 

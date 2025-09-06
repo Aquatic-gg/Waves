@@ -63,9 +63,16 @@ object ItemSerializer {
             val material = section.getString("material", "STONE")!!
             val options = optionFactories.mapNotNull { it.load(section) }
 
+            val name = section.getString("display-name")
+            val lore = section.getStringList("lore")
+            val amount = section.getInt("amount", 1)
+
             return create(
                 material,
-                options
+                name,
+                lore,
+                amount,
+                options,
             )
         } catch (_: Exception) {
             null
@@ -85,6 +92,9 @@ object ItemSerializer {
 
     private fun create(
         namespace: String,
+        name: String?,
+        lore: List<String>,
+        amount: Int,
         options: List<ItemOptionHandle>
     ): AquaticItem? {
         val itemStack = if (namespace.contains(":")) {
@@ -98,6 +108,9 @@ object ItemSerializer {
         return ItemHandler.create(
             namespace,
             itemStack,
+            name,
+            lore,
+            amount,
             options
         )
     }

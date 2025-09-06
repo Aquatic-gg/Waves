@@ -117,11 +117,17 @@ object ItemHandler : WavesModule {
     fun create(
         internalId: String?,
         item: ItemStack,
+        name: String?,
+        lore: List<String>,
+        amount: Int,
         options: List<ItemOptionHandle>
     ): AquaticItem {
         return AquaticItem(
             internalId,
             item,
+            name,
+            lore,
+            amount,
             options
         )
     }
