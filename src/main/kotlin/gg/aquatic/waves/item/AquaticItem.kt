@@ -2,7 +2,9 @@ package gg.aquatic.waves.item
 
 import com.google.common.collect.HashMultimap
 import gg.aquatic.waves.item.option.ItemOptionHandle
+import gg.aquatic.waves.item.option.ItemOptions
 import gg.aquatic.waves.registry.serializer.ItemSerializer
+import net.kyori.adventure.key.Key
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -10,11 +12,17 @@ import org.bukkit.inventory.ItemStack
 class AquaticItem(
     val internalId: String? = null,
     private val item: ItemStack,
-    val name: String?,
-    val lore: List<String>,
-    val amount: Int,
-    val options: List<ItemOptionHandle>
+    options: Collection<ItemOptionHandle>
 ) {
+
+    val options = options.associateBy { it.key }.toMutableMap()
+
+    fun getOption(key: Key): ItemOptionHandle? {
+        return options[key]
+    }
+    fun getOption(option: ItemOptions): ItemOptionHandle? {
+        return options[option.key]
+    }
 
     fun giveItem(player: Player) {
         val iS = getItem()
@@ -42,12 +50,12 @@ class AquaticItem(
         }
 
         for (handle in options) {
-            handle.apply(im)
+            handle.value.apply(im)
         }
 
         iS.itemMeta = im
         for (handle in options) {
-            handle.apply(iS)
+            handle.value.apply(iS)
         }
         return iS
     }

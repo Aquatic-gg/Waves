@@ -2,49 +2,31 @@ package gg.aquatic.waves.registry.serializer
 
 import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.item.ItemHandler
-import gg.aquatic.waves.item.option.AmountOption
-import gg.aquatic.waves.item.option.CustomModelDataLegacyOption
-import gg.aquatic.waves.item.option.CustomModelDataOption
-import gg.aquatic.waves.item.option.DamageOption
-import gg.aquatic.waves.item.option.DisplayNameOption
-import gg.aquatic.waves.item.option.DyeOption
-import gg.aquatic.waves.item.option.EnchantsOption
-import gg.aquatic.waves.item.option.FlagsOption
-import gg.aquatic.waves.item.option.ItemModelOption
-import gg.aquatic.waves.item.option.ItemOptionHandle
-import gg.aquatic.waves.item.option.LoreOption
-import gg.aquatic.waves.item.option.MaxDamageOption
-import gg.aquatic.waves.item.option.MaxStackSizeOption
-import gg.aquatic.waves.item.option.RarityOption
-import gg.aquatic.waves.item.option.SpawnerTypeOption
-import gg.aquatic.waves.item.option.TooltipStyleOption
-import gg.aquatic.waves.item.option.UnbreakableOption
+import gg.aquatic.waves.item.option.*
 import gg.aquatic.waves.registry.WavesRegistry
 import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.entity.EntityType
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
 object ItemSerializer {
 
     val optionFactories = hashSetOf(
-        AmountOption,
-        CustomModelDataLegacyOption,
-        CustomModelDataOption,
-        DamageOption,
-        DisplayNameOption,
-        DyeOption,
-        EnchantsOption,
-        FlagsOption,
-        ItemModelOption,
-        LoreOption,
-        MaxDamageOption,
-        MaxStackSizeOption,
-        RarityOption,
-        SpawnerTypeOption,
-        TooltipStyleOption,
-        UnbreakableOption
+        AmountOptionHandle,
+        CustomModelDataLegacyOptionHandle,
+        CustomModelDataOptionHandle,
+        DamageOptionHandle,
+        DisplayNameOptionHandle,
+        DyeOptionHandle,
+        EnchantsOptionHandle,
+        FlagsOptionHandle,
+        ItemModelOptionHandle,
+        LoreOptionHandle,
+        MaxDamageOptionHandle,
+        MaxStackSizeOptionHandle,
+        RarityOptionHandle,
+        SpawnerTypeOptionHandle,
+        TooltipStyleOptionHandle,
+        UnbreakableOptionHandle
     )
 
     inline fun <reified T : Any> fromSection(
@@ -63,15 +45,8 @@ object ItemSerializer {
             val material = section.getString("material", "STONE")!!
             val options = optionFactories.mapNotNull { it.load(section) }
 
-            val name = section.getString("display-name")
-            val lore = section.getStringList("lore")
-            val amount = section.getInt("amount", 1)
-
             return create(
                 material,
-                name,
-                lore,
-                amount,
                 options,
             )
         } catch (_: Exception) {
@@ -92,9 +67,6 @@ object ItemSerializer {
 
     private fun create(
         namespace: String,
-        name: String?,
-        lore: List<String>,
-        amount: Int,
         options: List<ItemOptionHandle>
     ): AquaticItem? {
         val itemStack = if (namespace.contains(":")) {
@@ -108,9 +80,6 @@ object ItemSerializer {
         return ItemHandler.create(
             namespace,
             itemStack,
-            name,
-            lore,
-            amount,
             options
         )
     }
