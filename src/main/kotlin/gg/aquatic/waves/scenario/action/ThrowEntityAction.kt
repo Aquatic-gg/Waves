@@ -15,7 +15,7 @@ import kotlin.math.sin
 @RegisterAction("throw-entity")
 class ThrowEntityAction : Action<Scenario> {
     override val arguments: List<AquaticObjectArgument<*>> = listOf(
-        PrimitiveObjectArgument("velocity", "0;0;0", false),
+        PrimitiveObjectArgument("velocity", null, false),
         PrimitiveObjectArgument("pitch", 0.0, false),
         PrimitiveObjectArgument("yaw", 0.0, false),
         PrimitiveObjectArgument("power", 1.0, false),
