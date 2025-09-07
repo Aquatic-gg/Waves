@@ -49,7 +49,8 @@ object ItemSerializer {
                 material,
                 options,
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            e.printStackTrace()
             null
         }
     }

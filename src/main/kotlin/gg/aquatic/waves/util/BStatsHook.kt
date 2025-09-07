@@ -1,13 +1,9 @@
 package gg.aquatic.waves.util
 
-import gg.aquatic.waves.Waves
 import org.bstats.bukkit.Metrics
+import org.bukkit.plugin.java.JavaPlugin
 
-object BStatsUtils {
-
-    fun registerMetrics(id: Int): Metrics {
-        val metrics = Metrics(Waves.INSTANCE, id)
-        return metrics
-    }
-
+fun JavaPlugin.registerMetrics(id: Int): Metrics {
+    val metrics = Metrics(this, id)
+    return metrics
 }

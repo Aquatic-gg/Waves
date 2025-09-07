@@ -1,16 +1,15 @@
 package gg.aquatic.waves.item
 
 import gg.aquatic.waves.Waves
-import gg.aquatic.waves.module.WavesModule
-import gg.aquatic.waves.module.WaveModules
-import gg.aquatic.waves.registry.isAquaticItem
-import gg.aquatic.waves.registry.registryId
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.item.option.ItemOptionHandle
+import gg.aquatic.waves.module.WaveModules
+import gg.aquatic.waves.module.WavesModule
+import gg.aquatic.waves.registry.isAquaticItem
+import gg.aquatic.waves.registry.registryId
 import gg.aquatic.waves.util.runSync
 import org.bukkit.NamespacedKey
-import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.ClickType
@@ -18,7 +17,6 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerSwapHandItemsEvent
 import org.bukkit.inventory.EquipmentSlot
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 
 object ItemHandler : WavesModule {

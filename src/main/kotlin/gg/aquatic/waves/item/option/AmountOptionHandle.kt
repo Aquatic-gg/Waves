@@ -17,7 +17,7 @@ class AmountOptionHandle(
     companion object: ItemOption {
         override val key = Key.key("itemoption:amount")
         override fun load(section: ConfigurationSection): ItemOptionHandle? {
-            if (section.contains("amount")) return null
+            if (!section.contains("amount")) return null
             val amount = section.getInt("amount")
             return AmountOptionHandle(amount)
         }
