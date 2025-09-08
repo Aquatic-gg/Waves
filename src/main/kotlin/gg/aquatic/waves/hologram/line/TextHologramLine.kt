@@ -38,6 +38,7 @@ class TextHologramLine(
     var isSeeThrough: Boolean = true,
     override var transformationDuration: Int = 0,
     override var teleportInterpolation: Int,
+    override var translation: Vector3f
 ) : HologramLine {
     override fun spawn(
         location: Location,
@@ -70,6 +71,7 @@ class TextHologramLine(
         data += TextDisplayEntityData.Width.generate(lineWidth)
         data += DisplayEntityData.Billboard.generate(billboard)
         data += TextDisplayEntityData.Flags.generate(hasShadow, isSeeThrough, backgroundColor == null)
+        data += DisplayEntityData.Translation.generate(translation)
         backgroundColor?.let {
             data += TextDisplayEntityData.BackgroundColor.generate(it)
         }
@@ -91,6 +93,7 @@ class TextHologramLine(
         val transformationDuration: Int,
         val failLine: LineSettings?,
         val teleportInterpolation: Int,
+        val translation: Vector3f
     ) : LineSettings {
         override fun create(): HologramLine {
             return TextHologramLine(
@@ -108,6 +111,7 @@ class TextHologramLine(
                 isSeeThrough,
                 transformationDuration,
                 teleportInterpolation,
+                translation
             )
         }
     }
@@ -133,6 +137,10 @@ class TextHologramLine(
                 Color.fromARGB(args.getOrNull(3) ?: 255, args[0], args[1], args[2])
             } else null
             val teleportInterpolation = section.getInt("teleport-interpolation", commonOptions.teleportInterpolation)
+            val translation = section.getString("translation")?.let {
+                val args = it.split(";")
+                Vector3f(args[0].toFloat(), args[1].toFloat(), args[2].toFloat())
+            } ?: commonOptions.translation
 
             return Settings(
                 height,
@@ -146,7 +154,8 @@ class TextHologramLine(
                 isSeeThrough,
                 transformationDuration,
                 failLine,
-                teleportInterpolation
+                teleportInterpolation,
+                translation
             )
         }
     }

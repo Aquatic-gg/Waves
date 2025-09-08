@@ -18,6 +18,7 @@ import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display
 import org.bukkit.entity.Player
+import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -29,7 +30,7 @@ class AnimatedHologramLine(
     override var scale: Float,
     override var billboard: Display.Billboard,
     override var transformationDuration: Int,
-    override var teleportInterpolation: Int,
+    override var teleportInterpolation: Int, override var translation: Vector3f = Vector3f(),
 ) : HologramLine {
 
     val ticks = ConcurrentHashMap<UUID, AnimationHandle>()

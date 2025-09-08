@@ -2,6 +2,7 @@ package gg.aquatic.waves.item.option
 
 import gg.aquatic.waves.util.toMMComponent
 import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.meta.ItemMeta
 
@@ -11,7 +12,7 @@ class DisplayNameOptionHandle(
     override val key = Companion.key
 
     override fun apply(itemMeta: ItemMeta) {
-        itemMeta.displayName(displayName.toMMComponent())
+        itemMeta.displayName(displayName.toMMComponent().decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE))
     }
 
     companion object: ItemOption {

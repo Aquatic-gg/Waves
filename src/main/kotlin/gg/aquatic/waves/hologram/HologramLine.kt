@@ -12,6 +12,7 @@ interface HologramLine {
     var billboard: Billboard
     var transformationDuration: Int
     var teleportInterpolation: Int
+    var translation: org.joml.Vector3f
 
     val height: Double
     val filter: (Player) -> Boolean

@@ -27,7 +27,7 @@ import org.bukkit.inventory.ItemStack
 import org.joml.Vector3f
 
 class ItemHologramLine(
-    val item: ItemStack,
+    item: ItemStack,
     override var height: Double = 0.3,
     override var scale: Float = 1.0f,
     override var billboard: Billboard = Billboard.CENTER,
@@ -35,8 +35,12 @@ class ItemHologramLine(
     override val filter: (Player) -> Boolean,
     override var failLine: HologramLine?,
     override var transformationDuration: Int,
-    override var teleportInterpolation: Int,
+    override var teleportInterpolation: Int, override var translation: Vector3f,
 ) : HologramLine {
+
+    var item: ItemStack = item
+        private set
+
     override fun spawn(
         location: Location,
         player: Player,
@@ -50,8 +54,21 @@ class ItemHologramLine(
         return packetEntity
     }
 
-    override fun tick(spawnedHologramLine: SpawnedHologramLine) {
+    @Volatile
+    var itemChanged = false
 
+    fun setItem(item: ItemStack) {
+        this.item = item
+        itemChanged = true
+    }
+
+    override fun tick(spawnedHologramLine: SpawnedHologramLine) {
+        if (itemChanged) {
+            itemChanged = false
+            val entityData = buildData(spawnedHologramLine)
+            spawnedHologramLine.packetEntity.setData(entityData)
+            spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
+        }
     }
 
     override fun buildData(textUpdater: (String) -> String): List<EntityDataValue> {
@@ -77,6 +94,7 @@ class ItemHologramLine(
         val failLine: LineSettings?,
         val transformationDuration: Int,
         val teleportInterpolation: Int,
+        val translation: Vector3f
     ) : LineSettings {
         override fun create(): HologramLine {
             return ItemHologramLine(
@@ -91,6 +109,7 @@ class ItemHologramLine(
                 failLine?.create(),
                 transformationDuration,
                 teleportInterpolation,
+                translation
             )
         }
     }
@@ -109,12 +128,16 @@ class ItemHologramLine(
             val failLine = section.getConfigurationSection("fail-line")?.let {
                 HologramSerializer.loadLine(it, commonOptions)
             }
+            val translation = section.getString("translation")?.let {
+                val args = it.split(";")
+                Vector3f(args[0].toFloat(), args[1].toFloat(), args[2].toFloat())
+            } ?: commonOptions.translation
             val transformationDuration = section.getInt("transformation-duration", commonOptions.transformationDuration)
             val teleportInterpolation = section.getInt("teleport-interpolation", commonOptions.teleportInterpolation)
             return Settings(
                 item.getItem(),
                 height,
-                scale, billboard, itemDisplayTransform, conditions, failLine, transformationDuration, teleportInterpolation
+                scale, billboard, itemDisplayTransform, conditions, failLine, transformationDuration, teleportInterpolation, translation
             )
         }
     }

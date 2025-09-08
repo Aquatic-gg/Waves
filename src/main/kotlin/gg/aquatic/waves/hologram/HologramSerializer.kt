@@ -10,6 +10,7 @@ import gg.aquatic.waves.util.getSectionList
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display
 import org.bukkit.entity.Player
+import org.joml.Vector3f
 
 object HologramSerializer {
 
@@ -17,16 +18,13 @@ object HologramSerializer {
         val typeId = section.getString("type", "text")?.lowercase() ?: return null
         val type = WavesRegistry.HOLOGRAM_LINE_FACTORIES[typeId] ?: return null
 
-        return type.load(section, commonOptions )
+        return type.load(section, commonOptions)
     }
 
     private fun loadLines(objectList: List<*>, commonOptions: CommonHologramLineSettings): List<LineSettings> {
         val lines = ArrayList<LineSettings>()
-
-        println("Loading lines... ${objectList.size} objects")
         for (obj in objectList) {
             if (obj is String) {
-                println("It is string!")
                 lines += TextHologramLine.Settings(
                     commonOptions.height,
                     obj,
@@ -39,7 +37,8 @@ object HologramSerializer {
                     true,
                     commonOptions.transformationDuration,
                     null,
-                    commonOptions.teleportInterpolation
+                    commonOptions.teleportInterpolation,
+                    commonOptions.translation
                 )
                 continue
             }
@@ -50,12 +49,10 @@ object HologramSerializer {
                 } else null
 
             if (objSection != null) {
-                println("It is object!")
                 loadLine(objSection, commonOptions)?.let { lines += it }
                 continue
             }
             if (obj is List<*>) {
-                println("It is list!")
                 val strings = ArrayList<String>()
                 val frames = ArrayList<Pair<Int, LineSettings>>()
                 for (any in obj) {
@@ -67,7 +64,8 @@ object HologramSerializer {
                     if (objSection != null) {
                         objSection.getKeys(false).first().toIntOrNull()?.let {
                             if (objSection.isConfigurationSection(it.toString())) {
-                                val frame = loadLine(objSection.getConfigurationSection(it.toString())!!, commonOptions) ?: continue
+                                val frame = loadLine(objSection.getConfigurationSection(it.toString())!!, commonOptions)
+                                    ?: continue
                                 frames += it to frame
                                 continue
                             }
@@ -85,7 +83,8 @@ object HologramSerializer {
                                 true,
                                 commonOptions.transformationDuration,
                                 null,
-                                commonOptions.teleportInterpolation
+                                commonOptions.teleportInterpolation,
+                                commonOptions.translation
                             )
                         }
                         continue
@@ -106,7 +105,8 @@ object HologramSerializer {
                         true,
                         commonOptions.transformationDuration,
                         null,
-                        commonOptions.teleportInterpolation
+                        commonOptions.teleportInterpolation,
+                        commonOptions.translation
                     )
                     continue
                 }
@@ -124,7 +124,7 @@ object HologramSerializer {
     }
 
     fun loadHologram(objectList: List<*>): AquaticHologram.Settings {
-        val commonOptions = CommonHologramLineSettings(1.0f, Display.Billboard.CENTER, 0, 0, 0.25)
+        val commonOptions = CommonHologramLineSettings(1.0f, Display.Billboard.CENTER, 0, 0, 0.25, Vector3f(0f, 0f, 0f))
         val lines = loadLines(objectList, commonOptions)
         return AquaticHologram.Settings(lines, listOf(), 50)
     }
@@ -148,6 +148,17 @@ object HologramSerializer {
         val transformationDuration = section.getInt("transformation-duration", 100)
         val teleportInterpolation = section.getInt("teleport-interpolation", 100)
         val height = section.getDouble("height", 0.5)
-        return CommonHologramLineSettings(scale, billboard, transformationDuration, teleportInterpolation, height)
+        val translation = section.getString("translation")?.let {
+            val args = it.split(";")
+            Vector3f(args[0].toFloat(), args[1].toFloat(), args[2].toFloat())
+        }
+        return CommonHologramLineSettings(
+            scale,
+            billboard,
+            transformationDuration,
+            teleportInterpolation,
+            height,
+            translation ?: Vector3f(0f, 0f, 0f)
+        )
     }
 }
