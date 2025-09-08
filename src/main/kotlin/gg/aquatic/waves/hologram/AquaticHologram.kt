@@ -1,8 +1,11 @@
 package gg.aquatic.waves.hologram
 
+import gg.aquatic.waves.Waves
 import gg.aquatic.waves.chunk.trackedBy
+import gg.aquatic.waves.hologram.serialize.LineSettings
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
+import gg.aquatic.waves.util.setData
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.concurrent.ConcurrentHashMap
@@ -12,8 +15,75 @@ class AquaticHologram(
     val filter: (Player) -> Boolean,
     val textUpdater: (Player, String) -> String,
     val viewDistance: Int,
-    lines: Set<HologramLine>
+    lines: Collection<HologramLine>,
 ) {
+
+    var seat: Int? = null
+        private set
+
+    fun setAsPassenger(seat: Int?) {
+        this.seat = seat
+        viewers.forEach { (_, lines) ->
+            for (line in lines) {
+                line.setAsPassenger(seat)
+            }
+        }
+    }
+
+    fun setLines(lines: Collection<HologramLine>) {
+        this.lines.clear()
+        this.lines.addAll(lines)
+
+        tickRange()
+        destroyLines()
+        for (player in viewers.keys) {
+            showOrUpdate(player)
+        }
+    }
+
+    fun setLineText(lineIndex: Int, text: String) {
+        val line = lines.elementAtOrNull(lineIndex) ?: return
+        if (line !is gg.aquatic.waves.hologram.line.TextHologramLine) return
+
+        line.text = text
+        for ((_, lines) in viewers) {
+            for (hologramLine in lines) {
+                if (hologramLine.line != line) continue
+                hologramLine.tick()
+            }
+        }
+    }
+
+    fun setTeleportInterpolation(interpolation: Int) {
+        for (line in lines) {
+            line.teleportInterpolation = interpolation
+        }
+        sendUpdatePackets()
+    }
+
+    fun setTransformationInterpolationDuration(duration: Int) {
+        for (line in lines) {
+            line.transformationDuration = duration
+        }
+        sendUpdatePackets()
+    }
+
+    fun setScale(scale: Float) {
+        for (line in lines) {
+            line.scale = scale
+        }
+        sendUpdatePackets()
+    }
+
+    private fun sendUpdatePackets() {
+        for ((_, lines) in viewers) {
+            for (hologramLine in lines) {
+                val data = hologramLine.line.buildData(hologramLine)
+                hologramLine.packetEntity.setData(data)
+                hologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, hologramLine.player)
+            }
+        }
+    }
 
     var location = location
         private set
@@ -29,7 +99,6 @@ class AquaticHologram(
         checkPlayersRange()
         tick()
     }
-
 
     fun tick() {
         tickRange()
@@ -73,10 +142,11 @@ class AquaticHologram(
             height += halfHeight
             val location = this.location.clone().add(0.0, height, 0.0)
             if (nullableSpawnedLine == null) {
-                val newLine = line.spawn(location, player, textUpdater)
+                val packetEntity = line.spawn(location, player) { str -> textUpdater(player, str) }
+                val newLine = SpawnedHologramLine(this, player, line, location, textUpdater, packetEntity)
                 lines.add(newLine)
             } else {
-                nullableSpawnedLine.update()
+                nullableSpawnedLine.tick()
                 if (nullableSpawnedLine.currentLocation == location) continue
                 nullableSpawnedLine.move(location)
             }
@@ -111,11 +181,16 @@ class AquaticHologram(
         }
     }
 
-    fun destroy() {
-        HologramHandler.spawnedHolograms -= this
+    fun destroyLines() {
         viewers.forEach { (_, spawnedHologramLines) ->
             spawnedHologramLines.forEach { it.destroy() }
+            spawnedHologramLines.clear()
         }
+    }
+
+    fun destroy() {
+        HologramHandler.spawnedHolograms -= this
+        destroyLines()
         viewers.clear()
         lines.clear()
 
@@ -129,20 +204,22 @@ class AquaticHologram(
     }
 
     class Settings(
-        val lines: Set<LineSettings>,
+        val lines: List<LineSettings>,
         val conditions: List<ConfiguredRequirement<Player>>,
-        val viewDistance: Int
+        val viewDistance: Int,
     ) {
-
-        fun create(location: Location, textUpdater: (Player, String) -> String): AquaticHologram = AquaticHologram(
+        fun create(
+            location: Location,
+            textUpdater: (Player, String) -> String,
+            filter: (Player) -> Boolean = { true },
+        ): AquaticHologram = AquaticHologram(
             location,
             { p ->
-                conditions.checkRequirements(p)
+                filter(p) && conditions.checkRequirements(p)
             },
             textUpdater,
             viewDistance,
             lines.map { it.create() }.toSet()
         )
     }
-
 }

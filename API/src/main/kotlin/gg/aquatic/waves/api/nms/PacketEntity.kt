@@ -16,6 +16,7 @@ class PacketEntity(
     var updatePacket: Any? = null,
     var passengerPacket: Any? = null,
     val despawnpacket: Any,
+    var seatPacket: Any? = null,
 ) {
     val equipment = HashMap<EquipmentSlot, ItemStack?>()
 
@@ -31,6 +32,7 @@ class PacketEntity(
         packets += spawnPacket
         updatePacket?.let { packets += it }
         passengerPacket?.let { packets += it }
+        seatPacket?.let { packets += it }
 
         val bundlePacket = nmsHandler.createBundlePacket(packets)
         for (player in players) {
@@ -51,6 +53,12 @@ class PacketEntity(
 
     fun sendPassengerUpdate(nmsHandler: NMSHandler, silent: Boolean = false, vararg players: Player) {
         passengerPacket?.let {
+            nmsHandler.sendPacket(it, silent, *players)
+        }
+    }
+
+    fun sendSeatUpdate(nmsHandler: NMSHandler, silent: Boolean = false, vararg players: Player) {
+        seatPacket?.let {
             nmsHandler.sendPacket(it, silent, *players)
         }
     }

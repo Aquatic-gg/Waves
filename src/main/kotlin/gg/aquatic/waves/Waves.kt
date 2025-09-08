@@ -13,7 +13,6 @@ import gg.aquatic.waves.command.register
 import gg.aquatic.waves.data.MySqlDriver
 import gg.aquatic.waves.data.SQLiteDriver
 import gg.aquatic.waves.fake.FakeObjectHandler
-import gg.aquatic.waves.hologram.HologramHandler
 import gg.aquatic.waves.input.InputModule
 import gg.aquatic.waves.interactable.InteractableHandler
 import gg.aquatic.waves.item.ItemHandler
@@ -41,7 +40,7 @@ class Waves : WavesPlugin() {
         WaveModules.INTERACTABLES to InteractableHandler,
         WaveModules.INVENTORIES to gg.aquatic.waves.inventory.InventoryManager,
         WaveModules.MENUS to MenuHandler,
-        WaveModules.HOLOGRAMS to HologramHandler,
+        WaveModules.HOLOGRAMS to gg.aquatic.waves.hologram.HologramHandler,
         WaveModules.INPUT to InputModule
     )
     lateinit var configValues: WavesConfig

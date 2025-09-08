@@ -1,17 +1,22 @@
 package gg.aquatic.waves.hologram.line
 
 import gg.aquatic.waves.Waves
+import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.entity.EntityDataValue
-import gg.aquatic.waves.fake.entity.data.EntityData
-import gg.aquatic.waves.hologram.*
+import gg.aquatic.waves.hologram.CommonHologramLineSettings
+import gg.aquatic.waves.hologram.HologramLine
+import gg.aquatic.waves.hologram.HologramSerializer
+import gg.aquatic.waves.hologram.SpawnedHologramLine
+import gg.aquatic.waves.hologram.serialize.LineFactory
+import gg.aquatic.waves.hologram.serialize.LineSettings
 import gg.aquatic.waves.registry.serializer.RequirementSerializer
 import gg.aquatic.waves.util.collection.checkRequirements
 import gg.aquatic.waves.util.getSectionList
-import gg.aquatic.waves.util.modify
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import gg.aquatic.waves.util.setData
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -21,33 +26,22 @@ class AnimatedHologramLine(
     override val height: Double,
     override val filter: (Player) -> Boolean,
     override val failLine: HologramLine?,
-) : HologramLine() {
+    override var scale: Float,
+    override var billboard: Display.Billboard,
+    override var transformationDuration: Int,
+    override var teleportInterpolation: Int,
+) : HologramLine {
 
     val ticks = ConcurrentHashMap<UUID, AnimationHandle>()
-
     override fun spawn(
         location: Location,
         player: Player,
-        textUpdater: (Player, String) -> String,
-    ): SpawnedHologramLine {
-        val spawned = SpawnedHologramLine(
-            player,
-            this,
-            location,
-            textUpdater
-        )
-
-        createEntity(spawned)
-
-        return spawned
+        textUpdater: (String) -> String,
+    ): PacketEntity {
+        return frames.first().second.spawn(location, player) { str -> textUpdater(str) }
     }
 
-    override fun destroy(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.packetEntity.sendDespawn(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
-        ticks.remove(spawnedHologramLine.player.uniqueId)
-    }
-
-    override fun update(spawnedHologramLine: SpawnedHologramLine) {
+    override fun tick(spawnedHologramLine: SpawnedHologramLine) {
         val handle = ticks.getOrPut(spawnedHologramLine.player.uniqueId) { AnimationHandle() }
         handle.tick++
 
@@ -64,7 +58,12 @@ class AnimatedHologramLine(
 
             if (previousFrame.javaClass != frame.javaClass) {
                 spawnedHologramLine.packetEntity.sendDespawn(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
-                frame.createEntity(spawnedHologramLine)
+                val packetEntity = frame.spawn(
+                    spawnedHologramLine.currentLocation,
+                    spawnedHologramLine.player
+                ) { str -> spawnedHologramLine.textUpdater(spawnedHologramLine.player, str) }
+                spawnedHologramLine.packetEntity = packetEntity
+                spawnedHologramLine.packetEntity.sendSpawnComplete(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
                 return
             }
             val data = buildData(spawnedHologramLine)
@@ -73,23 +72,12 @@ class AnimatedHologramLine(
             spawnedHologramLine.packetEntity.sendDataUpdate(Waves.NMS_HANDLER, false, spawnedHologramLine.player)
             return
         }
-        frame.update(spawnedHologramLine)
+        frame.tick(spawnedHologramLine)
     }
 
-    override fun move(spawnedHologramLine: SpawnedHologramLine) {
-        spawnedHologramLine.packetEntity.teleport(
-            Waves.NMS_HANDLER,
-            spawnedHologramLine.currentLocation,
-            false,
-            spawnedHologramLine.player
-        )
-    }
 
-    override fun createEntity(spawnedHologramLine: SpawnedHologramLine) {
-        val handle = ticks.getOrPut(spawnedHologramLine.player.uniqueId) { AnimationHandle() }
-        val frame = frames[handle.index].second
-
-        frame.createEntity(spawnedHologramLine)
+    override fun buildData(textUpdater: (String) -> String): List<EntityDataValue> {
+        return frames.first().second.buildData(textUpdater)
     }
 
     override fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityDataValue> {
@@ -114,21 +102,25 @@ class AnimatedHologramLine(
                 frames.map { it.first to it.second.create() }.toMutableList(),
                 height,
                 { p -> conditions.checkRequirements(p) },
-                failLine?.create()
+                failLine?.create(),
+                0f,
+                Display.Billboard.FIXED,
+                0,
+                0
             )
         }
     }
 
     companion object : LineFactory {
-        override fun load(section: ConfigurationSection): Settings? {
+        override fun load(section: ConfigurationSection, commonOptions: CommonHologramLineSettings): LineSettings? {
             val frames = ArrayList<Pair<Int, LineSettings>>()
-            val height = section.getDouble("height", 0.5)
+            val height = section.getDouble("height", commonOptions.height)
             val conditions = RequirementSerializer.fromSections<Player>(section.getSectionList("view-conditions"))
             val failLine = section.getConfigurationSection("fail-line")?.let {
-                HologramSerializer.loadLine(it)
+                HologramSerializer.loadLine(it, commonOptions)
             }
             for (configurationSection in section.getSectionList("frames")) {
-                val frame = HologramSerializer.loadLine(configurationSection) ?: continue
+                val frame = HologramSerializer.loadLine(configurationSection, commonOptions) ?: continue
                 val stay = configurationSection.getInt("stay", 1)
                 frames.add(stay to frame)
             }

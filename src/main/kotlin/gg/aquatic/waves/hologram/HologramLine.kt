@@ -1,25 +1,37 @@
 package gg.aquatic.waves.hologram
 
+import gg.aquatic.waves.api.nms.PacketEntity
 import gg.aquatic.waves.api.nms.entity.EntityDataValue
-import gg.aquatic.waves.fake.entity.data.EntityData
 import org.bukkit.Location
+import org.bukkit.entity.Display.Billboard
 import org.bukkit.entity.Player
 
-abstract class HologramLine {
+interface HologramLine {
 
-    abstract val height: Double
-    abstract val filter: (Player) -> Boolean
-    abstract val failLine: HologramLine?
+    var scale: Float
+    var billboard: Billboard
+    var transformationDuration: Int
+    var teleportInterpolation: Int
 
-    abstract fun spawn(location: Location, player: Player, textUpdater: (Player, String) -> String): SpawnedHologramLine
+    val height: Double
+    val filter: (Player) -> Boolean
 
-    internal abstract fun destroy(spawnedHologramLine: SpawnedHologramLine)
+    val failLine: HologramLine?
 
-    internal abstract fun update(spawnedHologramLine: SpawnedHologramLine)
+    fun getVisibleLine(player: Player): HologramLine? =
+        if (filter(player)) {
+            this
+        } else {
+            failLine?.getVisibleLine(player)
+        }
 
-    internal abstract fun move(spawnedHologramLine: SpawnedHologramLine)
+    fun spawn(location: Location, player: Player, textUpdater: (String) -> String): PacketEntity
+    fun tick(spawnedHologramLine: SpawnedHologramLine)
+    fun buildData(textUpdater: (String) -> String): List<EntityDataValue>
 
-    internal abstract fun createEntity(spawnedHologramLine: SpawnedHologramLine)
-
-    internal abstract fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityDataValue>
+    fun buildData(spawnedHologramLine: SpawnedHologramLine): List<EntityDataValue> {
+        return buildData { str ->
+            spawnedHologramLine.textUpdater(spawnedHologramLine.player, str)
+        }
+    }
 }

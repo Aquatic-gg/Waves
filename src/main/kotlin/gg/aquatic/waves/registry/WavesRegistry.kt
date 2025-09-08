@@ -2,9 +2,6 @@ package gg.aquatic.waves.registry
 
 import gg.aquatic.waves.economy.RegisteredCurrency
 import gg.aquatic.waves.fake.entity.data.EntityData
-import gg.aquatic.waves.hologram.line.AnimatedHologramLine
-import gg.aquatic.waves.hologram.line.ItemHologramLine
-import gg.aquatic.waves.hologram.line.TextHologramLine
 import gg.aquatic.waves.input.impl.ChatInput
 import gg.aquatic.waves.input.impl.VanillaMenuInput
 import gg.aquatic.waves.interactable.settings.*
@@ -72,9 +69,14 @@ object WavesRegistry {
     )
 
     val HOLOGRAM_LINE_FACTORIES = hashMapOf(
-        "item" to ItemHologramLine.Companion,
+        "text" to gg.aquatic.waves.hologram.line.TextHologramLine.Companion,
+        "item" to gg.aquatic.waves.hologram.line.ItemHologramLine.Companion,
+        "animated" to gg.aquatic.waves.hologram.line.AnimatedHologramLine.Companion,
+        /*
         "text" to TextHologramLine.Companion,
         "animated" to AnimatedHologramLine.Companion,
+
+         */
     )
 
     val ENTITY_DATA = ConcurrentHashMap<Class<out Entity>, ConcurrentHashMap<String, EntityData>>()

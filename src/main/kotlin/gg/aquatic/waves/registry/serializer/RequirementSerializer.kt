@@ -3,11 +3,13 @@ package gg.aquatic.waves.registry.serializer
 import gg.aquatic.waves.registry.WavesRegistry
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
+import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
 import gg.aquatic.waves.util.generic.ClassTransform
 import gg.aquatic.waves.util.generic.Condition
 import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import org.bukkit.configuration.ConfigurationSection
+import kotlin.collections.toMutableList
 
 object RequirementSerializer {
 
@@ -31,12 +33,16 @@ object RequirementSerializer {
             val voidRequirement = voidRequirements[type] ?: return null
             val requirement = TransformedRequirement<T, Unit>(voidRequirement as Condition<Unit>) { d -> let { } }
 
-            val args = AquaticObjectArgument.loadRequirementArguments(section, voidRequirement.arguments)
+            val arguments = requirement.arguments.toMutableList()
+            arguments += PrimitiveObjectArgument("negate",false, required = false)
+            val args = AquaticObjectArgument.loadRequirementArguments(section, arguments)
             val configuredAction = ConfiguredRequirement(requirement as Condition<T>, args)
             return configuredAction
         }
 
-        val args = AquaticObjectArgument.loadRequirementArguments(section, action.arguments)
+        val arguments = action.arguments.toMutableList()
+        arguments += PrimitiveObjectArgument("negate",false, required = false)
+        val args = AquaticObjectArgument.loadRequirementArguments(section, arguments)
 
         val configuredAction = ConfiguredRequirement(action as Condition<T>, args)
         return configuredAction
@@ -60,7 +66,9 @@ object RequirementSerializer {
 
         for (transform in classTransforms) {
             val tranformAction = transform.createTransformedRequirement(type) ?: continue
-            val args = AquaticObjectArgument.loadRequirementArguments(section, tranformAction.arguments)
+            val arguments = tranformAction.arguments.toMutableList()
+            arguments += PrimitiveObjectArgument("negate",false, required = false)
+            val args = AquaticObjectArgument.loadRequirementArguments(section, arguments)
             val configuredAction = ConfiguredRequirement(tranformAction, args)
             return configuredAction
         }
