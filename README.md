@@ -1,0 +1,1 @@
+[![CodeFactor](https://www.codefactor.io/repository/github/aquatic-gg/waves/badge)](https://www.codefactor.io/repository/github/aquatic-gg/waves)

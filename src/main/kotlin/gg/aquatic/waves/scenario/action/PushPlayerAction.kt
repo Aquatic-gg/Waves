@@ -16,7 +16,7 @@ class PushPlayerAction : Action<PlayerScenario> {
         PrimitiveObjectArgument("velocity", null, false),
         PrimitiveObjectArgument("pitch", 0.0, false),
         PrimitiveObjectArgument("yaw", 0.0, false),
-        PrimitiveObjectArgument("power", "double", true)
+        PrimitiveObjectArgument("power", 1.0, false)
     )
 
     override fun execute(
