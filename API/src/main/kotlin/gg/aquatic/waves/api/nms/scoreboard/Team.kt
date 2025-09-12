@@ -11,5 +11,4 @@ class Team(
     val nametagVisibility: Team.OptionStatus,
     val collisionRule: Team.Option,
     val nameColor: NamedTextColor,
-) {
-}
+)

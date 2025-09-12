@@ -10,5 +10,4 @@ class CommonHologramLineSettings(
     var teleportInterpolation: Int,
     val height: Double,
     val translation: Vector3f
-) {
-}
+)

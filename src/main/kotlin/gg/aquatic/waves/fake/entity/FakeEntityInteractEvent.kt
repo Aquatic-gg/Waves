@@ -8,5 +8,4 @@ class FakeEntityInteractEvent(
     val fakeEntity: EntityBased,
     val player: Player,
     val isLeftClick: Boolean
-): AquaticEvent() {
-}
+): AquaticEvent()

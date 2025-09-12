@@ -6,6 +6,4 @@ import gg.aquatic.waves.util.generic.ClassTransform
 abstract class SmartAction<T: Any>(
     val clazz: Class<T>,
     val classTransforms: Collection<ClassTransform<T,*>>
-): Action<T> {
-
-}
+): Action<T>

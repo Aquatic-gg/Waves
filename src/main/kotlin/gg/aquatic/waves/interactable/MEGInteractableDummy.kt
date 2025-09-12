@@ -5,5 +5,4 @@ import gg.aquatic.waves.interactable.type.MEGInteractable
 
 class MEGInteractableDummy(
     val interactable: MEGInteractable
-): Dummy<Any>() {
-}
+): Dummy<Any>()

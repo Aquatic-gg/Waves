@@ -11,5 +11,4 @@ class ProfileEntry(
     val displayName: Component?,
     val showHat: Boolean,
     val listOrder: Int,
-) {
-}
+)

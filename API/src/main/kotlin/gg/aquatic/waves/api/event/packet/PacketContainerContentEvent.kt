@@ -10,5 +10,4 @@ class PacketContainerContentEvent(
     val inventoryId: Int,
     val contents: MutableList<ItemStack>,
     var carriedItem: ItemStack
-): PacketEvent() {
-}
+): PacketEvent()

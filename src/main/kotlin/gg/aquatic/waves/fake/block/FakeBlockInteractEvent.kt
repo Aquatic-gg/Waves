@@ -7,5 +7,4 @@ class FakeBlockInteractEvent(
     val fakeBlock: FakeBlock,
     val player: Player,
     val isLeftClick: Boolean
-): AquaticEvent() {
-}
+): AquaticEvent()

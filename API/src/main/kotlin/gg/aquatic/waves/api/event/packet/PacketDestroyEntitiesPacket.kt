@@ -6,5 +6,4 @@ import org.bukkit.entity.Player
 class PacketDestroyEntitiesPacket(
     val player: Player,
     val entityIds: IntArray
-): PacketEvent() {
-}
+): PacketEvent()
