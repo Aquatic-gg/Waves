@@ -12,5 +12,4 @@ class PacketEntitySpawnEvent(
     val uuid: UUID,
     val entityType: EntityType,
     val location: Location,
-): PacketEvent() {
-}
+): PacketEvent()

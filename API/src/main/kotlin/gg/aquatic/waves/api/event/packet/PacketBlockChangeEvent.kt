@@ -10,5 +10,4 @@ class PacketBlockChangeEvent(
     val y: Int,
     val z: Int,
     var blockData: BlockData
-): PacketEvent() {
-}
+): PacketEvent()

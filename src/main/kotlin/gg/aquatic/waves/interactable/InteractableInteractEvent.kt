@@ -7,5 +7,4 @@ class InteractableInteractEvent(
     val interactable: Interactable,
     val player: Player,
     val isLeft: Boolean
-): AquaticEvent() {
-}
+): AquaticEvent()

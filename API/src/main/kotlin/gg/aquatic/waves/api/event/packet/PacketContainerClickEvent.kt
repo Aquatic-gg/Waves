@@ -14,5 +14,4 @@ class PacketContainerClickEvent(
     var clickTypeId: Int,
     var carriedItem: ItemStack?,
     var changedSlots: Map<Int, ItemStack?>
-): PacketEvent() {
-}
+): PacketEvent()

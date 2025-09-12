@@ -7,5 +7,4 @@ import org.bukkit.entity.Player
 class PacketContainerOpenEvent(
     val player: Player,
     val containerId: Int,
-): PacketEvent() {
-}
+): PacketEvent()

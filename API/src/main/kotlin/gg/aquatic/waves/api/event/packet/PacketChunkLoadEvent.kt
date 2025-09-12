@@ -10,5 +10,4 @@ class PacketChunkLoadEvent(
     val z: Int,
     val packet: Any,
     val extraPackets: MutableList<Any>
-): PacketEvent() {
-}
+): PacketEvent()

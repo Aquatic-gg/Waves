@@ -7,8 +7,7 @@ class BlockPos(
     val x: Int,
     val y: Int,
     val z: Int
-) {
-}
+)
 
 fun Location.toBlockPos(): BlockPos {
     return BlockPos(blockX, blockY, blockZ)

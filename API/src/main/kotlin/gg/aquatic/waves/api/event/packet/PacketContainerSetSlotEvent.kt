@@ -10,5 +10,4 @@ class PacketContainerSetSlotEvent(
     val inventoryId: Int,
     val slot: Int,
     var item: ItemStack
-): PacketEvent() {
-}
+): PacketEvent()

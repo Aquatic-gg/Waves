@@ -7,5 +7,4 @@ import org.bukkit.entity.Player
 class AsyncPacketInventoryCloseEvent(
     val player: Player,
     val inventory: PacketInventory
-): AquaticEvent(true) {
-}
+): AquaticEvent(true)

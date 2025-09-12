@@ -6,5 +6,4 @@ import org.bukkit.entity.Player
 
 class PacketContainerCloseEvent(
     val player: Player
-): PacketEvent() {
-}
+): PacketEvent()
