@@ -1,8 +1,7 @@
 package gg.aquatic.waves.util.action.impl.logical.scenario
 
-import gg.aquatic.waves.scenario.prop.timer.TickerAnimationProp
 import gg.aquatic.waves.scenario.Scenario
-import gg.aquatic.waves.util.action.RegisterAction
+import gg.aquatic.waves.scenario.prop.timer.TickerAnimationProp
 import gg.aquatic.waves.util.action.impl.logical.SmartAction
 import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
