@@ -6,6 +6,10 @@ import org.bukkit.inventory.ItemStack
 
 object OraxenFactory: ItemHandler.Factory {
     override fun create(id: String): ItemStack? {
-        return OraxenItems.getItemById(id).build()
+        val item = OraxenItems.getItemById(id)?.build()
+        if (item == null) {
+            println("Failed to create oraxen item for $id. No Oraxen item with this ID found!")
+        }
+        return item
     }
 }

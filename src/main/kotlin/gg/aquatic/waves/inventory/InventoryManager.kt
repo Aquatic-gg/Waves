@@ -26,21 +26,6 @@ object InventoryManager : WavesModule {
         event<PlayerQuitEvent> {
             onCloseMenu(it.player, false)
         }
-        /*
-        packetEvent<PacketSendEvent> {
-            val player = player() ?: return@packetEvent
-            if (packetType != PacketType.Play.Server.WINDOW_ITEMS) {
-                return@packetEvent
-            }
-            val packet = WrapperPlayServerWindowItems(this)
-            if (shouldIgnore(packet.windowId, player)) return@packetEvent
-
-            val menu = openedInventories[player] ?: return@packetEvent
-            val viewer = menu.viewers[player.uniqueId] ?: return@packetEvent
-            isCancelled = true
-            updateInventoryContent(menu, viewer)
-        }
-         */
         event<PacketContainerCloseEvent> {
             it.then = {
                 onCloseMenu(it.player, true)

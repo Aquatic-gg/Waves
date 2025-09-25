@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "gg.aquatic.waves"
-version = "1.3.21"
+version = "1.3.22"
 
 val ktor_version: String by project
 
@@ -125,7 +125,7 @@ dependencies {
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("gg.aquatic:AEAPI:1.0")
-    compileOnly("io.th0rgal:oraxen:1.171.0")
+    compileOnly("io.th0rgal:oraxen:1.193.2")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
     compileOnly("io.lumine:Mythic-Dist:5.9.1")

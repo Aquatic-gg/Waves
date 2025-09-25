@@ -33,7 +33,6 @@ object ProfilesModule : WavesModule {
     val cache = ConcurrentHashMap<UUID, AquaticPlayer>()
     val playersSaving = HashSet<UUID>()
     val playersLoading = HashSet<UUID>()
-    val playersAwaiting = HashSet<UUID>()
     val modules = HashMap<String, ProfileModule>()
 
     override fun initialize(waves: Waves) {
@@ -80,8 +79,6 @@ object ProfilesModule : WavesModule {
             runAsync {
                 loadPlayer()
             }
-
-
         }
         event<PlayerQuitEvent>(ignoredCancelled = true) {
             Bukkit.getConsoleSender().sendMessage("Unloading profile!")

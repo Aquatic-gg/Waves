@@ -17,7 +17,7 @@ class ShowBossbarAction : Action<PlayerScenario> {
         PrimitiveObjectArgument("id", "bossbar", true),
         PrimitiveObjectArgument("message", "", true),
         PrimitiveObjectArgument("color", "white", false),
-        PrimitiveObjectArgument("style", "solid", false),
+        PrimitiveObjectArgument("style", "progress", false),
         PrimitiveObjectArgument("progress", 1.0, false),
     )
 

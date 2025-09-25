@@ -12,21 +12,29 @@ import io.th0rgal.oraxen.api.OraxenItems
 import io.th0rgal.oraxen.mechanics.provided.gameplay.furniture.FurnitureMechanic
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.entity.Display
 import org.bukkit.entity.EntityType
+import org.bukkit.entity.ItemDisplay
 import org.bukkit.util.Vector
 
 class OraxenEntityInteractableSettings(
     val furniture: FurnitureMechanic,
-    val offset: Vector
-): InteractableSettings {
+    val offset: Vector,
+) : InteractableSettings {
 
-    override fun build(location: Location, audience: AquaticAudience, onInteract: (InteractableInteractEvent) -> Unit): EntityInteractable {
+    override fun build(
+        location: Location,
+        audience: AquaticAudience,
+        onInteract: (InteractableInteractEvent) -> Unit,
+    ): EntityInteractable {
         val item = OraxenItems.getItemById(furniture.itemID).build()
         val displaySettings = furniture.displayEntityProperties
-        val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer =  {
+        val fakeEntity = FakeEntity(EntityType.ITEM_DISPLAY, location.clone().add(offset), 50, audience, consumer = {
             val data = ArrayList<EntityDataValue>()
-            data += DisplayEntityData.Billboard.generate(displaySettings.trackingRotation)
-            data += ItemDisplayEntityData.ItemDisplayTransform.generate(displaySettings.displayTransform)
+            data += DisplayEntityData.Billboard.generate(displaySettings.trackingRotation ?: Display.Billboard.FIXED)
+            data += ItemDisplayEntityData.ItemDisplayTransform.generate(
+                displaySettings.displayTransform ?: ItemDisplay.ItemDisplayTransform.FIXED
+            )
             data += DisplayEntityData.Scale.generate(displaySettings.scale)
             data += ItemDisplayEntityData.Item.generate(item)
             data += DisplayEntityData.Width.generate(displaySettings.displayWidth)
@@ -39,7 +47,7 @@ class OraxenEntityInteractableSettings(
         return interactable
     }
 
-    companion object: InteractableSettingsFactory {
+    companion object : InteractableSettingsFactory {
         override fun load(section: ConfigurationSection): InteractableSettings? {
             val id = section.getString("id")
             val furnitureMechanic = OraxenFurniture.getFurnitureMechanic(id) ?: return null
