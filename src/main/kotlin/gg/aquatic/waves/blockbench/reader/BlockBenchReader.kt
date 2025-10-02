@@ -5,6 +5,7 @@ import gg.aquatic.waves.blockbench.animation.LoopMode
 import gg.aquatic.waves.blockbench.animation.impl.BBTimeline
 import gg.aquatic.waves.blockbench.animation.impl.PositionKeyframe
 import gg.aquatic.waves.blockbench.animation.impl.RotationKeyframe
+import gg.aquatic.waves.blockbench.animation.impl.ScaleKeyframe
 import gg.aquatic.waves.blockbench.reader.data.*
 import gg.aquatic.waves.blockbench.template.BBAnimationTemplate
 import gg.aquatic.waves.blockbench.template.BBBoneTemplate
@@ -106,6 +107,7 @@ object BlockBenchReader {
     private fun readTimeline(bbAnimator: BBAnimator): BBTimeline {
         val rotationTimeline: InterpolatedTimeline<RotationKeyframe> = InterpolatedTimeline()
         val positionTimeline: InterpolatedTimeline<PositionKeyframe> = InterpolatedTimeline()
+        val scaleTimeline: InterpolatedTimeline<ScaleKeyframe> = InterpolatedTimeline()
         for (keyframe in bbAnimator.keyframes) {
             val datapoints = keyframe.data_points[0]
             val vector = Vector(datapoints.x, datapoints.y, datapoints.z)
@@ -132,9 +134,14 @@ object BlockBenchReader {
                 kf.interpolationType = interpolationType
                 positionTimeline.addFrame(time, kf)
                 Bukkit.broadcastMessage("Loaded position kf")
+            } else if (keyframe.channel.equals("scale",true)) {
+                val kf = ScaleKeyframe(Vector(vector.x, vector.y, vector.z))
+                kf.interpolationType = interpolationType
+                scaleTimeline.addFrame(time, kf)
+                Bukkit.broadcastMessage("Loaded scale kf")
             }
         }
-        return BBTimeline(positionTimeline, rotationTimeline)
+        return BBTimeline(positionTimeline, rotationTimeline,scaleTimeline)
     }
 
 

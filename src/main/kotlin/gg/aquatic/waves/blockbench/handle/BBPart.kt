@@ -12,7 +12,7 @@ class BBPart(
 ) {
     var lastCachedLocation: Location? = null
 
-    fun spawn(bone: BBBone, templateHandle: BBTemplateHandle, location: Location, parentOrigin: Vector, parentPivot: Vector, parentAngle: EulerAngle) {
+    fun spawn(bone: BBBone, templateHandle: BBTemplateHandle, location: Location, parentOrigin: Vector, parentPivot: Vector, parentAngle: EulerAngle, scale: Vector) {
         val translation = template.translation.clone()
 
         val newLocation = location.clone() //.add(particlePartTemplate.getTranslation());
@@ -25,7 +25,7 @@ class BBPart(
         vector.rotateAroundY(-rotation.y)
         vector.rotateAroundZ(-rotation.z)
 
-        vector.add(origin.clone().subtract(parentOrigin))
+        vector.add(origin.clone().multiply(scale).subtract(parentOrigin))
 
         vector.rotateAroundX(parentAngle.x)
         vector.rotateAroundY(-parentAngle.y)
