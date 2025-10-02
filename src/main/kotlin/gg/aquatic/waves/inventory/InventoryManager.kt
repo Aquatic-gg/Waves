@@ -8,8 +8,9 @@ import gg.aquatic.waves.inventory.event.AsyncPacketInventoryCloseEvent
 import gg.aquatic.waves.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
-import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.sendPacket
+import gg.aquatic.waves.util.task.AsyncScope
+import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -161,7 +162,9 @@ object InventoryManager : WavesModule {
             AsyncPacketInventoryCloseEvent(player, removed).call()
         }
         if (Bukkit.isPrimaryThread()) {
-            runAsync { execute() }
+            AsyncScope.launch {
+                execute()
+            }
         } else {
             execute()
         }

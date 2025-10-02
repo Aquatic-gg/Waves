@@ -6,7 +6,6 @@ import gg.aquatic.waves.scenario.ScenarioProp
 import gg.aquatic.waves.scenario.prop.Moveable
 import gg.aquatic.waves.scenario.prop.path.PathBoundProperties
 import gg.aquatic.waves.scenario.prop.path.PathProp
-import gg.aquatic.waves.util.runSync
 import kr.toxicity.model.api.animation.AnimationModifier
 import org.bukkit.Location
 import org.bukkit.util.Vector
@@ -39,15 +38,13 @@ class BMModelAnimationProp(
             newLocation
         }
 
-        runSync {
-            interactable = BMInteractable(
-                currentLocation,
-                model,
-                scenario.audience,
-            ) {}
-            if (modelAnimation != null) {
-                playAnimation(modelAnimation)
-            }
+        interactable = BMInteractable(
+            currentLocation,
+            model,
+            scenario.audience,
+        ) {}
+        if (modelAnimation != null) {
+            playAnimation(modelAnimation)
         }
     }
 
@@ -56,21 +53,15 @@ class BMModelAnimationProp(
     }
 
     fun playAnimation(animation: String, fadeIn: Int = 0, fadeOut: Int = 0, speed: Float = 1.0f) {
-        runSync {
-            interactable?.tracker?.animate(animation, AnimationModifier(fadeIn,fadeOut,speed))
-        }
+        interactable?.tracker?.animate(animation, AnimationModifier(fadeIn,fadeOut,speed))
     }
 
     override fun onEnd() {
-        runSync {
-            interactable?.destroy()
-        }
+        interactable?.destroy()
     }
 
 
     override fun move(location: Location) {
-        runSync {
-            interactable?.tracker?.location(location)
-        }
+        interactable?.tracker?.location(location)
     }
 }

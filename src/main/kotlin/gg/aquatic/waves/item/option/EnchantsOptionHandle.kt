@@ -1,5 +1,7 @@
 package gg.aquatic.waves.item.option
 
+import io.papermc.paper.datacomponent.DataComponentTypes
+import io.papermc.paper.datacomponent.item.ItemEnchantments
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import net.advancedplugins.ae.api.AEAPI
@@ -19,6 +21,8 @@ class EnchantsOptionHandle(
 
     override val key = Companion.key
     override fun apply(itemStack: ItemStack) {
+
+        val enchantments = HashMap<Enchantment, Int>()
         for ((ench, level) in enchants) {
             if (ench.uppercase() == "AE-SLOTS") {
                 AEAPI.setTotalSlots(
@@ -31,10 +35,15 @@ class EnchantsOptionHandle(
                 AEAPI.applyEnchant(ench.substringBefore("AE-"), level, itemStack)
                 continue
             }
+
             getEnchantmentByString(ench)?.apply {
-                itemStack.addUnsafeEnchantment(this, level)
+                enchantments += this to level
+                //itemStack.addUnsafeEnchantment(this, level)
             }
         }
+        itemStack.setData(
+            DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments().addAll(enchantments).build()
+        )
     }
 
     override fun apply(itemMeta: ItemMeta) {

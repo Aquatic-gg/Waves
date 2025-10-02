@@ -6,7 +6,7 @@ class ChanceUtils {
 
     companion object {
 
-        fun <T : IChance> getRandomItem(items: Collection<T>): T? {
+        fun <T : IChance> getRandomItemOld(items: Collection<T>): T? {
             val chances = items.map { it.chance }.toMutableList()
             val randomIndex = getRandomChanceIndex(chances)
             if (randomIndex < 0) return null
@@ -35,6 +35,22 @@ class ChanceUtils {
 
         private fun getTotalPercentage(chances: Collection<Double>): Double {
             return chances.sum()
+        }
+
+        fun <T : IChance> getRandomItem(items: Collection<T>): T? {
+            if (items.isEmpty()) return null
+
+            val totalWeight = items.sumOf { it.chance }
+            if (totalWeight <= 0) return null
+
+            var random = Math.random() * totalWeight
+            for (item in items) {
+                random -= item.chance
+                if (random <= 0.0) {
+                    return item
+                }
+            }
+            return null
         }
     }
 

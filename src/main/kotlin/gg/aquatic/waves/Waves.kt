@@ -4,6 +4,7 @@ import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.event
 import gg.aquatic.waves.api.nms.NMSHandler
+import gg.aquatic.waves.blockbench.BlockBenchAnimationHandler
 import gg.aquatic.waves.command.AquaticBaseCommand
 import gg.aquatic.waves.command.impl.GeneratePackCommand
 import gg.aquatic.waves.command.impl.ItemConvertCommand
@@ -23,9 +24,12 @@ import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.nms_1_21_4.NMSHandlerImpl
 import gg.aquatic.waves.pack.PackHandler
 import gg.aquatic.waves.profile.ProfilesModule
+import gg.aquatic.waves.registry.WavesRegistry
+import gg.aquatic.waves.registry.registerEntityData
 import gg.aquatic.waves.util.Config
 import gg.aquatic.waves.util.action.ActionAnnotationProcessor
 import gg.aquatic.waves.util.message.impl.EmptyMessage
+import gg.aquatic.waves.util.task.AsyncCtx
 import gg.aquatic.waves.util.version.ServerVersion
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -92,11 +96,17 @@ class Waves : WavesPlugin() {
         }
 
         ActionAnnotationProcessor.process(this,"gg.aquatic.waves.util.action.impl")
+        WavesRegistry.registerEntityData("gg.aquatic.waves.fake.entity.data.impl")
         loadConfig()
         MessageSerializer.loadWavesCustomMessages()
     }
 
     override fun onEnable() {
+        try {
+            BlockBenchAnimationHandler.initialize()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
         for ((_, module) in modules) {
             module.initialize(this@Waves)
         }
@@ -125,6 +135,7 @@ class Waves : WavesPlugin() {
 
     override fun onDisable() {
         ProfilesModule.save(*ProfilesModule.cache.values.toTypedArray())
+        AsyncCtx.executor.shutdown()
     }
 
     fun loadConfig() {

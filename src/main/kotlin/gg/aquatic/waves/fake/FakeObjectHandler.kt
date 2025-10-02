@@ -11,7 +11,6 @@ import gg.aquatic.waves.fake.block.FakeBlockInteractEvent
 import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
-import gg.aquatic.waves.util.runAsync
 import gg.aquatic.waves.util.runAsyncTimer
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Location
@@ -79,11 +78,9 @@ object FakeObjectHandler : WavesModule {
             }
         }
         event<PlayerChunkUnloadEvent> {
-            runAsync {
-                for (tickableObject in tickableObjects) {
-                    if (tickableObject.location.chunk != it.chunk) continue
-                    handlePlayerRemove(it.player, tickableObject, false)
-                }
+            for (tickableObject in tickableObjects) {
+                if (tickableObject.location.chunk != it.chunk) continue
+                handlePlayerRemove(it.player, tickableObject, false)
             }
         }
 

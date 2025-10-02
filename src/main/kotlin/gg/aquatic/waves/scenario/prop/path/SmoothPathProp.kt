@@ -3,10 +3,8 @@ package gg.aquatic.waves.scenario.prop.path
 import gg.aquatic.waves.scenario.Scenario
 import gg.aquatic.waves.scenario.ScenarioProp
 import gg.aquatic.waves.scenario.prop.Moveable
-import gg.aquatic.waves.util.runAsync
 import org.bukkit.util.Vector
-import java.util.TreeMap
-import kotlin.collections.iterator
+import java.util.*
 
 class SmoothPathProp(
     override val scenario: Scenario, points: TreeMap<Int, PathPoint>
@@ -18,16 +16,14 @@ class SmoothPathProp(
     override val boundProps: MutableMap<Moveable, PathBoundProperties> = HashMap()
     var tick = 0
     override fun tick() {
-        runAsync {
-            val point = points[tick] ?: return@runAsync
-            currentPoint = point
+        val point = points[tick] ?: return
+        currentPoint = point
 
-            for ((prop, _) in boundProps) {
-                prop.processPath(this, point)
-            }
-
-            tick++
+        for ((prop, _) in boundProps) {
+            prop.processPath(this, point)
         }
+
+        tick++
     }
 
     override fun onEnd() {

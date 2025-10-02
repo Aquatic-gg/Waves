@@ -82,10 +82,6 @@ object WavesRegistry {
     val ENTITY_DATA = ConcurrentHashMap<Class<out Entity>, ConcurrentHashMap<String, EntityData>>()
     //val ENTITY_DATA = HashMap<String, EntityData>()
 
-    init {
-        registerEntityData("gg.aquatic.waves.fake.entity.data.impl")
-    }
-
     val ITEM = HashMap<String, AquaticItem>()
 
     val STATISTIC_TYPES = HashMap<Class<*>, MutableMap<String, StatisticType<*>>>().apply {

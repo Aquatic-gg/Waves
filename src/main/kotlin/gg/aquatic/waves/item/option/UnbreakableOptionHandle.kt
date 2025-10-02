@@ -1,7 +1,6 @@
 package gg.aquatic.waves.item.option
 
 import io.papermc.paper.datacomponent.DataComponentTypes
-import io.papermc.paper.datacomponent.item.Unbreakable
 import net.kyori.adventure.key.Key
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
@@ -10,7 +9,7 @@ class UnbreakableOptionHandle: ItemOptionHandle {
 
     override val key = Companion.key
     override fun apply(itemStack: ItemStack) {
-        itemStack.setData(DataComponentTypes.UNBREAKABLE, Unbreakable.unbreakable(false))
+        itemStack.setData(DataComponentTypes.UNBREAKABLE)
     }
 
     companion object: ItemOption {

@@ -5,7 +5,6 @@ import gg.aquatic.waves.scenario.Scenario
 import gg.aquatic.waves.scenario.ScenarioProp
 import gg.aquatic.waves.util.block.AquaticBlock
 import gg.aquatic.waves.util.blockLocation
-import gg.aquatic.waves.util.runSync
 import org.bukkit.util.Vector
 
 class BlockAnimationProp(
@@ -23,8 +22,6 @@ class BlockAnimationProp(
     }
 
     override fun onEnd() {
-        runSync {
-            packetBlock.destroy()
-        }
+        packetBlock.destroy()
     }
 }

@@ -9,8 +9,6 @@ import gg.aquatic.waves.fake.FakeObjectHandler
 import gg.aquatic.waves.util.audience.AquaticAudience
 import gg.aquatic.waves.util.block.AquaticBlock
 import gg.aquatic.waves.util.blockLocation
-import gg.aquatic.waves.util.runAsync
-import gg.aquatic.waves.util.runSync
 import gg.aquatic.waves.util.sendPacket
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -59,14 +57,11 @@ open class FakeBlock(
         FakeObjectHandler.locationToBlocks.getOrPut(location.blockLocation()) { ConcurrentHashMap.newKeySet() } += this
         FakeObjectHandler.tickableObjects += this
 
-        runSync {
-            val chunkViewers = location.chunk.trackedBy().toSet()
-            runAsync {
-                for (viewer in viewers) {
-                    if (viewer in chunkViewers) {
-                        show(viewer)
-                    }
-                }
+
+        val chunkViewers = location.chunk.trackedBy().toSet()
+        for (viewer in viewers) {
+            if (viewer in chunkViewers) {
+                show(viewer)
             }
         }
     }

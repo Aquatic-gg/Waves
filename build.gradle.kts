@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "gg.aquatic.waves"
-version = "1.3.22"
+version = "1.3.24"
 
 val ktor_version: String by project
 
@@ -37,12 +37,21 @@ tasks.writeDependencies {
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.openjdk.nashorn", "gg.aquatic.waves.libs.nashorn")
     relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
+    relocate("com.undefined", "gg.aquatic.waves.shadow.undefined")
 }
 
 
 gremlin {
     //defaultRepositories.set(false) // Optional: if you want to manage repositories manually
     repositories {
+        maven {
+            name = "undefined-repo"
+            url = uri("https://repo.undefinedcreations.com/releases")
+        }
+        maven {
+            name = "undefined-repo"
+            url = uri("https://repo.undefinedcreations.com/snapshots")
+        }
         maven("https://jitpack.io")
         maven("https://repo1.maven.org/maven2/") // Maven Central
         maven("https://maven.radsteve.net/public")
@@ -76,6 +85,9 @@ gremlin {
         implementation("org.bstats:bstats-bukkit:3.1.0")
         implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
         implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+        implementation("com.undefined:stellar-kotlin:1.1.0-SNAPSHOT:paper")
+        implementation("com.undefined:stellar:1.1.0-SNAPSHOT:paper")
     }
 }
 
@@ -104,11 +116,19 @@ repositories {
     maven("https://maven.radsteve.net/public")
     maven("https://repo.nexomc.com/releases")
     maven("https://repo.momirealms.net/releases/")
+    maven {
+        name = "undefined-repo"
+        url = uri("https://repo.undefinedcreations.com/releases")
+    }
+    maven {
+        name = "undefined-repo"
+        url = uri("https://repo.undefinedcreations.com/snapshots")
+    }
 }
 
 dependencies {
     implementation("xyz.jpenilla:gremlin-runtime:0.0.7")
-    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
     //implementation("gg.aquatic.wavessync:wavessync-api:1.0.1:all")
 
     /*
@@ -150,6 +170,9 @@ dependencies {
     runtimeDownload("org.bstats:bstats-bukkit:3.1.0")
     runtimeDownload("net.kyori:adventure-text-serializer-gson:4.17.0")
     runtimeDownload("net.kyori:adventure-text-serializer-plain:4.18.0")
+    runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    runtimeDownload("com.undefined:stellar-kotlin:1.1.0-SNAPSHOT:paper")
+    runtimeDownload("com.undefined:stellar:1.1.0-SNAPSHOT:paper")
 
     compileOnly("net.momirealms:craft-engine-core:0.0.61")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.61")
@@ -206,10 +229,15 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     exclude("net/**")
     exclude("org/**")
 
+    exclude("_COROUTINE")
+    exclude("OSGI-INF")
+
     relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
+
+    relocate("com.undefined", "gg.aquatic.waves.shadow.undefined")
 
     relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
 

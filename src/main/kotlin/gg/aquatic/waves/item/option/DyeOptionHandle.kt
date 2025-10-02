@@ -13,7 +13,7 @@ class DyeOptionHandle(
 
     override val key = Companion.key
     override fun apply(itemStack: ItemStack) {
-        itemStack.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor(color, false))
+        itemStack.setData(DataComponentTypes.DYED_COLOR, DyedItemColor.dyedItemColor(color))
     }
 
     companion object : ItemOption {

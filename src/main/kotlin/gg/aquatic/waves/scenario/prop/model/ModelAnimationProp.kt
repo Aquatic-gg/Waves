@@ -7,7 +7,6 @@ import gg.aquatic.waves.scenario.ScenarioProp
 import gg.aquatic.waves.scenario.prop.Moveable
 import gg.aquatic.waves.scenario.prop.path.PathBoundProperties
 import gg.aquatic.waves.scenario.prop.path.PathProp
-import gg.aquatic.waves.util.runSync
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -43,18 +42,16 @@ class ModelAnimationProp(
             newLocation
         }
 
-        runSync {
-            interactable = MEGInteractable(
-                currentLocation,
-                model,
-                scenario.audience,
-            ) {}
-            skin?.let { interactable!!.setSkin(it) }
-            if (modelAnimation != null) {
-                playAnimation(modelAnimation)
-            }
-            tint?.let { interactable!!.setTint(it) }
+        interactable = MEGInteractable(
+            currentLocation,
+            model,
+            scenario.audience,
+        ) {}
+        skin?.let { interactable!!.setSkin(it) }
+        if (modelAnimation != null) {
+            playAnimation(modelAnimation)
         }
+        tint?.let { interactable!!.setTint(it) }
     }
 
     fun setTint(color: Color) {
@@ -66,27 +63,21 @@ class ModelAnimationProp(
     }
 
     fun playAnimation(animation: String, fadeIn: Double = 0.0, fadeOut: Double = 0.0, speed: Double = 1.0) {
-        runSync {
-            interactable?.activeModel?.animationHandler?.playAnimation(animation, fadeIn, fadeOut, speed, true)
-        }
+        interactable?.activeModel?.animationHandler?.playAnimation(animation, fadeIn, fadeOut, speed, true)
     }
 
     override fun onEnd() {
-        runSync {
-            interactable?.destroy()
-        }
+        interactable?.destroy()
     }
 
 
     override fun move(location: Location) {
-        runSync {
-            val dummy = interactable?.modeledEntity?.base as? Dummy<*> ?: return@runSync
-            dummy.location = location
-            dummy.bodyRotationController.yBodyRot = location.yaw
-            dummy.bodyRotationController.xHeadRot = location.pitch
-            dummy.bodyRotationController.yHeadRot = location.yaw
-            dummy.yHeadRot = location.yaw
-            dummy.yBodyRot = location.yaw
-        }
+        val dummy = interactable?.modeledEntity?.base as? Dummy<*> ?: return
+        dummy.location = location
+        dummy.bodyRotationController.yBodyRot = location.yaw
+        dummy.bodyRotationController.xHeadRot = location.pitch
+        dummy.bodyRotationController.yHeadRot = location.yaw
+        dummy.yHeadRot = location.yaw
+        dummy.yBodyRot = location.yaw
     }
 }

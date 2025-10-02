@@ -102,14 +102,10 @@ class FakePlayer(
         FakeObjectHandler.tickableObjects += this
         FakeObjectHandler.idToEntity += entityId to this
 
-        runSync {
-            val chunkViewers = location.chunk.trackedBy().toSet()
-            runAsync {
-                for (viewer in viewers) {
-                    if (viewer in chunkViewers) {
-                        show(viewer)
-                    }
-                }
+        val chunkViewers = location.chunk.trackedBy().toSet()
+        for (viewer in viewers) {
+            if (viewer in chunkViewers) {
+                show(viewer)
             }
         }
     }

@@ -10,6 +10,7 @@ class FlagsOptionHandle(
 ) : ItemOptionHandle {
 
     override val key = Companion.key
+
     override fun apply(itemMeta: ItemMeta) {
         itemMeta.addItemFlags(*flags.toTypedArray())
     }

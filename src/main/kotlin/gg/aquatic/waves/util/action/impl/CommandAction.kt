@@ -5,13 +5,14 @@ import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
-import gg.aquatic.waves.util.runSync
+import gg.aquatic.waves.util.task.BukkitScope
 import gg.aquatic.waves.util.updatePAPIPlaceholders
+import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
 @RegisterAction("command")
-class CommandAction: Action<Player> {
+class CommandAction : Action<Player> {
 
     override fun execute(binder: Player, args: ObjectArguments, textUpdater: (Player, String) -> String) {
         val commands = args.stringOrCollection("command") ?: return
@@ -31,7 +32,7 @@ class CommandAction: Action<Player> {
         if (Bukkit.getServer().isPrimaryThread) {
             run()
         } else {
-            runSync {
+            BukkitScope.launch {
                 for (cmd in commands) {
                     val command = textUpdater(binder, cmd.updatePAPIPlaceholders(binder))
                     if (command.isEmpty() || command.isBlank()) continue
