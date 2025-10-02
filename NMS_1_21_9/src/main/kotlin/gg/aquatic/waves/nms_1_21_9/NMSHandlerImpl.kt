@@ -1,4 +1,4 @@
-package gg.aquatic.gg.waves.nms_1_21_9
+package gg.aquatic.waves.nms_1_21_9
 
 import com.google.common.collect.LinkedHashMultimap
 import com.google.common.hash.HashCode
@@ -6,6 +6,7 @@ import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
+import com.mojang.serialization.JsonOps
 import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.nms.*
@@ -76,6 +77,7 @@ import org.joml.Vector3d
 import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.iterator
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.absoluteValue
 
@@ -383,7 +385,7 @@ object NMSHandlerImpl : NMSHandler {
                 return SynchedEntityData.DataValue(
                     original.id,
                     EntityDataSerializers.ROTATIONS,
-                    (original.value as org.bukkit.util.Vector).let {
+                    (original.value as Vector).let {
                         Rotations(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
                     }
                 )
@@ -939,7 +941,7 @@ object NMSHandlerImpl : NMSHandler {
     fun Component.toNMSComponent(): net.minecraft.network.chat.Component {
         val kyoriJson = GsonComponentSerializer.gson().serialize(this)
         return ComponentSerialization.CODEC.parse(
-            com.mojang.serialization.JsonOps.INSTANCE,
+            JsonOps.INSTANCE,
             JsonParser.parseString(kyoriJson)
         ).orThrow
     }

@@ -90,8 +90,15 @@ class Waves : WavesPlugin() {
                 gg.aquatic.waves.nms_1_21_5.NMSHandlerImpl
             }
 
-            else -> {
+            ServerVersion.V_1_21_7 -> {
                 gg.aquatic.waves.nms_1_21_7.NMSHandlerImpl
+            }
+
+            ServerVersion.V_1_21_9 -> {
+                gg.aquatic.waves.nms_1_21_9.NMSHandlerImpl
+            }
+            else -> {
+                gg.aquatic.waves.nms_1_21_9.NMSHandlerImpl
             }
         }
 

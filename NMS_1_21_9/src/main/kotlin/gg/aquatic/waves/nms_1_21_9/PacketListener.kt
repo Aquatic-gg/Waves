@@ -1,4 +1,4 @@
-package gg.aquatic.gg.waves.nms_1_21_9
+package gg.aquatic.waves.nms_1_21_9
 
 import gg.aquatic.waves.api.ReflectionUtils
 import gg.aquatic.waves.api.event.PacketEvent
