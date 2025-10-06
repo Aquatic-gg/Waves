@@ -47,6 +47,15 @@ placeholders.
 
 I would highly recommend using void-based placeholders & contexts for global usage!
 
+````kt 
+// 5 stands for the updating interval in ticks. You can easily limit how often the placeholders get updated.
+val globalContext = Placeholders.resolverFor<Void>(5)
+
+val playerContext = Placeholders.resolverFor<Player>(10)
+
+val entityContext = Placeholders.resolverFor<Entity>(100)
+````
+
 ### Retrieving PlaceholderContext items
 
 ````kt 
