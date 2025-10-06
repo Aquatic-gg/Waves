@@ -1,3 +1,13 @@
+## What's this?
+Replace is a library that allows you to easily create placeholders for your plugins.
+
+- Smart Placeholder updating (elimination of unneeded context updates - useful for limiting packet usage)
+- Global placeholders
+- Context-based updating
+- Generic Placeholders & Contexts
+- Limiting the updating interval
+- Support for Literal, Kyori Components, ItemStacks
+
 ## Example Usage
 
 ### Creating Placeholders
