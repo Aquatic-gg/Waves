@@ -23,6 +23,8 @@ out/
 .idea/
 .idea/*
 
+.env
+
 ### Eclipse ###
 .apt_generated
 .classpath

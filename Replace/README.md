@@ -8,6 +8,23 @@ Replace is a library that allows you to easily create placeholders for your plug
 - Limiting the updating interval
 - Support for Literal, Kyori Components, ItemStacks
 
+## Importing
+
+Gradle (Kotlin DSL):
+````kt 
+repositories {
+    maven {
+        url = uri("https://repo.nekroplex.com/releases")
+    }
+}
+````
+
+````kt 
+dependencies {
+    implementation("com.nekroplex.replace:replace:1.0.0")
+}
+````
+
 ## Example Usage
 
 ### Creating Placeholders
