@@ -6,4 +6,4 @@ import java.util.concurrent.ConcurrentHashMap
 
 val ACTIONS = ConcurrentHashMap<Class<*>, ConcurrentHashMap<String, Action<*>>>()
 
-typealias Action<T> = ExecutableObjectHandle<T, Unit>
+typealias ActionHandle<T> = ExecutableObjectHandle<T, Unit>
