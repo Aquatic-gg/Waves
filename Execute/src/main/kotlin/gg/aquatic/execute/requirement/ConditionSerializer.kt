@@ -1,7 +1,6 @@
 package gg.aquatic.execute.requirement
 
 import gg.aquatic.execute.argument.ObjectArgument
-import gg.aquatic.execute.argument.ObjectArguments
 import gg.aquatic.execute.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.execute.ClassTransform
 import gg.aquatic.execute.Condition
@@ -12,14 +11,14 @@ object ConditionSerializer {
 
     inline fun <reified T : Any> fromSectionSimple(
         section: ConfigurationSection,
-    ): ConfiguredCondition<T>? {
+    ): ConditionHandle<T>? {
         return fromSectionSimple(T::class.java, section)
     }
 
     fun <T : Any> fromSectionSimple(
         clazz: Class<T>,
         section: ConfigurationSection,
-    ): ConfiguredCondition<T>? {
+    ): ConditionHandle<T>? {
         val type = section.getString("type") ?: return null
 
         val actions = allRequirements(clazz)
@@ -33,7 +32,7 @@ object ConditionSerializer {
             val arguments = requirement.arguments.toMutableList()
             arguments += PrimitiveObjectArgument("negate", false, required = false)
             val args = ObjectArgument.Companion.loadRequirementArguments(section, arguments)
-            val configuredAction = ConfiguredCondition(requirement as Condition<T>, args)
+            val configuredAction = ConditionHandle(requirement as Condition<T>, args)
             return configuredAction
         }
 
@@ -41,14 +40,14 @@ object ConditionSerializer {
         arguments += PrimitiveObjectArgument("negate", false, required = false)
         val args = ObjectArgument.Companion.loadRequirementArguments(section, arguments)
 
-        val configuredAction = ConfiguredCondition(action as Condition<T>, args)
+        val configuredAction = ConditionHandle(action as Condition<T>, args)
         return configuredAction
     }
 
     inline fun <reified T : Any> fromSection(
         section: ConfigurationSection,
         vararg classTransforms: ClassTransform<T, *>,
-    ): ConfiguredCondition<T>? {
+    ): ConditionHandle<T>? {
         return fromSection(T::class.java, section, *classTransforms)
     }
 
@@ -56,7 +55,7 @@ object ConditionSerializer {
         clazz: Class<T>,
         section: ConfigurationSection,
         vararg classTransforms: ClassTransform<T, *>,
-    ): ConfiguredCondition<T>? {
+    ): ConditionHandle<T>? {
         val action = fromSectionSimple(clazz, section)
         if (action != null) return action
         val type = section.getString("type") ?: return null
@@ -66,7 +65,7 @@ object ConditionSerializer {
             val arguments = tranformAction.arguments.toMutableList()
             arguments += PrimitiveObjectArgument("negate", false, required = false)
             val args = ObjectArgument.Companion.loadRequirementArguments(section, arguments)
-            val configuredAction = ConfiguredCondition(tranformAction, args)
+            val configuredAction = ConditionHandle(tranformAction, args)
             return configuredAction
         }
         return null
@@ -75,7 +74,7 @@ object ConditionSerializer {
     inline fun <reified T : Any> fromSections(
         sections: List<ConfigurationSection>,
         vararg classTransforms: ClassTransform<T, *>,
-    ): List<ConfiguredCondition<T>> {
+    ): List<ConditionHandle<T>> {
         return fromSections(T::class.java, sections, *classTransforms)
     }
 
@@ -83,7 +82,7 @@ object ConditionSerializer {
         clazz: Class<T>,
         sections: List<ConfigurationSection>,
         vararg classTransforms: ClassTransform<T, *>,
-    ): List<ConfiguredCondition<T>> {
+    ): List<ConditionHandle<T>> {
         return sections.mapNotNull { fromSection(clazz, it, *classTransforms) }
     }
 

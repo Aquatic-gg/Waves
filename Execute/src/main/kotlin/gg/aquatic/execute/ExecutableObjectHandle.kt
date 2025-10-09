@@ -2,7 +2,7 @@ package gg.aquatic.execute
 
 import gg.aquatic.execute.argument.ObjectArguments
 
-open class ConfiguredExecutableObject<B, C>(
+open class ExecutableObjectHandle<B, C>(
     val executableObject: ExecutableObject<B, C>,
     val arguments: ObjectArguments
 ) {

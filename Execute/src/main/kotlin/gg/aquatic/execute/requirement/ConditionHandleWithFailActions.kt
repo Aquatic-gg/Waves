@@ -1,10 +1,10 @@
 package gg.aquatic.execute.requirement
 
-import gg.aquatic.execute.ConfiguredExecutableObjectsWithConditions
+import gg.aquatic.execute.ConditionalActionHandles
 
-class ConfiguredConditionWithFailActions<A,B>(
-    val condition: ConfiguredCondition<A>,
-    val failActions: ConfiguredExecutableObjectsWithConditions<A>?
+class ConditionHandleWithFailActions<A,B>(
+    val condition: ConditionHandle<A>,
+    val failActions: ConditionalActionHandles<A>?
 ) {
 
     fun tryExecute(binder: A, textUpdater: (A, String) -> String): Boolean {

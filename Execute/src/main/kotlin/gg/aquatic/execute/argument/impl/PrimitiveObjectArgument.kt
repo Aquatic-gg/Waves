@@ -1,6 +1,6 @@
 package gg.aquatic.execute.argument.impl
 
-import gg.aquatic.execute.argument.AbstractObjectArgumentSerializer
+import gg.aquatic.execute.argument.ArgumentFactory
 import gg.aquatic.execute.argument.ObjectArgument
 import org.bukkit.configuration.ConfigurationSection
 
@@ -14,12 +14,12 @@ class PrimitiveObjectArgument(
     required,
     aliases
 ) {
-    override val serializer: AbstractObjectArgumentSerializer<Any?>
+    override val serializer: ArgumentFactory<Any?>
         get() {
             return Serializer
         }
 
-    object Serializer : AbstractObjectArgumentSerializer<Any?>() {
+    object Serializer : ArgumentFactory<Any?>() {
         override fun load(section: ConfigurationSection, id: String): Any? {
             return section.get(id)
         }

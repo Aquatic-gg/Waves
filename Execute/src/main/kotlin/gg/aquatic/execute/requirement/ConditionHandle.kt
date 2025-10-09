@@ -1,10 +1,10 @@
 package gg.aquatic.execute.requirement
 
 import gg.aquatic.execute.argument.ObjectArguments
-import gg.aquatic.execute.ConfiguredExecutableObject
+import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.ExecutableObject
 
-class ConfiguredCondition<A>(executableObject: ExecutableObject<A,Boolean>, arguments: ObjectArguments) : ConfiguredExecutableObject<A, Boolean>(
+class ConditionHandle<A>(executableObject: ExecutableObject<A,Boolean>, arguments: ObjectArguments) : ExecutableObjectHandle<A, Boolean>(
     executableObject, arguments
 ) {
 

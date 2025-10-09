@@ -6,11 +6,10 @@ import gg.aquatic.execute.action.impl.logical.SmartAction
 import gg.aquatic.execute.argument.ObjectArgument
 import gg.aquatic.execute.argument.ObjectArguments
 import gg.aquatic.execute.Action
-import gg.aquatic.execute.ConfiguredExecutableObject
+import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.argument.ArgumentContext
 import gg.aquatic.execute.argument.ArgumentSerializer
 import org.bukkit.configuration.ConfigurationSection
-import org.bukkit.entity.Player
 
 object ActionSerializer {
 
@@ -28,21 +27,21 @@ object ActionSerializer {
 
     inline fun <reified T : Any> fromSectionSimple(
         section: ConfigurationSection,
-    ): ConfiguredExecutableObject<T, Unit>? {
+    ): ExecutableObjectHandle<T, Unit>? {
         return fromSectionSimple(T::class.java, section)
     }
 
     fun <T : Any> fromSectionSimple(
         clazz: Class<T>,
         section: ConfigurationSection,
-    ): ConfiguredExecutableObject<T, Unit>? {
+    ): ExecutableObjectHandle<T, Unit>? {
         val type = section.getString("type") ?: return null
         //val action = WavesRegistry.getAction<T>(type) ?: return null
 
         val smartAction = getSmartAction(type, clazz, emptyList())
         if (smartAction != null) {
             val args = ObjectArgument.loadRequirementArguments(section, smartAction.arguments)
-            return ConfiguredExecutableObject(smartAction, args)
+            return ExecutableObjectHandle(smartAction, args)
         }
 
         val actions = allActions(clazz)
@@ -54,20 +53,20 @@ object ActionSerializer {
             val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> let { } }
 
             val args = ObjectArgument.loadRequirementArguments(section, voidAction.arguments)
-            val configuredAction = ConfiguredExecutableObject(action as Action<T>, args)
+            val configuredAction = ExecutableObjectHandle(action as Action<T>, args)
             return configuredAction
         }
 
         val args = ObjectArgument.loadRequirementArguments(section, action.arguments)
 
-        val configuredAction = ConfiguredExecutableObject(action as Action<T>, args)
+        val configuredAction = ExecutableObjectHandle(action as Action<T>, args)
         return configuredAction
     }
 
     inline fun <reified T : Any> fromSection(
         section: ConfigurationSection,
         vararg classTransforms: ClassTransform<T, *>,
-    ): ConfiguredExecutableObject<T, Unit>? {
+    ): ExecutableObjectHandle<T, Unit>? {
         return fromSection(T::class.java, section, *classTransforms)
     }
 
@@ -75,7 +74,7 @@ object ActionSerializer {
         clazz: Class<T>,
         section: ConfigurationSection,
         vararg classTransforms: ClassTransform<T, *>,
-    ): ConfiguredExecutableObject<T, Unit>? {
+    ): ExecutableObjectHandle<T, Unit>? {
         val action = fromSectionSimple(clazz, section)
         if (action != null) return action
         val type = section.getString("type") ?: return null
@@ -83,13 +82,13 @@ object ActionSerializer {
         val smartAction = getSmartAction(type, clazz, emptyList())
         if (smartAction != null) {
             val args = ObjectArguments(ArgumentSerializer.load(section, smartAction.arguments))
-            return ConfiguredExecutableObject(smartAction, args)
+            return ExecutableObjectHandle(smartAction, args)
         }
 
         for (transform in classTransforms) {
             val tranformAction = transform.createTransformedAction(type) ?: continue
             val args = ObjectArgument.loadRequirementArguments(section, tranformAction.arguments)
-            val configuredAction = ConfiguredExecutableObject(tranformAction, args)
+            val configuredAction = ExecutableObjectHandle(tranformAction, args)
             return configuredAction
         }
         return null
@@ -98,7 +97,7 @@ object ActionSerializer {
     inline fun <reified T : Any> fromSections(
         sections: List<ConfigurationSection>,
         vararg classTransforms: ClassTransform<T, *>,
-    ): List<ConfiguredExecutableObject<T, Unit>> {
+    ): List<ExecutableObjectHandle<T, Unit>> {
         return fromSections(T::class.java, sections, *classTransforms)
     }
 
@@ -106,7 +105,7 @@ object ActionSerializer {
         clazz: Class<T>,
         sections: List<ConfigurationSection>,
         vararg classTransforms: ClassTransform<T, *>,
-    ): List<ConfiguredExecutableObject<T, Unit>> {
+    ): List<ExecutableObjectHandle<T, Unit>> {
         return sections.mapNotNull { fromSection(clazz, it, *classTransforms) }
     }
 
