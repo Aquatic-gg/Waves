@@ -31,14 +31,14 @@ object ConditionSerializer {
 
             val arguments = requirement.arguments.toMutableList()
             arguments += PrimitiveObjectArgument("negate", false, required = false)
-            val args = ObjectArgument.Companion.loadRequirementArguments(section, arguments)
+            val args = ObjectArgument.loadRequirementArguments(section, arguments)
             val configuredAction = ConditionHandle(requirement as Condition<T>, args)
             return configuredAction
         }
 
         val arguments = action.arguments.toMutableList()
         arguments += PrimitiveObjectArgument("negate", false, required = false)
-        val args = ObjectArgument.Companion.loadRequirementArguments(section, arguments)
+        val args = ObjectArgument.loadRequirementArguments(section, arguments)
 
         val configuredAction = ConditionHandle(action as Condition<T>, args)
         return configuredAction
