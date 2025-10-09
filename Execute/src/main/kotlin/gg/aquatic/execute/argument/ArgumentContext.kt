@@ -121,6 +121,80 @@ class ArgumentContext<T>(
 
     // Property delegation operators
 
+    infix fun <R> or(default: R): ReadOnlyProperty<Any?, R> {
+        return ElvisProvider(property = null, id = null, default = default)
+    }
+    /**
+     * Provides a way to specify a custom ID for the argument
+     * Usage: val value: Int by args id "custom-id"
+     */
+    infix fun id(customId: String): IdProvider {
+        return IdProvider(customId)
+    }
+
+    inner class IdProvider(private val customId: String) {
+        /**
+         * Provides a way to specify a default value after a custom ID
+         * Usage: val value: Int by args id "custom-id" or 0
+         */
+        infix fun <R> or(default: R): ReadOnlyProperty<Any?, R> {
+            return ElvisProvider(property = null, id = customId, default = default)
+        }
+
+        /**
+         * Provides a delegate with a custom ID
+         * Usage: val value: Int by args id "custom-id"
+         */
+        operator fun provideDelegate(
+            thisRef: Any?,
+            property: KProperty<*>
+        ): ReadOnlyProperty<Any?, Any?> {
+            return ElvisProvider(property = property, id = customId, default = null)
+        }
+    }
+
+    /**
+     * The main delegate provider that handles both nullable and non-nullable cases
+     */
+    inner class ElvisProvider<R>(
+        private val property: KProperty<*>?,
+        private val id: String?,
+        private val default: R?
+    ) : ReadOnlyProperty<Any?, R> {
+        @Suppress("UNCHECKED_CAST")
+        override fun getValue(thisRef: Any?, property: KProperty<*>): R {
+            // Use the provided property if available, otherwise use the one from getValue
+            val prop = this.property ?: property
+            // Use the provided ID if available, otherwise use the property name
+            val argumentId = id ?: prop.name
+
+            // Get the value based on the property type
+            val returnType = prop.returnType.classifier
+
+            val value = when (returnType) {
+                String::class -> string(argumentId)
+                Int::class -> int(argumentId)
+                Double::class -> double(argumentId)
+                Boolean::class -> boolean(argumentId)
+                Float::class -> float(argumentId)
+                Long::class -> long(argumentId)
+                Short::class -> short(argumentId)
+                Byte::class -> byte(argumentId)
+                Vector::class -> vector(argumentId)
+                Vector3f::class -> vector3f(argumentId)
+                Color::class -> color(argumentId)
+                else -> any(argumentId)
+            }
+
+            // Return the value if not null and compatible with R, otherwise return default
+            return if (value != null && (default == null || default::class.java.isInstance(value))) {
+                value as R
+            } else {
+                default as R
+            }
+        }
+    }
+
     /**
      * Smart provideDelegate operator that returns the appropriate delegate based on the property type.
      * This allows syntax like: val double: Double? by context

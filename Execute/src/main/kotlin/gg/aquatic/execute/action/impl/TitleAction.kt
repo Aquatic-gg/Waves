@@ -13,19 +13,19 @@ object TitleAction : Action<Player> {
 
     override fun execute(binder: Player, args: ArgumentContext<Player>) {
 
-        val title: String? by args
-        val subtitle: String? by args
-        val fadeIn = args.int("fade-in") ?: 0
-        val stay: Int? by args
-        val fadeOut = args.int("fade-out") ?: 0
+        val title by args or ""
+        val subtitle by args or ""
+        val fadeIn by args id "fade-in" or 0
+        val stay by args or 0
+        val fadeOut by args id "fade-out" or 0
 
         binder.showTitle(
             Title.title(
-                (title ?: "").toMMComponent(),
-                (subtitle ?: "").toMMComponent(),
+                title.toMMComponent(),
+                subtitle.toMMComponent(),
                 Title.Times.times(
                     Duration.ofMillis((fadeIn * 50).toLong()),
-                    Duration.ofMillis(((stay ?: 0) * 50).toLong()),
+                    Duration.ofMillis((stay * 50).toLong()),
                     Duration.ofMillis((fadeOut * 50).toLong())
                 )
             )
