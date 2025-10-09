@@ -121,8 +121,12 @@ class ArgumentContext<T>(
 
     // Property delegation operators
 
+    infix fun <R> or(consumer: () -> R): ReadOnlyProperty<Any?, R> {
+        return ElvisProvider(property = null, id = null, default = { consumer() })
+    }
+
     infix fun <R> or(default: R): ReadOnlyProperty<Any?, R> {
-        return ElvisProvider(property = null, id = null, default = default)
+        return ElvisProvider(property = null, id = null, default = { default })
     }
     /**
      * Provides a way to specify a custom ID for the argument
@@ -159,7 +163,7 @@ class ArgumentContext<T>(
     inner class ElvisProvider<R>(
         private val property: KProperty<*>?,
         private val id: String?,
-        private val default: R?
+        private val default: () -> R?
     ) : ReadOnlyProperty<Any?, R> {
         @Suppress("UNCHECKED_CAST")
         override fun getValue(thisRef: Any?, property: KProperty<*>): R {

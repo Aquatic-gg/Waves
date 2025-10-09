@@ -15,9 +15,9 @@ class ConditionalActionsAction<T : Any>(
         binder: T,
         args: ArgumentContext<T>,
     ) {
-        val actions = args.any("actions") as? Collection<ExecutableObjectHandle<T, Unit>> ?: return
-        val failActions = args.any("fail") as? Collection<ExecutableObjectHandle<T, Unit>>
-        val conditions = args.any("conditions") as? Collection<ExecutableObjectHandle<T, Boolean>> ?: return
+        val actions = args.typed<Collection<ExecutableObjectHandle<T, Unit>>>("actions") ?: return
+        val failActions = args.typed<Collection<ExecutableObjectHandle<T, Unit>>>("fail")
+        val conditions = args.typed<Collection<ExecutableObjectHandle<T, Boolean>>>("conditions") ?: return
 
         for (condition in conditions) {
             if (!condition.execute(binder,args.updater)) {
