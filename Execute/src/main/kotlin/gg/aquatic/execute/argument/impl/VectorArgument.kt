@@ -1,0 +1,25 @@
+package gg.aquatic.execute.argument.impl
+
+import gg.aquatic.execute.argument.AbstractObjectArgumentSerializer
+import gg.aquatic.execute.argument.ObjectArgument
+import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.util.Vector
+
+class VectorArgument(id: String, defaultValue: Vector?, required: Boolean, aliases: Collection<String> = listOf()) : ObjectArgument<Vector>(id, defaultValue,
+    required,
+    aliases
+) {
+    override val serializer: AbstractObjectArgumentSerializer<Vector?> = Serializer
+
+    object Serializer: AbstractObjectArgumentSerializer<Vector?>() {
+        override fun load(section: ConfigurationSection, id: String): Vector? {
+            val str = section.getString(id) ?: return null
+            val split = str.split(";")
+            if (split.size != 3) {
+                return null
+            }
+            val vector = Vector(split[0].toDouble(), split[1].toDouble(), split[2].toDouble())
+            return vector
+        }
+    }
+}
