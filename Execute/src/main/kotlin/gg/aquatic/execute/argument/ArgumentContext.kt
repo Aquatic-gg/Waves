@@ -142,7 +142,7 @@ class ArgumentContext<T>(
          * Usage: val value: Int by args id "custom-id" or 0
          */
         infix fun <R> or(default: R): ReadOnlyProperty<Any?, R> {
-            return ElvisProvider(property = null, id = customId, default = default)
+            return ElvisProvider(property = null, id = customId, default = { default })
         }
 
         /**
@@ -153,7 +153,7 @@ class ArgumentContext<T>(
             thisRef: Any?,
             property: KProperty<*>
         ): ReadOnlyProperty<Any?, Any?> {
-            return ElvisProvider(property = property, id = customId, default = null)
+            return ElvisProvider(property = property, id = customId, default = { null })
         }
     }
 
