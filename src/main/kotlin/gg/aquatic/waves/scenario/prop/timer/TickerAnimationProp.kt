@@ -2,7 +2,6 @@ package gg.aquatic.waves.scenario.prop.timer
 
 import gg.aquatic.waves.scenario.Scenario
 import gg.aquatic.waves.scenario.ScenarioProp
-import gg.aquatic.waves.util.collection.executeActions
 import gg.aquatic.waves.util.generic.ConfiguredExecutableObject
 import net.kyori.adventure.key.Key
 
