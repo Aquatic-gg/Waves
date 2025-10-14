@@ -11,5 +11,4 @@ open class ExecutableObjectHandle<B, C>(
         val context = arguments.context(binder, textUpdater)
         return executableObject.execute(binder, context)
     }
-
 }

@@ -115,7 +115,7 @@ object ActionSerializer {
             args: ArgumentContext<T>,
         ) {
             val transformed = transform(binder) ?: return
-            val args = ArgumentContext(transformed,args.arguments) { d, str -> args.updater(binder, str) }
+            val args = ArgumentContext(transformed,args.arguments) { _, str -> args.updater(binder, str) }
             externalAction.execute(transformed, args)
         }
 

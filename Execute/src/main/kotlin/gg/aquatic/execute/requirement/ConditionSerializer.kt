@@ -90,7 +90,7 @@ object ConditionSerializer {
         Condition<T> {
         override fun execute(binder: T, args: ArgumentContext<T>): Boolean {
             val transformed = transform(binder) ?: return false
-            val args = ArgumentContext(transformed, args.arguments, { d, str -> args.updater(binder, str) })
+            val args = ArgumentContext(transformed, args.arguments) { _, str -> args.updater(binder, str) }
             return externalAction.execute(transformed, args)
         }
 
