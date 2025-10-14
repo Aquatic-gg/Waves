@@ -5,12 +5,12 @@ import gg.aquatic.execute.requirement.ConditionHandle
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-fun <T> Collection<ConditionHandle<T>>.checkRequirements(
+fun <T> Collection<ConditionHandle<T>>.checkConditions(
     binder: T,
     textUpdater: (T, String) -> String = { _, str -> str }
 ): Boolean {
     for (configuredRequirement in this) {
-        if (!configuredRequirement.execute(binder) { _, str -> str }) return false
+        if (!configuredRequirement.execute(binder, textUpdater)) return false
     }
     return true
 }
