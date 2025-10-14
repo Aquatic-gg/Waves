@@ -77,7 +77,6 @@ import org.joml.Vector3d
 import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.iterator
 import kotlin.jvm.optionals.getOrNull
 import kotlin.math.absoluteValue
 
@@ -597,7 +596,6 @@ object NMSHandlerImpl : NMSHandler {
         profileEntries: Collection<ProfileEntry>,
     ): Any {
         val entries = ArrayList<ClientboundPlayerInfoUpdatePacket.Entry>()
-
         entries += profileEntries.map { profileEntry ->
             ClientboundPlayerInfoUpdatePacket.Entry(
                 profileEntry.userProfile.uuid,

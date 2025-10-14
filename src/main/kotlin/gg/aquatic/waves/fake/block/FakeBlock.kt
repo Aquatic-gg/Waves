@@ -51,12 +51,10 @@ open class FakeBlock(
     var block = block
         private set
 
-
     init {
         this.audience = audience
         FakeObjectHandler.locationToBlocks.getOrPut(location.blockLocation()) { ConcurrentHashMap.newKeySet() } += this
         FakeObjectHandler.tickableObjects += this
-
 
         val chunkViewers = location.chunk.trackedBy().toSet()
         for (viewer in viewers) {
@@ -119,13 +117,6 @@ open class FakeBlock(
 
     override fun show(player: Player) {
         isViewing.add(player)
-        /*
-        val packet = WrapperPlayServerBlockChange(
-            Vector3i(location.blockX,location.blockY,location.blockZ),
-            SpigotConversionUtil.fromBukkitBlockData(block.blockData).globalId
-        )
-        player.toUser().sendPacket(packet)
-         */
         val packet = Waves.NMS_HANDLER.createBlockChangePacket(location, block.blockData)
         player.sendPacket(packet, true)
     }
@@ -133,7 +124,7 @@ open class FakeBlock(
     override fun hide(player: Player) {
         isViewing.remove(player)
         val packet = Waves.NMS_HANDLER.createBlockChangePacket(location, location.block.blockData)
-        player.sendPacket(packet, true)
+        player.sendPacket(packet, false)
     }
 
     override fun tick() {

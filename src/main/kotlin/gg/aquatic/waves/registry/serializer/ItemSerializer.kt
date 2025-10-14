@@ -4,6 +4,8 @@ import gg.aquatic.waves.item.AquaticItem
 import gg.aquatic.waves.item.ItemHandler
 import gg.aquatic.waves.item.option.*
 import gg.aquatic.waves.registry.WavesRegistry
+import gg.aquatic.waves.util.task.BukkitCtx
+import kotlinx.coroutines.runBlocking
 import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
@@ -44,6 +46,15 @@ object ItemSerializer {
         return try {
             val material = section.getString("material", "STONE")!!
             val options = optionFactories.mapNotNull { it.load(section) }
+
+            if (material.lowercase().startsWith("mmoitem")) {
+                return runBlocking(BukkitCtx) {
+                    return@runBlocking create(
+                        material,
+                        options,
+                    )
+                }
+            }
 
             return create(
                 material,
