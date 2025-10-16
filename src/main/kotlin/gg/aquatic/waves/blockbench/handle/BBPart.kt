@@ -2,7 +2,6 @@ package gg.aquatic.waves.blockbench.handle
 
 import gg.aquatic.waves.blockbench.template.BBPartTemplate
 import org.bukkit.Location
-import org.bukkit.Particle
 import org.bukkit.util.EulerAngle
 import org.bukkit.util.Vector
 
@@ -25,7 +24,8 @@ class BBPart(
         vector.rotateAroundY(-rotation.y)
         vector.rotateAroundZ(-rotation.z)
 
-        vector.add(origin.clone().multiply(scale).subtract(parentOrigin))
+        //.multiply(scale)
+        vector.add(origin.clone().subtract(parentOrigin))
 
         vector.rotateAroundX(parentAngle.x)
         vector.rotateAroundY(-parentAngle.y)

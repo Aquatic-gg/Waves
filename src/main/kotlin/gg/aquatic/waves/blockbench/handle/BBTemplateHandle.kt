@@ -3,6 +3,7 @@ package gg.aquatic.waves.blockbench.handle
 import gg.aquatic.waves.blockbench.animation.AnimationHandler
 import gg.aquatic.waves.blockbench.template.BBTemplate
 import org.bukkit.Location
+import org.bukkit.util.Vector
 
 class BBTemplateHandle(
     val template: BBTemplate,
@@ -17,7 +18,7 @@ class BBTemplateHandle(
     fun tick() {
         animationHandler.update()
         for (parentBone in parentBones) {
-            parentBone.spawn(location.clone(),this,null,null,null)
+            parentBone.spawn(location.clone(),this,null,null,null, Vector(1.0,1.0,1.0))
         }
     }
 

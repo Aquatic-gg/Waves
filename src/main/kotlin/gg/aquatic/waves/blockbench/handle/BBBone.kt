@@ -18,6 +18,7 @@ class BBBone(
         parentOrigin: Vector?,
         parentPivot: Vector?,
         parentAngle: EulerAngle?,
+        parentScale: Vector,
     ) {
         val currentParentOrigin = parentOrigin ?: Vector()
         val currentParentPivot = parentPivot ?: Vector()
@@ -25,14 +26,21 @@ class BBBone(
 
         val rotation: EulerAngle = getFinalAngle(currentParentAngle, bbTemplateHandle)
 
-        val scale = getFinalScale(bbTemplateHandle)
+        val scale = parentScale.clone().multiply(getFinalScale(bbTemplateHandle))
         val pivot: Vector = getFinalPivot(currentParentOrigin, currentParentPivot, currentParentAngle, bbTemplateHandle)
-
         for (part in parts) {
-            part.spawn(this, bbTemplateHandle, location.clone(), template.origin.clone(), pivot.clone(), rotation, scale)
+            part.spawn(
+                this,
+                bbTemplateHandle,
+                location.clone(),
+                template.origin.clone(),
+                pivot.clone(),
+                rotation,
+                scale
+            )
         }
         for (child in children) {
-            child.spawn(location.clone(), bbTemplateHandle, template.origin.clone(), pivot.clone().multiply(scale), rotation)
+            child.spawn(location.clone(), bbTemplateHandle, template.origin.clone(), pivot.clone(), rotation, scale)
         }
     }
 
@@ -58,7 +66,8 @@ class BBBone(
     }
 
     fun getFinalScale(
-        BBTemplateHandle: BBTemplateHandle,): Vector {
+        BBTemplateHandle: BBTemplateHandle,
+    ): Vector {
         val animationScale: Vector = BBTemplateHandle.animationHandler.getScale(template.name)
         return animationScale
     }
