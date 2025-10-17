@@ -33,20 +33,15 @@ object ActionSerializer {
         return type(clazz, classTransforms) as? SmartAction<T>
     }
 
-    inline fun <reified T : Any> fromSectionSimple(
-        section: ConfigurationSection,
-    ): ConfiguredExecutableObject<T, Unit>? {
-        return fromSectionSimple(T::class.java, section)
-    }
-
-    fun <T : Any> fromSectionSimple(
+    private fun <T : Any> fromSectionSimple(
         clazz: Class<T>,
         section: ConfigurationSection,
+        vararg classTransforms: ClassTransform<T, *>,
     ): ConfiguredExecutableObject<T, Unit>? {
         val type = section.getString("type") ?: return null
         //val action = WavesRegistry.getAction<T>(type) ?: return null
 
-        val smartAction = getSmartAction(type, clazz, emptyList())
+        val smartAction = getSmartAction(type, clazz, classTransforms.toList())
         if (smartAction != null) {
             val args = AquaticObjectArgument.loadRequirementArguments(section, smartAction.arguments)
             return ConfiguredExecutableObject(smartAction, args)
@@ -83,11 +78,11 @@ object ActionSerializer {
         section: ConfigurationSection,
         vararg classTransforms: ClassTransform<T, *>,
     ): ConfiguredExecutableObject<T, Unit>? {
-        val action = fromSectionSimple(clazz, section)
+        val action = fromSectionSimple(clazz, section, *classTransforms)
         if (action != null) return action
         val type = section.getString("type") ?: return null
 
-        val smartAction = getSmartAction(type, clazz, emptyList())
+        val smartAction = getSmartAction(type, clazz, classTransforms.toList())
         if (smartAction != null) {
             val args = AquaticObjectArgument.loadRequirementArguments(section, smartAction.arguments)
             return ConfiguredExecutableObject(smartAction, args)

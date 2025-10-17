@@ -30,7 +30,11 @@ class TickerAnimationProp<T: Scenario>(
             tick = 0
             actualTick++
             for (action in actions) {
-                action.execute(scenario) { a, str -> a.updatePlaceholders(str) }
+                try {
+                    action.execute(scenario) { a, str -> a.updatePlaceholders(str) }
+                } catch (e: Exception) {
+                    println(e.localizedMessage)
+                }
             }
         }
     }

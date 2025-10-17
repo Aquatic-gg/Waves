@@ -25,6 +25,5 @@ class MessageArgument(id: String, defaultValue: Message?, required: Boolean, ali
             }
             return msg
         }
-
     }
 }

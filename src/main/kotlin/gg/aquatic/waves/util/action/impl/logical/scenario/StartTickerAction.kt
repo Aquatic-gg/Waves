@@ -16,7 +16,7 @@ class StartTickerAction<T : Scenario>(
     classTransforms: Collection<ClassTransform<*, *>>,
 ) : SmartAction<T>(clazz, classTransforms as Collection<ClassTransform<T, *>>) {
     override val arguments: List<AquaticObjectArgument<*>> = listOf(
-        ActionsArgument("actions", listOf(), true, clazz,super.classTransforms),
+        ActionsArgument("actions", listOf(), true, clazz, this.classTransforms),
         PrimitiveObjectArgument("tick-every", 1, false),
         PrimitiveObjectArgument("id", "example", false),
         PrimitiveObjectArgument("repeat-limit", -1, false)
@@ -27,6 +27,11 @@ class StartTickerAction<T : Scenario>(
         val tickEvery = args.int("tick-every") { textUpdater(binder, it) } ?: return
         val repeatLimit = args.int("repeat-limit") { textUpdater(binder, it)} ?: -1
         val id = args.string("id") { textUpdater(binder, it) } ?: return
+
+        if (actions.isEmpty()) {
+            println("Ticker actions are empty, skipping")
+            return
+        }
 
         val prop = TickerAnimationProp(binder, id, tickEvery, actions, repeatLimit)
         binder.props[Key.key("ticker:$id")] = prop
