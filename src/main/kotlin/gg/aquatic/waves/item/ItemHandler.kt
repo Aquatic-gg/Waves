@@ -10,6 +10,7 @@ import gg.aquatic.waves.registry.isAquaticItem
 import gg.aquatic.waves.registry.registryId
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
+import org.bukkit.event.EventPriority
 import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.ClickType
 import org.bukkit.event.inventory.InventoryClickEvent
@@ -27,7 +28,7 @@ object ItemHandler : WavesModule {
     override val type: WaveModules = WaveModules.ITEMS
 
     override fun initialize(waves: Waves) {
-        event<PlayerInteractEvent> {
+        event<PlayerInteractEvent>(ignoredCancelled = true, EventPriority.LOW) {
             if (it.hand == EquipmentSlot.OFF_HAND) return@event
             if (listenInteractions.isEmpty()) return@event
             val item = it.item ?: return@event
@@ -49,7 +50,7 @@ object ItemHandler : WavesModule {
             aitemEvent.call()
         }
         event<PlayerSwapHandItemsEvent> {
-            val item = it.mainHandItem ?: return@event
+            val item = it.mainHandItem
             val aitem = item.isAquaticItem() ?: return@event
             val registry = aitem.registryId() ?: return@event
             val interaction = listenInteractions[registry] ?: return@event
