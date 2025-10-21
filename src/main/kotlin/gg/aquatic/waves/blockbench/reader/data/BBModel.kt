@@ -8,7 +8,8 @@ class BBModel(
     val variable_placeholders: String,
     val resolution: BBResolution,
     val elements: Array<BBElement> = arrayOf(),
-    val outliner: Array<BBBone> = arrayOf(),
+    val groups: Array<BBBone> = arrayOf(),
+    val outliner: Array<BBChildren> = arrayOf(),
     val textures: Array<BBTexture>,
     val animations: Array<BBAnimation>
 ) {

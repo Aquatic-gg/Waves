@@ -16,5 +16,4 @@ class BBBone(
     val visibility: Boolean,
     val autoUv: Int,
     val children: Array<BBChildren> = arrayOf()
-): BBChildren {
-}
+)

@@ -33,14 +33,16 @@ object BlockBenchReader {
     fun read(bbmodel: BBModel): BBTemplate? {
         val outliner = bbmodel.outliner ?: return null
         val parentBones: MutableList<BBBoneTemplate> = ArrayList()
-        for (bone in outliner) {
-            val readbone = readBone(bone, bbmodel)
-            parentBones.add(readbone)
+        for (obj in outliner) {
+            if (obj is BBChildren.BBBoneChildren) {
+                val readbone = readBone(obj, bbmodel)
+                parentBones.add(readbone)
+            }
         }
 
         val animations: MutableMap<String, BBAnimationTemplate> = HashMap()
         for (animation in bbmodel.animations) {
-            val templateAnimation: BBAnimationTemplate = readAnimation(animation, outliner)
+            val templateAnimation: BBAnimationTemplate = readAnimation(animation, bbmodel.groups)
             if (templateAnimation != null) {
                 animations[templateAnimation.name] = templateAnimation
             }
@@ -145,7 +147,9 @@ object BlockBenchReader {
     }
 
 
-    private fun readBone(bone: BBBone, bbModel: BBModel): BBBoneTemplate {
+    private fun readBone(boneChildren: BBChildren.BBBoneChildren, bbModel: BBModel): BBBoneTemplate {
+        val bone = bbModel.groups.find { it.uuid == boneChildren.uuid }!!
+
         val bbOrigin = bone.origin
         val bbRotation = bone.rotation
         val rotation = readRotation(bbRotation)
@@ -158,13 +162,13 @@ object BlockBenchReader {
         val children: MutableList<BBBoneTemplate> = ArrayList()
 
         Bukkit.broadcastMessage("Children: " + bone.children.size)
-        for (child in bone.children) {
-            if (child is BBBone) {
+        for (child in boneChildren.children) {
+            if (child is BBChildren.BBBoneChildren) {
                 val childBone = readBone(child, bbModel)
                 if (childBone != null) {
                     children.add(childBone)
                 }
-            } else if (child is BBElementChildren) {
+            } else if (child is BBChildren.BBElementChildren) {
                 for (element in bbModel.elements) {
                     if (element.uuid == child.uuid) {
                         val part: BBPartTemplate = readPart(element)
