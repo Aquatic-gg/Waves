@@ -11,7 +11,7 @@ import gg.aquatic.waves.profile.event.AsyncProfileLoadEvent
 import gg.aquatic.waves.profile.event.ProfileUnloadEvent
 import gg.aquatic.waves.profile.module.ProfileModule
 import gg.aquatic.waves.util.logger.type.InfoLogger
-import gg.aquatic.waves.util.task.AsyncScope
+import gg.aquatic.waves.util.task.AsyncCtx
 import gg.aquatic.waves.util.toBytes
 import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
@@ -76,7 +76,7 @@ object ProfilesModule : WavesModule {
                 return player
             }
 
-            AsyncScope.launch {
+            AsyncCtx {
                 loadPlayer()
             }
         }
@@ -91,7 +91,7 @@ object ProfilesModule : WavesModule {
                 cache.remove(it.player.uniqueId)
             }
 
-            AsyncScope.launch {
+            AsyncCtx {
                 savePlayer()
             }
         }

@@ -682,7 +682,7 @@ object NMSHandlerImpl : NMSHandler {
         val chunkData = chunkBundlePacket.chunkData
         val readBuffer = chunkData.readBuffer
 
-        val wrappedSections = mutableListOf<Pair<WrappedChunkSection, LevelChunkSection>>()
+        val wrappedSections = mutableListOf<WrappedChunkSection>()
         val registries = (world as CraftWorld).handle.registryAccess()
         val registry: Registry<Biome?> = registries.lookupOrThrow<Biome?>(Registries.BIOME)
         for (i in 0 until sections) {
@@ -702,6 +702,8 @@ object NMSHandlerImpl : NMSHandler {
             val section = LevelChunkSection(container1, container2)
             section.read(readBuffer)
             val pair = ((object : WrappedChunkSection {
+                override val section: LevelChunkSection = section
+
                 override fun set(x: Int, y: Int, z: Int, blockState: BlockData) {
                     section.setBlockState(x, y, z, (blockState as CraftBlockData).state, false)
                     //palettedContainer.set(x, y, z, (blockState as CraftBlockState).handle)
@@ -711,16 +713,17 @@ object NMSHandlerImpl : NMSHandler {
                     val state = CraftBlockData.fromData(section.getBlockState(x, y, z))
                     return state
                 }
-            } as WrappedChunkSection) to section)
+            } as WrappedChunkSection))
             wrappedSections.add(pair)
         }
-        func(wrappedSections.map { it.first })
+        func(wrappedSections)
 
-        val bytes = ByteArray(calculateChunkSize(wrappedSections.map { it.second }))
+        val chunkSections = wrappedSections.map { it.section as LevelChunkSection }
+        val bytes = ByteArray(calculateChunkSize(chunkSections))
         val writeBuffer: ByteBuf = Unpooled.wrappedBuffer(bytes)
         writeBuffer.writerIndex(0)
 
-        extractChunkData(wrappedSections.map { it.second }, writeBuffer)
+        extractChunkData(chunkSections, writeBuffer)
         chunkDataBufferField.set(chunkData, bytes)
     }
 

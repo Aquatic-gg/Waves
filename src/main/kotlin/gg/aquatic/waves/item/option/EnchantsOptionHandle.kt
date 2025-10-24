@@ -6,14 +6,12 @@ import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
 import net.advancedplugins.ae.api.AEAPI
 import net.kyori.adventure.key.Key
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.meta.EnchantmentStorageMeta
-import org.bukkit.inventory.meta.ItemMeta
 import java.util.*
-import kotlin.collections.iterator
 
 class EnchantsOptionHandle(
     val enchants: Map<String, Int>,
@@ -21,7 +19,6 @@ class EnchantsOptionHandle(
 
     override val key = Companion.key
     override fun apply(itemStack: ItemStack) {
-
         val enchantments = HashMap<Enchantment, Int>()
         for ((ench, level) in enchants) {
             if (ench.uppercase() == "AE-SLOTS") {
@@ -38,25 +35,12 @@ class EnchantsOptionHandle(
 
             getEnchantmentByString(ench)?.apply {
                 enchantments += this to level
-                //itemStack.addUnsafeEnchantment(this, level)
             }
         }
         itemStack.setData(
-            DataComponentTypes.ENCHANTMENTS, ItemEnchantments.itemEnchantments().addAll(enchantments).build()
+            if (itemStack.type == Material.ENCHANTED_BOOK) DataComponentTypes.STORED_ENCHANTMENTS else DataComponentTypes.ENCHANTMENTS,
+            ItemEnchantments.itemEnchantments().addAll(enchantments).build()
         )
-    }
-
-    override fun apply(itemMeta: ItemMeta) {
-        if (itemMeta is EnchantmentStorageMeta) {
-            for ((ench, level) in enchants) {
-                if (ench.uppercase().startsWith("AE-")) continue
-                if (ench.uppercase() == "AE-SLOTS") continue
-
-                getEnchantmentByString(ench)?.apply {
-                    itemMeta.addStoredEnchant(this, level, true)
-                }
-            }
-        }
     }
 
     private fun getEnchantmentByString(ench: String): Enchantment? {

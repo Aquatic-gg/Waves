@@ -5,8 +5,7 @@ import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
-import gg.aquatic.waves.util.task.AsyncScope
-import kotlinx.coroutines.launch
+import gg.aquatic.waves.util.task.AsyncCtx
 import me.micartey.webhookly.DiscordWebhook
 
 @RegisterAction("discord-webhook")
@@ -21,7 +20,7 @@ class DiscordWebhookAction : Action<Unit> {
         val tts = args.boolean("tts") { str -> textUpdater(binder, str) } ?: return
         val embeds = args.typed<Collection<DiscordEmbedArgument.WavesEmbedObject>>("embeds") { str -> textUpdater(binder, str) } ?: return
 
-        AsyncScope.launch {
+        AsyncCtx {
             val webhook = DiscordWebhook(url)
             webhook.setContent(content)
             webhook.setAvatarUrl(avatarUrl)

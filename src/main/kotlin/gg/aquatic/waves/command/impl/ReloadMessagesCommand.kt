@@ -2,8 +2,7 @@ package gg.aquatic.waves.command.impl
 
 import gg.aquatic.waves.command.ICommand
 import gg.aquatic.waves.message.MessageSerializer
-import gg.aquatic.waves.util.task.AsyncScope
-import kotlinx.coroutines.launch
+import gg.aquatic.waves.util.task.AsyncCtx
 import org.bukkit.command.CommandSender
 
 object ReloadMessagesCommand: ICommand {
@@ -13,7 +12,7 @@ object ReloadMessagesCommand: ICommand {
         }
 
         sender.sendMessage("Reloading messages...")
-        AsyncScope.launch {
+        AsyncCtx {
             MessageSerializer.loadWavesCustomMessages()
             sender.sendMessage("Messages have been reloaded!")
         }

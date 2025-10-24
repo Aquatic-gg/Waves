@@ -3,8 +3,7 @@ package gg.aquatic.waves.menu.settings
 import gg.aquatic.waves.inventory.ButtonType
 import gg.aquatic.waves.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.waves.util.generic.ConfiguredExecutableObjectsWithConditions
-import gg.aquatic.waves.util.task.BukkitScope
-import kotlinx.coroutines.launch
+import gg.aquatic.waves.util.task.BukkitCtx
 import org.bukkit.entity.Player
 
 class ClickSettings(
@@ -15,7 +14,7 @@ class ClickSettings(
         val type = event.buttonType
         val actions = clicks[type] ?: return
 
-        BukkitScope.launch {
+        BukkitCtx {
             for (action in actions) {
                 action.tryExecute(event.viewer.player, updater)
             }

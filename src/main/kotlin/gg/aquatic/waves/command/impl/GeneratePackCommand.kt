@@ -2,8 +2,7 @@ package gg.aquatic.waves.command.impl
 
 import gg.aquatic.waves.command.ICommand
 import gg.aquatic.waves.pack.PackHandler
-import gg.aquatic.waves.util.task.AsyncScope
-import kotlinx.coroutines.launch
+import gg.aquatic.waves.util.task.AsyncCtx
 import org.bukkit.command.CommandSender
 
 object GeneratePackCommand: ICommand {
@@ -13,9 +12,8 @@ object GeneratePackCommand: ICommand {
         }
 
         sender.sendMessage("Generating pack...")
-        AsyncScope.launch {
+        AsyncCtx {
             PackHandler.loadPack()
-
             sender.sendMessage("Pack has been generated!")
         }
     }

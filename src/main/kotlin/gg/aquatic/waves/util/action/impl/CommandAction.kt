@@ -5,7 +5,7 @@ import gg.aquatic.waves.util.argument.AquaticObjectArgument
 import gg.aquatic.waves.util.argument.ObjectArguments
 import gg.aquatic.waves.util.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.waves.util.generic.Action
-import gg.aquatic.waves.util.task.BukkitScope
+import gg.aquatic.waves.util.task.BukkitCtx
 import gg.aquatic.waves.util.updatePAPIPlaceholders
 import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
@@ -32,7 +32,7 @@ class CommandAction : Action<Player> {
         if (Bukkit.getServer().isPrimaryThread) {
             run()
         } else {
-            BukkitScope.launch {
+            BukkitCtx {
                 for (cmd in commands) {
                     val command = textUpdater(binder, cmd.updatePAPIPlaceholders(binder))
                     if (command.isEmpty() || command.isBlank()) continue
