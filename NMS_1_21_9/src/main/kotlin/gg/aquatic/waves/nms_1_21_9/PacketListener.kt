@@ -49,12 +49,9 @@ class PacketListener(
         val newPackets = ArrayList<Packet<in ClientGamePacketListener>>()
         val thens = ArrayList<() -> Unit>()
         for (subPacket in packets) {
-            val pair = handlePacket(subPacket)
-            if (pair == null) {
-                continue
-            }
+            val pair = handlePacket(subPacket) ?: continue
             val (resultPacket, resultEvent) = pair
-            resultEvent?.let { thens.add { it.then() } }
+            resultEvent?.let { thens.add(it.then) }
             newPackets.add(resultPacket)
         }
         if (newPackets.isEmpty()) {
@@ -90,13 +87,13 @@ class PacketListener(
                 return packet to event
             }
             is ClientboundLevelChunkWithLightPacket -> {
-                val event = PacketChunkLoadEvent(player, packet.x, packet.z, packet,packet.chunkData.extraPackets.toMutableList())
+                val event = PacketChunkLoadEvent(player, packet.x, packet.z, packet, ArrayList())
                 event.call()
 
                 if (event.isCancelled) {
                     return null
                 }
-                packet.chunkData.extraPackets += (event.extraPackets.map { it -> it as Packet<*> }.toMutableList())
+                //packet.extraPackets!!.addAll(event.extraPackets.map { it as Packet<*> })
                 return packet to event
             }
 

@@ -64,7 +64,7 @@ interface NMSHandler {
 
     fun createChangeGameStatePacket(action: GameEventAction, value: Float): Any
     fun createCameraPacket(entityId: Int): Any
-    fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit)
+    //fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit)
 
     fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
     fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any

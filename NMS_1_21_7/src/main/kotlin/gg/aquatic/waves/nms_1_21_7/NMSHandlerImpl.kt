@@ -671,6 +671,7 @@ object NMSHandlerImpl : NMSHandler {
         return entity.bukkitEntity
     }
 
+    /*
     private val chunkDataBufferField =
         ReflectionUtils.getField("buffer", ClientboundLevelChunkPacketData::class.java).apply {
             isAccessible = true
@@ -726,6 +727,7 @@ object NMSHandlerImpl : NMSHandler {
         extractChunkData(chunkSections, writeBuffer)
         chunkDataBufferField.set(chunkData, bytes)
     }
+     */
 
     private fun calculateChunkSize(sections: Collection<LevelChunkSection>): Int {
         var i = 0

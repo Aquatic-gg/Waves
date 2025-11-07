@@ -11,16 +11,31 @@ import gg.aquatic.waves.interactable.InteractableHandler
 import gg.aquatic.waves.interactable.InteractableInteractEvent
 import gg.aquatic.waves.interactable.MEGInteractableDummy
 import gg.aquatic.waves.util.audience.AquaticAudience
+import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import java.util.function.Predicate
 import kotlin.jvm.optionals.getOrNull
 
 class MEGInteractable(
-    override val location: Location, val modelId: String, audience: AquaticAudience, override val onInteract: (InteractableInteractEvent) -> Unit,
+    override val location: Location,
+    val modelId: String,
+    audience: AquaticAudience,
+    override val onInteract: (InteractableInteractEvent) -> Unit,
 ) : Interactable() {
 
     override val viewers: MutableSet<Player> = mutableSetOf()
+
+    val dummy = MEGInteractableDummy(this).apply {
+        location = this@MEGInteractable.location
+        bodyRotationController.yBodyRot = location.yaw
+        bodyRotationController.xHeadRot = location.pitch
+        bodyRotationController.yHeadRot = location.yaw
+        yHeadRot = location.yaw
+        yBodyRot = location.yaw
+
+    }
 
     override var audience: AquaticAudience = audience
         set(value) {
@@ -30,21 +45,13 @@ class MEGInteractable(
                     removeViewer(player)
                 }
             }
-            for (player in location.world.players.filter { !viewers.contains(it) }) {
+            for (player in location.world.players) {
+                if (viewers.contains(player)) continue
                 if (!field.canBeApplied(player)) continue
                 addViewer(player)
             }
         }
 
-    val dummy = MEGInteractableDummy(this).apply {
-        location = this@MEGInteractable.location
-        bodyRotationController.yBodyRot = location.yaw
-        bodyRotationController.xHeadRot = location.pitch
-        bodyRotationController.yHeadRot = location.yaw
-        yHeadRot = location.yaw
-        yBodyRot = location.yaw
-        isDetectingPlayers = false
-    }
 
     val modeledEntity: ModeledEntity?
         get() {
@@ -58,6 +65,7 @@ class MEGInteractable(
     fun setSkin(player: Player) {
         setSkin(player.playerProfile)
     }
+
     fun setSkin(playerProfile: PlayerProfile) {
         activeModel?.apply {
             for (value in bones.values) {
@@ -76,8 +84,11 @@ class MEGInteractable(
 
     init {
         this.audience = audience
+        dummy.data.tracked.playerPredicate = Predicate { p -> viewers.contains(p) }
+
         val modeledEntity = ModelEngineAPI.createModeledEntity(dummy)
         val activeModel = ModelEngineAPI.createActiveModel(modelId)
+
         InteractableHandler.megInteractables += this
         modeledEntity.addModel(activeModel, true)
     }
@@ -85,12 +96,12 @@ class MEGInteractable(
 
     override fun addViewer(player: Player) {
         viewers.add(player)
-        dummy.setForceViewing(player, true)
+        //dummy.setForceViewing(player, true)
     }
 
     override fun removeViewer(player: Player) {
         viewers.remove(player)
-        dummy.setForceViewing(player, false)
+        //dummy.setForceViewing(player, false)
     }
 
 
@@ -98,12 +109,24 @@ class MEGInteractable(
         this.activeModel?.destroy()
         this.activeModel?.isRemoved = true
         dummy.isRemoved = true
+
         InteractableHandler.megInteractables -= this
+        /*
+        val chunkId = this.location.chunk.chunkId()
+        val collection = InteractableHandler.megInteractables[chunkId]
+        if (collection != null) {
+            collection -= this
+
+            if (collection.isEmpty()) {
+                InteractableHandler.megInteractables -= chunkId
+            }
+        }
+         */
         viewers.clear()
     }
 
     override fun updateViewers() {
-        location.world.players.forEach { player ->
+        Bukkit.getOnlinePlayers().forEach { player ->
             if (audience.canBeApplied(player)) {
                 addViewer(player)
             }

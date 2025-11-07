@@ -8,6 +8,7 @@ import gg.aquatic.waves.util.requirement.ConfiguredRequirement
 import gg.aquatic.waves.util.setData
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 
 class AquaticHologram(
@@ -15,7 +16,7 @@ class AquaticHologram(
     val filter: (Player) -> Boolean,
     val textUpdater: (Player, String) -> String,
     val viewDistance: Int,
-    lines: Collection<HologramLine>,
+    lines: List<HologramLine>,
 ) {
 
     var seat: Int? = null
@@ -91,7 +92,7 @@ class AquaticHologram(
     @Volatile
     private var rangeTick = 0
 
-    val lines = ConcurrentHashMap.newKeySet<HologramLine>().apply { addAll(lines) }
+    val lines = Collections.synchronizedList(lines.reversed())
     val viewers = ConcurrentHashMap<Player, MutableSet<SpawnedHologramLine>>()
 
     init {
@@ -192,8 +193,6 @@ class AquaticHologram(
         HologramHandler.spawnedHolograms -= this
         destroyLines()
         viewers.clear()
-        lines.clear()
-
     }
 
     fun teleport(location: Location) {
@@ -219,7 +218,7 @@ class AquaticHologram(
             },
             textUpdater,
             viewDistance,
-            lines.map { it.create() }.toSet()
+            lines.map { it.create() }
         )
     }
 }

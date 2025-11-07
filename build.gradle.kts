@@ -1,17 +1,17 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    kotlin("jvm") version "2.2.0"
+    kotlin("jvm") version "2.2.21"
     `maven-publish`
     java
-    id("com.gradleup.shadow") version "9.0.0-beta11"
+    id("com.gradleup.shadow") version "9.2.2"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
-    id("xyz.jpenilla.gremlin-gradle") version "0.0.7"
+    id("xyz.jpenilla.gremlin-gradle") version "0.0.9"
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.17" apply false
 }
 
 group = "gg.aquatic.waves"
-version = "1.3.26"
+version = "1.3.28"
 
 val ktor_version: String by project
 
@@ -37,7 +37,7 @@ tasks.writeDependencies {
     relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
     relocate("org.openjdk.nashorn", "gg.aquatic.waves.libs.nashorn")
     relocate("org.bstats", "gg.aquatic.waves.shadow.bstats")
-    relocate("com.undefined", "gg.aquatic.waves.shadow.undefined")
+    //relocate("com.undefined", "gg.aquatic.waves.shadow.undefined")
 }
 
 
@@ -49,7 +49,7 @@ gremlin {
             url = uri("https://repo.undefinedcreations.com/releases")
         }
         maven {
-            name = "undefined-repo"
+            name = "undefined-snapshots"
             url = uri("https://repo.undefinedcreations.com/snapshots")
         }
         maven("https://jitpack.io")
@@ -70,10 +70,9 @@ gremlin {
 
     dependencies {
         // Define your dependencies
-        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10")
-        implementation("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.21")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
         implementation("org.openjdk.nashorn:nashorn-core:15.4")
         implementation("com.zaxxer:HikariCP:5.1.0")
         implementation("net.radstevee.packed:packed-core:1.1.1")
@@ -81,13 +80,12 @@ gremlin {
         implementation("org.reflections:reflections:0.10.2")
         implementation("com.github.micartey:webhookly:master-SNAPSHOT")
         implementation("net.kyori:adventure-text-minimessage:4.20.0")
-        implementation("net.kyori:adventure-api:4.20.0")
         implementation("org.bstats:bstats-bukkit:3.1.0")
         implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
         implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        implementation("com.undefined:stellar-kotlin:1.1.0-SNAPSHOT:paper")
-        implementation("com.undefined:stellar:1.1.0-SNAPSHOT:paper")
+        implementation("com.undefined:stellar-kotlin:1.1.1:paper")
+        implementation("com.undefined:stellar:1.1.1:paper")
     }
 }
 
@@ -129,17 +127,6 @@ repositories {
 dependencies {
     implementation("xyz.jpenilla:gremlin-runtime:0.0.7")
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    //implementation("gg.aquatic.wavessync:wavessync-api:1.0.1:all")
-
-    /*
-    implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("io.ktor:ktor-client-cio:$ktor_version")
-    implementation("io.ktor:ktor-client-websockets:$ktor_version")
-    implementation("io.ktor:ktor-client-okhttp:$ktor_version")
-    implementation("io.ktor:ktor-client-okhttp-jvm:2.3.12")
-    implementation("io.ktor:ktor-client-auth:$ktor_version")
-
-     */
 
     compileOnly("me.clip:placeholderapi:2.11.6")
 
@@ -147,7 +134,7 @@ dependencies {
     compileOnly("gg.aquatic:AEAPI:1.0")
     compileOnly("io.th0rgal:oraxen:1.193.2")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
-    compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
+    compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     compileOnly("io.lumine:Mythic-Dist:5.9.1")
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
@@ -157,22 +144,21 @@ dependencies {
 
     runtimeDownload("org.reflections:reflections:0.10.2")
     runtimeDownload("com.github.micartey:webhookly:master-SNAPSHOT")
-    runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
-    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
-    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.1.10")
-    runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.1.10")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.21")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
     runtimeDownload("org.openjdk.nashorn:nashorn-core:15.4")
     runtimeDownload("com.zaxxer:HikariCP:5.1.0")
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
     runtimeDownload("net.kyori:adventure-text-minimessage:4.20.0")
-    runtimeDownload("net.kyori:adventure-api:4.20.0")
+    compileOnly("net.kyori:adventure-api:4.20.0")
     runtimeDownload("org.bstats:bstats-bukkit:3.1.0")
     runtimeDownload("net.kyori:adventure-text-serializer-gson:4.17.0")
     runtimeDownload("net.kyori:adventure-text-serializer-plain:4.18.0")
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    runtimeDownload("com.undefined:stellar-kotlin:1.1.0-SNAPSHOT:paper")
-    runtimeDownload("com.undefined:stellar:1.1.0-SNAPSHOT:paper")
+    runtimeDownload("com.undefined:stellar-kotlin:1.1.1:paper")
+    runtimeDownload("com.undefined:stellar:1.1.1:paper")
 
     compileOnly("net.momirealms:craft-engine-core:0.0.61")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.61")
@@ -238,7 +224,7 @@ tasks.register<ShadowJar>("shadowJarPlugin") {
     relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
     relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
 
-    relocate("com.undefined", "gg.aquatic.waves.shadow.undefined")
+    //relocate("com.undefined", "gg.aquatic.waves.shadow.undefined")
 
     relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
 
@@ -296,7 +282,6 @@ tasks {
         }
     }
 }
-
 val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
 val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 

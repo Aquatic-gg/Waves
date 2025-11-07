@@ -3,6 +3,7 @@ package gg.aquatic.waves.dependency;
 import io.papermc.paper.plugin.loader.PluginClasspathBuilder;
 import io.papermc.paper.plugin.loader.PluginLoader;
 import xyz.jpenilla.gremlin.runtime.*;
+import xyz.jpenilla.gremlin.runtime.logging.Slf4jGremlinLogger;
 import xyz.jpenilla.gremlin.runtime.platformsupport.PaperClasspathAppender;
 
 import java.nio.file.Path;
@@ -21,7 +22,7 @@ public class DependencyLoader implements PluginLoader {
             DependencyCache cache = new DependencyCache(cacheDir);
 
             // Create the resolver and resolve dependencies
-            try (DependencyResolver resolver = new DependencyResolver(org.slf4j.LoggerFactory.getLogger("Waves"))) {
+            try (DependencyResolver resolver = new DependencyResolver(new Slf4jGremlinLogger(org.slf4j.LoggerFactory.getLogger("Waves")))) {
                 // Use PaperClasspathAppender to add the resolved jars to the classpath
                 PaperClasspathAppender appender = new PaperClasspathAppender(classpathBuilder);
                 Set<Path> jars = resolver.resolve(deps, cache).jarFiles();

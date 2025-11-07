@@ -49,6 +49,8 @@ import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.inventory.ClickType
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.GameType
+import net.minecraft.world.level.block.ShulkerBoxBlock
+import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity
 import net.minecraft.world.level.chunk.LevelChunkSection
 import net.minecraft.world.level.chunk.PalettedContainerFactory
 import net.minecraft.world.phys.Vec3
@@ -682,6 +684,7 @@ object NMSHandlerImpl : NMSHandler {
             isAccessible = true
         }
 
+    /*
     override fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit) {
         val sections = (world.minHeight.absoluteValue + world.maxHeight) shr 4
         val chunkBundlePacket = packet as ClientboundLevelChunkWithLightPacket
@@ -747,6 +750,7 @@ object NMSHandlerImpl : NMSHandler {
 
         check(buffer.writerIndex() == buffer.capacity()) { "Didn't fill biome buffer: expected " + buffer.capacity() + " bytes, got " + buffer.writerIndex() }
     }
+     */
 
     override fun createTeamsPacket(
         team: Team,

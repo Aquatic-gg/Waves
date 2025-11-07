@@ -626,6 +626,7 @@ object NMSHandlerImpl : NMSHandler {
             isAccessible = true
         }
 
+    /*
     override fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit) {
         val sections = (world.minHeight.absoluteValue + world.maxHeight) shr 4
         val chunkBundlePacket = packet as ClientboundLevelChunkWithLightPacket
@@ -652,6 +653,9 @@ object NMSHandlerImpl : NMSHandler {
             val section = LevelChunkSection(container1, container2)
             section.read(readBuffer)
             val pair = ((object : WrappedChunkSection {
+                override val section: Any
+                    get() = TODO("Not yet implemented")
+
                 override fun set(x: Int, y: Int, z: Int, blockState: BlockData) {
                     section.setBlockState(x, y, z, (blockState as CraftBlockData).state, false)
                     //palettedContainer.set(x, y, z, (blockState as CraftBlockState).handle)
@@ -694,6 +698,8 @@ object NMSHandlerImpl : NMSHandler {
             ++chunkSectionIndex
         }
     }
+
+     */
 
     override fun createTeamsPacket(
         team: gg.aquatic.waves.api.nms.scoreboard.Team,

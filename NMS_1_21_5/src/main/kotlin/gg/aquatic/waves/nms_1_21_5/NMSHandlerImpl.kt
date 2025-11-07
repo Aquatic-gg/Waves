@@ -632,6 +632,7 @@ object NMSHandlerImpl : NMSHandler {
             isAccessible = true
         }
 
+    /*
     override fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit) {
         val sections = (world.minHeight.absoluteValue + world.maxHeight) shr 4
         val chunkBundlePacket = packet as ClientboundLevelChunkWithLightPacket
@@ -679,6 +680,7 @@ object NMSHandlerImpl : NMSHandler {
         extractChunkData(wrappedSections.map { it.second }, writeBuffer)
         chunkDataBufferField.set(chunkData, bytes)
     }
+     */
 
     private fun calculateChunkSize(sections: Collection<LevelChunkSection>): Int {
         var i = 0

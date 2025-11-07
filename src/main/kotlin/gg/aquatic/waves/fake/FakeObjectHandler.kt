@@ -12,6 +12,7 @@ import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.util.runAsyncTimer
+import gg.aquatic.waves.util.sendPacket
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -28,7 +29,7 @@ object FakeObjectHandler : WavesModule {
     internal val tickableObjects = ConcurrentHashMap.newKeySet<FakeObject>()
     internal val idToEntity = ConcurrentHashMap<Int, EntityBased>()
     internal val locationToBlocks = ConcurrentHashMap<Location, MutableSet<FakeBlock>>()
-    val objectRemovalQueue = ConcurrentHashMap.newKeySet<FakeObject>()
+    private val objectRemovalQueue: MutableSet<FakeObject> = ConcurrentHashMap.newKeySet()
 
     override fun initialize(waves: Waves) {
         runAsyncTimer(
@@ -58,27 +59,20 @@ object FakeObjectHandler : WavesModule {
             tickableObjects += obj.blocks
             tickableObjects += obj.entities
 
-            val packet = it.packet
-            Waves.NMS_HANDLER.modifyChunkPacketBlocks(it.player.world, packet) { sections ->
-                for (block in obj.blocks) {
-                    if (block.destroyed) continue
-                    if (block.viewers.contains(it.player)) {
-                        val index = (block.location.y.toInt() + 64) / 16
-                        val section = sections[index]
-                        section.set(
-                            block.location.x.toInt() and 0xf,
-                            block.location.y.toInt() and 0xf,
-                            block.location.z.toInt() and 0xf,
-                            block.block.blockData
-                        )
-                        block.isViewing += it.player
-                        it.extraPackets += Waves.NMS_HANDLER.createBlockChangePacket(block.location, block.block.blockData)
+            for (block in obj.blocks) {
+                if (block.destroyed) continue
+                if (block.viewers.contains(it.player)) {
+                    block.isViewing += it.player
+                    it.then = {
+                        val packet = Waves.NMS_HANDLER.createBlockChangePacket(block.location, block.block.blockData)
+                        it.player.sendPacket(packet)
                     }
                 }
             }
         }
         event<PlayerChunkUnloadEvent> {
             for (tickableObject in tickableObjects) {
+                if (!tickableObject.location.isChunkLoaded) continue
                 if (tickableObject.location.chunk != it.chunk) continue
                 handlePlayerRemove(it.player, tickableObject, false)
             }
