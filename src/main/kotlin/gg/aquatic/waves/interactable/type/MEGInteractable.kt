@@ -45,7 +45,7 @@ class MEGInteractable(
                     removeViewer(player)
                 }
             }
-            for (player in location.world.players) {
+            for (player in Bukkit.getOnlinePlayers()) {
                 if (viewers.contains(player)) continue
                 if (!field.canBeApplied(player)) continue
                 addViewer(player)
