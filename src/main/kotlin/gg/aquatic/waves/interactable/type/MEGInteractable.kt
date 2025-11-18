@@ -106,7 +106,6 @@ class MEGInteractable(
 
 
     override fun destroy() {
-        this.activeModel?.destroy()
         this.activeModel?.isRemoved = true
         dummy.isRemoved = true
 

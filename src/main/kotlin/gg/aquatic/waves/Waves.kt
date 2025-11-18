@@ -49,15 +49,6 @@ class Waves : WavesPlugin() {
     )
     lateinit var configValues: WavesConfig
 
-    /**
-     * Indicates whether the `Waves` plugin has been fully initialized.
-     * This variable is set to `true` when the plugin completes the initialization process
-     * during the execution of the `onEnable` method. It is used to prevent certain actions
-     * from being performed before the initialization is complete.
-     *
-     * This property is private to ensure controlled modification and only allows
-     * being updated within the class.
-     */
     var initialized = false
         private set
 
@@ -84,7 +75,6 @@ class Waves : WavesPlugin() {
             ServerVersion.V_1_21_4 -> {
                 NMSHandlerImpl
             }
-
 
             ServerVersion.V_1_21_5 -> {
                 gg.aquatic.waves.nms_1_21_5.NMSHandlerImpl
@@ -129,8 +119,8 @@ class Waves : WavesPlugin() {
                 "reloadmessages" to ReloadMessagesCommand,
                 "itemconvert" to ItemConvertCommand,
                 "generatepack" to GeneratePackCommand
-            ), { EmptyMessage() }
-        ).register("waves")
+            )
+        ) { EmptyMessage() }.register("waves")
 
         event<PlayerJoinEvent> {
             NMS_HANDLER.injectPacketListener(it.player)
