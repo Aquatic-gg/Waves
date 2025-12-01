@@ -1,5 +1,7 @@
 package gg.aquatic.waves
 
+import com.undefined.stellar.StellarConfig
+import com.undefined.stellar.kotlin.setScope
 import gg.aquatic.waves.api.WavesPlugin
 import gg.aquatic.waves.api.event.call
 import gg.aquatic.waves.api.event.event
@@ -99,6 +101,9 @@ class Waves : WavesPlugin() {
     }
 
     override fun onEnable() {
+        StellarConfig.setPrefix("aquatic")
+        StellarConfig.setPlugin(this)
+        StellarConfig.setScope(AsyncCtx.scope)
         try {
             BlockBenchAnimationHandler.initialize()
         } catch (e: Exception) {
