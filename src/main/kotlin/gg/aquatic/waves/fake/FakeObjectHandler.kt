@@ -12,6 +12,7 @@ import gg.aquatic.waves.fake.entity.FakeEntityInteractEvent
 import gg.aquatic.waves.module.WaveModules
 import gg.aquatic.waves.module.WavesModule
 import gg.aquatic.waves.util.runAsyncTimer
+import gg.aquatic.waves.util.runLaterAsync
 import gg.aquatic.waves.util.sendPacket
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Location
@@ -59,15 +60,18 @@ object FakeObjectHandler : WavesModule {
             tickableObjects += obj.blocks
             tickableObjects += obj.entities
 
+            val packets = mutableListOf<Any>()
             for (block in obj.blocks) {
                 if (block.destroyed) continue
                 if (block.viewers.contains(it.player)) {
                     block.isViewing += it.player
-                    it.then = {
-                        val packet = Waves.NMS_HANDLER.createBlockChangePacket(block.location, block.block.blockData)
-                        it.player.sendPacket(packet)
-                    }
+                    val packet = Waves.NMS_HANDLER.createBlockChangePacket(block.location, block.block.blockData)
+                    packets += packet
+
                 }
+            }
+            it.then = {
+                packets.forEach { packet -> it.player.sendPacket(packet) }
             }
         }
         event<PlayerChunkUnloadEvent> {

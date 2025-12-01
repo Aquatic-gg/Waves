@@ -13,13 +13,13 @@ abstract class Scenario {
     var tick: Int = 0
     var isRunning: Boolean = true
 
-    fun tick() {
+    suspend fun tick() {
         if (!isRunning) return
         onTick()
         tick++
     }
 
-    open fun onTick() {
+    open suspend fun onTick() {
 
     }
 
@@ -33,7 +33,7 @@ abstract class Scenario {
     abstract fun updatePlaceholders(original: String): String
 
     interface Phase {
-        fun tick()
+        suspend fun tick()
     }
 
     inline fun <reified T: Any> prop(id: Key): T? {
