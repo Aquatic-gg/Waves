@@ -84,8 +84,8 @@ gremlin {
         implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
         implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        implementation("com.undefined:stellar-kotlin:1.1.2:paper")
-        implementation("com.undefined:stellar:1.1.2:paper")
+        implementation("com.undefined:stellar-kotlin:1.2.0-SNAPSHOT:paper")
+        implementation("com.undefined:stellar:1.2.0-SNAPSHOT:paper")
     }
 }
 
@@ -157,8 +157,8 @@ dependencies {
     runtimeDownload("net.kyori:adventure-text-serializer-gson:4.17.0")
     runtimeDownload("net.kyori:adventure-text-serializer-plain:4.18.0")
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    runtimeDownload("com.undefined:stellar-kotlin:1.1.2:paper")
-    runtimeDownload("com.undefined:stellar:1.1.2:paper")
+    runtimeDownload("com.undefined:stellar-kotlin:1.2.0-SNAPSHOT:paper")
+    runtimeDownload("com.undefined:stellar:1.2.0-SNAPSHOT:paper")
 
     compileOnly("net.momirealms:craft-engine-core:0.0.61")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.61")
