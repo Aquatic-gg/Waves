@@ -42,3 +42,7 @@ bus.subscribeWeak<ExampleEvent> { e ->
 bus.post(ExampleEvent())
 
 ````
+
+Credits:
+
+Huge thanks to [EventBus](https://github.com/Revxrsal/EventBus) by [Revxrsal](https://github.com/Revxrsal) for inspiration and API.
