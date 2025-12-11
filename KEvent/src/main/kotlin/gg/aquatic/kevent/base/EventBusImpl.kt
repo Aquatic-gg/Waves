@@ -14,16 +14,17 @@ class EventBusImpl(
     private val exceptionHandler: EventExceptionHandler,
     private val scope: CoroutineScope,
     private val hierarchical: Boolean
-): EventBus {
+) : EventBus {
 
     private val subscriptions = ConcurrentHashMap<Class<*>, MutableList<Subscription<*>>>()
     private val allSubscriptions = CopyOnWriteArrayList<Subscription<*>>()
 
     private data class CacheKey(val eventClass: Class<*>, val hierarchical: Boolean)
+
     private val dispatchCache = ConcurrentHashMap<CacheKey, List<Subscription<*>>>()
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T: Any> post(event: T): Deferred<PostResult<T>> {
+    override fun <T : Any> post(event: T): Deferred<PostResult<T>> {
         return scope.async {
             val executionTimes = HashMap<Subscription<T>, Long>()
             var failed = 0
@@ -86,20 +87,22 @@ class EventBusImpl(
 
     override fun <T> subscribe(
         eventType: Class<T>,
+        priority: EventPriority,
+        ignoreCancelled: Boolean,
         listener: EventListener<T>,
-        priority: EventPriority
     ): Subscription<T> {
-        val subscription = StrongSubscription(listener, listener::class.java.name, eventType, priority)
+        val subscription = StrongSubscription(listener, listener::class.java.name, eventType, priority, ignoreCancelled)
         addSubscription(subscription)
         return subscription
     }
 
     override fun <T> subscribeWeak(
         eventType: Class<T>,
+        priority: EventPriority,
+        ignoreCancelled: Boolean,
         listener: EventListener<T>,
-        priority: EventPriority
     ): Subscription<T> {
-        val subscription = WeakSubscription(listener, listener::class.java.name, eventType, priority)
+        val subscription = WeakSubscription(listener, listener::class.java.name, eventType, priority, ignoreCancelled)
         addSubscription(subscription)
         return subscription
     }

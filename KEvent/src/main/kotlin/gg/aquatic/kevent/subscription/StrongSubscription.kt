@@ -8,7 +8,7 @@ class StrongSubscription<T>(
     override val name: String,
     override val eventType: Class<T>,
     override val priority: EventPriority,
-    override val ignoreCancelled: Boolean = false
+    override val ignoreCancelled: Boolean
 ) : Subscription<T> {
 
     override fun getListener(): EventListener<T> = listener

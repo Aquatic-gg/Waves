@@ -9,7 +9,7 @@ class WeakSubscription<T>(
     override val name: String,
     override val eventType: Class<T>,
     override val priority: EventPriority,
-    override val ignoreCancelled: Boolean = false
+    override val ignoreCancelled: Boolean
 ) : Subscription<T> {
 
     private val ref = WeakReference(listener)

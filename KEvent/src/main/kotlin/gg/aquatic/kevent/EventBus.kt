@@ -10,14 +10,16 @@ interface EventBus {
 
     fun <T> subscribe(
         eventType: Class<T>,
+        priority: EventPriority = EventPriority.NORMAL,
+        ignoreCancelled: Boolean = false,
         listener: EventListener<T>,
-        priority: EventPriority = EventPriority.NORMAL
     ): Subscription<T>
 
     fun <T> subscribeWeak(
         eventType: Class<T>,
+        priority: EventPriority = EventPriority.NORMAL,
+        ignoreCancelled: Boolean = false,
         listener: EventListener<T>,
-        priority: EventPriority = EventPriority.NORMAL
     ): Subscription<T>
 
     fun <T> unregister(subscription: Subscription<T>)
@@ -31,18 +33,20 @@ interface EventBus {
     class EventRegisterBuilder internal constructor(val eventBus: EventBus) {
         fun <T> strong(
             eventType: Class<T>,
+            priority: EventPriority = EventPriority.NORMAL,
+            ignoreCancelled: Boolean = false,
             listener: EventListener<T>,
-            priority: EventPriority = EventPriority.NORMAL
         ): Subscription<T> {
-            return eventBus.subscribe(eventType, listener, priority)
+            return eventBus.subscribe(eventType, priority, ignoreCancelled, listener)
         }
 
         fun <T> weak(
             eventType: Class<T>,
+            priority: EventPriority = EventPriority.NORMAL,
+            ignoreCancelled: Boolean = false,
             listener: EventListener<T>,
-            priority: EventPriority = EventPriority.NORMAL
         ): Subscription<T> {
-            return eventBus.subscribeWeak(eventType, listener, priority)
+            return eventBus.subscribeWeak(eventType, priority, ignoreCancelled, listener)
         }
     }
 }
@@ -56,9 +60,10 @@ interface EventBus {
  * @return A `Subscription` representing the registration, which can be used to manage or unregister the listener.
  */
 inline fun <reified T> EventBus.subscribe(
+    priority: EventPriority = EventPriority.NORMAL,
+    ignoreCancelled: Boolean = false,
     listener: EventListener<T>,
-    priority: EventPriority = EventPriority.NORMAL
-): Subscription<T> = subscribe(T::class.java, listener, priority)
+): Subscription<T> = subscribe(T::class.java, priority, ignoreCancelled, listener)
 
 /**
  * Subscribes a listener to a specific event type with a weak reference,
@@ -70,9 +75,10 @@ inline fun <reified T> EventBus.subscribe(
  * @return A `Subscription` object representing the subscription, which can be used to unregister or query the listener's status.
  */
 inline fun <reified T> EventBus.subscribeWeak(
+    priority: EventPriority = EventPriority.NORMAL,
+    ignoreCancelled: Boolean = false,
     listener: EventListener<T>,
-    priority: EventPriority = EventPriority.NORMAL
-): Subscription<T> = subscribeWeak(T::class.java, listener, priority)
+): Subscription<T> = subscribeWeak(T::class.java, priority, ignoreCancelled, listener)
 
 
 /**
@@ -84,9 +90,10 @@ inline fun <reified T> EventBus.subscribeWeak(
  * @return A `Subscription` representing the registration, which can be used to manage or unregister the listener.
  */
 inline fun <reified T> EventBus.EventRegisterBuilder.strong(
+    priority: EventPriority = EventPriority.NORMAL,
+    ignoreCancelled: Boolean = false,
     listener: EventListener<T>,
-    priority: EventPriority = EventPriority.NORMAL
-): Subscription<T> = strong(T::class.java, listener, priority)
+): Subscription<T> = strong(T::class.java, priority, ignoreCancelled, listener)
 
 /**
  * Subscribes a listener to a specific event type with a weak reference,
@@ -98,6 +105,7 @@ inline fun <reified T> EventBus.EventRegisterBuilder.strong(
  * @return A `Subscription` object representing the subscription, which can be used to unregister or query the listener's status.
  */
 inline fun <reified T> EventBus.EventRegisterBuilder.weak(
+    priority: EventPriority = EventPriority.NORMAL,
+    ignoreCancelled: Boolean = false,
     listener: EventListener<T>,
-    priority: EventPriority = EventPriority.NORMAL
-): Subscription<T> = weak(T::class.java, listener, priority)
+): Subscription<T> = weak(T::class.java, priority, ignoreCancelled, listener)
