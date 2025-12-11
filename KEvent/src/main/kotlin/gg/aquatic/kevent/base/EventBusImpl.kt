@@ -106,7 +106,11 @@ class EventBusImpl(
 
     override fun <T> unregister(subscription: Subscription<T>) {
         allSubscriptions.remove(subscription)
-        subscriptions[subscription.eventType]?.remove(subscription)
+        val subs = subscriptions[subscription.eventType]
+        if (subs != null) {
+            subs -= subscription
+            if (subs.isEmpty()) subscriptions.remove(subscription.eventType)
+        }
         dispatchCache.clear()
     }
 
