@@ -43,6 +43,13 @@ class EventBusImpl(
                     unregister(sub)
                     continue
                 }
+
+                if (!sub.ignoreCancelled && event is Cancellable) {
+                    if (event.cancelled) {
+                        continue
+                    }
+                }
+
                 try {
                     val time = System.currentTimeMillis()
                     listener.handle(event)
