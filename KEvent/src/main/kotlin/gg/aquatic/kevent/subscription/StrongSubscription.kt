@@ -10,7 +10,7 @@ class StrongSubscription<T>(
     override val priority: EventPriority
 ) : Subscription<T> {
 
-    override fun getListener(): EventListener<T>? = listener
+    override fun getListener(): EventListener<T> = listener
 
     override fun toString(): String {
         return "StrongSubscription($name, priority=$priority)"

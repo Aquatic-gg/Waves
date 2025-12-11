@@ -23,7 +23,7 @@ class EventBusImpl(
     private val dispatchCache = ConcurrentHashMap<CacheKey, List<Subscription<*>>>()
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> post(event: T): Deferred<PostResult<T>> {
+    override fun <T: Any> post(event: T): Deferred<PostResult<T>> {
         return scope.async {
             val executionTimes = HashMap<Subscription<T>, Long>()
             var failed = 0
