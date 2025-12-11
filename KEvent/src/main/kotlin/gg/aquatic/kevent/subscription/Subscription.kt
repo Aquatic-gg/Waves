@@ -7,6 +7,7 @@ interface Subscription<T> {
     val name: String
     val eventType: Class<T>
     val priority: EventPriority
+    val ignoreCancelled: Boolean
 
     /**
      * Returns the listener if it's still available, or null if it was collected (for weak subs).
