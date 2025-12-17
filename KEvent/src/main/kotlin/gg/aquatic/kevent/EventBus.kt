@@ -23,7 +23,7 @@ interface EventBus {
     ): Subscription<T>
 
     fun <T> unregister(subscription: Subscription<T>)
-    fun getScope(): CoroutineScope
+    fun getScope(): CoroutineScope?
 
     fun getEventExceptionHandler(): EventExceptionHandler
 

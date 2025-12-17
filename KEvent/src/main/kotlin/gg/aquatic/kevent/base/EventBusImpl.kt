@@ -4,15 +4,17 @@ import gg.aquatic.kevent.*
 import gg.aquatic.kevent.subscription.StrongSubscription
 import gg.aquatic.kevent.subscription.Subscription
 import gg.aquatic.kevent.subscription.WeakSubscription
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
 class EventBusImpl(
     private val exceptionHandler: EventExceptionHandler,
-    private val scope: CoroutineScope,
+    private val scope: CoroutineScope?,
     private val hierarchical: Boolean
 ) : EventBus {
 
@@ -25,6 +27,49 @@ class EventBusImpl(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> post(event: T): Deferred<PostResult<T>> {
+        if (scope == null) {
+            return CompletableDeferred(
+                runBlocking {
+                    val executionTimes = HashMap<Subscription<T>, Long>()
+                    var failed = 0
+                    var success = 0
+
+                    val eventClass = event::class.java
+                    val key = CacheKey(eventClass, hierarchical)
+                    val toHandle = dispatchCache[key] ?: buildDispatchList(eventClass, hierarchical).also {
+                        dispatchCache[key] = it
+                    }
+
+                    for (rawSub in toHandle) {
+                        val sub = rawSub as Subscription<T>
+                        val listener = sub.getListener()
+                        if (listener == null) {
+                            // Weak subscription whose target was GC'd -> unregister it
+                            unregister(sub)
+                            continue
+                        }
+
+                        if (!sub.ignoreCancelled && event is Cancellable) {
+                            if (event.cancelled) {
+                                continue
+                            }
+                        }
+
+                        try {
+                            val time = System.currentTimeMillis()
+                            listener.handle(event)
+                            executionTimes[rawSub] = System.currentTimeMillis() - time
+                            success++
+                        } catch (ex: Exception) {
+                            failed++
+                            exceptionHandler.handleException(rawSub, event, ex)
+                        }
+                    }
+                    BasicMeasuredPostResult(event, success, failed, executionTimes)
+                }
+            )
+        }
+
         return scope.async {
             val executionTimes = HashMap<Subscription<T>, Long>()
             var failed = 0
@@ -145,5 +190,5 @@ class EventBusImpl(
     }
 
     override fun getEventExceptionHandler(): EventExceptionHandler = exceptionHandler
-    override fun getScope(): CoroutineScope = scope
+    override fun getScope(): CoroutineScope? = scope
 }

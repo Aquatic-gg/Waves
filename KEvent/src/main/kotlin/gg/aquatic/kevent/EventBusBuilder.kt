@@ -2,7 +2,6 @@ package gg.aquatic.kevent
 
 import gg.aquatic.kevent.base.EventBusImpl
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 
 class EventBusBuilder {
 
@@ -10,7 +9,7 @@ class EventBusBuilder {
     var exceptionHandler: EventExceptionHandler = EventExceptionHandler.PRINT_STACKTRACE
     var hierarchical: Boolean = true
 
-    fun build(): EventBus = EventBusImpl(exceptionHandler, scope ?: CoroutineScope(Dispatchers.Default), hierarchical)
+    fun build(): EventBus = EventBusImpl(exceptionHandler, scope, hierarchical)
 
 }
 
