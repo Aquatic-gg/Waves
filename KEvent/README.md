@@ -16,7 +16,7 @@ Features:
 ## Example usage
 ````kotlin
 val bus = eventBusBuilder {
-    scope = null // Default - Uses runBlocking {}, so have this in mind.
+    scope = null // Default - Uses runBlocking {} when null, so have this in mind.
     exceptionHandler = { e -> println(e) }
     hierarchical = true // Default
 }
