@@ -16,7 +16,7 @@ Features:
 ## Example usage
 ````kotlin
 val bus = eventBusBuilder {
-    scope = Dispatchers.Default // Default
+    scope = null // Default - Uses runBlocking {}, so have this in mind.
     exceptionHandler = { e -> println(e) }
     hierarchical = true // Default
 }
@@ -41,6 +41,22 @@ bus.subscribeWeak<ExampleEvent> { e ->
 
 bus.post(ExampleEvent())
 
+````
+
+## Importing
+Gradle kts
+````kotlin
+repositories {
+    maven {
+        url = uri("https://repo.nekroplex.com/releases")
+    }
+}
+````
+
+````kotlin
+dependencies {
+    implementation("gg.aquatic:KEvent:1.0.2")
+}
 ````
 
 Credits:
