@@ -55,7 +55,7 @@ repositories {
 
 ````kotlin
 dependencies {
-    implementation("gg.aquatic:KEvent:1.0.2")
+    implementation("gg.aquatic:KEvent:1.0.3")
 }
 ````
 
