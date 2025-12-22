@@ -1,6 +1,7 @@
 ## KEvent
 
 [![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/kevent/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kevent)
+[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KEvent?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/KEvent)
 
 Lightweight library for EventBus
 
