@@ -41,6 +41,8 @@ bus.subscribeWeak<ExampleEvent> { e ->
 
 bus.post(ExampleEvent())
 
+// Suspend post - in case you are in a coroutine scope - does not cause an overhead
+bus.postSuspend(ExampleEvent())
 ````
 
 ## Importing
@@ -55,7 +57,7 @@ repositories {
 
 ````kotlin
 dependencies {
-    implementation("gg.aquatic:KEvent:1.0.3")
+    implementation("gg.aquatic:KEvent:1.0.4")
 }
 ````
 

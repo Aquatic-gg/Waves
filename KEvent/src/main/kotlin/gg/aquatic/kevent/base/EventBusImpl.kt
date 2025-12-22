@@ -7,10 +7,13 @@ import gg.aquatic.kevent.subscription.WeakSubscription
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.coroutines.EmptyCoroutineContext
 
 class EventBusImpl(
     private val exceptionHandler: EventExceptionHandler,
@@ -27,88 +30,55 @@ class EventBusImpl(
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Any> post(event: T): Deferred<PostResult<T>> {
-        if (scope == null) {
-            return CompletableDeferred(
-                runBlocking {
-                    val executionTimes = HashMap<Subscription<T>, Long>()
-                    var failed = 0
-                    var success = 0
+        return scope?.async {
+            return@async postSuspend(event)
+        }
+            ?: CompletableDeferred(runBlocking {
+                postSuspend(event)
+            })
+    }
 
-                    val eventClass = event::class.java
-                    val key = CacheKey(eventClass, hierarchical)
-                    val toHandle = dispatchCache[key] ?: buildDispatchList(eventClass, hierarchical).also {
-                        dispatchCache[key] = it
-                    }
+    /**
+     * Posts event; measures handler execution; returns a measured result
+     */
+    override suspend fun <T : Any> postSuspend(event: T): PostResult<T> = withContext(scope?.coroutineContext ?: EmptyCoroutineContext) {
+        val executionTimes = HashMap<Subscription<T>, Long>()
+        var failed = 0
+        var success = 0
 
-                    for (rawSub in toHandle) {
-                        val sub = rawSub as Subscription<T>
-                        val listener = sub.getListener()
-                        if (listener == null) {
-                            // Weak subscription whose target was GC'd -> unregister it
-                            unregister(sub)
-                            continue
-                        }
-
-                        if (!sub.ignoreCancelled && event is Cancellable) {
-                            if (event.cancelled) {
-                                continue
-                            }
-                        }
-
-                        try {
-                            val time = System.currentTimeMillis()
-                            listener.handle(event)
-                            executionTimes[rawSub] = System.currentTimeMillis() - time
-                            success++
-                        } catch (ex: Exception) {
-                            failed++
-                            exceptionHandler.handleException(rawSub, event, ex)
-                        }
-                    }
-                    BasicMeasuredPostResult(event, success, failed, executionTimes)
-                }
-            )
+        val eventClass = event::class.java
+        val key = CacheKey(eventClass, hierarchical)
+        val toHandle = dispatchCache[key] ?: buildDispatchList(eventClass, hierarchical).also {
+            dispatchCache[key] = it
         }
 
-        return scope.async {
-            val executionTimes = HashMap<Subscription<T>, Long>()
-            var failed = 0
-            var success = 0
-
-            val eventClass = event::class.java
-            val key = CacheKey(eventClass, hierarchical)
-            val toHandle = dispatchCache[key] ?: buildDispatchList(eventClass, hierarchical).also {
-                dispatchCache[key] = it
+        for (rawSub in toHandle) {
+            val sub = rawSub as Subscription<T>
+            val listener = sub.getListener()
+            if (listener == null) {
+                // Weak subscription whose target was GC'd -> unregister it
+                unregister(sub)
+                continue
             }
 
-            for (rawSub in toHandle) {
-                val sub = rawSub as Subscription<T>
-                val listener = sub.getListener()
-                if (listener == null) {
-                    // Weak subscription whose target was GC'd -> unregister it
-                    unregister(sub)
+            if (!sub.ignoreCancelled && event is Cancellable) {
+                if (event.cancelled) {
                     continue
                 }
-
-                if (!sub.ignoreCancelled && event is Cancellable) {
-                    if (event.cancelled) {
-                        continue
-                    }
-                }
-
-                try {
-                    val time = System.currentTimeMillis()
-                    listener.handle(event)
-                    executionTimes[rawSub] = System.currentTimeMillis() - time
-                    success++
-                } catch (ex: Exception) {
-                    failed++
-                    exceptionHandler.handleException(rawSub, event, ex)
-                }
             }
 
-            BasicMeasuredPostResult(event, success, failed, executionTimes)
+            try {
+                val time = System.currentTimeMillis()
+                listener.handle(event)
+                executionTimes[rawSub] = System.currentTimeMillis() - time
+                success++
+            } catch (ex: Exception) {
+                failed++
+                exceptionHandler.handleException(rawSub, event, ex)
+            }
         }
+
+        BasicMeasuredPostResult(event, success, failed, executionTimes)
     }
 
     private fun buildDispatchList(

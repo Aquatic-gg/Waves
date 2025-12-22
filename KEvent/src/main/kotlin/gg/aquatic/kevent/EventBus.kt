@@ -7,6 +7,7 @@ import kotlinx.coroutines.Deferred
 interface EventBus {
 
     fun <T : Any> post(event: T): Deferred<PostResult<T>>
+    suspend fun <T : Any> postSuspend(event: T): PostResult<T>
 
     fun <T> subscribe(
         eventType: Class<T>,
