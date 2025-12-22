@@ -1,5 +1,7 @@
 ## KEvent
 
+[![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/kevent/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kevent)
+
 Lightweight library for EventBus
 
 Features:
