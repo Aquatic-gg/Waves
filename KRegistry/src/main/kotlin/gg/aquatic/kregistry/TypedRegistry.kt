@@ -32,7 +32,7 @@ inline fun <Id, Type, reified T : Type> TypedRegistry<Id, Type>.getAllHierarchic
     for ((clazz, reg) in rawMap) {
         val collection = reg.getAll()
         if (type == clazz || clazz.isAssignableFrom(type)) {
-            data += (collection as Map<Id, T>)
+            data += collection as Map<Id, T>
         }
     }
     return data
