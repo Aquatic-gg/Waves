@@ -2,7 +2,7 @@
 
 [![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/kevent/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kevent)
 [![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KEvent?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/KEvent)
-![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-lime.svg?logo=kotlin)
+![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 
 **KEvent** is a high-performance, lightweight EventBus library for Kotlin. It is designed to be reflection-free, thread-safe, and deeply integrated with Kotlin Coroutines.
 
