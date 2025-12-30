@@ -3,6 +3,7 @@
 [![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/kevent/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kevent)
 [![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KEvent?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/KEvent)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
+[![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
 **KEvent** is a high-performance, lightweight EventBus library for Kotlin. It is designed to be reflection-free, thread-safe, and deeply integrated with Kotlin Coroutines.
 
@@ -101,6 +102,17 @@ If you are already inside a suspending function or a coroutine, always prefer `b
 
 ### 🧩 Hierarchical Lookups
 If you have a very large number of subscriptions and don't need inheritance matching (e.g., you only ever post exact classes), setting `hierarchical = false` in the builder can provide a small performance boost by skipping `isAssignableFrom` checks.
+
+---
+
+## 💬 Community & Support
+
+Got questions, need help, or want to showcase what you've built with **KEvent**? Join our community!
+
+[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
+
+*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
+*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
 
 ---
 
