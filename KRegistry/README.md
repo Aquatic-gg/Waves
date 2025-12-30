@@ -1,5 +1,10 @@
 # KRegistry
 
+[![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/kregistry/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kregistry)
+[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KRegistry?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/KRegistry)
+![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
+[![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
+
 A lightweight, type-safe registry system for Kotlin. KRegistry provides a structured way to manage object lifecycles through mutable and immutable (frozen) states, supporting both simple key-value lookups and complex hierarchical type-based registries.
 
 ## ✨ Features
