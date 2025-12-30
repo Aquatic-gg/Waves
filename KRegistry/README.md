@@ -9,10 +9,10 @@ A lightweight, type-safe registry system for Kotlin. KRegistry provides a struct
 
 ## ✨ Features
 
-*   **Immutable by Default:** Easily transition between `MutableRegistry` and `FrozenRegistry` to ensure data integrity.
-*   **Typed Registries:** Built-in support for `TypedRegistry<Id, Type>`, allowing you to organize objects by their class type.
-*   **Hierarchical Lookups:** Fetch entries not just by their specific class, but also via inherited interfaces or parent classes.
-*   **Type Safety:** Heavy use of reified generics to eliminate manual casting and `Class<T>` boilerplate.
+*   **Immutability Patterns:** Transition between `MutableRegistry` (write) and `FrozenRegistry` (read-only) to guarantee thread safety.
+*   **Atomic Global State:** A central `Registry` graph that uses atomic compare-and-swap operations for lock-free updates.
+*   **Hierarchical Lookups:** Search for registered objects by their specific implementation class or by any inherited interface/parent class.
+*   **Zero Boilerplate:** Utilizes Kotlin reified generics to provide a clean, type-safe API without manual casting.
 
 ---
 
@@ -20,11 +20,11 @@ A lightweight, type-safe registry system for Kotlin. KRegistry provides a struct
 
 ```kotlin
 repositories {
-    mavenCentral()
+    maven("https://repo.nekroplex.com/releases")
 }
 
 dependencies {
-    implementation("gg.aquatic:kregistry:VERSION")
+    implementation("gg.aquatic:kregistry:25.0.1")
 }
 ```
 
@@ -32,40 +32,47 @@ dependencies {
 
 ## 🚀 Getting Started
 
-### Basic Registry Usage
+### Basic Usage
 
-For simple key-value management where you want to lock the state after initialization:
+Create a registry, fill it with data, and freeze it to prevent accidental modification during runtime.
 
 ```kotlin
-// Create and populate a mutable registry
-val mutableReg = MutableRegistry<String, String>()
-mutableReg.register("version", "1.0.0")
+val mutable = MutableRegistry<String, String>()
+mutable.register("api_key", "secret_value")
 
-// Freeze it to prevent further modifications
-val registry = mutableReg.freeze()
-
-// Accessing values (returns null if missing)
-val version = registry["version"]
+val frozen = mutable.freeze()
+val key = frozen["api_key"] // Returns "secret_value"
 ```
 
-### Typed Registries
+### The Global Registry Graph
 
-`TypedRegistry` is a powerful pattern for storing different implementations under a common base type:
+Use the global `Registry` object to manage multiple registries across your entire application.
 
 ```kotlin
-// Define a TypedRegistry (Mapped by Class -> Registry)
-var myRegistry: TypedRegistry<String, BaseService> = MutableRegistry<Class<*>, FrozenRegistry<String, BaseService>>().freeze()
+val SERVICES = RegistryKey<String, BaseService>(RegistryId("services"))
 
-// Registering items using reified extensions
-myRegistry = myRegistry.updateRegistry {
-    register("auth-service", AuthenticationProvider()) 
+// Atomic update (thread-safe)
+Registry.update {
+    val myReg = MutableRegistry<String, BaseService>()
+    myReg.register("auth", AuthenticationService())
+    
+    registerRegistry(SERVICES, myReg.freeze())
 }
 
-// Retrieve by specific type
-val auth = myRegistry.getTyped<String, BaseService, AuthenticationProvider>("auth-service")
+// Accessing from anywhere
+val auth = Registry[SERVICES]["auth"]
+```
 
-// Retrieve hierarchically (will find implementations of the requested type)
-val allProviders = myRegistry.getAllHierarchical<String, BaseService, BaseService>()
+### Typed & Hierarchical Registries
+
+`TypedRegistry` allows you to group objects by their Class type and perform powerful lookups.
+
+```kotlin
+// Retrieve an object by its exact implementation type
+val provider = myTypedRegistry.getTyped<String, BaseService, MyImplementation>("provider_id")
+
+// Retrieve all objects that implement a specific interface
+val allServices = myTypedRegistry.getAllHierarchical<String, BaseService, IService>()
 ```
 
 ## 🛠️ Core Concepts

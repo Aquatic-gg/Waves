@@ -24,18 +24,16 @@ inline fun <Id, Type, reified T : Type> TypedRegistry<Id, Type>.getHierarchical(
 
 @Suppress("UNCHECKED_CAST")
 inline fun <Id, Type, reified T : Type> TypedRegistry<Id, Type>.getAllHierarchical(): Map<Id, T> {
-    val data = HashMap<Id, T>()
     val type = T::class.java
-
     val rawMap = this.getAll()
 
-    for ((clazz, reg) in rawMap) {
-        val collection = reg.getAll()
-        if (type == clazz || clazz.isAssignableFrom(type)) {
-            data += collection as Map<Id, T>
+    return buildMap {
+        for ((clazz, reg) in rawMap) {
+            if (type.isAssignableFrom(clazz)) {
+                putAll(reg.getAll() as Map<Id, T>)
+            }
         }
     }
-    return data
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -43,12 +41,7 @@ inline fun <Id, Type, reified T : Type> MutableRegistry<Class<*>, FrozenRegistry
     id: Id,
     value: T
 ) {
-    val reg = try {
-        this[T::class.java].unfreeze()
-    } catch (_: Exception) {
-        MutableRegistry()
-    }
-
+    val reg = this[T::class.java]?.unfreeze() ?: MutableRegistry()
     reg.register(id, value)
     this.register(T::class.java, reg.freeze())
 }
@@ -58,11 +51,7 @@ inline fun <Id, Type, reified T : Type> MutableRegistry<Class<*>, FrozenRegistry
 inline fun <Id, Type, reified T : Type> MutableRegistry<Class<*>, FrozenRegistry<Id, Type>>.register(
     map: Map<Id, T>
 ) {
-    val reg = try {
-        this[T::class.java].unfreeze()
-    } catch (_: Exception) {
-        MutableRegistry()
-    }
+    val reg = this[T::class.java]?.unfreeze() ?: MutableRegistry()
     map.forEach { (id, value) -> reg.register(id, value) }
     this.register(T::class.java, reg.freeze())
 }

@@ -22,8 +22,7 @@ open class MutableRegistry<K, V> protected constructor(
     fun freeze(): FrozenRegistry<K, V> =
         FrozenRegistry(entries.toMap())
 
-    override fun get(key: K): V =
-        entries[key] ?: error("Missing entry: $key")
+    override fun get(key: K): V? = entries[key]
 
     override fun getAll(): Map<K, V> {
         return entries

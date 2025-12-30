@@ -39,14 +39,16 @@ object Registry {
     fun update(
         updater: MutableRegistryGraph.() -> Unit
     ) {
-        val current = graphRef.load()
-        val mutable = current.unfreeze()
+        while (true) {
+            val current = graphRef.load()
+            val mutable = current.unfreeze()
 
-        updater(mutable)
+            updater(mutable)
 
-        val updated = mutable.freeze()
-        if (graphRef.compareAndSet(current, updated)) {
-            return
+            val updated = mutable.freeze()
+            if (graphRef.compareAndSet(current, updated)) {
+                break
+            }
         }
     }
 }
