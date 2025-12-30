@@ -13,4 +13,5 @@ class EventBusBuilder {
 
 }
 
+@Suppress("unused")
 fun eventBusBuilder(builder: EventBusBuilder.() -> Unit) = EventBusBuilder().apply(builder).build()

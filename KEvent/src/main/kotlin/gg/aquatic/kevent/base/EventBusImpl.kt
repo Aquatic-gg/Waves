@@ -41,6 +41,7 @@ class EventBusImpl(
     /**
      * Posts event; measures handler execution; returns a measured result
      */
+    @Suppress("UNCHECKED_CAST")
     override suspend fun <T : Any> postSuspend(event: T): PostResult<T> = withContext(scope?.coroutineContext ?: EmptyCoroutineContext) {
         val executionTimes = HashMap<Subscription<T>, Long>()
         var failed = 0

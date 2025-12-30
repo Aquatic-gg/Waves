@@ -6,14 +6,8 @@ fun interface EventExceptionHandler {
 
     fun handleException(subscription: Subscription<*>, event: Any, throwable: Throwable)
 
-    object PRINT_STACKTRACE: EventExceptionHandler {
-        override fun handleException(
-            subscription: Subscription<*>,
-            event: Any,
-            throwable: Throwable
-        ) {
-            throwable.printStackTrace()
-        }
-
+    companion object {
+        val PRINT_STACKTRACE = EventExceptionHandler { _, _, throwable -> throwable.printStackTrace() }
     }
+
 }

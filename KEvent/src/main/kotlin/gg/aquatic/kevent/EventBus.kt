@@ -60,6 +60,7 @@ interface EventBus {
  * @param priority The priority level of the listener, defining its execution order relative to other listeners. Defaults to `EventPriority.NORMAL`.
  * @return A `Subscription` representing the registration, which can be used to manage or unregister the listener.
  */
+@Suppress("unused")
 inline fun <reified T> EventBus.subscribe(
     priority: EventPriority = EventPriority.NORMAL,
     ignoreCancelled: Boolean = false,
@@ -75,6 +76,7 @@ inline fun <reified T> EventBus.subscribe(
  * @param priority The priority of the subscription, determining the order of execution relative to other listeners. Defaults to `EventPriority.NORMAL`.
  * @return A `Subscription` object representing the subscription, which can be used to unregister or query the listener's status.
  */
+@Suppress("unused")
 inline fun <reified T> EventBus.subscribeWeak(
     priority: EventPriority = EventPriority.NORMAL,
     ignoreCancelled: Boolean = false,
@@ -90,6 +92,7 @@ inline fun <reified T> EventBus.subscribeWeak(
  * @param priority The priority level of the listener, defining its execution order relative to other listeners. Defaults to `EventPriority.NORMAL`.
  * @return A `Subscription` representing the registration, which can be used to manage or unregister the listener.
  */
+@Suppress("unused")
 inline fun <reified T> EventBus.EventRegisterBuilder.strong(
     priority: EventPriority = EventPriority.NORMAL,
     ignoreCancelled: Boolean = false,
@@ -105,6 +108,7 @@ inline fun <reified T> EventBus.EventRegisterBuilder.strong(
  * @param priority The priority of the subscription, determining the order of execution relative to other listeners. Defaults to `EventPriority.NORMAL`.
  * @return A `Subscription` object representing the subscription, which can be used to unregister or query the listener's status.
  */
+@Suppress("unused")
 inline fun <reified T> EventBus.EventRegisterBuilder.weak(
     priority: EventPriority = EventPriority.NORMAL,
     ignoreCancelled: Boolean = false,
