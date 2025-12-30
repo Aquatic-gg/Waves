@@ -33,6 +33,8 @@ dependencies {
 }
 ```
 
+---
+
 ## 🚀 Quick Start
 ### 1. Create the Event Bus
 ````kotlin
@@ -82,6 +84,25 @@ result.executionTimes.forEach { (sub, time) ->
     println("Listener ${sub.name} took ${time}ms")
 }
 ````
+
+---
+
+## 💡 Best Practices & Performance
+
+To get the most out of KEvent, keep these tips in mind:
+
+### 🧵 Coroutine Scope
+When building the `EventBus`, if you leave `scope = null`, the bus will use `runBlocking { }` for synchronous calls.
+> **Warning:** Using `runBlocking` freezes the current thread until all listeners finish. For high-concurrency environments, it is **strongly recommended** to provide a proper `CoroutineScope`.
+
+### ⚡ Use `postSuspend`
+If you are already inside a suspending function or a coroutine, always prefer `bus.postSuspend(event)`.
+*   **Why?** `bus.post(event)` returns a `Deferred` and involves extra overhead for job management. `postSuspend` is a direct call that avoids this overhead and integrates perfectly with your existing coroutine context.
+
+### 🧩 Hierarchical Lookups
+If you have a very large number of subscriptions and don't need inheritance matching (e.g., you only ever post exact classes), setting `hierarchical = false` in the builder can provide a small performance boost by skipping `isAssignableFrom` checks.
+
+---
 
 ## 🤝 Credits
 
