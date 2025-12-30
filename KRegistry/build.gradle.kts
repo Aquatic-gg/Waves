@@ -46,7 +46,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "gg.aquatic"
-            artifactId = "KEvent"
+            artifactId = "KRegistry"
             version = "${project.version}"
 
             from(components["java"])
