@@ -15,6 +15,8 @@ class EventBusImpl(
     private val hierarchical: Boolean
 ) : EventBus {
 
+    // Cache lock - thread safety
+    private val lock = Any()
     private val subscriptions = ConcurrentHashMap<Class<*>, MutableList<Subscription<*>>>()
     private val allSubscriptions = CopyOnWriteArrayList<Subscription<*>>()
 
@@ -118,40 +120,44 @@ class EventBusImpl(
     }
 
     override fun <T> unregister(subscription: Subscription<T>) {
-        allSubscriptions.remove(subscription)
-        val subs = subscriptions[subscription.eventType]
-        if (subs != null) {
-            subs -= subscription
-            if (subs.isEmpty()) subscriptions.remove(subscription.eventType)
+        synchronized(lock) {
+            allSubscriptions.remove(subscription)
+            val subs = subscriptions[subscription.eventType]
+            if (subs != null) {
+                subs -= subscription
+                if (subs.isEmpty()) subscriptions.remove(subscription.eventType)
+            }
+            dispatchCache.clear()
         }
-        dispatchCache.clear()
     }
 
     private fun addSubscription(subscription: Subscription<*>) {
-        if (subscription.priority == EventPriority.MONITOR) {
-            subscriptions.getOrPut(subscription.eventType) { CopyOnWriteArrayList() } += subscription
-            allSubscriptions += subscription
+        synchronized(lock) {
+            if (subscription.priority == EventPriority.MONITOR) {
+                subscriptions.getOrPut(subscription.eventType) { CopyOnWriteArrayList() } += subscription
+                allSubscriptions += subscription
+                dispatchCache.clear()
+                return
+            }
+
+            var idx = 0
+            for (s in allSubscriptions) {
+                if (s.priority === EventPriority.MONITOR) break
+                if (s.priority.ordinal < subscription.priority.ordinal) break
+                idx++
+            }
+            allSubscriptions.add(idx, subscription)
+
+            val subsForType = subscriptions.getOrPut(subscription.eventType) { CopyOnWriteArrayList() }
+            idx = 0
+            for (s in subsForType) {
+                if (s.priority === EventPriority.MONITOR) break
+                if (s.priority.ordinal < subscription.priority.ordinal) break
+                idx++
+            }
+            subsForType.add(idx, subscription)
             dispatchCache.clear()
-            return
         }
-
-        var idx = 0
-        for (s in allSubscriptions) {
-            if (s.priority === EventPriority.MONITOR) break
-            if (s.priority.ordinal < subscription.priority.ordinal) break
-            idx++
-        }
-        allSubscriptions.add(idx, subscription)
-
-        val subsForType = subscriptions.getOrPut(subscription.eventType) { CopyOnWriteArrayList() }
-        idx = 0
-        for (s in subsForType) {
-            if (s.priority === EventPriority.MONITOR) break
-            if (s.priority.ordinal < subscription.priority.ordinal) break
-            idx++
-        }
-        subsForType.add(idx, subscription)
-        dispatchCache.clear()
     }
 
     override fun getEventExceptionHandler(): EventExceptionHandler = exceptionHandler
