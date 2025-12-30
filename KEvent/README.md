@@ -98,10 +98,14 @@ When building the `EventBus`, if you leave `scope = null`, the bus will use `run
 
 ### ⚡ Use `postSuspend`
 If you are already inside a suspending function or a coroutine, always prefer `bus.postSuspend(event)`.
-*   **Why?** `bus.post(event)` returns a `Deferred` and involves extra overhead for job management. `postSuspend` is a direct call that avoids this overhead and integrates perfectly with your existing coroutine context.
+
+**Why?** `bus.post(event)` returns a `Deferred` and involves extra overhead for job management. `postSuspend` is a direct call that avoids this overhead and integrates perfectly with your existing coroutine context.
 
 ### 🧩 Hierarchical Lookups
-If you have a very large number of subscriptions and don't need inheritance matching (e.g., you only ever post exact classes), setting `hierarchical = false` in the builder can provide a small performance boost by skipping `isAssignableFrom` checks.
+If you have a huge number of subscriptions and don't need inheritance matching (e.g., you only ever post exact classes), setting `hierarchical = false` in the builder can provide a small performance boost by skipping `isAssignableFrom` checks.
+
+### ⚖️ Priority Management
+Use `EventPriority.MONITOR` for listeners that only need to log or observe the final state of an event without modifying it.
 
 ---
 

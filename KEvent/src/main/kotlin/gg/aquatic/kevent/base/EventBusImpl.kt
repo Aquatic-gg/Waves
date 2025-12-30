@@ -4,13 +4,7 @@ import gg.aquatic.kevent.*
 import gg.aquatic.kevent.subscription.StrongSubscription
 import gg.aquatic.kevent.subscription.Subscription
 import gg.aquatic.kevent.subscription.WeakSubscription
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.EmptyCoroutineContext
@@ -69,9 +63,9 @@ class EventBusImpl(
             }
 
             try {
-                val time = System.currentTimeMillis()
+                val time = System.nanoTime()
                 listener.handle(event)
-                executionTimes[rawSub] = System.currentTimeMillis() - time
+                executionTimes[rawSub] = System.nanoTime() - time
                 success++
             } catch (ex: Exception) {
                 failed++
