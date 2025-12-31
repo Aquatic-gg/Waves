@@ -21,3 +21,10 @@ kotlin {
 tasks.test {
     useJUnitPlatform()
 }
+
+subprojects {
+    apply(plugin = "kotlin")
+    apply(plugin = "maven-publish")
+
+    version = rootProject.version
+}

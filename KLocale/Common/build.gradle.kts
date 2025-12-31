@@ -1,8 +1,3 @@
-plugins {
-    kotlin("jvm")
-    `maven-publish`
-}
-
 group = "gg.aquatic.klocale"
 
 repositories {
