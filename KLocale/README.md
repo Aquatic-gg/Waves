@@ -9,13 +9,13 @@
 
 ## ✨ Features
 
-*   🚀 **High Performance:** Pre-renders static messages to minimize object allocation.
-*   🔄 **Smart Fallbacks:** Automatic locale resolution (e.g., en_US -> en -> default).
-*   🧩 **MiniMessage Ready:** Native support for Kyori MiniMessage and legacy color codes.
-*   ⚡ **Single-Pass Replacement:** Optimized placeholder system to prevent double-replacement issues.
-*   🌐 **Multi-Provider:** Load locales from YAML, GitHub, HTTP, or internal resources.
-*   🔗 **Async Loading:** Coroutine-based loading to keep your server tick-rate silky smooth.
-*   🛡️ **Fail-Safe:** Customizable strategies for missing keys (MissingKeyHandler).
+*   **High Performance:** Pre-renders static messages to minimize object allocation.
+*   **Smart Fallbacks:** Automatic locale resolution (e.g., en_US -> en -> default).
+*   **MiniMessage Ready:** Native support for Kyori MiniMessage and legacy color codes.
+*   **Single-Pass Replacement:** Optimized placeholder system to prevent double-replacement issues.
+*   **Multi-Provider:** Load locales from YAML, GitHub, HTTP, or internal resources.
+*   **Async Loading:** Coroutine-based loading to keep your server tick-rate silky smooth.
+*   **Fail-Safe:** Customizable strategies for missing keys (MissingKeyHandler).
 
 ---
 
