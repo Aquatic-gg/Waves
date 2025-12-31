@@ -15,6 +15,7 @@
 *   ⚡ **Single-Pass Replacement:** Optimized placeholder system to prevent double-replacement issues.
 *   🌐 **Multi-Provider:** Load locales from YAML, GitHub, HTTP, or internal resources.
 *   🔗 **Async Loading:** Coroutine-based loading to keep your server tick-rate silky smooth.
+*   🛡️ **Fail-Safe:** Customizable strategies for missing keys (MissingKeyHandler).
 
 ---
 
@@ -40,12 +41,15 @@ dependencies {
 Initialize your locale manager using the clean Kotlin DSL:
 
 ````kotlin
-val localeManager = KLocale.paper(plugin) {
+val localeManager = KLocale.paper {
     defaultLanguage = "en"
     provider = YamlLocaleProvider(
         file = File(dataFolder, "lang.yml"),
         serializer = YamlLocaleProvider.DefaultSerializer
     )
+
+    // Optional: Handle missing keys gracefully instead of throwing exceptions
+    missingKeyHandler = PaperMissingKeyHandler()
 }
 
 // Reload locales (suspended call)
@@ -61,8 +65,9 @@ Fetching and sending messages is intuitive and chainable:
 ````kotlin
 fun welcome(player: Player) {
     localeManager.getOrDefault(player.locale(), "welcome-message")
-        .arg("player", player.name)
-        .arg("balance", "<green>$500</green>".toMMComponent())
+        .replace("player", player.name)
+        // Supports Kyori components
+        .replace("balance", "<green>$500</green>".toMMComponent())
         .send(player)
 }
 ````
@@ -106,6 +111,17 @@ val localeManager = KLocale.paper(plugin) {
             YamlLocaleProvider(File(dataFolder, "overrides.yml"), serializer)
         )
     )
+}
+````
+
+### Missing Key Strategies
+You can define what happens when a key is missing by implementing MissingKeyHandler. The default behavior is to throw an exception, but you can override this globally:
+
+````kotlin
+class MyCustomHandler : MissingKeyHandler<PaperMessage> {
+    override fun handle(key: String, language: String): PaperMessage {
+        return PaperMessage.of(Component.text("Missing: $key", NamedTextColor.RED))
+    }
 }
 ````
 
