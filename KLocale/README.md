@@ -28,7 +28,8 @@ repositories {
 }
 
 dependencies {
-    implementation("gg.aquatic:klocale-paper:VERSION")
+    implementation("gg.aquatic:KLocale:VERSION")
+    implementation("gg.aquatic:KLocale-Paper:VERSION")
 }
 ````
 
