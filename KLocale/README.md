@@ -1,7 +1,7 @@
 # 🌍 KLocale
 
 [![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/klocale/badge)](https://www.codefactor.io/repository/github/mrlarkyy/klocale)
-[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KLocale?color=40c14a&name=Reposilite&filter=none:unspecified)](https://repo.nekroplex.com/#/releases/gg/aquatic/KLocale)
+[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KLocale?color=40c14a&name=Reposilite&filter=26)](https://repo.nekroplex.com/#/releases/gg/aquatic/KLocale)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
