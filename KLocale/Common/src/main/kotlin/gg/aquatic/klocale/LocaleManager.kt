@@ -9,6 +9,7 @@ interface LocaleManager<A : Message<A>> {
     val defaultLanguage: String
     val cache: MessageCache<A>
     val provider: LocaleProvider<A>
+    val missingKeyHandler: MissingKeyHandler<A>
 
     suspend fun invalidate()
 
@@ -19,11 +20,11 @@ interface LocaleManager<A : Message<A>> {
     fun getOrDefault(language: Locale, key: String): A {
         val msg =
             cache.get(language.language, key) ?: if (defaultLanguage == language.language) null else cache.get(defaultLanguage, key)
-        return msg ?: throw IllegalArgumentException("Message $key not found for language $language")
+        return msg ?: missingKeyHandler.handle(key,language.language)
     }
 
     fun getOrThrow(language: Locale, key: String): A {
-        return get(language, key) ?: throw IllegalArgumentException("Message $key not found for language $language")
+        return get(language, key) ?: missingKeyHandler.handle(key,language.language)
     }
 
     fun getAll(language: Locale): Map<String, A> {
