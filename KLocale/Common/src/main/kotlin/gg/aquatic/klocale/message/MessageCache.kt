@@ -32,8 +32,10 @@ interface MessageCache<A : Message<A>> {
             return map.keys
         }
 
-        override suspend fun set(map: Map<String, Map<String, A>>) = withContext(Dispatchers.Main) {
-            this@MapCache.map = map.toMutableMap()
+        override suspend fun set(map: Map<String, Map<String, A>>) {
+            synchronized(map) {
+                this@MapCache.map = map.toMutableMap()
+            }
         }
     }
 }

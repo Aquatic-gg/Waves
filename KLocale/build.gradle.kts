@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "gg.aquatic.klocale"
-version = "26.0.1"
+version = "26.0.2"
 
 repositories {
     mavenCentral()
