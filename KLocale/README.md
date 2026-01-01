@@ -102,6 +102,8 @@ The MergedLocaleProvider allows you to combine base translations with local user
 
 ````kotlin
 val localeManager = KLocale.paper(plugin) {
+    // You can specify your own minimessage with custom tag resolvers
+    miniMessage = MiniMessage.miniMessage()
     provider = MergedLocaleProvider(
         listOf(
             // 1. Remote "Base" translations
