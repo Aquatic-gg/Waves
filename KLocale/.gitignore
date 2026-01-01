@@ -20,6 +20,9 @@ out/
 .idea
 .idea/*
 
+Paper/logs
+Paper/logs/*
+
 ### Kotlin ###
 .kotlin
 
