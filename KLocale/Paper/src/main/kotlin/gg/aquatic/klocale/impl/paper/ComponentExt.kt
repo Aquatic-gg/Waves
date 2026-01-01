@@ -2,10 +2,8 @@ package gg.aquatic.klocale.impl.paper
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
-import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.Style
-import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
 val PLACEHOLDER_REGEX = Regex("%([^%]+)%")
@@ -240,7 +238,7 @@ fun String.hasPlaceholder(): Boolean {
  * @return Transformed `Component` with MiniMessage formatting and custom tag support applied.
  */
 fun String.toMMComponent(): Component {
-    return MiniMessage.builder().build().deserialize(
+    return PaperLocaleBuilder.miniMessage.deserialize(
             this
                 .replace("§", "&")
                 .replace("&a", "<green>")
@@ -276,5 +274,5 @@ fun Component.toPlain(): String {
 }
 
 fun Component.toMMString(): String {
-    return MiniMessage.miniMessage().serialize(this)
+    return PaperLocaleBuilder.miniMessage.serialize(this)
 }

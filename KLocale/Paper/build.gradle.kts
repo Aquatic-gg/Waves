@@ -12,7 +12,7 @@ dependencies {
     paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
     testImplementation(kotlin("test"))
     implementation(project(":Common"))
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
 tasks.test {
