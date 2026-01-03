@@ -163,7 +163,7 @@ dependencies {
     compileOnly("net.momirealms:craft-engine-core:0.0.61")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.61")
 
-    compileOnly("com.nexomc:nexo:1.8.0") //Nexo 1.X -> 1.X.0
+    compileOnly("com.nexomc:nexo:1.17.0") //Nexo 1.X -> 1.X.0
     compileOnly("io.netty:netty-all:4.1.24.Final")
 
     implementation(project(":API"))
