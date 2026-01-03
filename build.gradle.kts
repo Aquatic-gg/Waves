@@ -81,8 +81,8 @@ gremlin {
         implementation("com.github.micartey:webhookly:master-SNAPSHOT")
         implementation("net.kyori:adventure-text-minimessage:4.20.0")
         implementation("org.bstats:bstats-bukkit:3.1.0")
-        implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
         implementation("net.kyori:adventure-text-serializer-plain:4.26.1")
+        implementation("net.kyori:adventure-text-serializer-gson:4.26.1")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         implementation("com.undefined:stellar-kotlin:1.2.0-SNAPSHOT:paper")
         implementation("com.undefined:stellar:1.2.0-SNAPSHOT:paper")
@@ -125,7 +125,7 @@ repositories {
 }
 
 dependencies {
-    implementation("xyz.jpenilla:gremlin-runtime:0.0.7")
+    implementation("xyz.jpenilla:gremlin-runtime:0.0.9")
     compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
     compileOnly("me.clip:placeholderapi:2.11.6")
@@ -135,12 +135,12 @@ dependencies {
     compileOnly("io.th0rgal:oraxen:1.193.2")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
-    compileOnly("io.lumine:Mythic-Dist:5.9.1")
+    compileOnly("io.lumine:Mythic-Dist:5.11.1")
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
     compileOnly("com.willfp:eco:6.77.1")
-    compileOnly("io.github.toxicity188:bettermodel:1.11.3")
+    compileOnly("io.github.toxicity188:bettermodel:1.15.1")
 
     runtimeDownload("org.reflections:reflections:0.10.2")
     runtimeDownload("com.github.micartey:webhookly:master-SNAPSHOT")
@@ -152,9 +152,9 @@ dependencies {
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
     runtimeDownload("net.kyori:adventure-text-minimessage:4.20.0")
-    compileOnly("net.kyori:adventure-api:4.20.0")
+    compileOnly("net.kyori:adventure-api:4.26.1")
     runtimeDownload("org.bstats:bstats-bukkit:3.1.0")
-    runtimeDownload("net.kyori:adventure-text-serializer-gson:4.17.0")
+    runtimeDownload("net.kyori:adventure-text-serializer-gson:4.26.1")
     runtimeDownload("net.kyori:adventure-text-serializer-plain:4.26.1")
     runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     runtimeDownload("com.undefined:stellar-kotlin:1.2.0-SNAPSHOT:paper")
