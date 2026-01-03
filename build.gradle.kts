@@ -152,7 +152,7 @@ dependencies {
     runtimeDownload("net.radstevee.packed:packed-core:1.1.1")
     runtimeDownload("net.radstevee.packed:packed-negative-spaces:1.1.1")
     runtimeDownload("net.kyori:adventure-text-minimessage:4.20.0")
-    compileOnly("net.kyori:adventure-api:4.20.0")
+    compileOnly("net.kyori:adventure-api:4.26.1")
     runtimeDownload("org.bstats:bstats-bukkit:3.1.0")
     runtimeDownload("net.kyori:adventure-text-serializer-gson:4.17.0")
     runtimeDownload("net.kyori:adventure-text-serializer-plain:4.18.0")
