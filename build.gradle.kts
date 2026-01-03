@@ -4,7 +4,7 @@ plugins {
     kotlin("jvm") version "2.3.0"
     `maven-publish`
     java
-    id("com.gradleup.shadow") version "9.2.2"
+    id("com.gradleup.shadow") version "9.3.0"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
     id("xyz.jpenilla.gremlin-gradle") version "0.0.9"
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.17" apply false
