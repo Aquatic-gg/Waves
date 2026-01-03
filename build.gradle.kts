@@ -132,7 +132,7 @@ dependencies {
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("gg.aquatic:AEAPI:1.0")
-    compileOnly("io.th0rgal:oraxen:1.193.2")
+    compileOnly("io.th0rgal:oraxen:1.200.0")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3-b")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     compileOnly("io.lumine:Mythic-Dist:5.11.1")
