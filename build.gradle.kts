@@ -160,7 +160,7 @@ dependencies {
     runtimeDownload("com.undefined:stellar-kotlin:1.2.0-SNAPSHOT:paper")
     runtimeDownload("com.undefined:stellar:1.2.0-SNAPSHOT:paper")
 
-    compileOnly("net.momirealms:craft-engine-core:0.0.61")
+    compileOnly("net.momirealms:craft-engine-core:0.0.66")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.61")
 
     compileOnly("com.nexomc:nexo:1.8.0") //Nexo 1.X -> 1.X.0
