@@ -7,7 +7,7 @@ plugins {
     id("com.gradleup.shadow") version "9.2.2"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
     id("xyz.jpenilla.gremlin-gradle") version "0.0.9"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17" apply false
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
 }
 
 group = "gg.aquatic.waves"
