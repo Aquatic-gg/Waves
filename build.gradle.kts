@@ -139,7 +139,7 @@ dependencies {
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
-    compileOnly("com.willfp:eco:6.77.1")
+    compileOnly("com.willfp:eco:6.77.2")
     compileOnly("io.github.toxicity188:bettermodel:1.15.1")
 
     runtimeDownload("org.reflections:reflections:0.10.2")
