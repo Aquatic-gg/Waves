@@ -70,7 +70,7 @@ gremlin {
 
     dependencies {
         // Define your dependencies
-        implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.0")
         implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
         implementation("org.openjdk.nashorn:nashorn-core:15.7")
@@ -144,7 +144,8 @@ dependencies {
 
     runtimeDownload("org.reflections:reflections:0.10.2")
     runtimeDownload("com.github.micartey:webhookly:master-SNAPSHOT")
-    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.2.21")
+    
+    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.0")
     runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
     runtimeDownload("org.openjdk.nashorn:nashorn-core:15.7")
