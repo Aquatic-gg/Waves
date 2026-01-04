@@ -16,7 +16,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
-    compileOnly("io.netty:netty-all:4.1.24.Final")
+    compileOnly("io.netty:netty-all:4.2.9.Final")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
 }
 
