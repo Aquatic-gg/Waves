@@ -72,7 +72,7 @@ gremlin {
         // Define your dependencies
         implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
         implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.0")
-        implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
+        implementation("org.jetbrains.kotlin:kotlin-reflect:2.3.0")
         implementation("org.openjdk.nashorn:nashorn-core:15.7")
         implementation("com.zaxxer:HikariCP:7.0.2")
         implementation("net.radstevee.packed:packed-core:1.1.2")
@@ -147,7 +147,7 @@ dependencies {
     
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.0")
-    runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.3.0")
     runtimeDownload("org.openjdk.nashorn:nashorn-core:15.7")
     runtimeDownload("com.zaxxer:HikariCP:7.0.2")
     runtimeDownload("net.radstevee.packed:packed-core:1.1.2")
