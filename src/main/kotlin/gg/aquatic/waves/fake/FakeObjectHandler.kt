@@ -100,7 +100,7 @@ object FakeObjectHandler : WavesModule {
                 it.y.toDouble(),
                 it.z.toDouble()
             ).toBlockLocation()]
-            if (blocks == null || blocks.isEmpty()) {
+            if (blocks.isNullOrEmpty()) {
                 return@event
             }
             for (block in blocks) {

@@ -84,8 +84,8 @@ gremlin {
         implementation("net.kyori:adventure-text-serializer-gson:4.17.0")
         implementation("net.kyori:adventure-text-serializer-plain:4.18.0")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        implementation("com.undefined:stellar-kotlin:1.2.0-SNAPSHOT:paper")
-        implementation("com.undefined:stellar:1.2.0-SNAPSHOT:paper")
+        implementation("com.undefined:stellar-kotlin:1.1.3-SNAPSHOT:paper")
+        implementation("com.undefined:stellar:1.1.3-SNAPSHOT:paper")
     }
 }
 
