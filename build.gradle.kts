@@ -71,7 +71,7 @@ gremlin {
     dependencies {
         // Define your dependencies
         implementation("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.21")
+        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.0")
         implementation("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
         implementation("org.openjdk.nashorn:nashorn-core:15.7")
         implementation("com.zaxxer:HikariCP:7.0.2")
@@ -84,8 +84,8 @@ gremlin {
         implementation("net.kyori:adventure-text-serializer-plain:4.26.1")
         implementation("net.kyori:adventure-text-serializer-gson:4.26.1")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-        implementation("com.undefined:stellar-kotlin:1.2.0-SNAPSHOT:paper")
-        implementation("com.undefined:stellar:1.2.0-SNAPSHOT:paper")
+        implementation("com.undefined:stellar-kotlin:1.1.3-SNAPSHOT:paper")
+        implementation("com.undefined:stellar:1.1.3-SNAPSHOT:paper")
     }
 }
 
@@ -132,7 +132,7 @@ dependencies {
 
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("gg.aquatic:AEAPI:1.0")
-    compileOnly("io.th0rgal:oraxen:1.200.0")
+    compileOnly("io.th0rgal:oraxen:1.203.2")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     compileOnly("io.lumine:Mythic-Dist:5.11.1")
@@ -144,8 +144,9 @@ dependencies {
 
     runtimeDownload("org.reflections:reflections:0.10.2")
     runtimeDownload("com.github.micartey:webhookly:master-SNAPSHOT")
+    
     runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
-    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.2.21")
+    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.3.0")
     runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.2.21")
     runtimeDownload("org.openjdk.nashorn:nashorn-core:15.7")
     runtimeDownload("com.zaxxer:HikariCP:7.0.2")
