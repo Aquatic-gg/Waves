@@ -43,7 +43,7 @@ class StackedItem(
     }
 
     fun getUnmodifiedItem(): ItemStack {
-        return item
+        return item.clone()
     }
 
     fun getItem(): ItemStack {
