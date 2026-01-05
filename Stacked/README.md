@@ -19,6 +19,8 @@ custom item plugins.
 - Serialization Layer: Seamlessly serialize and deserialize items for database storage or configuration files.
 - Interaction Handling: Built-in event system to handle complex item interactions (clicks, drops, swaps) easily.
 
+---
+
 ## 📦 Installation
 
 Add the repository and dependency to your build.gradle.kts:
@@ -36,33 +38,48 @@ dependencies {
 }
 ````
 
+---
+
 ## 💡 Quick Start
 
-1. Initialization
-   You must initialize the library with your plugin instance and a CoroutineScope:
+### Initialization
 
-    ````kotlin
-    initializeStacked(myPlugin, myCoroutineScope)
-    Stacked.injectFactories()
-    ````
+You must initialize the library with your plugin instance and a CoroutineScope:
 
-2. Registering an Item with Logic
-   You can register items with unique IDs and attach interaction handlers directly:
+````kotlin
+initializeStacked(myPlugin, myCoroutineScope)
+Stacked.injectFactories()
+````
 
-    ````kotlin
-    val stackedItem = ... // Create or load your StackedItem
-    stackedItem.register("my_namespace", "my_item_id") { event ->
-        event.player.sendMessage("You clicked a custom item!")
-    }
-    ````
+### Registering an Item with Logic
 
-3. Retrieving a StackedItem
-   Retrieve items from the registry at any time:
+You can register items with unique IDs and attach interaction handlers directly:
 
-    ````kotlin
-    val item = StackedItem.ITEMS["my_namespace:my_item_id"]
-    val itemStack = item?.getItem()
-    ````
+````kotlin
+val stackedItem = ... // Create or load your StackedItem
+stackedItem.register("my_namespace", "my_item_id") { event ->
+    event.player.sendMessage("You clicked a custom item!")
+}
+````
+
+### Retrieving a StackedItem
+
+Retrieve items from the registry at any time:
+
+````kotlin
+val item = StackedItem.ITEMS["my_namespace:my_item_id"]
+val itemStack = item?.getItem()
+````
+
+### Serializing Items
+
+You can load items easily from your configuration files:
+
+````kotlin
+val item = StackedItem.loadFromYml(ConfigurationSection)
+````
+
+---
 
 ## 🛠️ Supported Factories
 
@@ -93,9 +110,8 @@ Got questions, need help, or want to showcase what you've built with **KEvent**?
 
 [![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
-
+* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
+* **Issues**: Open a ticket on GitHub for bugs or feature requests.
 
 ---
 *Built with ❤️ by Larkyy*
