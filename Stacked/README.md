@@ -23,18 +23,21 @@ custom item plugins.
 
 ## 📦 Installation
 
-Add the repository and dependency to your build.gradle.kts:
+Add the repository and dependencies to your build.gradle.kts:
 
 ````kotlin
 repositories {
-    maven {
-        name = "aquatic-releases"
-        url = uri("https://repo.nekroplex.com/releases")
-    }
+  maven {
+    name = "aquatic-releases"
+    url = uri("https://repo.nekroplex.com/releases")
+  }
 }
 
 dependencies {
-    compileOnly("gg.aquatic.stacked:Stacked:26.0.1")
+  implementation("gg.aquatic.stacked:Stacked:26.0.1")
+
+  implementation("gg.aquatic:KRegistry:25.0.1")
+  implementation("gg.aquatic:KEvent:1.0.4")
 }
 ````
 
