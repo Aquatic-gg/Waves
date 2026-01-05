@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.0"
+    `maven-publish`
 }
 
 group = "gg.aquatic.stacked"
@@ -52,4 +53,19 @@ kotlin {
 
 tasks.test {
     useJUnitPlatform()
+publishing {
+    repositories {
+        maven {
+            name = "aquaticRepository"
+            url = uri("https://repo.nekroplex.com/releases")
+
+            credentials {
+                username = maven_username
+                password = maven_password
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
 }
