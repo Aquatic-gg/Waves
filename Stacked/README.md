@@ -1,6 +1,6 @@
 # Stacked
 
-[![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/stacked/badge)](https://www.codefactor.io/repository/github/mrlarkyy/stacked)
+[![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/execute/badge)](https://www.codefactor.io/repository/github/mrlarkyy/execute)
 [![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/Stacked?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/Stacked)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
