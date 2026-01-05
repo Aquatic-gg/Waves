@@ -68,4 +68,14 @@ publishing {
             }
         }
     }
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "gg.aquatic"
+            artifactId = "Stacked"
+            version = "${project.version}"
+
+            from(components["java"])
+            //artifact(tasks.compileJava)
+        }
+    }
 }
