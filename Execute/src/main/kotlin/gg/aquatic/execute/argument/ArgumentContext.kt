@@ -205,7 +205,7 @@ class ArgumentContext<T>(
             }
 
             // Return the value if not null and compatible with R, otherwise return default
-            return if (value != null && (default::class.java.isInstance(value))) {
+            return if (value != null && default::class.java.isInstance(value)) {
                 value as R
             } else {
                 default as R
