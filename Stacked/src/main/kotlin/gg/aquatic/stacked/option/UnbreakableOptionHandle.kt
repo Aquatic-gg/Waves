@@ -1,0 +1,23 @@
+package gg.aquatic.stacked.option
+
+import io.papermc.paper.datacomponent.DataComponentTypes
+import net.kyori.adventure.key.Key
+import org.bukkit.configuration.ConfigurationSection
+import org.bukkit.inventory.ItemStack
+
+class UnbreakableOptionHandle: ItemOptionHandle {
+
+    override val key = Companion.key
+    override fun apply(itemStack: ItemStack) {
+        itemStack.setData(DataComponentTypes.UNBREAKABLE)
+    }
+
+    companion object: ItemOption {
+        override val key = Key.key("itemoption:unbreakable")
+        override fun load(section: ConfigurationSection): ItemOptionHandle? {
+            val unbreakable = section.getBoolean("unbreakable",false)
+            if (!unbreakable) return null
+            return UnbreakableOptionHandle()
+        }
+    }
+}
