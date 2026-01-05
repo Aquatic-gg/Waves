@@ -1,32 +1,14 @@
 package gg.aquatic.stacked
 
-import gg.aquatic.stacked.option.AmountOptionHandle
-import gg.aquatic.stacked.option.CustomModelDataLegacyOptionHandle
-import gg.aquatic.stacked.option.CustomModelDataOptionHandle
-import gg.aquatic.stacked.option.DamageOptionHandle
-import gg.aquatic.stacked.option.DisplayNameOptionHandle
-import gg.aquatic.stacked.option.DyeOptionHandle
-import gg.aquatic.stacked.option.EnchantsOptionHandle
-import gg.aquatic.stacked.option.FlagsOptionHandle
-import gg.aquatic.stacked.option.ItemModelOptionHandle
-import gg.aquatic.stacked.option.ItemOptionHandle
-import gg.aquatic.stacked.option.LoreOptionHandle
-import gg.aquatic.stacked.option.MaxDamageOptionHandle
-import gg.aquatic.stacked.option.MaxStackSizeOptionHandle
-import gg.aquatic.stacked.option.RarityOptionHandle
-import gg.aquatic.stacked.option.SpawnerTypeOptionHandle
-import gg.aquatic.stacked.option.TooltipStyleOptionHandle
-import gg.aquatic.stacked.option.UnbreakableOptionHandle
+import gg.aquatic.stacked.option.*
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.Material
-import org.bukkit.enchantments.Enchantment
 import org.bukkit.entity.EntityType
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemRarity
 import org.bukkit.inventory.ItemStack
-import kotlin.jvm.java
 
 @DslMarker
 annotation class StackedDsl
@@ -55,6 +37,11 @@ class StackedItemBuilder(private val baseStack: ItemStack) {
             value?.let { options[CustomModelDataLegacyOptionHandle::class.java] = CustomModelDataLegacyOptionHandle(it) }
             field = value
         }
+
+    fun customModelData(builder: CustomModelDataBuilder.() -> Unit) {
+        val dataBuilder = CustomModelDataBuilder().apply(builder)
+        options[CustomModelDataOptionHandle::class.java] = dataBuilder.build()
+    }
 
     var itemModel: Key? = null
         set(value) {
@@ -143,4 +130,21 @@ fun stackedItem(material: Material, builder: StackedItemBuilder.() -> Unit): Sta
 
 fun ItemStack.toStackedBuilder(builder: StackedItemBuilder.() -> Unit): StackedItem {
     return StackedItemBuilder(this.clone()).apply(builder).build()
+}
+
+@StackedDsl
+class CustomModelDataBuilder {
+    val colors = mutableListOf<Color>()
+    val floats = mutableListOf<Float>()
+    val flags = mutableListOf<Boolean>()
+    val strings = mutableListOf<String>()
+
+    fun build(): CustomModelDataOptionHandle {
+        return CustomModelDataOptionHandle(
+            colors.toList(),
+            floats.toList(),
+            flags.toList(),
+            strings.toList()
+        )
+    }
 }
