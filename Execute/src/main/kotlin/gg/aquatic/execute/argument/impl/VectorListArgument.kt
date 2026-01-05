@@ -1,6 +1,6 @@
 package gg.aquatic.execute.argument.impl
 
-import gg.aquatic.execute.argument.ArgumentFactory
+import gg.aquatic.execute.argument.ObjectArgumentFactory
 import gg.aquatic.execute.argument.ObjectArgument
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.util.Vector
@@ -9,9 +9,9 @@ class VectorListArgument(id: String, defaultValue: List<Vector>?, required: Bool
     required,
     aliases
 ) {
-    override val serializer: ArgumentFactory<List<Vector>?> = Serializer
+    override val serializer: ObjectArgumentFactory<List<Vector>?> = Factory
 
-    object Serializer: ArgumentFactory<List<Vector>?>() {
+    object Factory: ObjectArgumentFactory<List<Vector>?>() {
         override fun load(section: ConfigurationSection, id: String): List<Vector> {
             val strs = section.getStringList(id)
             val vectors = mutableListOf<Vector>()

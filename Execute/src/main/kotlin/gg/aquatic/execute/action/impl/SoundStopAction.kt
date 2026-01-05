@@ -11,7 +11,7 @@ object SoundStopAction : Action<Player> {
         PrimitiveObjectArgument("sound", "example", true),
     )
 
-    override fun execute(binder: Player, args: ArgumentContext<Player>) {
+    override suspend fun execute(binder: Player, args: ArgumentContext<Player>) {
         val sound = args.string("sound") ?: return
         binder.stopSound(sound)
     }

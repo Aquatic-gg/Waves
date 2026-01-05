@@ -1,13 +1,13 @@
 package gg.aquatic.execute.requirement
 
-import gg.aquatic.execute.ConditionalActionHandles
+import gg.aquatic.execute.ConditionalActionsHandle
 
-class ConditionHandleWithFailActions<A,B>(
+class RequirementHandleWithFailActions<A,B>(
     val condition: ConditionHandle<A>,
-    val failActions: ConditionalActionHandles<A>?
+    val failActions: ConditionalActionsHandle<A>?
 ) {
 
-    fun tryExecute(binder: A, textUpdater: (A, String) -> String): Boolean {
+    suspend fun tryExecute(binder: A, textUpdater: (A, String) -> String): Boolean {
         if (!condition.execute(binder, textUpdater)) {
             failActions?.tryExecute(binder, textUpdater)
             return false

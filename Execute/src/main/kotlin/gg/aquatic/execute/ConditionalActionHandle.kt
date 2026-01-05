@@ -1,21 +1,21 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.requirement.ConditionHandleWithFailActions
+import gg.aquatic.execute.requirement.RequirementHandleWithFailActions
 
 class ConditionalActionHandle<A, B>(
-    val action: ExecutableObjectHandle<A, B>,
-    val conditions: Collection<ConditionHandleWithFailActions<A,B>>,
-    val failActions: ConditionalActionHandles<A>?
+    val configuredObject: ExecutableObjectHandle<A, B>,
+    val conditions: Collection<RequirementHandleWithFailActions<A,B>>,
+    val failConfiguredObjects: ConditionalActionsHandle<A>?
 ) {
 
-    fun tryExecute(binder: A, textUpdater: (A, String) -> String) {
+    suspend fun tryExecute(binder: A, textUpdater: (A, String) -> String) {
         for (condition in conditions) {
             if (!condition.tryExecute(binder, textUpdater)) {
-                failActions?.tryExecute(binder, textUpdater)
+                failConfiguredObjects?.tryExecute(binder, textUpdater)
                 return
             }
         }
-        action.execute(binder, textUpdater)
+        configuredObject.execute(binder, textUpdater)
 
     }
 

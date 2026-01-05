@@ -1,7 +1,6 @@
 plugins {
-    kotlin("jvm") version "2.2.20"
+    kotlin("jvm") version "2.3.0"
     id("com.gradleup.shadow") version "9.0.0-beta11"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     id("co.uzzu.dotenv.gradle") version "2.0.0"
     `maven-publish`
 }
@@ -12,10 +11,18 @@ version = "1.0.2"
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven {
+        name = "aquatic-releases"
+        url = uri("https://repo.nekroplex.com/releases")
+    }
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+
+    compileOnly("gg.aquatic:KRegistry:25.0.1")
+    compileOnly("gg.aquatic:KEvent:1.0.4")
 }
 
 kotlin {

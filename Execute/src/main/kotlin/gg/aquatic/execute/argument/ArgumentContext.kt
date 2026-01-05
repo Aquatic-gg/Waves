@@ -6,6 +6,16 @@ import org.joml.Vector3f
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty
 
+/**
+ * Represents a context for handling arguments and applying updates to them. The class facilitates
+ * retrieving various types of argument values using delegation and ensures that updates to the
+ * arguments are handled through a specified updater function.
+ *
+ * @param T The type of the binder which is used as part of the updater function.
+ * @property binder The binder object utilized during the update process.
+ * @property arguments The collection of arguments to retrieve values from.
+ * @property updater A function that applies updates to argument values based on the binder.
+ */
 class ArgumentContext<T>(
     val binder: T,
     val arguments: ObjectArguments,
@@ -19,6 +29,10 @@ class ArgumentContext<T>(
      */
     fun string(id: String): String? {
         return arguments.string(id) { str -> updatedValue(str) }
+    }
+
+    fun stringOrCollection(id: String): Collection<String>? {
+        return arguments.stringOrCollection(id) { str -> updatedValue(str) }
     }
 
     /**
@@ -191,7 +205,7 @@ class ArgumentContext<T>(
             }
 
             // Return the value if not null and compatible with R, otherwise return default
-            return if (value != null && (default == null || default::class.java.isInstance(value))) {
+            return if (value != null && (default::class.java.isInstance(value))) {
                 value as R
             } else {
                 default as R
@@ -225,20 +239,12 @@ class ArgumentContext<T>(
                 Vector::class -> VectorDelegate(id) as ReadOnlyProperty<Any?, R?>
                 Vector3f::class -> Vector3fDelegate(id) as ReadOnlyProperty<Any?, R?>
                 Color::class -> ColorDelegate(id) as ReadOnlyProperty<Any?, R?>
-                else -> object : ReadOnlyProperty<Any?, R?> {
-                    override fun getValue(thisRef: Any?, property: KProperty<*>): R? {
-                        return any(id) as? R
-                    }
-                }
+                else -> ReadOnlyProperty { _, _ -> any(id) as? R }
             }
         }
 
         // For non-nullable types (which is unusual in your API), fall back to a generic delegate
-        return object : ReadOnlyProperty<Any?, R?> {
-            override fun getValue(thisRef: Any?, property: KProperty<*>): R? {
-                return any(id) as? R
-            }
-        }
+        return ReadOnlyProperty { _, _ -> any(id) as? R }
     }
 
     // Delegate classes

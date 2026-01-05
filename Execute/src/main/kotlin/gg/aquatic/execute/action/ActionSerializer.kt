@@ -1,14 +1,12 @@
 package gg.aquatic.execute.action
 
-import gg.aquatic.execute.ClassTransform
+import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.action.impl.logical.ConditionalActionsAction
 import gg.aquatic.execute.action.impl.logical.SmartAction
-import gg.aquatic.execute.argument.ObjectArgument
-import gg.aquatic.execute.argument.ObjectArguments
-import gg.aquatic.execute.Action
-import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.argument.ArgumentContext
-import gg.aquatic.execute.argument.ArgumentSerializer
+import gg.aquatic.execute.argument.ObjectArgument
+import gg.aquatic.execute.Action
+import gg.aquatic.execute.ClassTransform
 import org.bukkit.configuration.ConfigurationSection
 
 object ActionSerializer {
@@ -20,7 +18,12 @@ object ActionSerializer {
         "conditional-actions" to { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) },
     )
 
-    private fun <T: Any> getSmartAction(id: String,clazz: Class<T>, classTransforms: Collection<ClassTransform<T, *>>): SmartAction<T>? {
+    @Suppress("UNCHECKED_CAST")
+    private fun <T : Any> getSmartAction(
+        id: String,
+        clazz: Class<T>,
+        classTransforms: Collection<ClassTransform<T, *>>
+    ): SmartAction<T>? {
         val type = smartActions[id] ?: return null
         return type(clazz, classTransforms) as? SmartAction<T>
     }
@@ -40,26 +43,28 @@ object ActionSerializer {
 
         val smartAction = getSmartAction(type, clazz, emptyList())
         if (smartAction != null) {
-            val args = ObjectArgument.loadRequirementArguments(section, smartAction.arguments)
+            val args = ObjectArgument.load(section, smartAction.arguments)
             return ExecutableObjectHandle(smartAction, args)
         }
 
-        val actions = allActions(clazz)
-        val action = actions[type]
+        val allActions = Action.REGISTRY.getAllHierarchical<T>()
+
+        val action = allActions[type]
         if (action == null) {
             if (clazz == Unit::class.java) return null
-            val voidActions = ACTIONS[Unit::class.java] ?: return null
-            val voidAction = voidActions[type] ?: return null
-            val action = TransformedAction<T, Unit>(voidAction as Action<Unit>) { d -> let { } }
 
-            val args = ObjectArgument.loadRequirementArguments(section, voidAction.arguments)
+            val voidActions = Action.REGISTRY.getActions<Unit>()
+            val voidAction = voidActions[type] ?: return null
+            val action = TransformedAction<T, Unit>(voidAction) { _ -> let { } }
+
+            val args = ObjectArgument.load(section, voidAction.arguments)
             val configuredAction = ExecutableObjectHandle(action as Action<T>, args)
             return configuredAction
         }
 
-        val args = ObjectArgument.loadRequirementArguments(section, action.arguments)
+        val args = ObjectArgument.load(section, action.arguments)
 
-        val configuredAction = ExecutableObjectHandle(action as Action<T>, args)
+        val configuredAction = ExecutableObjectHandle(action, args)
         return configuredAction
     }
 
@@ -81,13 +86,13 @@ object ActionSerializer {
 
         val smartAction = getSmartAction(type, clazz, emptyList())
         if (smartAction != null) {
-            val args = ObjectArguments(ArgumentSerializer.load(section, smartAction.arguments))
+            val args = ObjectArgument.load(section, smartAction.arguments)
             return ExecutableObjectHandle(smartAction, args)
         }
 
         for (transform in classTransforms) {
             val tranformAction = transform.createTransformedAction(type) ?: continue
-            val args = ObjectArgument.loadRequirementArguments(section, tranformAction.arguments)
+            val args = ObjectArgument.load(section, tranformAction.arguments)
             val configuredAction = ExecutableObjectHandle(tranformAction, args)
             return configuredAction
         }
@@ -110,26 +115,15 @@ object ActionSerializer {
     }
 
     class TransformedAction<T : Any, D : Any>(val externalAction: Action<D>, val transform: (T) -> D?) : Action<T> {
-        override fun execute(
+        override suspend fun execute(
             binder: T,
             args: ArgumentContext<T>,
         ) {
             val transformed = transform(binder) ?: return
-            val args = ArgumentContext(transformed,args.arguments) { _, str -> args.updater(binder, str) }
+            val args = ArgumentContext(transformed, args.arguments) { _, str -> args.updater(binder, str) }
             externalAction.execute(transformed, args)
         }
 
         override val arguments: List<ObjectArgument<*>> = externalAction.arguments
     }
-
-    fun <T : Any> allActions(type: Class<T>): Map<String, Action<T>> {
-        val actions = hashMapOf<String, Action<T>>()
-        for ((clazz, typeActions) in ACTIONS) {
-            if (type == clazz || clazz.isAssignableFrom(type)) {
-                actions += typeActions as Map<String, Action<T>>
-            }
-        }
-        return actions
-    }
-
 }

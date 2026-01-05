@@ -1,11 +1,10 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.action.ActionHandle
 import gg.aquatic.execute.requirement.ConditionHandle
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-fun <T> Collection<ConditionHandle<T>>.checkConditions(
+suspend fun <T> Collection<ConditionHandle<T>>.checkConditions(
     binder: T,
     textUpdater: (T, String) -> String = { _, str -> str }
 ): Boolean {
@@ -15,7 +14,7 @@ fun <T> Collection<ConditionHandle<T>>.checkConditions(
     return true
 }
 
-fun <T : Any> Collection<ActionHandle<T>>.executeActions(
+suspend fun <T : Any> Collection<ActionHandle<T>>.executeActions(
     binder: T,
     textUpdater: (T, String) -> String = { _, str -> str }
 ) {
@@ -24,11 +23,10 @@ fun <T : Any> Collection<ActionHandle<T>>.executeActions(
     }
 }
 
-fun Collection<ActionHandle<Player>>.broadcastActions(textUpdater: (Player, String) -> String = { _, str -> str }) {
+suspend fun Collection<ActionHandle<Player>>.broadcastActions(textUpdater: (Player, String) -> String = { _, str -> str }) {
     for (player in Bukkit.getOnlinePlayers()) {
         for (configuredAction in this) {
             configuredAction.execute(player, textUpdater)
         }
     }
-
 }

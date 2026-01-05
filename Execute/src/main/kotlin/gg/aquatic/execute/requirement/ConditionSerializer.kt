@@ -1,10 +1,10 @@
 package gg.aquatic.execute.requirement
 
+import gg.aquatic.execute.argument.ArgumentContext
 import gg.aquatic.execute.argument.ObjectArgument
-import gg.aquatic.execute.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.execute.ClassTransform
 import gg.aquatic.execute.Condition
-import gg.aquatic.execute.argument.ArgumentContext
+import gg.aquatic.execute.argument.impl.PrimitiveObjectArgument
 import org.bukkit.configuration.ConfigurationSection
 
 object ConditionSerializer {
@@ -21,26 +21,27 @@ object ConditionSerializer {
     ): ConditionHandle<T>? {
         val type = section.getString("type") ?: return null
 
-        val actions = allRequirements(clazz)
+        val actions = Condition.REGISTRY.getAllHierarchical<T>()
         val action = actions[type]
         if (action == null) {
             if (clazz == Unit::class.java) return null
-            val voidRequirements = CONDITIONS[Unit::class.java] ?: return null
-            val voidRequirement = voidRequirements[type] ?: return null
-            val requirement = TransformedRequirement<T, Unit>(voidRequirement as Condition<Unit>) { d -> let { } }
 
-            val arguments = requirement.arguments.toMutableList()
+
+            val voidRequirement = Condition.REGISTRY.getHierarchical<Unit>(type) ?: return null
+            val condition = TransformedCondition<T, Unit>(voidRequirement) { _ -> let { } }
+
+            val arguments = condition.arguments.toMutableList()
             arguments += PrimitiveObjectArgument("negate", false, required = false)
-            val args = ObjectArgument.loadRequirementArguments(section, arguments)
-            val configuredAction = ConditionHandle(requirement as Condition<T>, args)
+            val args = ObjectArgument.load(section, arguments)
+            val configuredAction = ConditionHandle(condition, args)
             return configuredAction
         }
 
         val arguments = action.arguments.toMutableList()
         arguments += PrimitiveObjectArgument("negate", false, required = false)
-        val args = ObjectArgument.loadRequirementArguments(section, arguments)
+        val args = ObjectArgument.load(section, arguments)
 
-        val configuredAction = ConditionHandle(action as Condition<T>, args)
+        val configuredAction = ConditionHandle(action, args)
         return configuredAction
     }
 
@@ -61,10 +62,10 @@ object ConditionSerializer {
         val type = section.getString("type") ?: return null
 
         for (transform in classTransforms) {
-            val tranformAction = transform.createTransformedRequirement(type) ?: continue
+            val tranformAction = transform.createTransformedCondition(type) ?: continue
             val arguments = tranformAction.arguments.toMutableList()
             arguments += PrimitiveObjectArgument("negate", false, required = false)
-            val args = ObjectArgument.Companion.loadRequirementArguments(section, arguments)
+            val args = ObjectArgument.load(section, arguments)
             val configuredAction = ConditionHandle(tranformAction, args)
             return configuredAction
         }
@@ -86,24 +87,15 @@ object ConditionSerializer {
         return sections.mapNotNull { fromSection(clazz, it, *classTransforms) }
     }
 
-    class TransformedRequirement<T : Any, D : Any>(val externalAction: Condition<D>, val transform: (T) -> D?) :
+    class TransformedCondition<T : Any, D : Any>(val externalAction: Condition<D>, val transform: (T) -> D?) :
         Condition<T> {
-        override fun execute(binder: T, args: ArgumentContext<T>): Boolean {
+
+        override suspend fun execute(binder: T, args: ArgumentContext<T>): Boolean {
             val transformed = transform(binder) ?: return false
             val args = ArgumentContext(transformed, args.arguments) { _, str -> args.updater(binder, str) }
             return externalAction.execute(transformed, args)
         }
 
         override val arguments: List<ObjectArgument<*>> = externalAction.arguments
-    }
-
-    fun <T : Any> allRequirements(type: Class<T>): Map<String, Condition<T>> {
-        val actions = hashMapOf<String, Condition<T>>()
-        for ((clazz, typeActions) in CONDITIONS) {
-            if (type == clazz || clazz.isAssignableFrom(type)) {
-                actions += typeActions as Map<String, Condition<T>>
-            }
-        }
-        return actions
     }
 }

@@ -8,7 +8,7 @@ abstract class ObjectArgument<T>(
     val id: String, val defaultValue: T?, val required: Boolean, val aliases: Collection<String>
 ) {
 
-    abstract val serializer: ArgumentFactory<T?>
+    abstract val serializer: ObjectArgumentFactory<T?>
 
     fun load(section: ConfigurationSection): T? {
         val id = (aliases + id).find { section.contains(it) } ?: return defaultValue
@@ -16,7 +16,7 @@ abstract class ObjectArgument<T>(
     }
 
     companion object {
-        fun loadRequirementArguments(
+        fun load(
             section: ConfigurationSection,
             arguments: List<ObjectArgument<*>>
         ): ObjectArguments {

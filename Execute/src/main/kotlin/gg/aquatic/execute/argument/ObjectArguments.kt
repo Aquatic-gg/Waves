@@ -3,8 +3,6 @@ package gg.aquatic.execute.argument
 import org.bukkit.Color
 import org.bukkit.util.Vector
 import org.joml.Vector3f
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 class ObjectArguments(
     private val arguments: Map<String, Any?>,
@@ -228,83 +226,5 @@ class ObjectArguments(
         }
         return listOfNotNull(updater(value.toString()).toByteOrNull())
     }
-    operator fun <T> get(id: String): T? {
-        @Suppress("UNCHECKED_CAST")
-        return arguments[id] as? T
-    }
-
-    // String delegate
-    fun string(property: KProperty<*>): ReadOnlyProperty<Any?, String?> {
-        return StringDelegate(property.name)
-    }
-
-    // Int delegate
-    fun int(property: KProperty<*>): ReadOnlyProperty<Any?, Int?> {
-        return IntDelegate(property.name)
-    }
-
-    // Boolean delegate
-    fun boolean(property: KProperty<*>): ReadOnlyProperty<Any?, Boolean?> {
-        return BooleanDelegate(property.name)
-    }
-
-    // Double delegate
-    fun double(property: KProperty<*>): ReadOnlyProperty<Any?, Double?> {
-        return DoubleDelegate(property.name)
-    }
-
-    // Float delegate
-    fun float(property: KProperty<*>): ReadOnlyProperty<Any?, Float?> {
-        return FloatDelegate(property.name)
-    }
-
-    // Generic delegate
-    inline fun <reified T> typed(property: KProperty<*>): ReadOnlyProperty<Any?, T?> {
-        return TypedDelegate(property.name)
-    }
-
-    // Inner delegate classes
-    inner class StringDelegate(private val id: String) : ReadOnlyProperty<Any?, String?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): String? {
-            return string(id)
-        }
-    }
-
-    inner class IntDelegate(private val id: String) : ReadOnlyProperty<Any?, Int?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Int? {
-            return int(id)
-        }
-    }
-
-    inner class BooleanDelegate(private val id: String) : ReadOnlyProperty<Any?, Boolean?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean? {
-            return boolean(id)
-        }
-    }
-
-    inner class DoubleDelegate(private val id: String) : ReadOnlyProperty<Any?, Double?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Double? {
-            return double(id)
-        }
-    }
-
-    inner class FloatDelegate(private val id: String) : ReadOnlyProperty<Any?, Float?> {
-        override fun getValue(thisRef: Any?, property: KProperty<*>): Float? {
-            return float(id)
-        }
-    }
-
-    inner class TypedDelegate<T>(private val id: String) : ReadOnlyProperty<Any?, T?> {
-        @Suppress("UNCHECKED_CAST")
-        override fun getValue(thisRef: Any?, property: KProperty<*>): T? {
-            return any(id) as? T
-        }
-    }
-
-    // Extension functions for operators
-    operator fun provideDelegate(
-        thisRef: Any?,
-        property: KProperty<*>
-    ): ReadOnlyProperty<Any?, String?> = StringDelegate(property.name)
 
 }

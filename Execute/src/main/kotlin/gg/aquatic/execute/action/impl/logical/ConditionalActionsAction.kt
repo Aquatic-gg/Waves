@@ -7,29 +7,30 @@ import gg.aquatic.execute.argument.ObjectArgument
 import gg.aquatic.execute.argument.impl.ActionsArgument
 import gg.aquatic.execute.argument.impl.ConditionsArgument
 
+@Suppress("UNCHECKED_CAST")
 class ConditionalActionsAction<T : Any>(
     clazz: Class<T>,
     classTransforms: Collection<ClassTransform<*, *>>,
 ) : SmartAction<T>(clazz, classTransforms as Collection<ClassTransform<T, *>>) {
-    override fun execute(
+    override suspend fun execute(
         binder: T,
         args: ArgumentContext<T>,
     ) {
-        val actions = args.typed<Collection<ExecutableObjectHandle<T, Unit>>>("actions") ?: return
-        val failActions = args.typed<Collection<ExecutableObjectHandle<T, Unit>>>("fail")
-        val conditions = args.typed<Collection<ExecutableObjectHandle<T, Boolean>>>("conditions") ?: return
+        val actions = args.any("actions") as? Collection<ExecutableObjectHandle<T, Unit>> ?: return
+        val failActions = args.any("fail") as? Collection<ExecutableObjectHandle<T, Unit>>
+        val conditions = args.any("conditions") as? Collection<ExecutableObjectHandle<T, Boolean>> ?: return
 
         for (condition in conditions) {
-            if (!condition.execute(binder,args.updater)) {
-                failActions?.forEach { it.execute(binder, args.updater) }
+            if (!condition.execute(binder) { _, str -> args.updater(binder, str) }) {
+                failActions?.forEach { it.execute(binder) { _, str -> args.updater(binder, str) } }
                 return
             }
         }
-        actions.forEach { it.execute(binder, args.updater) }
+        actions.forEach { it.execute(binder) { _, str -> args.updater(binder, str) } }
     }
 
     override val arguments: List<ObjectArgument<*>> = listOf(
-        ActionsArgument("actions", listOf(), true, clazz,super.classTransforms),
+        ActionsArgument("actions", listOf(), true, clazz, super.classTransforms),
         ActionsArgument("fail", listOf(), false, clazz, super.classTransforms),
         ConditionsArgument("conditions", listOf(), true, clazz, super.classTransforms)
     )

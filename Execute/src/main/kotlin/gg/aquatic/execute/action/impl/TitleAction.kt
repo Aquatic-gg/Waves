@@ -1,28 +1,27 @@
 package gg.aquatic.execute.action.impl
 
 import gg.aquatic.execute.Action
+import gg.aquatic.execute.Execute
 import gg.aquatic.execute.argument.ArgumentContext
 import gg.aquatic.execute.argument.ObjectArgument
 import gg.aquatic.execute.argument.impl.PrimitiveObjectArgument
-import gg.aquatic.execute.minimessage.toMMComponent
 import net.kyori.adventure.title.Title
 import org.bukkit.entity.Player
 import java.time.Duration
 
 object TitleAction : Action<Player> {
 
-    override fun execute(binder: Player, args: ArgumentContext<Player>) {
-
-        val title by args or ""
-        val subtitle by args or ""
-        val fadeIn by args id "fade-in" or 0
-        val stay by args or 0
-        val fadeOut by args id "fade-out" or 0
+    override suspend fun execute(binder: Player, args: ArgumentContext<Player>) {
+        val title: String = args.string("title") ?: ""
+        val subtitle: String = args.string("subtitle") ?: ""
+        val fadeIn: Int = args.int("fade-in") ?: 0
+        val stay: Int = args.int("stay") ?: 0
+        val fadeOut: Int = args.int("fade-out") ?: 0
 
         binder.showTitle(
             Title.title(
-                title.toMMComponent(),
-                subtitle.toMMComponent(),
+                Execute.miniMessage.deserialize(title),
+                Execute.miniMessage.deserialize(subtitle),
                 Title.Times.times(
                     Duration.ofMillis((fadeIn * 50).toLong()),
                     Duration.ofMillis((stay * 50).toLong()),
