@@ -108,7 +108,6 @@ my-button:
 The engine supports a wide array of specialized arguments:
 * **TimedActionsArgument:** Execute actions after a specific delay.
 * **Vector / VectorListArgument:** Precise coordinate handling for world effects.
-* **UpdatableObjectArgument:** Arguments that can change their value based on external factors during runtime.
 
 ---
 
