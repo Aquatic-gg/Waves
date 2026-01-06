@@ -137,7 +137,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 💬 Community & Support
 
-Got questions, need help, or want to showcase what you've built with **KEvent**? Join our community!
+Got questions, need help, or want to showcase what you've built with **KLocale**? Join our community!
 
 [![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
