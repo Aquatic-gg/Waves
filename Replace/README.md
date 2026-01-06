@@ -1,7 +1,7 @@
 # Replace 🔄
 
 [![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/replace/badge)](https://www.codefactor.io/repository/github/mrlarkyy/replace)
-[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/replace/Replace?color=40c14a&name=Reposilite&filter=26)](https://repo.nekroplex.com/#/releases/gg/aquatic/replace/Replace)
+[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/replace/Replace?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/replace/Replace)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
