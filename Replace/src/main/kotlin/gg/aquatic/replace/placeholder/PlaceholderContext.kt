@@ -115,19 +115,19 @@ class PlaceholderContext<T>(
                 val previousValue = componentCache[string]
 
                 if (previousValue != null && (currentTime - previousValue.time < maxUpdateInterval * 50 || placeholder.isConst)) {
-                    resultComponent[string] = { previousValue.updated }
+                    resultComponent["%$string%"] = { previousValue.updated }
                     continue
                 }
 
                 val newValue = placeholder.apply(binder, string)
 
                 if (previousValue?.updated != newValue) {
-                    resultComponent[string] = { newValue }
+                    resultComponent["%$string%"] = { newValue }
                     componentCache[string] = PlaceholderStateComponent(newValue, currentTime)
                     updated = true
                 } else {
                     previousValue.time = currentTime
-                    resultComponent[string] = { previousValue.updated }
+                    resultComponent["%$string%"] = { previousValue.updated }
                 }
             }
         }
