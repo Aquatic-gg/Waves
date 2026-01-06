@@ -30,7 +30,7 @@ dependencies {
     compileOnly("me.clip:placeholderapi:2.11.7")
 
     // Testing
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")
     testImplementation("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
