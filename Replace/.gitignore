@@ -23,6 +23,7 @@ out/
 .idea/
 .idea/*
 
+logs/
 .env
 
 ### Eclipse ###
