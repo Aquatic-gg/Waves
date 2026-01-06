@@ -53,7 +53,7 @@ class PlaceholderContext<T>(
         if (resultComponent.isNotEmpty()) {
             updatedComponent = updatedComponent.replaceWith(resultComponent)
         }
-        return Result(updatedComponent, (updatedComponent != latestComponent))
+        return Result(updatedComponent, updatedComponent != latestComponent)
     }
 
     private fun tryApply(binder: T, item: LiteralItem, firstTime: Boolean): Pair<String, Boolean> {
@@ -96,7 +96,7 @@ class PlaceholderContext<T>(
             if (placeholder is Placeholder.Literal) {
                 val previousValue = literalCache[string]
 
-                if (previousValue != null && ((currentTime - previousValue.time) < (maxUpdateInterval * 50) || placeholder.isConst)) {
+                if (previousValue != null && (currentTime - previousValue.time < maxUpdateInterval * 50 || placeholder.isConst)) {
                     result[string] = previousValue.updated
                     continue
                 }
@@ -114,7 +114,7 @@ class PlaceholderContext<T>(
             } else if (placeholder is Placeholder.Component) {
                 val previousValue = componentCache[string]
 
-                if (previousValue != null && ((currentTime - previousValue.time) < (maxUpdateInterval * 50) || placeholder.isConst)) {
+                if (previousValue != null && (currentTime - previousValue.time < maxUpdateInterval * 50 || placeholder.isConst)) {
                     resultComponent[string] = { previousValue.updated }
                     continue
                 }
