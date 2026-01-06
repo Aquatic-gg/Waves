@@ -1,5 +1,8 @@
 package gg.aquatic.replace.placeholder
 
+import me.clip.placeholderapi.PlaceholderAPI
+import org.bukkit.entity.Player
+
 /**
  * A generic placeholder that defines a template for replacing or formatting text using a specific
  * transformation function. The `Placeholder` class is designed to work with a type `T`, and its
@@ -13,13 +16,30 @@ package gg.aquatic.replace.placeholder
  * @param func A transformation function that defines how a given target of type `T` and a text
  *             input are used to produce the processed output.
  */
-class Placeholder<T>(
-    val identifier: String,
-    val isConst: Boolean = false,
-    private val func: (T, String) -> String
-) {
+interface Placeholder<T> {
+    val identifier: String
+    val isConst: Boolean
 
-    fun apply(target: T, text: String): String {
-        return func(target, text)
+    open class Literal<T>(
+        override val identifier: String, override val isConst: Boolean = false, private val func: (T, String) -> String
+    ) : Placeholder<T> {
+        fun apply(target: T, text: String): String {
+            return func(target, text)
+        }
     }
+
+    class Component<T>(
+        override val identifier: String,
+        override val isConst: Boolean = false,
+        private val func: (T, String) -> net.kyori.adventure.text.Component
+    ) : Placeholder<T> {
+        fun apply(target: T, text: String): net.kyori.adventure.text.Component {
+            return func(target, text)
+        }
+    }
+
+    object PAPIPlaceholder : Literal<Player>("papi", false, { target, text ->
+        val internalIdentifier = text.removePrefix("papi_")
+        PlaceholderAPI.setPlaceholders(target, "%$internalIdentifier%")
+    })
 }

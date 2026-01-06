@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.Style
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
 val PLACEHOLDER_REGEX = Regex("%([^%]+)%")
 
@@ -218,4 +219,9 @@ fun Component.replaceWith(map: Map<String, () -> Component>): Component {
         return newComponent
     }
     return recurse(this)
+}
+
+private val plainSerializer = PlainTextComponentSerializer.plainText()
+fun Component.toPlain(): String {
+    return plainSerializer.serialize(this)
 }

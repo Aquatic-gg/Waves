@@ -1,136 +1,119 @@
-## What's this?
-Replace is a library that allows you to easily create placeholders for your plugins.
+# Replace 🔄
 
-- Smart Placeholder updating (elimination of unneeded context updates - useful for limiting packet usage)
-- Global placeholders
-- Context-based updating
-- Generic Placeholders & Contexts
-- Limiting the updating interval
-- Support for Literal, Kyori Components, ItemStacks
+[![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/replace/badge)](https://www.codefactor.io/repository/github/mrlarkyy/replace)
+[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/replace/Replace?color=40c14a&name=Reposilite&filter=26)](https://repo.nekroplex.com/#/releases/gg/aquatic/replace/Replace)
+![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
+[![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-## Importing
+**Replace** is a high-performance, type-safe Kotlin library designed for Minecraft plugins to handle dynamic placeholders with built-in caching and smart state management.
 
-Gradle (Kotlin DSL):
-````kt 
+## ✨ Key Features
+
+- **Smart Updating:** Automatically avoids redundant updates to save CPU and network bandwidth (crucial for packet-based systems).
+- **Type-Safe Contexts:** Link placeholders to specific types (e.g., `Player`, `Entity`, or custom objects).
+- **Context Transformations:** Easily map data types (e.g., provide a `Game` object and automatically inherit `Player` placeholders).
+- **Update Intervals:** Built-in throttling to control how often values are re-calculated.
+- **Multi-Format:** Support for `String` literals and Kyori `Component`s out of the box.
+
+---
+
+## 📦 Installation
+
+Add the repository and dependency to your `build.gradle.kts`:
+
+```kotlin
 repositories {
-    maven {
-        url = uri("https://repo.nekroplex.com/releases")
-    }
+    maven("https://repo.nekroplex.com/releases")
 }
-````
 
-````kt 
 dependencies {
-    implementation("com.nekroplex.replace:replace:1.0.0")
+    implementation("gg.aquatic.replace:Replace:1.0.0")
 }
-````
+```
 
-## Example Usage
+---
 
-### Creating Placeholders
+## 🚀 Quick Start
 
-````kt 
-// True means that the placeholder is a constant. While set to true, the placeholder will retrieve
-// the value just once and never get updated again (never executed the lambda again)
-val placeholder = Placeholder<Player>("player", true) { player, foundString ->
-    return@Placeholder player.name
+### 1. Define Placeholders
+You can define placeholders that return simple strings or complex Kyori components.
+
+```kotlin
+// A constant placeholder (only calculated once per session)
+val playerName = Placeholder.Literal<Player>("name", isConst = true) { player, _ -> 
+    player.name 
 }
 
-val argumentPlaceholder = Placeholder<Player>("argument", false) { player, foundString ->
-    val arguments = foundString.split("_")
-
-    if (arguments.size < 2) {
-        return@Placeholder ""
+// A dynamic placeholder with internal arguments (e.g., %stat_kills%)
+val statPlaceholder = Placeholder.Literal<Player>("stat", isConst = false) { player, arg ->
+    when (arg.lowercase()) {
+        "kills" -> getKills(player).toString()
+        "deaths" -> getDeaths(player).toString()
+        else -> "0"
     }
-
-    val value = arguments[1] // Getting custom parameter from your placeholder
-    when (value.lowercase()) {
-        "name" -> return@Placeholder player.name
-        "health" -> return@Placeholder player.health.toString()
-    }
-
-    return@Placeholder foundString
 }
-````
+```
 
-### Registering custom global placeholders
+### 2. Global Registration
+Register placeholders globally so they are automatically included when creating new contexts for that type.
 
-This registers the global placeholders.
-Global means that while you are creating a PlaceholderContext, the placeholders will get automatically added to it
-depending on the binder T (generic type).
+```kotlin
+Placeholders.register(playerName, statPlaceholder)
+```
 
-````kt
-// Reified
-Placeholders.register(placeholder, argumentPlaceholder)
+### 3. Context & Transformations
+A `PlaceholderContext` manages the lifecycle of your placeholders. You can transform contexts to reuse existing logic.
 
-Placeholders.register(Player::class.java, placeholder, argumentPlaceholder)
-````
+```kotlin
+class MyGameSession(val player: Player, val score: Int)
 
-### Creation of PlaceholderContext
-
-PlaceholderContext is a context handler for your placeholder. You can create as many contexts as you want or
-create a global context too. However, have in mind that global contexts do not work well while using Player-based 
-placeholders. 
-
-I would highly recommend using void-based placeholders & contexts for global usage!
-
-````kt 
-// 5 stands for the updating interval in ticks. You can easily limit how often the placeholders get updated.
-val globalContext = Placeholders.resolverFor<Void>(5)
-
-val playerContext = Placeholders.resolverFor<Player>(10)
-
-val entityContext = Placeholders.resolverFor<Entity>(100)
-````
-
-### Retrieving PlaceholderContext items
-
-````kt 
-fun something() {
-    // 5 stands for the updating interval in ticks. You can easily limit how often the placeholders get updated.
-    val playerContext = Placeholders.resolverFor<Player>(5)
-    Placeholders.Transform<Something, Player> {
-        it.player
-    }
-    val tranformed = Placeholders.resolverFor<Something>(
-        5, Placeholders.Transform(
-            Player::class.java
-        ) {
-            it.player
-        })
-    val transformedReified = Placeholders.resolverFor<Something>(
-        5,
-        Placeholders.Transform{
-            it.player
-        }
+// Create a context for MyGameSession that INHERITS all Player placeholders
+val gameContext = Placeholders.resolverFor<MyGameSession>(
+    maxUpdateInterval = 20, // 20 ticks
+    transforms = arrayOf(
+        Placeholders.Transform { it.player } // Tell the context how to get a Player from a MyGameSession
     )
-}
-
-class Something(
-    val player: Player
 )
-````
+```
 
-### Updating PlaceholderContext items
+### 4. Efficient Updating
+The library uses a "State" system. You can check if a value actually changed before sending updates to a player.
 
-````kt
-fun something() {
+```kotlin
+val component = Component.text("Welcome %name%! Kills: %stat_kills%")
+val contextItem = gameContext.createItem(mySession, component)
 
-    val player = Bukkit.getPlayer("MrLarkyy_")!!
+// Attempt to update (respects maxUpdateInterval)
+val updateResult = contextItem.tryUpdate(mySession)
 
-    val component = Component.text("Hello %player%!")
-    val context = PlaceholderContext.player
-
-    val item = context.createItem(player, component)
-
-    val firstUpdate = item.latestState
-    if (firstUpdate.wasUpdated) {
-        val newUpdatedValue by firstUpdate
-    }
-
-    val result = item.tryUpdate(player)
-    if (result.wasUpdated) {
-        val newUpdatedValue by result
-    }
+if (updateResult.wasUpdated) {
+    val newComponent = updateResult.value
+    player.sendMessage(newComponent)
 }
-````
+```
+
+## 🔌 PlaceholderAPI Support
+If PlaceholderAPI is present on the server, `Replace` can automatically wrap PAPI placeholders into its type-safe system using the `papi` identifier:
+
+`%papi_player_name%` → Automatically resolved via PAPI.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+## 💬 Community & Support
+
+Got questions, need help, or want to showcase what you've built with **KEvent**? Join our community!
+
+[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
+
+*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
+*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
+
+
+---
+*Built with ❤️ by Larkyy*

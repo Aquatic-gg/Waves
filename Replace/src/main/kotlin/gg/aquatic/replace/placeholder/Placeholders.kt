@@ -1,11 +1,21 @@
 package gg.aquatic.replace.placeholder
 
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import kotlin.collections.iterator
 
 object Placeholders {
 
-    val registered = hashMapOf<Class<*>, MutableCollection<Placeholder<*>>>()
+    val registered by lazy {
+        val map = hashMapOf<Class<*>, MutableCollection<Placeholder<*>>>()
+
+        val isPapiInstalled = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null
+        if (isPapiInstalled) {
+            map += Player::class.java to mutableListOf(Placeholder.PAPIPlaceholder)
+        }
+
+        map
+    }
 
     val player: PlaceholderContext<Player>
         get() {
@@ -46,7 +56,7 @@ object Placeholders {
 
         val original = getRegisteredFor(clazz)
         for (placeholder in original) {
-            placeholders.add(placeholder as Placeholder<T>)
+            placeholders.add(placeholder)
         }
 
         for (transform in transforms) {
@@ -72,14 +82,11 @@ object Placeholders {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun <T> getRegisteredFor(type: Class<T>): ArrayList<Placeholder<T>> {
-        val placeholders = ArrayList<Placeholder<T>>()
-        for ((clazz, list) in registered) {
-            if (type == clazz || clazz.isAssignableFrom(type)) {
-                placeholders += list.map { it as Placeholder<T> }
-            }
-        }
-        return placeholders
+    private fun <T> getRegisteredFor(type: Class<T>): List<Placeholder<T>> {
+        return registered.entries
+            .filter { it.key.isAssignableFrom(type) || type == it.key }
+            .flatMap { it.value }
+            .map { it as Placeholder<T> }
     }
 
     class Transform<A, B>(
@@ -96,9 +103,15 @@ object Placeholders {
             val originals = getRegisteredFor(transformToClass)
 
             for (placeholder in originals) {
-                generated.add(Placeholder(placeholder.identifier) { a, str ->
-                    placeholder.apply(func(a), str)
-                })
+                if (placeholder is Placeholder.Literal) {
+                    generated.add(Placeholder.Literal(placeholder.identifier) { a, str ->
+                        placeholder.apply(func(a), str)
+                    })
+                } else if (placeholder is Placeholder.Component) {
+                    generated.add(Placeholder.Component(placeholder.identifier) { a, str ->
+                        placeholder.apply(func(a), str)
+                    })
+                }
             }
             return generated
         }

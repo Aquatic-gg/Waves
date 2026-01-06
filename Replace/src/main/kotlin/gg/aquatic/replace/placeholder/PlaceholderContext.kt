@@ -1,8 +1,6 @@
 package gg.aquatic.replace.placeholder
 
-import gg.aquatic.replace.PLACEHOLDER_REGEX
-import gg.aquatic.replace.findPlaceholders
-import gg.aquatic.replace.replacePlaceholders
+import gg.aquatic.replace.*
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -34,19 +32,27 @@ class PlaceholderContext<T>(
         this.placeholders.putAll(placeholders.associateBy { it.identifier })
     }
 
-    private val cache = HashMap<String, PlaceholderState>()
+    private val literalCache = HashMap<String, PlaceholderState>()
+    private val componentCache = HashMap<String, PlaceholderStateComponent>()
 
     private fun tryApply(binder: T, item: ComponentItem, firstTime: Boolean): Result<Component> {
         val original = item.original
         val latestComponent = item.latestState.value
         val foundPlaceholders = item.foundPlaceholders
 
-        val (result, updated) = generateResult(binder, foundPlaceholders)
+        val (maps, updated) = generateResult(binder, foundPlaceholders)
+        val (result, resultComponent) = maps
 
         if (!updated && !firstTime) {
             return Result(latestComponent, false)
         }
-        val updatedComponent = original.replacePlaceholders(result)
+        var updatedComponent = original
+        if (result.isNotEmpty()) {
+            updatedComponent = updatedComponent.replacePlaceholders(result)
+        }
+        if (resultComponent.isNotEmpty()) {
+            updatedComponent = updatedComponent.replaceWith(resultComponent)
+        }
         return Result(updatedComponent, (updatedComponent != latestComponent))
     }
 
@@ -55,7 +61,8 @@ class PlaceholderContext<T>(
         val latestString = item.latestState.value
         val foundPlaceholders = item.foundPlaceholders
 
-        val (result, updated) = generateResult(binder, foundPlaceholders)
+        val (maps, updated) = generateResult(binder, foundPlaceholders)
+        val (result, resultComponent) = maps
 
         if (!updated && !firstTime) {
             return latestString to false
@@ -65,13 +72,20 @@ class PlaceholderContext<T>(
         for ((placeholder, value) in result) {
             updatedString = updatedString.replace("%$placeholder%", value)
         }
+        for ((placeholder, value) in resultComponent) {
+            updatedString = updatedString.replace("%$placeholder%", value().toPlain())
+        }
 
         return updatedString to (updatedString != latestString)
     }
 
-    private fun generateResult(binder: T, foundPlaceholders: List<String>): Pair<Map<String, String>, Boolean> {
+    private fun generateResult(
+        binder: T,
+        foundPlaceholders: List<String>
+    ): Pair<Pair<Map<String, String>, Map<String, () -> Component>>, Boolean> {
         val currentTime = System.currentTimeMillis()
         val result = HashMap<String, String>()
+        val resultComponent = HashMap<String, () -> Component>()
 
         var updated = false
 
@@ -79,25 +93,45 @@ class PlaceholderContext<T>(
             val identifier = string.substringBefore("_")
             val placeholder = placeholders[identifier] ?: continue
 
-            val previousValue = cache[string]
+            if (placeholder is Placeholder.Literal) {
+                val previousValue = literalCache[string]
 
-            if (previousValue != null && ((currentTime - previousValue.time) < (maxUpdateInterval * 50) || placeholder.isConst)) {
-                result[string] = previousValue.updated
-                continue
-            }
+                if (previousValue != null && ((currentTime - previousValue.time) < (maxUpdateInterval * 50) || placeholder.isConst)) {
+                    result[string] = previousValue.updated
+                    continue
+                }
 
-            val newValue = placeholder.apply(binder, string)
+                val newValue = placeholder.apply(binder, string)
 
-            if (previousValue?.updated != newValue) {
-                result[string] = newValue
-                cache[string] = PlaceholderState(newValue, currentTime)
-                updated = true
-            } else {
-                previousValue.time = currentTime
-                result[string] = previousValue.updated
+                if (previousValue?.updated != newValue) {
+                    result[string] = newValue
+                    literalCache[string] = PlaceholderState(newValue, currentTime)
+                    updated = true
+                } else {
+                    previousValue.time = currentTime
+                    result[string] = previousValue.updated
+                }
+            } else if (placeholder is Placeholder.Component) {
+                val previousValue = componentCache[string]
+
+                if (previousValue != null && ((currentTime - previousValue.time) < (maxUpdateInterval * 50) || placeholder.isConst)) {
+                    resultComponent[string] = { previousValue.updated }
+                    continue
+                }
+
+                val newValue = placeholder.apply(binder, string)
+
+                if (previousValue?.updated != newValue) {
+                    resultComponent[string] = { newValue }
+                    componentCache[string] = PlaceholderStateComponent(newValue, currentTime)
+                    updated = true
+                } else {
+                    previousValue.time = currentTime
+                    resultComponent[string] = { previousValue.updated }
+                }
             }
         }
-        return result to updated
+        return (result to resultComponent) to updated
     }
 
     /**
@@ -356,6 +390,12 @@ class PlaceholderContext<T>(
 
     private class PlaceholderState(
         val updated: String,
+        var time: Long
+    )
+
+
+    private class PlaceholderStateComponent(
+        val updated: Component,
         var time: Long
     )
 
