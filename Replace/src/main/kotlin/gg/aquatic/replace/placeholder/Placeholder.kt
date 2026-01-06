@@ -20,11 +20,17 @@ interface Placeholder<T> {
     val identifier: String
     val isConst: Boolean
 
+    fun <R> map(mapper: (R) -> T): Placeholder<R>
+
     open class Literal<T>(
-        override val identifier: String, override val isConst: Boolean = false, private val func: (T, String) -> String
+        override val identifier: String,
+        override val isConst: Boolean = false,
+        private val func: (T, String) -> String
     ) : Placeholder<T> {
-        fun apply(target: T, text: String): String {
-            return func(target, text)
+        fun apply(target: T, text: String): String = func(target, text)
+
+        override fun <R> map(mapper: (R) -> T): Placeholder<R> {
+            return Literal(identifier, isConst) { r, str -> func(mapper(r), str) }
         }
     }
 
@@ -33,8 +39,10 @@ interface Placeholder<T> {
         override val isConst: Boolean = false,
         private val func: (T, String) -> net.kyori.adventure.text.Component
     ) : Placeholder<T> {
-        fun apply(target: T, text: String): net.kyori.adventure.text.Component {
-            return func(target, text)
+        fun apply(target: T, text: String): net.kyori.adventure.text.Component = func(target, text)
+
+        override fun <R> map(mapper: (R) -> T): Placeholder<R> {
+            return Component(identifier, isConst) { r, str -> func(mapper(r), str) }
         }
     }
 

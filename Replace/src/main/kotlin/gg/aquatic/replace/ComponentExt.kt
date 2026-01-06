@@ -43,90 +43,40 @@ fun Component.findPlaceholders(): Set<String> {
  * @return A new `Component` with placeholders replaced according to the `updater` function.
  */
 fun Component.replacePlaceholders(updater: (String) -> String): Component {
-    fun recurse(comp: Component): Component {
-        val style = comp.style()
-        var newStyle = style
-
-        // Handle hover event if present
-        style.hoverEvent()?.let { hover ->
-            if (hover.action() == HoverEvent.Action.SHOW_TEXT) {
-                val hoverComp = hover.value() as? Component
-                if (hoverComp != null) {
-                    val replacedHover = recurse(hoverComp)
-                    newStyle = newStyle.hoverEvent(HoverEvent.showText(replacedHover))
-                }
-            }
-        }
-
-        // Handle insertion text (plain string)
-        style.insertion()?.let { insertion ->
-            val newInsertion = updater(insertion)
-            newStyle = newStyle.insertion(newInsertion)
-        }
-
-        var newComponent = if (comp is TextComponent) {
-            val newText = updater(comp.content())
-            val rebuilt = Component.text(newText).style(newStyle)
-            rebuilt
-        } else {
-            val rebuilt: Component = comp.style(newStyle)
-            rebuilt
-        }
-        for (child in comp.children()) {
-            newComponent = newComponent.append(recurse(child))
-        }
-        return newComponent
+    val newStyle = applyToStyle(updater)
+    var newComponent = if (this is TextComponent) {
+        val newText = PLACEHOLDER_REGEX.replace(content()) { updater(it.groupValues[1]) }
+        Component.text(newText).style(newStyle)
+    } else {
+        style(newStyle)
     }
-    return recurse(this)
+
+    children().forEach { newComponent = newComponent.append(it.replacePlaceholders(updater)) }
+    return newComponent
+}
+
+private fun Component.applyToStyle(updater: (String) -> String): Style {
+    var newStyle = style()
+    style().hoverEvent()?.let { hover ->
+        if (hover.action() == HoverEvent.Action.SHOW_TEXT && hover.value() is Component) {
+            val replacedHover = (hover.value() as Component).replacePlaceholders(updater)
+            newStyle = newStyle.hoverEvent(HoverEvent.showText(replacedHover))
+        }
+    }
+    style().insertion()?.let { newStyle = newStyle.insertion(updater(it)) }
+    return newStyle
 }
 
 /**
  * Only use when we 100% know that we got predefined placeholders
  */
 fun Component.replacePlaceholders(cached: Map<String, String>): Component {
-    fun recurse(comp: Component): Component {
-        val style = comp.style()
-        var newStyle = style
-
-        // Handle hover event if present
-        style.hoverEvent()?.let { hover ->
-            if (hover.action() == HoverEvent.Action.SHOW_TEXT) {
-                val hoverComp = hover.value() as? Component
-                if (hoverComp != null) {
-                    val replacedHover = recurse(hoverComp)
-                    newStyle = newStyle.hoverEvent(HoverEvent.showText(replacedHover))
-                }
-            }
+    return replacePlaceholders { text ->
+        PLACEHOLDER_REGEX.replace(text) { match ->
+            val key = match.groupValues[1]
+            cached[key] ?: key
         }
-
-        // Handle insertion text (plain string)
-        style.insertion()?.let { insertion ->
-            var newInsertion = insertion
-            PLACEHOLDER_REGEX.findAll(insertion).forEach { match ->
-                val key = match.groupValues[1]
-                newInsertion = insertion.replace("%$key%", cached[key] ?: key)
-            }
-            newStyle = newStyle.insertion(newInsertion)
-        }
-
-        var newComponent = if (comp is TextComponent) {
-            var newText = comp.content()
-            PLACEHOLDER_REGEX.findAll(newText).forEach { match ->
-                val key = match.groupValues[1]
-                newText = newText.replace("%$key%", cached[key] ?: key)
-            }
-            val rebuilt = Component.text(newText).style(newStyle)
-            rebuilt
-        } else {
-            val rebuilt: Component = comp.style(newStyle)
-            rebuilt
-        }
-        for (child in comp.children()) {
-            newComponent = newComponent.append(recurse(child))
-        }
-        return newComponent
     }
-    return recurse(this)
 }
 
 /**

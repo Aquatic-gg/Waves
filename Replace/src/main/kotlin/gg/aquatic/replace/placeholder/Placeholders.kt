@@ -9,7 +9,10 @@ object Placeholders {
     val registered by lazy {
         val map = hashMapOf<Class<*>, MutableCollection<Placeholder<*>>>()
 
-        val isPapiInstalled = Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null
+        // Safe check for server existence to prevent NPE during Unit Tests
+        val server = try { Bukkit.getServer() } catch (_: Throwable) { null }
+        val isPapiInstalled = server?.pluginManager?.getPlugin("PlaceholderAPI") != null
+
         if (isPapiInstalled) {
             map += Player::class.java to mutableListOf(Placeholder.PAPIPlaceholder)
         }
@@ -52,16 +55,8 @@ object Placeholders {
         maxUpdateInterval: Int = 5,
         vararg transforms: Transform<T, *>
     ): PlaceholderContext<T> {
-        val placeholders = ArrayList<Placeholder<T>>()
-
-        val original = getRegisteredFor(clazz)
-        for (placeholder in original) {
-            placeholders.add(placeholder)
-        }
-
-        for (transform in transforms) {
-            placeholders += transform.generate()
-        }
+        val placeholders = getRegisteredFor(clazz).toMutableList()
+        transforms.forEach { placeholders += it.generate() }
 
         return PlaceholderContext(placeholders, maxUpdateInterval)
     }
@@ -93,27 +88,13 @@ object Placeholders {
         val transformToClass: Class<B>,
         val func: (A) -> B
     ) {
-
         companion object {
-            inline operator fun <reified A, reified B> invoke(noinline func: (A) -> B) = Transform(B::class.java, func)
+            inline operator fun <reified A, reified B> invoke(noinline func: (A) -> B) =
+                Transform(B::class.java, func)
         }
 
         internal fun generate(): List<Placeholder<A>> {
-            val generated = ArrayList<Placeholder<A>>()
-            val originals = getRegisteredFor(transformToClass)
-
-            for (placeholder in originals) {
-                if (placeholder is Placeholder.Literal) {
-                    generated.add(Placeholder.Literal(placeholder.identifier) { a, str ->
-                        placeholder.apply(func(a), str)
-                    })
-                } else if (placeholder is Placeholder.Component) {
-                    generated.add(Placeholder.Component(placeholder.identifier) { a, str ->
-                        placeholder.apply(func(a), str)
-                    })
-                }
-            }
-            return generated
+            return getRegisteredFor(transformToClass).map { it.map(func) }
         }
     }
 }
