@@ -25,7 +25,7 @@ Add the library to your build.gradle.kts:
 
 ````kotlin
 repositories {
-    maven("https://repo.aquatic.gg/releases")
+    maven("https://repo.nekroplex.com/releases")
 }
 
 dependencies {
