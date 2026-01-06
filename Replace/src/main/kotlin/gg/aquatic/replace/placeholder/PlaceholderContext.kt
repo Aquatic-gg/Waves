@@ -368,11 +368,11 @@ class PlaceholderContext<T>(
                 }
             }
 
-            if ((nameUpdated || loreUpdated)) {
-                if ((nameUpdated) && name != null) {
+            if (nameUpdated || loreUpdated) {
+                if (nameUpdated && name != null) {
                     meta.displayName(name.latestState.value)
                 }
-                if ((loreUpdated) && lore != null) {
+                if (loreUpdated && lore != null) {
                     meta.lore(lore.map { item -> item.latestState.value })
                 }
                 val item = latestState.value.clone()
