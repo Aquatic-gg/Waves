@@ -71,21 +71,20 @@ class PlaceholderTest {
 
     @Test
     fun `test transform with kyori components`() {
-        // Use a unique data class for this test to avoid registry interference
-        data class ComponentGame(val name: String)
-        val binder = ComponentGame("Survival")
+        data class Game(val name: String)
+        val binder = Game("Survival")
 
-        val componentPlaceholder = Placeholder.Component<String>("styledname") { name, _ ->
+        // Identifier with underscore works now!
+        val componentPlaceholder = Placeholder.Component<String>("styled_name") { name, _ ->
             net.kyori.adventure.text.Component.text(name).color(net.kyori.adventure.text.format.NamedTextColor.GOLD)
         }
-        // Register specifically for String to test the transform
         Placeholders.register(String::class.java, componentPlaceholder)
 
-        val gameContext = Placeholders.resolverFor<ComponentGame>(
+        val gameContext = Placeholders.resolverFor<Game>(
             transforms = arrayOf(Placeholders.Transform { it.name })
         )
 
-        val item = gameContext.createItem(binder, net.kyori.adventure.text.Component.text("Playing %styledname%"))
+        val item = gameContext.createItem(binder, net.kyori.adventure.text.Component.text("Playing %styled_name%"))
 
         assertEquals("Playing Survival", item.latestState.value.toPlain())
     }

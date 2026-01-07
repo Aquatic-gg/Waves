@@ -90,8 +90,10 @@ class PlaceholderContext<T>(
         var updated = false
 
         for (string in foundPlaceholders) {
-            val identifier = string.substringBefore("_")
-            val placeholder = placeholders[identifier] ?: continue
+            val placeholderEntry = placeholders.entries.find { (id, _) ->
+                string == id || string.startsWith("${id}_")
+            }
+            val placeholder = placeholderEntry?.value ?: continue
 
             if (placeholder is Placeholder.Literal) {
                 val previousValue = literalCache[string]
@@ -156,8 +158,9 @@ class PlaceholderContext<T>(
      * @return A new `Item` instance with the processed component and found placeholders.
      */
     fun createItem(binder: T, component: Component): ComponentItem {
-        val foundPlaceholders =
-            component.findPlaceholders().filter { placeholders.containsKey(it.substringBefore("_").lowercase()) }
+        val foundPlaceholders = component.findPlaceholders().filter { found ->
+            placeholders.keys.any { id -> found == id || found.startsWith("${id}_") }
+        }
 
         return ComponentItem(component, foundPlaceholders, binder)
     }
