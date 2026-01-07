@@ -27,7 +27,7 @@ repositories {
 }
 
 dependencies {
-    implementation("gg.aquatic.replace:Replace:1.0.0")
+    implementation("gg.aquatic.replace:Replace:26.0.2")
 }
 ```
 
