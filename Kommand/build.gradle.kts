@@ -20,7 +20,7 @@ dependencies {
     compileOnly("com.mojang:brigadier:1.0.500")
 
     // Testing
-    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("io.mockk:mockk:1.14.7")
     testImplementation(kotlin("test"))
     testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
 }
