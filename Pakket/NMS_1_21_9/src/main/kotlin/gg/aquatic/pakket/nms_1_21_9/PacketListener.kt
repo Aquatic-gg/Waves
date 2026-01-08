@@ -25,27 +25,19 @@ class PacketListener(
 ) : ChannelDuplexHandler() {
 
     override fun write(ctx: ChannelHandlerContext?, msg: Any, promise: ChannelPromise?) {
-        var isMegPacket = false
-        val packet = if (Bukkit.getPluginManager().getPlugin("ModelEngine") != null) {
-            if (MEGPacketHandler.isMegPacket(msg)) {
-                isMegPacket = true
-                MEGPacketHandler.unpackPacket(msg)
-            } else msg
-        } else msg
+        val (isMegPacket, packet) = getPacket(msg)
 
         if (packet is ProtectedPacket) {
             super.write(ctx, packet.packet, promise)
             return
         }
 
-        val packets =
-            if (packet is ClientboundBundlePacket) packet.subPackets() else listOf<Packet<in ClientGamePacketListener>>(
-                packet as? Packet<ClientGamePacketListener> ?: return super.write(
-                    ctx,
-                    if (isMegPacket) msg else packet,
-                    promise
-                )
-            )
+        val packets = unwrapPacket(packet) ?: return super.write(
+            ctx,
+            if (isMegPacket) msg else packet,
+            promise
+        )
+
         val newPackets = ArrayList<Packet<in ClientGamePacketListener>>()
         val thens = ArrayList<() -> Unit>()
         for (subPacket in packets) {
@@ -67,6 +59,24 @@ class PacketListener(
         thens.forEach { it() }
         return
     }
+
+    private fun getPacket(msg: Any): Pair<Boolean, Any> {
+        val packet = if (Bukkit.getPluginManager().getPlugin("ModelEngine") != null) {
+            if (MEGPacketHandler.isMegPacket(msg)) {
+                return Pair(true, MEGPacketHandler.unpackPacket(msg))
+            } else msg
+        } else msg
+        return Pair(false, packet)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun unwrapPacket(packet: Any): Iterable<Packet<in ClientGamePacketListener>>? {
+        return if (packet is ClientboundBundlePacket) packet.subPackets()
+        else listOf<Packet<in ClientGamePacketListener>>(
+            packet as? Packet<ClientGamePacketListener> ?: return null
+        )
+    }
+
     fun handlePacket(packet: Packet<in ClientGamePacketListener>): Pair<Packet<in ClientGamePacketListener>, PacketEvent?>? {
         when (packet) {
             is ClientboundAddEntityPacket -> {
@@ -80,6 +90,7 @@ class PacketListener(
                 }
                 return packet to event
             }
+
             is ClientboundRemoveEntitiesPacket -> {
                 val event = PacketDestroyEntitiesPacket(player, packet.entityIds.toIntArray())
                 NMSHandler.eventBus.post(event)
@@ -88,6 +99,7 @@ class PacketListener(
                 }
                 return packet to event
             }
+
             is ClientboundLevelChunkWithLightPacket -> {
                 val event = PacketChunkLoadEvent(player, packet.x, packet.z, packet, ArrayList())
                 NMSHandler.eventBus.post(event)
@@ -158,6 +170,7 @@ class PacketListener(
                 )
                 return newPacket to event
             }
+
             is ClientboundOpenScreenPacket -> {
                 val event = PacketContainerOpenEvent(player, packet.containerId)
                 NMSHandler.eventBus.post(event)
