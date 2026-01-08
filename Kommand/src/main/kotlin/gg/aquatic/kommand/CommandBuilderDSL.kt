@@ -13,6 +13,9 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.launch
 import org.bukkit.Bukkit
 import org.bukkit.command.CommandSender
@@ -118,6 +121,16 @@ class CommandBuilder<S : CommandSourceStack>(
     fun suggests(block: (context: CommandContext<S>, builder: SuggestionsBuilder) -> CompletableFuture<Suggestions>) {
         if (builder is RequiredArgumentBuilder<S, *>) {
             builder.suggests(block)
+        }
+    }
+
+    fun suggestsAsync(
+        scope: CoroutineScope = KommandConfig.commandScope, block: suspend (context: CommandContext<S>, builder: SuggestionsBuilder) -> Suggestions
+    ) {
+        suggests { context, builder ->
+            scope.async {
+                block(context, builder)
+            }.asCompletableFuture()
         }
     }
 
