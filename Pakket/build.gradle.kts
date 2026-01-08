@@ -8,7 +8,7 @@ group = "gg.aquatic"
 version = "26.0.1"
 
 repositories {
-
+    maven("https://repo.nekroplex.com/releases")
     maven {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
@@ -20,6 +20,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":API"))
     implementation(project(":NMS_1_21_9"))
+    compileOnly("gg.aquatic:KEvent:1.0.4")
 }
 
 kotlin {
@@ -61,7 +62,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "gg.aquatic"
-            artifactId = "KEvent"
+            artifactId = "Pakket"
             version = "${project.version}"
 
             from(components["java"])
