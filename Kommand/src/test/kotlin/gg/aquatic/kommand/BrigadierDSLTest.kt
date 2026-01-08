@@ -217,4 +217,39 @@ class BrigadierDSLTest {
         dispatcher.execute("teleport MyPlayerName", mockSource)
         assertEquals("MyPlayerName", capturedVal, "Value should be captured when argument is present")
     }
+
+    @Test
+    fun `test subcommand inheritance and help by default`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+        val mockSource = mockk<CommandSourceStack>()
+        every { mockSource.sender } returns mockk<Player>(relaxed = true)
+
+        var helpCalls = 0
+        var balanceCalls = 0
+
+        dispatcher.command("economy") {
+            // Root execute (Help)
+            execute<Player> {
+                helpCalls++
+                false // ALLOW logic to continue to subcommands
+            }
+
+            "balance" {
+                execute<Player> {
+                    balanceCalls++
+                    true // Stop here
+                }
+            }
+        }
+
+        // 1. Run /economy -> Only help should fire
+        dispatcher.execute("economy", mockSource)
+        assertEquals(1, helpCalls, "Help should have fired once")
+        assertEquals(0, balanceCalls, "Balance should not have fired")
+
+        // 2. Run /economy balance -> Help fires first (inherited), then Balance fires
+        dispatcher.execute("economy balance", mockSource)
+        assertEquals(2, helpCalls, "Help should have fired again (inherited)")
+        assertEquals(1, balanceCalls, "Balance should have fired once")
+    }
 }

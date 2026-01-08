@@ -46,7 +46,7 @@ dependencies {
 Define a simple command with a required argument:
 
 ```kotlin
-dispatcher.command("teleport", "tp") {
+command("teleport", "tp") {
     hasPermission("myplugin.teleport")
 
     playerArgument("target") {
@@ -70,14 +70,13 @@ In **Kommand**, every `execute` block returns a `Boolean`. This value determines
 *   **`return true`**: Logic stops here. Use this when the command is fully handled.
 *   **`return false`**: Logic runs, but the engine continues to check child arguments or subcommands.
 
-This is perfect for creating help menus that appear by default:
+This is perfect for **Global Logic** (like logging or cooldown checks) that should apply to all subcommands:
 
 ```kotlin
 command("economy") {
     execute<Player> {
-        sender.sendMessage("--- Economy Help ---")
-        sender.sendMessage("/eco balance - Check money")
-        false // Allow subcommands like /eco balance to still be reached
+        println("${sender.name} used an economy command!")
+        false // Returning false ensures the subcommands (balance, pay) still run!
     }
 
     "balance" {
@@ -89,25 +88,44 @@ command("economy") {
 }
 ```
 
-### 2. Branching (Optional Arguments)
-You can create "Optional" arguments by placing an `execute` block at the same level as an argument definition. The engine will pick the most specific match provided by the user.
+### 2. Branching & `execute` Placement
+The placement of an `execute` block determines **when** it runs. By moving the block relative to an argument, you can handle optional parameters or "Help" fallbacks.
+
+#### Placement: BEFORE the argument
+If `execute` is placed at the same level as an argument but **before** its definition, it acts as the handler for when that argument is **missing**.
 
 ```kotlin
-command("teleport") {
-    // Executed for: /teleport
+command("feed") {
+    // This runs for: /feed
     execute<Player> {
-        sender.sendMessage("Usage: /teleport <player>")
+        sender.sendMessage("Usage: /feed <player>")
         true
     }
 
-    // Executed for: /teleport <target>
     playerArgument("target") {
+        // This runs for: /feed <player>
         execute<Player> {
             val target = get<Player>("target")
-            sender.teleport(target)
+            target.foodLevel = 20
             true
         }
     }
+}
+```
+
+#### Placement: INSIDE the argument
+If `execute` is placed **inside** the argument block, it can only run if that argument was successfully parsed.
+
+```kotlin
+command("heal") {
+  playerArgument("target") {
+    execute<Player> {
+      // This ONLY runs if a valid player name was provided
+      val target = get<Player>("target")
+      target.health = 20.0
+      true
+    }
+  }
 }
 ```
 
