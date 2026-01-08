@@ -21,6 +21,7 @@ out/
 
 .idea/
 .logs/
+.env
 
 ### Eclipse ###
 .apt_generated
