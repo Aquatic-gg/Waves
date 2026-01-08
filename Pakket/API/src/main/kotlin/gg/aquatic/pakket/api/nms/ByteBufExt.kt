@@ -22,19 +22,19 @@ fun ByteBuf.readVarInt(): Int {
 fun ByteBuf.writeVarInt(value: Int) {
     if (value and (-0x1 shl 7) == 0) {
         writeByte(value)
-    } else if ((value and (-0x1 shl 14)) == 0) {
+    } else if (value and (-0x1 shl 14) == 0) {
         val w = (value and 0x7F or 0x80) shl 8 or (value ushr 7)
         writeShort(w)
-    } else if ((value and (-0x1 shl 21)) == 0) {
+    } else if (value and (-0x1 shl 21) == 0) {
         val w = (value and 0x7F or 0x80) shl 16 or (((value ushr 7) and 0x7F or 0x80) shl 8) or (value ushr 14)
         writeMedium(w)
-    } else if ((value and (-0x1 shl 28)) == 0) {
+    } else if (value and (-0x1 shl 28) == 0) {
         val w = ((value and 0x7F or 0x80) shl 24 or (((value ushr 7) and 0x7F or 0x80) shl 16)
                 or (((value ushr 14) and 0x7F or 0x80) shl 8) or (value ushr 21))
         writeInt(w)
     } else {
-        val w = ((value and 0x7F or 0x80) shl 24 or (((value ushr 7) and 0x7F or 0x80) shl 16
-                ) or (((value ushr 14) and 0x7F or 0x80) shl 8) or ((value ushr 21) and 0x7F or 0x80))
+        val w = (value and 0x7F or 0x80) shl 24 or (((value ushr 7) and 0x7F or 0x80) shl 16
+                ) or (((value ushr 14) and 0x7F or 0x80) shl 8) or ((value ushr 21) and 0x7F or 0x80)
         writeInt(w)
         writeByte(value ushr 28)
     }
