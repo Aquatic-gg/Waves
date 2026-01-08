@@ -10,17 +10,17 @@ fun ByteBuf.readVarInt(): Int {
     var currentByte: Byte
     do {
         currentByte = readByte()
-        value = value or ((currentByte.toInt() and 0x7F) shl (length * 7))
+        value = value or ((currentByte.toInt() and 0x7F) shl length * 7)
         length++
         if (length > 5) {
             throw RuntimeException("VarInt is too large. Must be smaller than 5 bytes.");
         }
-    } while ((currentByte.toInt() and 0x80) == 0x80)
+    } while (currentByte.toInt() and 0x80 == 0x80)
     return value
 }
 
 fun ByteBuf.writeVarInt(value: Int) {
-    if ((value and (-0x1 shl 7)) == 0) {
+    if (value and (-0x1 shl 7) == 0) {
         writeByte(value)
     } else if ((value and (-0x1 shl 14)) == 0) {
         val w = (value and 0x7F or 0x80) shl 8 or (value ushr 7)

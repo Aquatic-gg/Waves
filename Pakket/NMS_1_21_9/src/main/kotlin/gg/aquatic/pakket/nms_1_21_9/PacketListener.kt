@@ -141,7 +141,7 @@ class PacketListener(
                 val event = PacketContainerContentEvent(
                     player,
                     packet.containerId,
-                    packet.items.map { (CraftItemStack.asCraftMirror(it)) }.toMutableList(),
+                    packet.items.map { CraftItemStack.asCraftMirror(it) }.toMutableList(),
                     CraftItemStack.asCraftMirror(packet.carriedItem)
                 )
                 NMSHandler.eventBus.post(event)
@@ -152,7 +152,7 @@ class PacketListener(
                     packet.containerId,
                     packet.stateId,
                     NonNullList.create<net.minecraft.world.item.ItemStack>().apply {
-                        addAll(event.contents.map { (CraftItemStack.asNMSCopy(it)) })
+                        addAll(event.contents.map { CraftItemStack.asNMSCopy(it) })
                     },
                     CraftItemStack.asNMSCopy(event.carriedItem)
                 )

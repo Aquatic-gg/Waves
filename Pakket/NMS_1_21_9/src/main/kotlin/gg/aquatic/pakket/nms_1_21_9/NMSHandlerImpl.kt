@@ -92,7 +92,7 @@ object NMSHandlerImpl : NMSHandler() {
         }
 
     override fun injectPacketListener(player: Player) {
-        val craftPlayer = (player as CraftPlayer)
+        val craftPlayer = player as CraftPlayer
         val packetListener = PacketListener(craftPlayer)
         val connection = playerConnectionField.get(craftPlayer.handle.connection) as Connection
         val pipeline = connection.channel.pipeline()
@@ -106,7 +106,7 @@ object NMSHandlerImpl : NMSHandler() {
     }
 
     override fun unregisterPacketListener(player: Player) {
-        val craftPlayer = (player as CraftPlayer)
+        val craftPlayer = player as CraftPlayer
         val connection = playerConnectionField.get(craftPlayer.handle.connection) as Connection
         val channel = connection.channel
         val pipeline = channel.pipeline()
@@ -439,7 +439,7 @@ object NMSHandlerImpl : NMSHandler() {
                 return SynchedEntityData.DataValue(
                     original.id,
                     EntityDataSerializers.VECTOR3,
-                    (original.value as Vector3f)
+                    original.value as Vector3f
                 )
             }
 
@@ -569,11 +569,11 @@ object NMSHandlerImpl : NMSHandler() {
         val mappedEquipment = equipment.map {
             Pair(
                 net.minecraft.world.entity.EquipmentSlot.entries[it.key.ordinal],
-                (it.value?.let { item ->
+                it.value?.let { item ->
                     CraftItemStack.asNMSCopy(
                         item
                     )
-                } ?: net.minecraft.world.item.ItemStack.EMPTY))
+                } ?: net.minecraft.world.item.ItemStack.EMPTY)
         }
         val packet = ClientboundSetEquipmentPacket(packetEntity.entityId, mappedEquipment)
         return packet
@@ -682,74 +682,6 @@ object NMSHandlerImpl : NMSHandler() {
         ReflectionUtils.getField("buffer", ClientboundLevelChunkPacketData::class.java).apply {
             isAccessible = true
         }
-
-    /*
-    override fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit) {
-        val sections = (world.minHeight.absoluteValue + world.maxHeight) shr 4
-        val chunkBundlePacket = packet as ClientboundLevelChunkWithLightPacket
-
-        val chunkData = chunkBundlePacket.chunkData
-        val readBuffer = chunkData.readBuffer
-
-        val wrappedSections = mutableListOf<WrappedChunkSection>()
-        val registries = (world as CraftWorld).handle.registryAccess()
-        val factory = PalettedContainerFactory.create(registries)
-
-        val container1 = factory.createForBlockStates()
-        val container2 = factory.createForBiomes()
-
-        for (i in 0 until sections) {
-            val section = LevelChunkSection(container1, container2)
-            section.read(readBuffer)
-            val pair = ((object : WrappedChunkSection {
-                override val section: LevelChunkSection = section
-
-                override fun set(x: Int, y: Int, z: Int, blockState: BlockData) {
-                    section.setBlockState(x, y, z, (blockState as CraftBlockData).state, false)
-                    //palettedContainer.set(x, y, z, (blockState as CraftBlockState).handle)
-                }
-
-                override fun get(x: Int, y: Int, z: Int): BlockData {
-                    val state = CraftBlockData.fromData(section.getBlockState(x, y, z))
-                    return state
-                }
-            } as WrappedChunkSection))
-            wrappedSections.add(pair)
-        }
-        func(wrappedSections)
-
-        val chunkSections = wrappedSections.map { it.section as LevelChunkSection }
-        val bytes = ByteArray(calculateChunkSize(chunkSections))
-        val writeBuffer: ByteBuf = Unpooled.wrappedBuffer(bytes)
-        writeBuffer.writerIndex(0)
-
-        extractChunkData(chunkSections, writeBuffer)
-        chunkDataBufferField.set(chunkData, bytes)
-    }
-
-    private fun calculateChunkSize(sections: Collection<LevelChunkSection>): Int {
-        var i = 0
-
-        for (levelChunkSection in sections) {
-            i += levelChunkSection.serializedSize
-        }
-
-        return i
-    }
-
-    private fun extractChunkData(sections: Collection<LevelChunkSection>, wrapper: ByteBuf) {
-        var chunkSectionIndex = 0
-
-        val buffer = FriendlyByteBuf(wrapper)
-
-        for (levelChunkSection in sections) {
-            levelChunkSection.write(buffer, null, chunkSectionIndex)
-            ++chunkSectionIndex
-        }
-
-        check(buffer.writerIndex() == buffer.capacity()) { "Didn't fill biome buffer: expected " + buffer.capacity() + " bytes, got " + buffer.writerIndex() }
-    }
-     */
 
     override fun createTeamsPacket(
         team: gg.aquatic.pakket.api.nms.scoreboard.Team,
