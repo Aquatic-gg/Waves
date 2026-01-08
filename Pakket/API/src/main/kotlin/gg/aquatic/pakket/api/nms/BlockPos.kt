@@ -3,7 +3,7 @@ package gg.aquatic.pakket.api.nms
 import org.bukkit.Location
 import org.bukkit.util.Vector
 
-class BlockPos(
+data class BlockPos(
     val x: Int,
     val y: Int,
     val z: Int

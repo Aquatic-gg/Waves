@@ -41,8 +41,8 @@ subprojects {
     }
 }
 
-val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
-val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
+val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
+val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 
 publishing {
     repositories {
@@ -51,8 +51,8 @@ publishing {
             url = uri("https://repo.nekroplex.com/releases")
 
             credentials {
-                username = maven_username
-                password = maven_password
+                username = mavenUsername
+                password = mavenPassword
             }
             authentication {
                 create<BasicAuthentication>("basic")

@@ -825,13 +825,11 @@ object NMSHandlerImpl : NMSHandler() {
         vararg players: Player,
     ) {
         val registryAccess = (Bukkit.getWorlds().first() as CraftWorld).handle.registryAccess()
-        val registryOps: RegistryOps<HashCode> = registryAccess.createSerializationContext(HashOps.CRC32C_INSTANCE);
-        val hashOpsGenerator: HashedPatchMap.HashGenerator = object : HashedPatchMap.HashGenerator {
-            override fun apply(typedDataComponent: TypedDataComponent<*>): Int {
-                return typedDataComponent.encodeValue(registryOps).getOrThrow { string ->
-                    IllegalArgumentException("Failed to hash $typedDataComponent: $string")
-                }.asInt()
-            }
+        val registryOps: RegistryOps<HashCode> = registryAccess.createSerializationContext(HashOps.CRC32C_INSTANCE)
+        val hashOpsGenerator: HashedPatchMap.HashGenerator = HashedPatchMap.HashGenerator { typedDataComponent ->
+            typedDataComponent.encodeValue(registryOps).getOrThrow { string ->
+                IllegalArgumentException("Failed to hash $typedDataComponent: $string")
+            }.asInt()
         }
 
         val map = Int2ObjectOpenHashMap<HashedStack>()

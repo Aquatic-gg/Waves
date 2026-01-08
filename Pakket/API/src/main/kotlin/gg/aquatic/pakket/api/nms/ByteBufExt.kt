@@ -13,7 +13,7 @@ fun ByteBuf.readVarInt(): Int {
         value = value or ((currentByte.toInt() and 0x7F) shl length * 7)
         length++
         if (length > 5) {
-            throw RuntimeException("VarInt is too large. Must be smaller than 5 bytes.");
+            throw RuntimeException("VarInt is too large. Must be smaller than 5 bytes.")
         }
     } while (currentByte.toInt() and 0x80 == 0x80)
     return value
@@ -51,10 +51,10 @@ fun <K, V> ByteBuf.readMap(keyReader: Reader<K>, valueReader: Reader<V>, maxSize
     }
 
     val map: MutableMap<K, V> = HashMap(size)
-    for (i in 0..<size) {
+    repeat(size) {
         val key = keyReader.invoke(this)
         val value = valueReader.invoke(this)
-        map.put(key, value)
+        map[key] = value
     }
     return map
 }
@@ -108,7 +108,7 @@ private fun ByteBuf.checkAvailable(fieldSize: Int) {
         throw IndexOutOfBoundsException("fieldSize cannot be a negative number")
     } else if (fieldSize > this.available()) {
         val value: Int = this.available()
-        val msg = "fieldSize is too long! Length is " + fieldSize + ", but maximum is " + value
+        val msg = "fieldSize is too long! Length is $fieldSize, but maximum is $value"
         if (value == 0) {
             throw Exception(msg)
         } else {

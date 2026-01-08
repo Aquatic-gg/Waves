@@ -22,7 +22,7 @@ class PacketEntity(
     var location: Location = location
         private set
 
-    fun bukkitEntity(nmsHandler: NMSHandler): Entity? {
+    fun bukkitEntity(nmsHandler: NMSHandler): Entity {
         return nmsHandler.getBukkitEntity(this)
     }
 

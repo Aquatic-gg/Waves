@@ -199,6 +199,10 @@ class PacketListener(
         isAccessible = true
     }
 
+    @Suppress("DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused",
+        "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused",
+        "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused"
+    )
     override fun channelRead(ctx: ChannelHandlerContext?, msg: Any?) {
         if (msg is ProtectedPacket) {
             super.channelRead(ctx, msg.packet)
