@@ -43,7 +43,7 @@ class PacketListener(
         for (subPacket in packets) {
             val pair = handlePacket(subPacket) ?: continue
             val (resultPacket, resultEvent) = pair
-            resultEvent?.let { thens.add(it.then) }
+            resultEvent?.let { thens.addAll(it.thens) }
             newPackets.add(resultPacket)
         }
         if (newPackets.isEmpty()) {
@@ -227,7 +227,7 @@ class PacketListener(
                     return
                 }
                 super.channelRead(ctx, msg)
-                event.then()
+                event.thens.forEach { it() }
                 return
             }
 
@@ -238,7 +238,7 @@ class PacketListener(
                     return
                 }
                 super.channelRead(ctx, msg)
-                event.then()
+                event.thens.forEach { it() }
                 return
             }
 
@@ -276,7 +276,7 @@ class PacketListener(
                     return
                 }
                 super.channelRead(ctx, msg)
-                event.then()
+                event.thens.forEach { it() }
                 return
             }
         }
