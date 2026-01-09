@@ -4,6 +4,7 @@ import gg.aquatic.kevent.subscribe
 import gg.aquatic.pakket.api.event.PacketEvent
 import gg.aquatic.pakket.api.nms.NMSHandler
 import gg.aquatic.pakket.nms_1_21_9.NMSHandlerImpl
+import org.bukkit.entity.Player
 
 object Pakket {
 
@@ -16,6 +17,8 @@ object Pakket {
 
 }
 
-inline fun <reified T: PacketEvent> packetEvent(crossinline block: (T) -> Unit) {
+inline fun <reified T : PacketEvent> packetEvent(crossinline block: (T) -> Unit) {
     NMSHandler.eventBus.subscribe<T> { block(it) }
 }
+
+fun Player.sendPacket(packet: Any, silent: Boolean = false) = Pakket.handler.sendPacket(packet, silent, this)
