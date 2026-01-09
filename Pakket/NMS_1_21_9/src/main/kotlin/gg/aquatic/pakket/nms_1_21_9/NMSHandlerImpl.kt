@@ -814,6 +814,15 @@ object NMSHandlerImpl : NMSHandler() {
         }
     }
 
+    override fun closeWindow(inventoryId: Int, vararg players: Player) {
+        val packet = closeWindowPacket(inventoryId)
+        sendPacket(packet, silent = false, *players)
+    }
+
+    override fun closeWindowPacket(inventoryId: Int): Any {
+        return ClientboundContainerClosePacket(inventoryId)
+    }
+
     override fun receiveWindowClick(
         inventoryId: Int,
         stateId: Int,

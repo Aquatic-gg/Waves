@@ -91,7 +91,10 @@ abstract class NMSHandler {
     //fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit)
 
     abstract fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
+    abstract fun closeWindow(inventoryId: Int, vararg players: Player)
+    abstract fun closeWindowPacket(inventoryId: Int): Any
     abstract fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
+
     abstract fun sendPacket(packet: Any, silent: Boolean = false, vararg players: Player)
     abstract fun sendPacketBundle(bundle: PacketBundle, silent: Boolean = false, vararg players: Player)
 
