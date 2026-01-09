@@ -34,7 +34,7 @@ repositories {
 }
 
 dependencies {
-  implementation("gg.aquatic.stacked:Stacked:26.0.1")
+  implementation("gg.aquatic:Stacked:26.0.1")
 
   implementation("gg.aquatic:KRegistry:25.0.1")
   implementation("gg.aquatic:KEvent:1.0.4")
