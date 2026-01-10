@@ -1,6 +1,5 @@
 package gg.aquatic.execute.coroutine
 
-import gg.aquatic.cosmoframework.util.coroutine.SingleThreadCtx
 import gg.aquatic.execute.Execute
 import kotlinx.coroutines.*
 import org.bukkit.Bukkit

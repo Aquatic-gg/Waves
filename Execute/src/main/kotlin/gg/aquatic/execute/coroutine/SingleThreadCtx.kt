@@ -1,4 +1,4 @@
-package gg.aquatic.cosmoframework.util.coroutine
+package gg.aquatic.execute.coroutine
 
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
