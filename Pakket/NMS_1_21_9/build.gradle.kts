@@ -8,9 +8,11 @@ repositories {
     maven("https://repo.nekroplex.com/releases")
 }
 
+val rootPrefix = if (project.parent == rootProject) "" else ":${project.parent!!.name}"
+
 dependencies {
     paperweight.paperDevBundle("1.21.9-R0.1-SNAPSHOT")
-    compileOnly(project(":API"))
+    compileOnly(project("$rootPrefix:API"))
     compileOnly("gg.aquatic:KEvent:1.0.4")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
