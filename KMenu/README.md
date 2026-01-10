@@ -5,14 +5,14 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-A high-performance, asynchronous, and reactive Minecraft Menu framework for PaperMC. Designed to be lightweight, packet-efficient, and easy to unit test.
+A high-performance, **completely packet-based**, asynchronous, and reactive Minecraft Menu framework for PaperMC. Designed to be lightweight, packet-efficient, and easy to unit test.
 
 ## 🚀 Key Features
 
+*   **Zero Bukkit Inventories:** Uses pure packets for window management via [Pakket](https://github.com/aquatic/Pakket).
 *   **Asynchronous & Coroutine-based**: Built from the ground up to support Kotlin Coroutines.
 *   **Packet-Efficient**: Uses a 'Packet Saver' logic to compare item states and only send updates when visually necessary.
 *   **Reactive Components**: Buttons and lists update dynamically without re-creating objects.
-*   **Decoupled Architecture**: Logic is separated from Bukkit dependencies, allowing for pure JVM unit testing.
 *   **Advanced Slot Management**: Built-in support for priorities, overlaps, and complex geometry (rectangles, ranges).
 
 ---
