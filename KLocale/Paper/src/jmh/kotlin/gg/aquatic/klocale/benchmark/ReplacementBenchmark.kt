@@ -16,37 +16,45 @@ import java.util.concurrent.TimeUnit
 open class ReplacementBenchmark {
 
     private lateinit var baseComponent: Component
-    private val placeholder = "%player%"
-    private val replacementText = "AquaticPlayer"
-    private val replacementComponent = Component.text("AquaticPlayer", NamedTextColor.GOLD)
+    private val p1 = "%player%"
+    private val p2 = "%rank%"
+    private val p3 = "%server%"
+
+    private val r1 = Component.text("AquaticPlayer", NamedTextColor.GOLD)
+    private val r2 = Component.text("Admin", NamedTextColor.RED)
+    private val r3 = Component.text("Survival-01", NamedTextColor.GREEN)
+
 
     @Setup
     fun setup() {
-        // Create a realistic complex component: 
-        // A main string with children and nested styles
+        // Complex nested component to stress the recursive logic
         baseComponent = Component.text()
-            .append(Component.text("Welcome, ", NamedTextColor.GRAY))
-            .append(Component.text(placeholder, NamedTextColor.AQUA))
-            .append(Component.text("! Enjoy your stay on the server.", NamedTextColor.GRAY))
+            .append(Component.text("[", NamedTextColor.GRAY))
+            .append(Component.text(p2, NamedTextColor.WHITE)) // Placeholder in child
+            .append(Component.text("] ", NamedTextColor.GRAY))
+            .append(Component.text(p1, NamedTextColor.AQUA))  // Placeholder in child
+            .append(Component.text(": Hello! Welcome to ", NamedTextColor.YELLOW))
+            .append(Component.text(p3, NamedTextColor.BLUE))  // Placeholder in child
             .build()
     }
 
     @Benchmark
-    fun benchmarkKyoriNative(): Component {
-        // Native Kyori replacement
-        return baseComponent.replaceText(
-            TextReplacementConfig.builder()
-                .matchLiteral(placeholder)
-                .replacement(replacementComponent)
-                .build()
-        )
+    fun benchmarkKyoriNativeMulti(): Component {
+        // Native Kyori requires either multiple calls or a regex-based approach.
+        // Calling it 3 times is the most common "naive" way.
+        return baseComponent
+            .replaceText(TextReplacementConfig.builder().matchLiteral(p1).replacement(r1).build())
+            .replaceText(TextReplacementConfig.builder().matchLiteral(p2).replacement(r2).build())
+            .replaceText(TextReplacementConfig.builder().matchLiteral(p3).replacement(r3).build())
     }
 
     @Benchmark
-    fun benchmarkKLocaleReplaceWith(): Component {
-        // Your custom recursive replacement
+    fun benchmarkKLocaleReplaceWithMulti(): Component {
+        // Your custom replacement handles the whole map in one recursive pass
         return baseComponent.replaceWith(mapOf(
-            placeholder to { replacementComponent }
+            p1 to { r1 },
+            p2 to { r2 },
+            p3 to { r3 }
         ))
     }
 }
