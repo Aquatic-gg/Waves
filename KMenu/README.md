@@ -1,5 +1,10 @@
 # KMenu
 
+[![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/kmenu/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kmenu)
+[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KMenu?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/KMenu)
+![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
+[![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
+
 A high-performance, asynchronous, and reactive Minecraft Menu framework for PaperMC. Designed to be lightweight, packet-efficient, and easy to unit test.
 
 ## 🚀 Key Features
@@ -9,6 +14,8 @@ A high-performance, asynchronous, and reactive Minecraft Menu framework for Pape
 *   **Reactive Components**: Buttons and lists update dynamically without re-creating objects.
 *   **Decoupled Architecture**: Logic is separated from Bukkit dependencies, allowing for pure JVM unit testing.
 *   **Advanced Slot Management**: Built-in support for priorities, overlaps, and complex geometry (rectangles, ranges).
+
+---
 
 ## 🛠 Installation
 
@@ -28,6 +35,8 @@ dependencies {
     implementation("gg.aquatic.replace:Replace:26.0.2")
 }
 ```
+
+---
 
 ## 💻 Code Showcase
 
@@ -144,6 +153,8 @@ The framework caches the visual state of the inventory. Before sending an update
 ### Reactive ListMenu
 The `ListMenu` implementation re-uses `Button` objects across page changes and searches. Instead of clearing the inventory and redrawing (which causes items to flicker), it simply updates the internal state of the existing buttons.
 
+---
+
 ## 🧪 Unit Testing
 Verify your UI logic in milliseconds:
 
@@ -158,6 +169,8 @@ fun `test priority ownership`() {
 }
 ```
 
+---
+
 ## 📜 Documentation
 
 | Class            | Description                                          |
@@ -170,3 +183,13 @@ fun `test priority ownership`() {
 | `SlotManager`    | Internal logic handler for slot ownership.           |
 | `MenuSerializer` | Utility to load menu configurations from YAML.       |
 
+---
+
+## 💬 Community & Support
+
+Got questions, need help, or want to showcase what you've built with **Pakket**? Join our community!
+
+[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
+
+*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
+*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
