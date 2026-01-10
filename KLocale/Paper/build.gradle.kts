@@ -1,18 +1,60 @@
+import me.champeau.jmh.JmhBytecodeGeneratorTask
+
 plugins {
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
+    id("me.champeau.jmh") version "0.7.2"
+    id("io.morethan.jmhreport") version "0.9.0"
 }
 
 group = "gg.aquatic.klocale"
 
 repositories {
     mavenCentral()
+    maven {
+        name = "papermc"
+        url = uri("https://repo.papermc.io/repository/maven-public/")
+    }
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
-    testImplementation(kotlin("test"))
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":Common"))
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    implementation("net.kyori:adventure-text-serializer-plain:4.25.0")
+
+    jmh("org.openjdk.jmh:jmh-core:1.37")
+    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+
+    jmhImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    jmhImplementation("net.kyori:adventure-text-serializer-plain:4.25.0")
+
+    testImplementation(kotlin("test"))
+    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    testImplementation("net.kyori:adventure-text-serializer-plain:4.25.0")
+}
+
+tasks.named<JmhBytecodeGeneratorTask>("jmhRunBytecodeGenerator") {
+}
+
+tasks.named<Jar>("jmhJar") {
+    isZip64 = true
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jmh {
+    resultFormat = "JSON"
+    includes.set(listOf("ReplacementBenchmark"))
+    forceGC = true
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+    resultsFile = project.file("${project.buildDir}/reports/jmh/results.json")
+}
+
+jmhReport {
+    jmhResultPath = project.file("${project.buildDir}/reports/jmh/results.json").absolutePath
+    jmhReportOutput = project.layout.buildDirectory.dir("reports/jmh").get().asFile.absolutePath
+}
+
+tasks.jmh {
+    finalizedBy(tasks.jmhReport)
 }
 
 tasks.test {
