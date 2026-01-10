@@ -2,7 +2,6 @@ package gg.aquatic.kmenu.menu
 
 import gg.aquatic.kevent.subscribe
 import gg.aquatic.kmenu.inventory.InventoryModule
-import gg.aquatic.kmenu.inventory.PacketInventory
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.packetInventory
 import gg.aquatic.stacked.event
@@ -22,6 +21,10 @@ object MenuHandler {
             inv.onInteract(it)
         }
 
+        initializeBukkitEvents()
+    }
+
+    private fun initializeBukkitEvents() {
         event<InventoryClickEvent> {
             val inv = (it.whoClicked as? Player)?.packetInventory() ?: return@event
             if (inv !is Menu) return@event
