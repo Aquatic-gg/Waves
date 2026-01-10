@@ -20,7 +20,7 @@ open class PrivateMenu(
         cancelBukkitInteractions
     )
 
-    suspend fun open() = withContext(KMenuCtx) {
+    open suspend fun open() = withContext(KMenuCtx) {
         InventoryModule.openMenu(player, this@PrivateMenu)
     }
 

@@ -89,9 +89,14 @@ abstract class ListMenu<T>(
     var filteredEntries = entries
         private set
 
-    override suspend fun open(player: Player) {
+    override suspend fun open() {
+        super.open()
         refreshEntries()
         refreshButtons()
+    }
+
+    override suspend fun open(player: Player) {
+        open()
     }
 
     suspend fun injectPreviousButton(settings: IButtonSettings) {
