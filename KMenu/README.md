@@ -44,6 +44,9 @@ dependencies {
 Menus are built using components that automatically handle their own rendering and interaction logic.
 
 ```kotlin
+// INITIALIZE THE LIBRARY FIRST!
+KMenu.initialize()
+
 val menu = PrivateMenu(player, Component.text("My Menu"), InventoryType.GENERIC9X3, true)
 
 val button = Button(
