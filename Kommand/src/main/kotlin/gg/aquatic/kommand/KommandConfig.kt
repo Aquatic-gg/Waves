@@ -16,8 +16,10 @@ object KommandConfig {
         val getServer = bukkitServer.javaClass.getDeclaredMethod("getServer")
         getServer.isAccessible = true
 
+        val minecraftServerClass = Class.forName("net.minecraft.server.MinecraftServer")
+
         val server = getServer.invoke(bukkitServer)
-        val resourcesField = server.javaClass.getDeclaredField("resources")
+        val resourcesField = minecraftServerClass.getDeclaredField("resources")
         resourcesField.isAccessible = true
 
         val resources = resourcesField.get(server)
