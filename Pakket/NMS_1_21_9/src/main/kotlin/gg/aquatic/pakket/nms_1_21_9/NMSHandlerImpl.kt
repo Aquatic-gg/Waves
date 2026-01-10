@@ -58,8 +58,10 @@ import net.minecraft.world.scores.Scoreboard
 import net.minecraft.world.scores.Team
 import org.bukkit.Bukkit
 import org.bukkit.Chunk
+import org.bukkit.Keyed
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
+import org.bukkit.craftbukkit.CraftRegistry
 import org.bukkit.craftbukkit.CraftServer
 import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.block.data.CraftBlockData
@@ -793,9 +795,13 @@ object NMSHandlerImpl : NMSHandler() {
         menuType: MenuType,
         title: Component,
     ): Any {
+        val nmsType = CraftRegistry.bukkitToMinecraft<Keyed, net.minecraft.world.inventory.MenuType<*>>(
+            menuType
+        )
+
         val packet = ClientboundOpenScreenPacket(
             inventoryId,
-            CraftMenuType.bukkitToMinecraft(menuType),
+            nmsType,
             title.toNMSComponent()
         )
         return packet
