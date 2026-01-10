@@ -16,6 +16,9 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
+.idea/
+.env
+
 ### Kotlin ###
 .kotlin
 
