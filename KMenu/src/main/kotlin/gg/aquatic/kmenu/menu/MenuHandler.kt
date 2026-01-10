@@ -25,33 +25,19 @@ object MenuHandler {
     }
 
     private fun initializeBukkitEvents() {
-        event<InventoryClickEvent> {
-            val inv = (it.whoClicked as? Player)?.packetInventory() ?: return@event
-            if (inv !is Menu) return@event
-            if (inv.cancelBukkitInteractions) {
-                it.isCancelled = true
-            }
-        }
-        event<InventoryInteractEvent> {
-            val inv = (it.whoClicked as? Player)?.packetInventory() ?: return@event
-            if (inv !is Menu) return@event
-            if (inv.cancelBukkitInteractions) {
-                it.isCancelled = true
-            }
-        }
-        event<InventoryDragEvent> {
-            val inv = (it.whoClicked as? Player)?.packetInventory() ?: return@event
-            if (inv !is Menu) return@event
-            if (inv.cancelBukkitInteractions) {
-                it.isCancelled = true
-            }
-        }
+        event<InventoryClickEvent> { handleBukkitInteraction(it) }
+        event<InventoryInteractEvent> { handleBukkitInteraction(it) }
+        event<InventoryDragEvent> { handleBukkitInteraction(it) }
         event<PlayerDropItemEvent> {
-            val inv = it.player.packetInventory() ?: return@event
-            if (inv !is Menu) return@event
-            if (inv.cancelBukkitInteractions) {
-                it.isCancelled = true
-            }
+            val inv = it.player.packetInventory() as? Menu ?: return@event
+            if (inv.cancelBukkitInteractions) it.isCancelled = true
+        }
+    }
+
+    private fun handleBukkitInteraction(event: InventoryInteractEvent) {
+        val inv = (event.whoClicked as? Player)?.packetInventory() as? Menu ?: return
+        if (inv.cancelBukkitInteractions) {
+            event.isCancelled = true
         }
     }
 

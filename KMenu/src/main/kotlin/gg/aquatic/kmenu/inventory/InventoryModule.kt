@@ -363,7 +363,7 @@ object InventoryModule {
         val hasCursor = cursor != null && cursor.type != Material.AIR
 
         return if (event.buttonNum == 0) {
-            ButtonType.LEFT to (if (hasCarried) ClickType.PICKUP else ClickType.PLACE)
+            ButtonType.LEFT to if (hasCarried) ClickType.PICKUP else ClickType.PLACE
         } else {
             val type = if (hasCarried) {
                 if (hasCursor) ClickType.PLACE else ClickType.PICKUP
