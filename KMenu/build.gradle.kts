@@ -1,11 +1,7 @@
 plugins {
     kotlin("jvm") version "2.3.0"
-    id("co.uzzu.dotenv.gradle") version "4.0.0" apply false
+    id("co.uzzu.dotenv.gradle") version "4.0.0"
     `maven-publish`
-}
-
-if (project == rootProject) {
-    apply(plugin = "co.uzzu.dotenv.gradle")
 }
 
 group = "gg.aquatic.kmenu"
