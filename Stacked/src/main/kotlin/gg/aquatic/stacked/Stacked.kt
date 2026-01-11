@@ -1,5 +1,7 @@
 package gg.aquatic.stacked
 
+import gg.aquatic.common.AquaticCommon
+import gg.aquatic.common.initializeCommon
 import gg.aquatic.kregistry.MutableRegistry
 import gg.aquatic.kregistry.Registry
 import gg.aquatic.stacked.factory.Base64Factory
@@ -10,7 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin
 
 object Stacked {
 
-    lateinit var plugin: JavaPlugin
     lateinit var scope: CoroutineScope
     lateinit var miniMessage: MiniMessage
 
@@ -33,9 +34,14 @@ object Stacked {
 }
 
 fun initializeStacked(plugin: JavaPlugin, scope: CoroutineScope, miniMessage: MiniMessage = MiniMessage.miniMessage()) {
-    Stacked.plugin = plugin
     Stacked.scope = scope
     Stacked.miniMessage = miniMessage
+
+    try {
+        val pl = AquaticCommon.plugin
+    } catch (_: Exception) {
+        initializeCommon(plugin)
+    }
 
     ItemHandler.initialize()
 }

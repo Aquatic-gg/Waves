@@ -1,5 +1,6 @@
 package gg.aquatic.stacked
 
+import gg.aquatic.common.event
 import gg.aquatic.kevent.eventBusBuilder
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import gg.aquatic.stacked.option.ItemOptionHandle
@@ -16,7 +17,7 @@ import org.bukkit.inventory.ItemStack
 object ItemHandler {
 
     val NAMESPACE_KEY by lazy {
-        NamespacedKey(Stacked.plugin, "Custom_Item_Registry")
+        NamespacedKey("Stacked", "Custom_Item_Registry")
     }
     val listenInteractions = mutableMapOf<String, (StackedItemInteractEvent) -> Unit>()
 

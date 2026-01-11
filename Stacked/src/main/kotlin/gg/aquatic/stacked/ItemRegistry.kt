@@ -2,6 +2,7 @@ package gg.aquatic.stacked
 
 import gg.aquatic.kregistry.Registry
 import gg.aquatic.stacked.event.StackedItemInteractEvent
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
