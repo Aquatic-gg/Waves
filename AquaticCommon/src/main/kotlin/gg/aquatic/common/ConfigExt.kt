@@ -2,7 +2,6 @@ package gg.aquatic.common
 
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.MemoryConfiguration
-import kotlin.collections.iterator
 
 /**
  * Retrieves a list of ConfigurationSection objects from a specified path in the current ConfigurationSection.
