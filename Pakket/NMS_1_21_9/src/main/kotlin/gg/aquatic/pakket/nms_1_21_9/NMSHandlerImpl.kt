@@ -27,7 +27,6 @@ import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.core.NonNullList
 import net.minecraft.core.Rotations
-import net.minecraft.core.component.TypedDataComponent
 import net.minecraft.network.Connection
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.HashedPatchMap
@@ -67,7 +66,6 @@ import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
-import org.bukkit.craftbukkit.inventory.CraftMenuType
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.entity.Pose
@@ -80,7 +78,6 @@ import org.joml.Vector3d
 import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.iterator
 import kotlin.jvm.optionals.getOrNull
 
 object NMSHandlerImpl : NMSHandler() {

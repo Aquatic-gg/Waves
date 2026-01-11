@@ -1,6 +1,6 @@
 package gg.aquatic.pakket.api.nms.profile
 
-import java.util.UUID
+import java.util.*
 
 class UserProfile(
     var uuid: UUID,

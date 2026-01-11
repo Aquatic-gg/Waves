@@ -18,7 +18,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.util.Vector
 import org.joml.Vector3d
-import java.util.UUID
+import java.util.*
 
 abstract class NMSHandler {
 
