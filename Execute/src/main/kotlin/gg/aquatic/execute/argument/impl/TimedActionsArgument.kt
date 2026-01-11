@@ -1,11 +1,11 @@
 package gg.aquatic.execute.argument.impl
 
+import gg.aquatic.common.getSectionList
 import gg.aquatic.execute.ClassTransform
 import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.action.ActionSerializer
 import gg.aquatic.execute.argument.ObjectArgument
 import gg.aquatic.execute.argument.ObjectArgumentFactory
-import gg.aquatic.execute.getSectionList
 import org.bukkit.configuration.ConfigurationSection
 
 class TimedActionsArgument<T : Any>(
