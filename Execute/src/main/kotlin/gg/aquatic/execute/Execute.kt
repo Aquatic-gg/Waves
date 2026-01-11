@@ -1,5 +1,7 @@
 package gg.aquatic.execute
 
+import gg.aquatic.common.AquaticCommon
+import gg.aquatic.common.initializeCommon
 import gg.aquatic.execute.action.impl.ActionbarAction
 import gg.aquatic.execute.action.impl.CloseInventory
 import gg.aquatic.execute.action.impl.CommandAction
@@ -19,7 +21,6 @@ import org.bukkit.plugin.java.JavaPlugin
 object Execute {
 
     lateinit var miniMessage: MiniMessage
-    lateinit var plugin: JavaPlugin
 
     fun injectExecutables() {
         Registry.update {
@@ -66,6 +67,10 @@ object Execute {
 
 fun initExecute(plugin: JavaPlugin, miniMessage: MiniMessage = MiniMessage.miniMessage()) {
     Execute.miniMessage = miniMessage
-    Execute.plugin = plugin
+    try {
+        val pl = AquaticCommon.plugin
+    } catch (_: Exception) {
+        initializeCommon(plugin)
+    }
 }
 
