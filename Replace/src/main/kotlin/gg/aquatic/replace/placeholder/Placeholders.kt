@@ -2,7 +2,6 @@ package gg.aquatic.replace.placeholder
 
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
-import kotlin.collections.iterator
 
 object Placeholders {
 
