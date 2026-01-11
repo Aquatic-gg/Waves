@@ -1,5 +1,6 @@
 package gg.aquatic.kmenu.menu.util
 
+import gg.aquatic.kmenu.coroutine.KMenuCtx
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
@@ -8,7 +9,6 @@ import gg.aquatic.kmenu.menu.MenuComponent
 import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.kmenu.menu.component.Button
 import gg.aquatic.kmenu.menu.settings.IButtonSettings
-import gg.aquatic.kmenu.coroutine.KMenuCtx
 import gg.aquatic.kmenu.privateMenu
 import gg.aquatic.replace.placeholder.PlaceholderContext
 import gg.aquatic.replace.toPlain
@@ -17,7 +17,6 @@ import kotlinx.coroutines.cancelAndJoin
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import kotlin.collections.iterator
 import kotlin.math.max
 import kotlin.properties.Delegates
 

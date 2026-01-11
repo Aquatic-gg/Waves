@@ -5,14 +5,10 @@ import gg.aquatic.kmenu.inventory.InventoryModule
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.inventory.PacketInventory
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
-import io.github.charlietap.cachemap.cacheMapOf
 import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import kotlin.collections.get
-import kotlin.collections.iterator
-import kotlin.text.get
 
 open class Menu(
     title: Component,

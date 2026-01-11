@@ -1,7 +1,5 @@
 package gg.aquatic.kmenu.menu
 
-import kotlin.math.ceil
-
 class SlotSelection(slots: Collection<Int>) {
 
     // Using a HashSet for O(1) lookups
