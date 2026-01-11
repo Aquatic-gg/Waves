@@ -1,7 +1,5 @@
 package gg.aquatic.kregistry
 
-import kotlin.collections.iterator
-
 typealias TypedRegistry<Id, Type> = FrozenRegistry<Class<*>, FrozenRegistry<Id, Type>>
 
 inline fun <Id, Type, reified T : Type> TypedRegistry<Id, Type>.getTyped(id: Id): T? {

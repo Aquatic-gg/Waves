@@ -1,7 +1,5 @@
 package gg.aquatic.kregistry
 
-import kotlin.collections.mutableMapOf
-
 class MutableRegistryGraph internal constructor(
     private val registries: MutableMap<RegistryId, FrozenRegistry<*, *>>
 ) {
