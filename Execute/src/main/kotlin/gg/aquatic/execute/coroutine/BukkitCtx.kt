@@ -3,9 +3,14 @@ package gg.aquatic.execute.coroutine
 import gg.aquatic.execute.Execute
 import kotlinx.coroutines.*
 import org.bukkit.Bukkit
+import org.bukkit.Location
+import org.bukkit.entity.Entity
 import kotlin.coroutines.CoroutineContext
 
-object BukkitCtx : SingleThreadCtx() {
+class BukkitCtx(
+    val check: () -> Boolean,
+    val execution: (Runnable) -> Unit
+) : SingleThreadCtx() {
 
     override val scope = CoroutineScope(
         this + SupervisorJob() + CoroutineExceptionHandler { _, e ->
@@ -15,19 +20,12 @@ object BukkitCtx : SingleThreadCtx() {
     )
 
     override fun isDispatchNeeded(context: CoroutineContext): Boolean {
-        return !Bukkit.getServer().isPrimaryThread
+        return !check()
     }
 
     override fun dispatch(context: CoroutineContext, block: Runnable) {
         if (isDispatchNeeded(context)) {
-            Bukkit.getScheduler().runTask(Execute.plugin, Runnable {
-                try {
-                    block.run()
-                } catch (e: Throwable) {
-                    Execute.plugin.logger.severe("An error occurred while running a task!")
-                    e.printStackTrace()
-                }
-            })
+            execution(block)
         } else {
             block.run()
         }
@@ -39,4 +37,24 @@ object BukkitCtx : SingleThreadCtx() {
 
     operator fun invoke(block: suspend CoroutineScope.() -> Unit) = launch(block = block)
     operator fun invoke() = scope
+
+    companion object {
+        val GLOBAL by lazy {
+            BukkitCtx({ Bukkit.getServer().isGlobalTickThread }, { runnable ->
+                Bukkit.getGlobalRegionScheduler().run(Execute.plugin) { runnable.run() }
+            })
+        }
+
+        fun ofLocation(location: Location): BukkitCtx {
+            return BukkitCtx({ Bukkit.getServer().isOwnedByCurrentRegion(location) }, { runnable ->
+                Bukkit.getRegionScheduler().run(Execute.plugin, location) { runnable.run() }
+            })
+        }
+
+        fun ofEntity(entity: Entity): BukkitCtx {
+            return BukkitCtx({ Bukkit.getServer().isOwnedByCurrentRegion(entity) }, { runnable ->
+                entity.scheduler.run(Execute.plugin, { runnable.run() }, null)
+            })
+        }
+    }
 }

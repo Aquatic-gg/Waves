@@ -11,7 +11,7 @@ object CloseInventory: Action<Player> {
     override suspend fun execute(
         binder: Player,
         args: ArgumentContext<Player>
-    ) = withContext(BukkitCtx) {
+    ) = withContext(BukkitCtx.ofEntity(binder)) {
         binder.closeInventory()
     }
 

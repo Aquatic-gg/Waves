@@ -9,20 +9,21 @@ import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 
-object CommandAction: Action<Player> {
+object CommandAction : Action<Player> {
 
-    override suspend fun execute(binder: Player, args: ArgumentContext<Player>) = withContext(BukkitCtx) {
-        val commands = args.stringOrCollection("command") ?: return@withContext
-        val executor = if (args.boolean("player-executor") == true) binder else Bukkit.getConsoleSender()
+    override suspend fun execute(binder: Player, args: ArgumentContext<Player>) =
+        withContext(BukkitCtx.ofEntity(binder)) {
+            val commands = args.stringOrCollection("command") ?: return@withContext
+            val executor = if (args.boolean("player-executor") == true) binder else Bukkit.getConsoleSender()
 
-        for (cmd in commands) {
-            if (cmd.isEmpty() || cmd.isBlank()) continue
-            Bukkit.dispatchCommand(
-                executor,
-                cmd
-            )
+            for (cmd in commands) {
+                if (cmd.isEmpty() || cmd.isBlank()) continue
+                Bukkit.dispatchCommand(
+                    executor,
+                    cmd
+                )
+            }
         }
-    }
 
     override val arguments: List<ObjectArgument<*>> = listOf(
         PrimitiveObjectArgument("command", "", true),
