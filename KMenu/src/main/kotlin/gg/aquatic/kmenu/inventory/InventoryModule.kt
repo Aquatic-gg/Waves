@@ -1,6 +1,7 @@
 package gg.aquatic.kmenu.inventory
 
 import gg.aquatic.common.coroutine.BukkitCtx
+import gg.aquatic.common.event
 import gg.aquatic.kevent.eventBusBuilder
 import gg.aquatic.kmenu.KMenu
 import gg.aquatic.kmenu.coroutine.KMenuCtx
@@ -12,7 +13,6 @@ import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.api.event.packet.*
 import gg.aquatic.pakket.packetEvent
 import gg.aquatic.pakket.sendPacket
-import gg.aquatic.stacked.event
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent

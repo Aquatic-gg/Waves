@@ -1,11 +1,11 @@
 package gg.aquatic.kmenu.menu
 
+import gg.aquatic.common.event
 import gg.aquatic.kevent.subscribe
 import gg.aquatic.kmenu.coroutine.KMenuCtx
 import gg.aquatic.kmenu.inventory.InventoryModule
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.packetInventory
-import gg.aquatic.stacked.event
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
