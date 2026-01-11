@@ -1,17 +1,16 @@
 package gg.aquatic.stacked
 
 import com.google.common.collect.HashMultimap
-import gg.aquatic.stacked.option.ItemOptionHandle
-import gg.aquatic.stacked.option.ItemOptions
 import gg.aquatic.kregistry.FrozenRegistry
 import gg.aquatic.kregistry.Registry
 import gg.aquatic.kregistry.RegistryId
 import gg.aquatic.kregistry.RegistryKey
+import gg.aquatic.stacked.option.ItemOptionHandle
+import gg.aquatic.stacked.option.ItemOptions
 import net.kyori.adventure.key.Key
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
-import kotlin.collections.iterator
 
 class StackedItem(
     val factoryId: String?,

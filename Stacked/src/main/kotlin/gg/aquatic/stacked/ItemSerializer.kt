@@ -1,22 +1,6 @@
 package gg.aquatic.stacked
 
-import gg.aquatic.stacked.option.AmountOptionHandle
-import gg.aquatic.stacked.option.CustomModelDataLegacyOptionHandle
-import gg.aquatic.stacked.option.CustomModelDataOptionHandle
-import gg.aquatic.stacked.option.DamageOptionHandle
-import gg.aquatic.stacked.option.DisplayNameOptionHandle
-import gg.aquatic.stacked.option.DyeOptionHandle
-import gg.aquatic.stacked.option.EnchantsOptionHandle
-import gg.aquatic.stacked.option.FlagsOptionHandle
-import gg.aquatic.stacked.option.ItemModelOptionHandle
-import gg.aquatic.stacked.option.ItemOptionHandle
-import gg.aquatic.stacked.option.LoreOptionHandle
-import gg.aquatic.stacked.option.MaxDamageOptionHandle
-import gg.aquatic.stacked.option.MaxStackSizeOptionHandle
-import gg.aquatic.stacked.option.RarityOptionHandle
-import gg.aquatic.stacked.option.SpawnerTypeOptionHandle
-import gg.aquatic.stacked.option.TooltipStyleOptionHandle
-import gg.aquatic.stacked.option.UnbreakableOptionHandle
+import gg.aquatic.stacked.option.*
 import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack

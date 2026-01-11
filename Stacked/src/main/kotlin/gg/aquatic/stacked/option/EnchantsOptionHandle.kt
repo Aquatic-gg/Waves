@@ -10,7 +10,6 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.EnchantmentStorageMeta
 import org.bukkit.inventory.meta.ItemMeta
 import java.util.*
-import kotlin.collections.iterator
 
 class EnchantsOptionHandle(
     val enchants: Map<String, Int>,
