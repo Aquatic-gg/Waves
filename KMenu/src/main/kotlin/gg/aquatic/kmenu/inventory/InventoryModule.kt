@@ -180,7 +180,7 @@ object InventoryModule {
 
         eventBus.post(AsyncPacketInventoryCloseEvent(player, removed))
 
-        BukkitCtx {
+        BukkitCtx.ofEntity(player).launch {
             player.updateInventory()
         }
     }
