@@ -1,6 +1,6 @@
 package gg.aquatic.kmenu.inventory
 
-import gg.aquatic.execute.coroutine.BukkitCtx
+import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.kevent.eventBusBuilder
 import gg.aquatic.kmenu.KMenu
 import gg.aquatic.kmenu.coroutine.KMenuCtx
