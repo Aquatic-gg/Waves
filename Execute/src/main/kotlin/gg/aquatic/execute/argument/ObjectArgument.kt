@@ -2,7 +2,6 @@ package gg.aquatic.execute.argument
 
 import org.bukkit.Bukkit
 import org.bukkit.configuration.ConfigurationSection
-import java.util.HashMap
 
 abstract class ObjectArgument<T>(
     val id: String, val defaultValue: T?, val required: Boolean, val aliases: Collection<String>

@@ -1,8 +1,8 @@
 package gg.aquatic.execute.requirement
 
-import gg.aquatic.execute.argument.ObjectArguments
-import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.ExecutableObject
+import gg.aquatic.execute.ExecutableObjectHandle
+import gg.aquatic.execute.argument.ObjectArguments
 
 class ConditionHandle<A>(executableObject: ExecutableObject<A, Boolean>, arguments: ObjectArguments) :
     ExecutableObjectHandle<A, Boolean>(

@@ -2,12 +2,7 @@ package gg.aquatic.execute
 
 import gg.aquatic.common.AquaticCommon
 import gg.aquatic.common.initializeCommon
-import gg.aquatic.execute.action.impl.ActionbarAction
-import gg.aquatic.execute.action.impl.CloseInventory
-import gg.aquatic.execute.action.impl.CommandAction
-import gg.aquatic.execute.action.impl.SoundAction
-import gg.aquatic.execute.action.impl.SoundStopAction
-import gg.aquatic.execute.action.impl.TitleAction
+import gg.aquatic.execute.action.impl.*
 import gg.aquatic.execute.action.registerAction
 import gg.aquatic.execute.requirement.impl.PermissionCondition
 import gg.aquatic.execute.requirement.registerCondition

@@ -1,7 +1,7 @@
 package gg.aquatic.execute.argument.impl
 
-import gg.aquatic.execute.argument.ObjectArgumentFactory
 import gg.aquatic.execute.argument.ObjectArgument
+import gg.aquatic.execute.argument.ObjectArgumentFactory
 import org.bukkit.configuration.ConfigurationSection
 
 class PrimitiveObjectArgument(
