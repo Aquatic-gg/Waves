@@ -14,6 +14,7 @@ class YamlLocaleProvider(
     val serializer: LocaleSerializer<YamlConfiguration, PaperMessage>
 ) : LocaleProvider<PaperMessage> {
     override suspend fun fetch(): Map<String, Map<String, PaperMessage>> = withContext(Dispatchers.IO) {
+        if (!file.exists()) return@withContext emptyMap()
         val config = YamlConfiguration.loadConfiguration(file)
         return@withContext serializer.parse(config) ?: emptyMap()
     }

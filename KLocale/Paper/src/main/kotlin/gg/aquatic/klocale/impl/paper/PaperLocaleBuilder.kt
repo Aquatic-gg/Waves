@@ -28,10 +28,9 @@ class PaperLocaleBuilder {
 }
 
 object KLocale {
-
-
-    fun paper(block: PaperLocaleBuilder.() -> Unit): BaseLocaleManager<PaperMessage> {
+    fun paper(provider: LocaleProvider<PaperMessage>, block: PaperLocaleBuilder.() -> Unit): BaseLocaleManager<PaperMessage> {
         val builder = PaperLocaleBuilder()
+        builder.provider = provider
         builder.block()
         return builder.build()
     }
