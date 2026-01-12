@@ -1,13 +1,13 @@
 package gg.aquatic.blokk.impl
 
 import dev.lone.itemsadder.api.CustomBlock
-import gg.aquatic.blokk.AquaticBlock
+import gg.aquatic.blokk.Blokk
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
 
 class ItemsAdderBlock(
     val iaId: String
-): AquaticBlock() {
+): Blokk() {
     override fun place(location: Location) {
         val customBlock: CustomBlock = CustomBlock.getInstance(iaId) ?: return
         customBlock.place(location)

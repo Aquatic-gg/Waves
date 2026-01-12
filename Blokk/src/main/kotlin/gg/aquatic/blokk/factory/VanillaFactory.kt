@@ -1,6 +1,6 @@
 package gg.aquatic.blokk.factory
 
-import gg.aquatic.blokk.AquaticBlock
+import gg.aquatic.blokk.Blokk
 import gg.aquatic.blokk.impl.VanillaBlock
 import org.bukkit.Material
 import org.bukkit.block.BlockFace
@@ -10,7 +10,7 @@ import org.bukkit.block.data.type.Stairs
 import org.bukkit.configuration.ConfigurationSection
 
 object VanillaFactory: BlockFactory {
-    override fun load(section: ConfigurationSection, material: String): AquaticBlock {
+    override fun load(section: ConfigurationSection, material: String): Blokk {
         val mat = Material.valueOf(material)
         val blockData = mat.createBlockData()
         if (blockData is Directional) {

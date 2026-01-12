@@ -32,7 +32,7 @@ dependencies {
 ## 🚀 Usage
 
 ### Loading and Placing Blocks
-The `AquaticBlockSerializer` automatically detects the block type based on the material prefix (e.g., `itemsadder:` or `oraxen:`).
+The `BlokkSerializer` automatically detects the block type based on the material prefix (e.g., `itemsadder:` or `oraxen:`).
 
 ````kotlin
 // In your config.yml
@@ -40,7 +40,7 @@ The `AquaticBlockSerializer` automatically detects the block type based on the m
 //   material: "oraxen:cave_crystal"
 
 val section = config.getConfigurationSection("my-block")!!
-val block = AquaticBlockSerializer.load(section)
+val block = BlokkSerializer.load(section)
 
 block.place(location)
 ````
@@ -63,7 +63,7 @@ layers:
 ````
 
 ````kotlin
-val multiBlock = AquaticBlockSerializer.loadMultiBlock(configSection)
+val multiBlock = BlokkSerializer.loadMultiBlock(configSection)
 
 // Spawns the structure relative to the location and its orientation
 val placedLocations = multiBlock.spawn(location)

@@ -7,13 +7,13 @@ import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
 
-object AquaticBlockSerializer {
+object BlokkSerializer {
 
-    fun loadMultiBlock(section: ConfigurationSection): AquaticMultiBlock {
+    fun loadMultiBlock(section: ConfigurationSection): MultiBlokk {
         val layersSection = section.getConfigurationSection("layers")!!
         val ingredientsSection = section.getConfigurationSection("blocks")!!
 
-        val ingredients = HashMap<Char, AquaticBlock>()
+        val ingredients = HashMap<Char, Blokk>()
 
         for (key in ingredientsSection.getKeys(false)) {
             val block = load(ingredientsSection.getConfigurationSection(key)!!)
@@ -28,10 +28,10 @@ object AquaticBlockSerializer {
             }
             layers[key.toInt()] = layerBlocks
         }
-        return AquaticMultiBlock(BlockShape(layers, ingredients))
+        return MultiBlokk(BlockShape(layers, ingredients))
     }
 
-    fun load(section: ConfigurationSection): AquaticBlock {
+    fun load(section: ConfigurationSection): Blokk {
         val material = section.getString("material", "STONE")!!.uppercase()
 
         for ((id, factory) in BlockFactory.REGISTRY.getAll()) {

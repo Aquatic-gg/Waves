@@ -6,7 +6,7 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.util.Vector
 import kotlin.math.floor
 
-class AquaticMultiBlock(
+class MultiBlokk(
     val shape: BlockShape
 ) {
 
