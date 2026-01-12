@@ -1,8 +1,5 @@
 package gg.aquatic.klocale.message
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
 interface MessageCache<A : Message<A>> {
 
     fun get(language: String, key: String): A?

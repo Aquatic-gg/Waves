@@ -2,7 +2,7 @@ package gg.aquatic.klocale
 
 import gg.aquatic.klocale.message.Message
 import gg.aquatic.klocale.message.MessageCache
-import java.util.Locale
+import java.util.*
 
 interface LocaleManager<A : Message<A>> {
 

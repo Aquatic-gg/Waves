@@ -4,7 +4,6 @@ import gg.aquatic.klocale.BaseLocaleManager
 import gg.aquatic.klocale.LocaleProvider
 import gg.aquatic.klocale.MissingKeyHandler
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.bukkit.plugin.java.JavaPlugin
 
 class PaperLocaleBuilder {
     var defaultLanguage: String = "en"
