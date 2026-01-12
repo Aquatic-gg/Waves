@@ -15,7 +15,8 @@ import java.math.RoundingMode
 import java.util.*
 
 class LocalCurrencyCache(
-    private val dbHandler: CurrencyDBHandler
+    private val dbHandler: CurrencyDBHandler,
+    private val saveIntervalSeconds: Int = 900 // 15 Minutes
 ) : CurrencyCache {
 
     private val balances = HashMap<UUID, HashMap<RegisteredCurrency, BigDecimal>>()
