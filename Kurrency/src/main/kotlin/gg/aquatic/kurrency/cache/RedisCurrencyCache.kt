@@ -1,10 +1,10 @@
 package gg.aquatic.kurrency.cache
 
 import gg.aquatic.common.coroutine.BukkitCtx
+import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.CurrencyCache
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import gg.aquatic.kurrency.db.CurrencyDBHandler
-import gg.aquatic.kurrency.db.DBCtx
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import redis.clients.jedis.UnifiedJedis
@@ -26,26 +26,30 @@ class RedisCurrencyCache(
         "$keyPrefix${currency.id}:$uuid"
 
     override suspend fun isActive(uuid: UUID): Boolean {
-        return withContext(BukkitCtx.GLOBAL) { Bukkit.getPlayer(uuid)?.isConnected == true } || withContext(DBCtx) {
+        return withContext(BukkitCtx.GLOBAL) { Bukkit.getPlayer(uuid)?.isConnected == true } || withContext(VirtualsCtx) {
             jedis.exists("$keyPrefix*:$uuid")
         }
     }
 
-    override suspend fun get(uuid: UUID, registeredCurrency: RegisteredCurrency): BigDecimal? = withContext(DBCtx) {
-        val key = playerKey(uuid, registeredCurrency)
-        val data = jedis.get(key)
+    override suspend fun get(uuid: UUID, registeredCurrency: RegisteredCurrency): BigDecimal? =
+        withContext(VirtualsCtx) {
+            val key = playerKey(uuid, registeredCurrency)
+            val data = jedis.get(key)
 
-        if (data != null) {
-            jedis.expire(key, ttlSeconds)
-            return@withContext data.toBigDecimalOrNull()?.setScale(2, RoundingMode.HALF_DOWN)
+            if (data != null) {
+                jedis.expire(key, ttlSeconds)
+                return@withContext data.toBigDecimalOrNull()?.setScale(2, RoundingMode.HALF_DOWN)
+            }
+
+            val dbBalance = dbHandler.getBalance(uuid, registeredCurrency)
+            jedis.set(key, dbBalance.toPlainString(), SetParams().ex(ttlSeconds))
+            dbBalance
         }
 
-        val dbBalance = dbHandler.getBalance(uuid, registeredCurrency)
-        jedis.set(key, dbBalance.toPlainString(), SetParams().ex(ttlSeconds))
-        dbBalance
-    }
-
-    override suspend fun getMultiple(uuids: Collection<UUID>, registeredCurrency: RegisteredCurrency): Map<UUID, BigDecimal> = withContext(DBCtx) {
+    override suspend fun getMultiple(
+        uuids: Collection<UUID>,
+        registeredCurrency: RegisteredCurrency
+    ): Map<UUID, BigDecimal> = withContext(VirtualsCtx) {
         val results = mutableMapOf<UUID, BigDecimal>()
         val missingUuids = mutableListOf<UUID>()
 
@@ -70,7 +74,7 @@ class RedisCurrencyCache(
     }
 
     override suspend fun update(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        withContext(DBCtx) {
+        withContext(VirtualsCtx) {
             val key = playerKey(uuid, registeredCurrency)
             dbHandler.give(uuid, amount, registeredCurrency)
 
@@ -81,7 +85,7 @@ class RedisCurrencyCache(
     }
 
     override suspend fun set(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        withContext(DBCtx) {
+        withContext(VirtualsCtx) {
             val key = playerKey(uuid, registeredCurrency)
             dbHandler.set(uuid, amount, registeredCurrency)
             jedis.set(key, amount.toPlainString(), SetParams().ex(ttlSeconds))

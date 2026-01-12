@@ -1,5 +1,6 @@
 package gg.aquatic.kurrency.db
 
+import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -19,7 +20,7 @@ class CurrencyDBHandler(val database: Database) {
     private suspend fun <T> dbQuery(block: suspend Transaction.() -> T): T =
         newSuspendedTransaction(db = database) { block() }
 
-    suspend fun getBalance(uuid: UUID, currency: RegisteredCurrency): BigDecimal = withContext(DBCtx) {
+    suspend fun getBalance(uuid: UUID, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
         dbQuery {
             BalancesTable.select(BalancesTable.balance)
                 .where { (BalancesTable.playerUUID eq uuid) and (BalancesTable.currencyId eq currency.id) }
@@ -27,7 +28,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun getAllBalances(uuid: UUID): Map<String, BigDecimal> = withContext(DBCtx) {
+    suspend fun getAllBalances(uuid: UUID): Map<String, BigDecimal> = withContext(VirtualsCtx) {
         dbQuery {
             BalancesTable.select(BalancesTable.currencyId, BalancesTable.balance)
                 .where { BalancesTable.playerUUID eq uuid }
@@ -35,7 +36,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun getBalances(uuids: Collection<UUID>, currency: RegisteredCurrency): Map<UUID, BigDecimal> = withContext(DBCtx) {
+    suspend fun getBalances(uuids: Collection<UUID>, currency: RegisteredCurrency): Map<UUID, BigDecimal> = withContext(VirtualsCtx) {
         dbQuery {
             BalancesTable.select(BalancesTable.playerUUID, BalancesTable.balance)
                 .where { (BalancesTable.playerUUID inList uuids) and (BalancesTable.currencyId eq currency.id) }
@@ -43,7 +44,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun give(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) = withContext(DBCtx) {
+    suspend fun give(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) = withContext(VirtualsCtx) {
         dbQuery {
             val result = BalancesTable.upsert(
                 onUpdate = {
@@ -61,7 +62,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun set(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) = withContext(DBCtx) {
+    suspend fun set(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) = withContext(VirtualsCtx) {
         dbQuery {
             val result = BalancesTable.upsert {
                 it[BalancesTable.playerUUID] = uuid
@@ -75,5 +76,3 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 }
-
-object DBCtx : CoroutineContext by Executors.newVirtualThreadPerTaskExecutor().asCoroutineDispatcher()

@@ -1,11 +1,11 @@
 package gg.aquatic.kurrency.cache
 
 import gg.aquatic.common.coroutine.BukkitCtx
+import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.common.event
 import gg.aquatic.kurrency.CurrencyCache
-import gg.aquatic.kurrency.impl.RegisteredCurrency
 import gg.aquatic.kurrency.db.CurrencyDBHandler
-import gg.aquatic.kurrency.db.DBCtx
+import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.event.player.PlayerJoinEvent
@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerQuitEvent
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
-import kotlin.collections.iterator
 
 class LocalCurrencyCache(
     private val dbHandler: CurrencyDBHandler
@@ -95,7 +94,7 @@ class LocalCurrencyCache(
     private suspend fun save(uuid: UUID) = withContext(BukkitCtx.GLOBAL) {
         val playerMap = balances[uuid] ?: return@withContext
 
-        withContext(DBCtx) {
+        withContext(VirtualsCtx) {
             for ((currency, balance) in playerMap) {
                 dbHandler.set(uuid, balance, currency)
             }
