@@ -2,7 +2,6 @@ package gg.aquatic.kurrency.db
 
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.impl.RegisteredCurrency
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
@@ -12,8 +11,6 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import org.jetbrains.exposed.sql.upsert
 import java.math.BigDecimal
 import java.util.*
-import java.util.concurrent.Executors
-import kotlin.coroutines.CoroutineContext
 
 class CurrencyDBHandler(val database: Database) {
 

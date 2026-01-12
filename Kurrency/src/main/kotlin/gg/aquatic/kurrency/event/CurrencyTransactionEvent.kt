@@ -2,7 +2,7 @@ package gg.aquatic.kurrency.event
 
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import java.math.BigDecimal
-import java.util.UUID
+import java.util.*
 
 data class CurrencyTransactionEvent(
     val uuid: UUID,

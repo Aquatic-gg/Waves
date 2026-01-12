@@ -3,8 +3,8 @@ package gg.aquatic.kurrency.cache
 import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.CurrencyCache
-import gg.aquatic.kurrency.impl.RegisteredCurrency
 import gg.aquatic.kurrency.db.CurrencyDBHandler
+import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import redis.clients.jedis.UnifiedJedis
@@ -12,7 +12,6 @@ import redis.clients.jedis.params.SetParams
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
-import kotlin.collections.iterator
 
 class RedisCurrencyCache(
     private val jedis: UnifiedJedis,

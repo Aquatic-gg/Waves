@@ -1,10 +1,6 @@
 package gg.aquatic.kurrency
 
-import gg.aquatic.kregistry.FrozenRegistry
-import gg.aquatic.kregistry.MutableRegistry
-import gg.aquatic.kregistry.Registry
-import gg.aquatic.kregistry.RegistryId
-import gg.aquatic.kregistry.RegistryKey
+import gg.aquatic.kregistry.*
 import org.jetbrains.exposed.sql.Database
 
 object KurrencyConfig {
