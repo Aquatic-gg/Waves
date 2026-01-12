@@ -1,5 +1,6 @@
 package gg.aquatic.common
 
+import gg.aquatic.common.ticker.GlobalTicker
 import org.bukkit.plugin.java.JavaPlugin
 
 object AquaticCommon {
@@ -10,4 +11,5 @@ object AquaticCommon {
 
 fun initializeCommon(plugin: JavaPlugin) {
     AquaticCommon.plugin = plugin
+    GlobalTicker.initialize()
 }
