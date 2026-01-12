@@ -4,6 +4,7 @@ import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
 import org.jetbrains.exposed.sql.Transaction
 import org.jetbrains.exposed.sql.and
@@ -70,6 +71,29 @@ class CurrencyDBHandler(val database: Database) {
             if (result.insertedCount == 0) {
                 throw IllegalStateException("Database set failed for $uuid")
             }
+        }
+    }
+
+    suspend fun getLeaderboard(currency: RegisteredCurrency, limit: Int = 10): List<Pair<UUID, BigDecimal>> = withContext(VirtualsCtx) {
+        dbQuery {
+            BalancesTable.select(BalancesTable.playerUUID, BalancesTable.balance)
+                .where { BalancesTable.currencyId eq currency.id }
+                .orderBy(BalancesTable.balance to SortOrder.DESC)
+                .limit(limit)
+                .map { it[BalancesTable.playerUUID] to it[BalancesTable.balance] }
+        }
+    }
+
+    suspend fun getPlayerRank(uuid: UUID, currency: RegisteredCurrency): Long = withContext(VirtualsCtx) {
+        dbQuery {
+            val playerBalance = BalancesTable.select(BalancesTable.balance)
+                .where { (BalancesTable.playerUUID eq uuid) and (BalancesTable.currencyId eq currency.id) }
+                .singleOrNull()?.get(BalancesTable.balance) ?: return@dbQuery -1L
+
+            // Rank is count of players with higher balance + 1
+            BalancesTable.select(BalancesTable.playerUUID)
+                .where { (BalancesTable.currencyId eq currency.id) and (BalancesTable.balance greater playerBalance) }
+                .count() + 1
         }
     }
 }
