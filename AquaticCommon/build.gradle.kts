@@ -12,6 +12,7 @@ repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
 }
 
+val exposedVersion = "0.61.0"
 dependencies {
     testImplementation(kotlin("test"))
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
