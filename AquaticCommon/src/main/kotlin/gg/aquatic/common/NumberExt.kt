@@ -5,7 +5,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.util.Locale
+import java.util.*
 
 fun Double.decimals(decimalPlaces: Int = 0): String {
     return if (decimalPlaces == 0) {
