@@ -31,6 +31,19 @@ dependencies {
 
 ## 🚀 Usage
 
+### Initialization
+Before using the library, you must initialize it with the block factories you want to support (e.g., ItemsAdder or Oraxen).
+
+````kotlin
+override fun onEnable() {
+    initializeBlokk(mapOf(
+        "itemsadder" to IAFactory,
+        "oraxen" to OraxenFactory
+    ))
+}
+````
+
+
 ### Loading and Placing Blocks
 The `BlokkSerializer` automatically detects the block type based on the material prefix (e.g., `itemsadder:` or `oraxen:`).
 
