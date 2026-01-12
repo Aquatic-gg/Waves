@@ -44,6 +44,7 @@ class MultiBlokk(
                     val vector = Vector(x, y, z)
                     vector.rotateAroundY(-Math.toRadians(face.ordinal * 90.0))
                     val newLoc = location.block.location.clone().add(vector)
+                    newLoc.yaw = location.yaw
 
                     operation.invoke(char, newLoc)
                 }
