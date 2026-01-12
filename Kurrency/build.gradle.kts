@@ -24,7 +24,7 @@ dependencies {
     compileOnly("gg.aquatic:KRegistry:25.0.1")
     compileOnly("gg.aquatic:KEvent:1.0.4")
     compileOnly("gg.aquatic:Common:26.0.3")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7") {
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         exclude(group = "org.bukkit", module = "bukkit")
     }
     testImplementation(kotlin("test"))
