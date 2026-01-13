@@ -7,7 +7,7 @@ open class MutableRegistry<K, V> protected constructor(
     constructor() : this(mutableMapOf())
 
     fun register(key: K, value: V) {
-        require(key !in entries)
+        //require(key !in entries)
         entries[key] = value
     }
 
