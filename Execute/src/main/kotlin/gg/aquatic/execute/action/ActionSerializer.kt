@@ -47,7 +47,7 @@ object ActionSerializer {
             return ExecutableObjectHandle(smartAction, args)
         }
 
-        val allActions = Action.REGISTRY.getAllHierarchical<T>()
+        val allActions = Action.REGISTRY.getAllHierarchical(clazz)
 
         val action = allActions[type]
         if (action == null) {

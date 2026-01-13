@@ -21,13 +21,13 @@ object ConditionSerializer {
     ): ConditionHandle<T>? {
         val type = section.getString("type") ?: return null
 
-        val actions = Condition.REGISTRY.getAllHierarchical<T>()
+        val actions = Condition.REGISTRY.getAllHierarchical(clazz)
         val action = actions[type]
         if (action == null) {
             if (clazz == Unit::class.java) return null
 
 
-            val voidRequirement = Condition.REGISTRY.getHierarchical<Unit>(type) ?: return null
+            val voidRequirement = Condition.REGISTRY.getHierarchical<Unit>(type, Unit::class.java) ?: return null
             val condition = TransformedCondition<T, Unit>(voidRequirement) { _ -> let { } }
 
             val arguments = condition.arguments.toMutableList()

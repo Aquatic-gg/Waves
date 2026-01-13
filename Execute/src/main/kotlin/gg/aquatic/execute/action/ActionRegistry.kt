@@ -8,14 +8,18 @@ inline fun <reified T : Any> MutableRegistry<Class<*>, FrozenRegistry<String, Ac
     id: String,
     action: Action<T>
 ) {
-    register<String, Action<*>, Action<T>>(id, action)
+    val reg = this[T::class.java]?.unfreeze() ?: MutableRegistry()
+    reg.register(id, action)
+    this.register(T::class.java, reg.freeze())
 }
 
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Any> MutableRegistry<Class<*>, FrozenRegistry<String, Action<*>>>.registerActions(
     map: Map<String, Action<T>>
 ) {
-    register<String, Action<*>, Action<T>>(map)
+    val reg = this[T::class.java]?.unfreeze() ?: MutableRegistry()
+    map.forEach { (id, value) -> reg.register(id, value) }
+    this.register(T::class.java, reg.freeze())
 }
 
 @Suppress("UNCHECKED_CAST")
@@ -24,11 +28,11 @@ inline fun <reified T : Any> TypedRegistry<String, Action<*>>.getActions(): Map<
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> TypedRegistry<String, Action<*>>.getHierarchical(id: String): Action<T>? {
-    return this.getHierarchical<String, Action<*>, Action<T>>(id)
+fun <T : Any> TypedRegistry<String, Action<*>>.getHierarchical(id: String, clazz: Class<T>): Action<T>? {
+    return (this as TypedRegistry<String, *>).getHierarchical<String, T, Action<T>>(id, clazz)
 }
 
 @Suppress("UNCHECKED_CAST")
-fun <T : Any> TypedRegistry<String, Action<*>>.getAllHierarchical(): Map<String, Action<T>> {
-    return this.getAllHierarchical<String, Action<*>, Action<T>>()
+fun <T : Any> TypedRegistry<String, Action<*>>.getAllHierarchical(clazz: Class<T>): Map<String, Action<T>> {
+    return (this as TypedRegistry<String, *>).getAllHierarchical<String, T, Action<T>>(clazz)
 }
