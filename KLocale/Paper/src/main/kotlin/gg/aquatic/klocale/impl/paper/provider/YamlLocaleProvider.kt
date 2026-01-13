@@ -6,8 +6,10 @@ import gg.aquatic.klocale.impl.paper.PaperMessage
 import gg.aquatic.klocale.impl.paper.toMMComponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
+import kotlin.collections.set
 
 class YamlLocaleProvider(
     val file: File,
@@ -26,14 +28,18 @@ class YamlLocaleProvider(
                 val map = HashMap<String, PaperMessage>()
                 val lang = data.getConfigurationSection(string) ?: continue
                 for (str in lang.getKeys(false)) {
-                    if (lang.isList(str)) map[str] = PaperMessage.of(lang.getStringList(str).map { it.toMMComponent() })
-                    else {
-                        map[str] = PaperMessage.of(lang.getString(str)?.toMMComponent() ?: continue)
-                    }
+                    map[str] = parseMessage(lang, str) ?: continue
                 }
                 result[string] = map
             }
             return result
+        }
+
+        fun parseMessage(section: ConfigurationSection, key: String): PaperMessage? {
+            if (section.isList(key)) return PaperMessage.of(section.getStringList(key).map { it.toMMComponent() })
+            else {
+                return PaperMessage.of(section.getString(key)?.toMMComponent() ?: return null)
+            }
         }
     }
 }
