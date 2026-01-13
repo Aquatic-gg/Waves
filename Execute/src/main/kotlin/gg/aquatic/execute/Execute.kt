@@ -41,7 +41,7 @@ object Execute {
     }
 
     fun injectActions(registry: MutableRegistry<Class<*>, FrozenRegistry<String, Action<*>>>) {
-        registry.registerAction("action-bar", ActionbarAction)
+        registry.registerAction("actionbar", ActionbarAction)
         registry.registerAction("close-inventory", CloseInventory)
         registry.registerAction("command", CommandAction)
         registry.registerAction("sound", SoundAction)
