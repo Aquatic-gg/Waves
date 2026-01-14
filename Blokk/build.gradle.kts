@@ -16,6 +16,7 @@ repositories {
     mavenCentral()
     maven("https://maven.devs.beer/")
     maven("https://repo.oraxen.com/releases")
+    maven("https://repo.nexomc.com/releases")
 }
 
 dependencies {
@@ -27,6 +28,7 @@ dependencies {
     // Implementations
     compileOnly("dev.lone:api-itemsadder:4.0.10")
     compileOnly("io.th0rgal:oraxen:1.203.2")
+    compileOnly("com.nexomc:nexo:1.17.0")
 }
 
 kotlin {
