@@ -1,12 +1,10 @@
 package gg.aquatic.kurrency.cache
 
-import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.CurrencyCache
 import gg.aquatic.kurrency.db.CurrencyDBHandler
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.withContext
-import org.bukkit.Bukkit
 import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.params.SetParams
 import java.math.BigDecimal
@@ -24,20 +22,14 @@ class RedisCurrencyCache(
     private fun playerKey(uuid: UUID, currency: RegisteredCurrency) =
         "$keyPrefix${currency.id}:$uuid"
 
-    override suspend fun isActive(uuid: UUID): Boolean {
-        return withContext(BukkitCtx.GLOBAL) { Bukkit.getPlayer(uuid)?.isConnected == true } || withContext(VirtualsCtx) {
-            jedis.exists("$keyPrefix*:$uuid")
-        }
-    }
-
-    override suspend fun get(uuid: UUID, registeredCurrency: RegisteredCurrency): BigDecimal? =
+    override suspend fun get(uuid: UUID, registeredCurrency: RegisteredCurrency): BigDecimal =
         withContext(VirtualsCtx) {
             val key = playerKey(uuid, registeredCurrency)
             val data = jedis.get(key)
 
             if (data != null) {
                 jedis.expire(key, ttlSeconds)
-                return@withContext data.toBigDecimalOrNull()?.setScale(2, RoundingMode.HALF_DOWN)
+                return@withContext data.toBigDecimal().setScale(2, RoundingMode.HALF_DOWN)
             }
 
             val dbBalance = dbHandler.getBalance(uuid, registeredCurrency)
@@ -49,12 +41,17 @@ class RedisCurrencyCache(
         uuids: Collection<UUID>,
         registeredCurrency: RegisteredCurrency
     ): Map<UUID, BigDecimal> = withContext(VirtualsCtx) {
+        val uuidList = uuids.toList()
+        val keys = uuidList.map { playerKey(it, registeredCurrency) }.toTypedArray()
+
+        // Use MGET for a single network round-trip
+        val values = jedis.mget(*keys)
         val results = mutableMapOf<UUID, BigDecimal>()
         val missingUuids = mutableListOf<UUID>()
 
-        for (uuid in uuids) {
-            val key = playerKey(uuid, registeredCurrency)
-            val data = jedis.get(key)
+        for (i in uuidList.indices) {
+            val data = values[i]
+            val uuid = uuidList[i]
             if (data != null) {
                 results[uuid] = data.toBigDecimal().setScale(2, RoundingMode.HALF_DOWN)
             } else {
@@ -77,7 +74,7 @@ class RedisCurrencyCache(
             val key = playerKey(uuid, registeredCurrency)
             dbHandler.give(uuid, amount, registeredCurrency)
 
-            val current = get(uuid, registeredCurrency) ?: BigDecimal.ZERO
+            val current = get(uuid, registeredCurrency)
             val newBalance = current.add(amount)
             jedis.set(key, newBalance.toPlainString(), SetParams().ex(ttlSeconds))
         }

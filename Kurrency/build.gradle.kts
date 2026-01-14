@@ -32,6 +32,7 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    compileOnly("com.github.ben-manes.caffeine:caffeine:3.2.3")
     compileOnly("redis.clients:jedis:7.2.0")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
 }
