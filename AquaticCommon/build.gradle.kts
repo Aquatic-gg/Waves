@@ -17,7 +17,7 @@ dependencies {
     testImplementation(kotlin("test"))
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("org.slf4j:slf4j-api:1.7.25")
+    compileOnly("org.slf4j:slf4j-api:2.0.17")
 }
 
 kotlin {
