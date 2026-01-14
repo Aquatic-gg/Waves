@@ -9,7 +9,6 @@ import kotlinx.coroutines.withContext
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.configuration.file.YamlConfiguration
 import java.io.File
-import kotlin.collections.set
 
 class YamlLocaleProvider(
     val file: File,
