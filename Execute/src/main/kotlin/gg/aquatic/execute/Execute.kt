@@ -63,7 +63,7 @@ object Execute {
 
     fun injectSmartActions(registry: MutableRegistry<String, SmartActionFactory>) {
         registry.register(
-            "smart-action-example"
+            "conditional-actions"
         ) { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) }
     }
 

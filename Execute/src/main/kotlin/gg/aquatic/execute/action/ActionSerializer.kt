@@ -11,13 +11,6 @@ import org.bukkit.configuration.ConfigurationSection
 
 object ActionSerializer {
 
-    val smartActions = mutableMapOf<String, (
-        clazz: Class<*>,
-        classTransforms: Collection<ClassTransform<*, *>>,
-    ) -> SmartAction<*>>(
-        "conditional-actions" to { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) },
-    )
-
     @Suppress("UNCHECKED_CAST")
     private fun <T : Any> getSmartAction(
         id: String,
