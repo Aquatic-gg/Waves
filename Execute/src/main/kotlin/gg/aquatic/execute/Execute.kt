@@ -3,6 +3,9 @@ package gg.aquatic.execute
 import gg.aquatic.common.AquaticCommon
 import gg.aquatic.common.initializeCommon
 import gg.aquatic.execute.action.impl.*
+import gg.aquatic.execute.action.impl.logical.ConditionalActionsAction
+import gg.aquatic.execute.action.impl.logical.SmartAction
+import gg.aquatic.execute.action.impl.logical.SmartActionFactory
 import gg.aquatic.execute.action.registerAction
 import gg.aquatic.execute.requirement.impl.PermissionCondition
 import gg.aquatic.execute.requirement.registerCondition
@@ -26,12 +29,15 @@ object Execute {
     fun injectExecutables(graph: MutableRegistryGraph) {
         val actions = MutableRegistry<Class<*>, FrozenRegistry<String, Action<*>>>()
         val conditions = MutableRegistry<Class<*>, FrozenRegistry<String, Condition<*>>>()
+        val smartActions = MutableRegistry<String, SmartActionFactory>()
 
         injectActions(actions)
         injectConditions(conditions)
+        injectSmartActions(smartActions)
 
         graph.registerRegistry(Action.REGISTRY_KEY, actions.freeze())
         graph.registerRegistry(Condition.REGISTRY_KEY, conditions.freeze())
+        graph.registerRegistry(SmartAction.REGISTRY_KEY, smartActions.freeze())
     }
 
     fun injectActions() {
@@ -47,6 +53,18 @@ object Execute {
         registry.registerAction("sound", SoundAction)
         registry.registerAction("stop-sound", SoundStopAction)
         registry.registerAction("title", TitleAction)
+    }
+
+    fun injectSmartActions() {
+        Registry.update {
+            this.replaceRegistry(SmartAction.REGISTRY_KEY) { injectSmartActions(this) }
+        }
+    }
+
+    fun injectSmartActions(registry: MutableRegistry<String, SmartActionFactory>) {
+        registry.register(
+            "smart-action-example"
+        ) { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) }
     }
 
     fun injectConditions() {

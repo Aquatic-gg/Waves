@@ -24,8 +24,8 @@ object ActionSerializer {
         clazz: Class<T>,
         classTransforms: Collection<ClassTransform<T, *>>
     ): SmartAction<T>? {
-        val type = smartActions[id] ?: return null
-        return type(clazz, classTransforms) as? SmartAction<T>
+        val factory = SmartAction.REGISTRY[id] ?: return null
+        return factory(clazz, classTransforms) as? SmartAction<T>
     }
 
     inline fun <reified T : Any> fromSectionSimple(
