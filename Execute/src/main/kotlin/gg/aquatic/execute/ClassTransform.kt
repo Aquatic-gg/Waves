@@ -5,8 +5,6 @@ import gg.aquatic.execute.action.getActions
 import gg.aquatic.execute.action.getHierarchical
 import gg.aquatic.execute.requirement.ConditionSerializer.TransformedCondition
 import gg.aquatic.execute.requirement.getHierarchical
-import gg.aquatic.kregistry.getHierarchical
-import gg.aquatic.kregistry.getTypedAll
 
 class ClassTransform<T : Any, D : Any>(val clazz: Class<D>, val transform: (T) -> D) {
     fun transform(obj: T): D {
