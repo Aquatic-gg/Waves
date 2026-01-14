@@ -34,7 +34,9 @@ class StackedItemBuilder(private val baseStack: ItemStack) {
 
     var customModelDataLegacy: Int? = null
         set(value) {
-            value?.let { options[CustomModelDataLegacyOptionHandle::class.java] = CustomModelDataLegacyOptionHandle(it) }
+            value?.let {
+                options[CustomModelDataLegacyOptionHandle::class.java] = CustomModelDataLegacyOptionHandle(it)
+            }
             field = value
         }
 
@@ -130,6 +132,10 @@ fun stackedItem(material: Material, builder: StackedItemBuilder.() -> Unit): Sta
 
 fun ItemStack.toStackedBuilder(builder: StackedItemBuilder.() -> Unit): StackedItem {
     return StackedItemBuilder(this.clone()).apply(builder).build()
+}
+
+fun Material.toStackedBuilder(builder: StackedItemBuilder.() -> Unit): StackedItem {
+    return StackedItemBuilder(ItemStack(this)).apply(builder).build()
 }
 
 @StackedDsl
