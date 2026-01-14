@@ -35,7 +35,7 @@ dependencies {
 
     // Item adapters
     compileOnly("gg.aquatic:AEAPI:1.0")
-    compileOnly("io.th0rgal:oraxen:1.203.2")
+    compileOnly("io.th0rgal:oraxen:1.204.0")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3")
     compileOnly("io.lumine:Mythic-Dist:5.11.1")
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
