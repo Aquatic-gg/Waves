@@ -13,13 +13,8 @@ enum class MessagesExample(
 
     EXAMPLE("example");
 
-    override fun message(locale: Locale): PaperMessage {
-        return manager.getOrThrow(locale, path)
-    }
-
     override val manager: LocaleManager<PaperMessage>
         get() = TODO("Not yet implemented")
-
 
     companion object {
         private val provider: LocaleProvider<PaperMessage> = YamlLocaleProvider(

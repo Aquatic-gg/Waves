@@ -88,10 +88,7 @@ enum class Messages(override val path: String) : CfgMessageHandler<PaperMessage>
     STAFF_LIST("staff-list");
 
     override val manager: LocaleManager<PaperMessage>
-        get() = MyPlugin.localeManager
-
-    override fun message(locale: Locale): PaperMessage = manager.getOrThrow(locale, path)
-}
+        get() = MyPlugin.localeManager }
 
 // Usage:
 Messages.WELCOME.message(player.locale()).replace("player", name).send(player)
