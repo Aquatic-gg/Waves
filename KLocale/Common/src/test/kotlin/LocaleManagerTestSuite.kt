@@ -28,8 +28,8 @@ class LocaleManagerTest {
 
         val manager = BaseLocaleManager(
             cache = cache,
-            defaultLanguage = "en",
-            provider = provider
+            defaultLanguage = Locale.ENGLISH,
+            providers = mutableListOf(provider)
         )
 
         manager.invalidate()
@@ -41,8 +41,8 @@ class LocaleManagerTest {
     @Test
     fun `test missing key handler`() = runBlocking {
         val manager = BaseLocaleManager(
-            defaultLanguage = "en",
-            provider = { emptyMap() },
+            defaultLanguage = Locale.ENGLISH,
+            providers = mutableListOf(),
             missingKeyHandler = object : MissingKeyHandler<TestMessage> {
                 override fun handle(key: String, language: String): TestMessage {
                     return TestMessage("MISSING: $key")
@@ -57,8 +57,8 @@ class LocaleManagerTest {
     @Test
     fun `test throwing handler`() {
         val manager = BaseLocaleManager<TestMessage>(
-            defaultLanguage = "en",
-            provider = { emptyMap() }
+            defaultLanguage = Locale.ENGLISH,
+            providers = mutableListOf()
         )
 
         assertThrows(IllegalArgumentException::class.java) {
