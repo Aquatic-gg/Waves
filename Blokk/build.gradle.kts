@@ -27,7 +27,7 @@ dependencies {
 
     // Implementations
     compileOnly("dev.lone:api-itemsadder:4.0.10")
-    compileOnly("io.th0rgal:oraxen:1.203.2")
+    compileOnly("io.th0rgal:oraxen:1.204.0")
     compileOnly("com.nexomc:nexo:1.17.0")
 }
 
