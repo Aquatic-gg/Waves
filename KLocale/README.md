@@ -43,13 +43,17 @@ Initialize your locale manager using the clean Kotlin DSL:
 ````kotlin
 val localeManager = KLocale.paper {
     defaultLanguage = "en"
-    provider = YamlLocaleProvider(
+
+    // Add one or more providers
+    providers += YamlLocaleProvider(
         file = File(dataFolder, "lang.yml"),
         serializer = YamlLocaleProvider.DefaultSerializer
     )
+    // Optional: Use a custom MiniMessage instance (comes with 'ccmd' tag by default!)
+    // miniMessage = MiniMessage.miniMessage()
 
     // Optional: Handle missing keys gracefully instead of throwing exceptions
-    missingKeyHandler = PaperMissingKeyHandler()
+    missingKeyHandler = MissingKeyHandler.Throwing()
 }
 
 // Reload locales (suspended call)
@@ -66,13 +70,32 @@ Fetching and sending messages is intuitive and chainable:
 fun welcome(player: Player) {
     localeManager.getOrDefault(player.locale(), "welcome-message")
         .replace("player", player.name)
-        // Supports Kyori components
-        .replace("balance", "<green>$500</green>".toMMComponent())
+        // Native support for replacing placeholders with rich Components
+        .replace("balance", Component.text("$500", NamedTextColor.GREEN))
         .send(player)
 }
 ````
 
 ## 🛠 Advanced Usage
+
+### Type-Safe Enums
+Implement `CfgMessageHandler` to access your messages globally with clean syntax:
+Check out `MessagesExample` for a full example.
+
+```kotlin
+enum class Messages(override val path: String) : CfgMessageHandler<PaperMessage> {
+    WELCOME("welcome-message"),
+    STAFF_LIST("staff-list");
+
+    override val manager: LocaleManager<PaperMessage>
+        get() = MyPlugin.localeManager
+
+    override fun message(locale: Locale): PaperMessage = manager.getOrThrow(locale, path)
+}
+
+// Usage:
+Messages.WELCOME.message(player.locale()).replace("player", name).send(player)
+```
 
 ### Handling Custom Languages
 If you need to support languages that aren't constants in java.util.Locale (like Czech, Slovak, or regional dialects), use IETF BCP 47 language tags:
