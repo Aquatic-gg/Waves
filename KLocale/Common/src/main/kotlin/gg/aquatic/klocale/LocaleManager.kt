@@ -8,7 +8,7 @@ interface LocaleManager<A : Message<A>> {
 
     val defaultLanguage: String
     val cache: MessageCache<A>
-    val provider: LocaleProvider<A>
+    val providers: Iterable<LocaleProvider<A>>
     val missingKeyHandler: MissingKeyHandler<A>
 
     suspend fun invalidate()
@@ -38,4 +38,8 @@ interface LocaleManager<A : Message<A>> {
     fun getLanguages(): Set<String> {
         return cache.getLanguages()
     }
+
+    suspend fun injectProvider(provider: LocaleProvider<A>)
+    fun removeProvider(provider: LocaleProvider<A>)
+    fun clearProviders()
 }

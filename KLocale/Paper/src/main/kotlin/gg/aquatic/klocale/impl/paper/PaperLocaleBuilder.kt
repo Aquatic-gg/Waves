@@ -8,15 +8,15 @@ import kotlin.io.resolve
 
 class PaperLocaleBuilder {
     var defaultLanguage: String = "en"
-    lateinit var provider: LocaleProvider<PaperMessage>
     var missingKeyHandler: MissingKeyHandler<PaperMessage> = MissingKeyHandler.Throwing()
     var miniMessage = Companion.miniMessage
+    var providers: MutableIterable<LocaleProvider<PaperMessage>> = mutableListOf()
 
     fun build(): BaseLocaleManager<PaperMessage> {
         Companion.miniMessage = miniMessage
         return BaseLocaleManager(
             defaultLanguage = defaultLanguage,
-            provider = provider,
+            providers = providers,
             missingKeyHandler = missingKeyHandler
         )
     }
@@ -33,11 +33,9 @@ class PaperLocaleBuilder {
 
 object KLocale {
     fun paper(
-        provider: LocaleProvider<PaperMessage>,
         block: PaperLocaleBuilder.() -> Unit
     ): BaseLocaleManager<PaperMessage> {
         val builder = PaperLocaleBuilder()
-        builder.provider = provider
         builder.block()
         return builder.build()
     }
