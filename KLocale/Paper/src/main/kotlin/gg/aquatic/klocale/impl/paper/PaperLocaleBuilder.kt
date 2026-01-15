@@ -4,6 +4,7 @@ import gg.aquatic.klocale.BaseLocaleManager
 import gg.aquatic.klocale.LocaleProvider
 import gg.aquatic.klocale.MissingKeyHandler
 import net.kyori.adventure.text.minimessage.MiniMessage
+import kotlin.io.resolve
 
 class PaperLocaleBuilder {
     var defaultLanguage: String = "en"
@@ -21,13 +22,20 @@ class PaperLocaleBuilder {
     }
 
     companion object {
-        var miniMessage = MiniMessage.miniMessage()
+        var miniMessage = MiniMessage.builder().editTags { b ->
+            b.tag("ccmd") { a, b ->
+                ConsoleCommandMMResolver.resolve(a, b)
+            }
+        }.build()
             private set
     }
 }
 
 object KLocale {
-    fun paper(provider: LocaleProvider<PaperMessage>, block: PaperLocaleBuilder.() -> Unit): BaseLocaleManager<PaperMessage> {
+    fun paper(
+        provider: LocaleProvider<PaperMessage>,
+        block: PaperLocaleBuilder.() -> Unit
+    ): BaseLocaleManager<PaperMessage> {
         val builder = PaperLocaleBuilder()
         builder.provider = provider
         builder.block()
