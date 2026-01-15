@@ -6,7 +6,7 @@ import java.util.*
 
 interface LocaleManager<A : Message<A>> {
 
-    val defaultLanguage: String
+    val defaultLanguage: Locale
     val cache: MessageCache<A>
     val providers: Iterable<LocaleProvider<A>>
     val missingKeyHandler: MissingKeyHandler<A>
@@ -19,7 +19,7 @@ interface LocaleManager<A : Message<A>> {
 
     fun getOrDefault(language: Locale, key: String): A {
         val msg =
-            cache.get(language.language, key) ?: if (defaultLanguage == language.language) null else cache.get(defaultLanguage, key)
+            cache.get(language.language, key) ?: if (defaultLanguage == language) null else cache.get(defaultLanguage.language, key)
         return msg ?: missingKeyHandler.handle(key,language.language)
     }
 

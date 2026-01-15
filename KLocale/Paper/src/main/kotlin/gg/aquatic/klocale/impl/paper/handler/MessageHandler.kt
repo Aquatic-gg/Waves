@@ -6,9 +6,6 @@ import java.util.*
 
 interface MessageHandler<T: Message<T>> {
 
-    fun message(language: String): T {
-        return message(Locale.forLanguageTag(language))
-    }
     fun message(locale: Locale): T
     val manager: LocaleManager<T>
 }

@@ -4,10 +4,11 @@ import gg.aquatic.klocale.BaseLocaleManager
 import gg.aquatic.klocale.LocaleProvider
 import gg.aquatic.klocale.MissingKeyHandler
 import net.kyori.adventure.text.minimessage.MiniMessage
+import java.util.Locale
 import kotlin.io.resolve
 
 class PaperLocaleBuilder {
-    var defaultLanguage: String = "en"
+    var defaultLanguage: Locale = Locale.ENGLISH
     var missingKeyHandler: MissingKeyHandler<PaperMessage> = MissingKeyHandler.Throwing()
     var miniMessage = Companion.miniMessage
     var providers: MutableIterable<LocaleProvider<PaperMessage>> = mutableListOf()
