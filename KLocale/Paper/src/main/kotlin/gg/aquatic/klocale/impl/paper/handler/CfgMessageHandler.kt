@@ -9,4 +9,8 @@ interface CfgMessageHandler<T: Message<T>> : MessageHandler<T> {
     override fun message(locale: Locale): T {
         return manager.getOrThrow(locale, path)
     }
+
+    fun message(): T {
+        return manager.getOrThrow(manager.defaultLanguage, path)
+    }
 }
