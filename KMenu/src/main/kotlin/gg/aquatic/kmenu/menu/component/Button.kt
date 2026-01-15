@@ -13,7 +13,7 @@ class Button(
     slots: Collection<Int>,
     priority: Int,
     val updateEvery: Int,
-    failComponent: MenuComponent?,
+    failComponent: MenuComponent? = null,
     viewRequirements: suspend (Menu) -> Boolean = { true },
     var textUpdater: PlaceholderContext<Menu>,
     onClick: suspend (AsyncPacketInventoryInteractEvent) -> Unit = { _ -> }
