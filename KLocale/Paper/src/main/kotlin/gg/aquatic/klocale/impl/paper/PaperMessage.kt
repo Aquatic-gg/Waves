@@ -48,20 +48,28 @@ class PaperMessage private constructor(
         Component.join(JoinConfiguration.newlines(), lines.map { it.component })
     } else null
 
-    fun withCallback(callback: (CommandSender, PaperMessage) -> Unit) = PaperMessage(lines, hooks + callback)
+    fun withCallback(callback: (CommandSender, PaperMessage) -> Unit) =
+        PaperMessage(lines, pagination, view, hooks + callback)
 
     fun send(vararg receiver: CommandSender) = send(receiver.asIterable())
 
     fun send(receivers: Iterable<CommandSender>) {
-        // If static, use the pre-rendered component
-        val componentToSend = cachedComponent ?: Component.join(
+        if (pagination != null && view is MessageView.Chat) {
+            sendPaginated(receivers)
+        }
+
+        val componentToSend = if (view is MessageView.Chat) cachedComponent ?: Component.join(
             JoinConfiguration.newlines(),
             lines.map { it.component }
-        )
+        ) else null
 
         for (player in receivers) {
             hooks.forEach { it(player, this) }
-            player.sendMessage(componentToSend)
+            when (view) {
+                is MessageView.Chat -> view.send(player, listOf(componentToSend!!))
+                is MessageView.ActionBar -> view.send(player, lines.map { it.component })
+                is MessageView.Title -> view.send(player, lines.map { it.component })
+            }
         }
     }
 
