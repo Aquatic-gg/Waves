@@ -37,10 +37,10 @@ dependencies {
 ## 🚀 Usage
 
 ### 1. Define your Placeholders
-Using the `placeholder` function, you can build your tree.
+Using the `papiPlaceholder` function, you can build your tree.
 
 ```kotlin
-placeholder("YourName", "mystats") {
+papiPlaceholder("YourName", "mystats") {
     
     // Literal node: %mystats_kills%
     "kills" {
@@ -81,10 +81,10 @@ placeholder("YourName", "mystats") {
 ### 2. Advanced Argument Parsing
 The library automatically handles underscores within quotes, which is a common limitation in standard PAPI expansions.
 
-| Placeholder                    | Tokens Resolved                |
-|:-------------------------------|:-------------------------------|
-| `%stats_kills_total%`          | `[stats, kills, total]`        |
-| `%stats_"Vault_Money"_amount%` | `[stats, Vault_Money, amount]` |
+| Placeholder                      | Tokens Resolved                  |
+|:---------------------------------|:---------------------------------|
+| `%mystats_kills_total%`          | `[mystats, kills, total]`        |
+| `%mystats_"Vault_Money"_amount%` | `[mystats, Vault_Money, amount]` |
 
 ---
 

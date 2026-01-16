@@ -2,7 +2,7 @@ package gg.aquatic.treepapi
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion
 
-fun placeholder(author: String, identifier: String, block: PlaceholderNode.() -> Unit): PlaceholderExpansion? {
+fun papiPlaceholder(author: String, identifier: String, block: PlaceholderNode.() -> Unit): PlaceholderExpansion? {
     val root = PlaceholderNode()
     root.block()
 
