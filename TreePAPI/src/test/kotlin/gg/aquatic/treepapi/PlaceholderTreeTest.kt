@@ -1,5 +1,6 @@
 package gg.aquatic.treepapi
 
+import io.mockk.every
 import io.mockk.mockk
 import org.bukkit.OfflinePlayer
 import kotlin.test.Test
@@ -93,5 +94,32 @@ class PlaceholderTreeTest {
         // Case 2: Argument provided
         assertEquals("5 Gems", root.resolve(player, listOf("balance", "gems"), emptyMap()))
         assertEquals("100 Coins", root.resolve(player, listOf("balance", "money"), emptyMap()))
+    }
+
+    @Test
+    fun `test single handler for optional argument fallback`() {
+        val player = mockk<OfflinePlayer>()
+        every { player.name } returns "Larkyy"
+        val root = PlaceholderNode()
+
+        root.apply {
+            "stat" {
+                "wins" {
+                    handle {
+                        val target = string("player") ?: binder.name
+                        if (target == "Larkyy") "10" else "0"
+                    }
+                    stringArgument("player") {
+                        // No handler here, falls back to parent
+                    }
+                }
+            }
+        }
+
+        // Case 1: %stat_wins% -> returns 10
+        assertEquals("10", root.resolve(player, listOf("stat", "wins"), emptyMap()))
+
+        // Case 2: %stat_wins_Other% -> returns 0
+        assertEquals("0", root.resolve(player, listOf("stat", "wins", "Other"), emptyMap()))
     }
 }
