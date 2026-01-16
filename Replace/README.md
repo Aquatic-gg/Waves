@@ -92,6 +92,53 @@ if (updateResult.wasUpdated) {
 }
 ```
 
+### 5. Placeholder DSL (New! 🌳)
+For complex placeholders with multiple branches and arguments (PAPI-style), you can use the built-in DSL. It handles underscored tokens and quoted arguments automatically.
+
+```kotlin
+Placeholders.registerDSL<Player>("rank") {
+    // %rank_name%
+    "name" {
+        handle { getRankName(binder) }
+    }
+    
+    // %rank_info_<rank>%
+    "info" {
+        stringArgument("target_rank") {
+            handle { 
+                val rank = string("target_rank")
+                "Details for $rank..." 
+            }
+        }
+    }
+
+    // Optional arguments logic: %rank_status% or %rank_status_detailed%
+    "status" {
+        handle { "Simple Status" }
+        "detailed" {
+            handle { "Very Detailed Status" }
+        }
+    }
+}
+```
+
+Example with shared handler
+
+```kotlin
+Placeholders.registerDSL<Player>("stat") {
+    // Shared handler for both %stat_wins% and %stat_wins_<player>%
+    "wins" {
+        handle {
+            val targetName = string("player") ?: binder.name
+            getWins(targetName).toString()
+        }
+        stringArgument("player") {
+            // No handler needed here; it automatically falls back to the parent
+        }
+    }
+}
+```
+
 ## 🔌 PlaceholderAPI Support
 If PlaceholderAPI is present on the server, `Replace` can automatically wrap PAPI placeholders into its type-safe system using the `papi` identifier:
 
