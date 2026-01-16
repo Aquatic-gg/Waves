@@ -68,6 +68,9 @@ class PlaceholderNode(
                 newArgs[child.id!!] = parsed
                 val result = child.resolve(binder, tokens, newArgs, index + 1)
                 if (result != null) return result
+
+                val fallback = handler?.invoke(PlaceholderArgumentContext(binder, newArgs))
+                if (fallback != null) return fallback
             }
         }
 
