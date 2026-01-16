@@ -74,6 +74,18 @@ papiPlaceholder("YourName", "mystats") {
             handle { "#152" }
         }
     }
+
+    // Optional Arguments: %mystats_wins% vs %mystats_wins_<player>%
+    "wins" {
+        // This single handler covers both cases!
+        handle {
+            val target = string("player") ?: binder.name
+            getWins(target)
+        }
+        stringArgument("player") {
+            // Falling back to parent handler automatically
+        }
+    }
 }
 ```
 
