@@ -59,7 +59,7 @@ placeholder("YourName", "mystats") {
         playerArgument("target") {
             "level" {
                 handle {
-                    val target = argument<Player>("target")
+                    val target = getOrNull<Player>("target")
                     target?.level?.toString() ?: "0"
                 }
             }
