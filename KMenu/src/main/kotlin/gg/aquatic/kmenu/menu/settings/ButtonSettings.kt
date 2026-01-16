@@ -6,7 +6,7 @@ import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.kmenu.menu.component.Button
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.stacked.StackedItem
 import org.bukkit.entity.Player
 

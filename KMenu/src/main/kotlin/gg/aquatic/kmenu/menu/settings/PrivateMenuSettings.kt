@@ -3,7 +3,7 @@ package gg.aquatic.kmenu.menu.settings
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 

@@ -3,7 +3,7 @@ package gg.aquatic.kmenu.menu.settings
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.MenuComponent
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 
 interface IButtonSettings {
 

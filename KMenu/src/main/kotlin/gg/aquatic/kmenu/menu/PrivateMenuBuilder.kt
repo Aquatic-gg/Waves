@@ -4,7 +4,7 @@ import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.component.Button
 import gg.aquatic.kmenu.menu.util.ScrollingButton
 import gg.aquatic.kmenu.privateMenu
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack

@@ -4,8 +4,8 @@ import gg.aquatic.kmenu.inventory.InventoryModule
 import gg.aquatic.kmenu.inventory.PacketInventory
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
-import gg.aquatic.replace.placeholder.PlaceholderContext
-import gg.aquatic.replace.placeholder.Placeholders
+import gg.aquatic.replace.PlaceholderContext
+import gg.aquatic.replace.Placeholders
 import io.github.charlietap.cachemap.cacheMapOf
 import org.bukkit.entity.Player
 
