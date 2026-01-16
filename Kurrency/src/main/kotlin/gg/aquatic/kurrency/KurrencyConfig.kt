@@ -1,6 +1,8 @@
 package gg.aquatic.kurrency
 
+import gg.aquatic.common.HikariDBFactory
 import gg.aquatic.kregistry.*
+import gg.aquatic.kurrency.db.BalancesTable
 import org.jetbrains.exposed.sql.Database
 
 object KurrencyConfig {
@@ -15,7 +17,7 @@ object KurrencyConfig {
         }
 
     fun injectCurrency(currency: Currency) {
-        Registry.update { replaceRegistry(REGISTRY_KEY) { register(currency.id, currency)} }
+        Registry.update { replaceRegistry(REGISTRY_KEY) { register(currency.id, currency) } }
     }
 
     fun injectCurrencies(currencies: List<Currency>) {
@@ -32,7 +34,7 @@ fun initializeKurrency(
     cache: CurrencyCache,
     currencies: List<Currency> = emptyList()
 ) {
-    val database = CurrencyDatabaseFactory.init(dbUrl, dbDriver, dbUser, dbPass)
+    val database = HikariDBFactory.init(dbUrl, dbDriver, dbUser, dbPass, BalancesTable)
 
     KurrencyConfig.database = database
     KurrencyConfig.currencyHandler = CurrencyHandler(cache)
