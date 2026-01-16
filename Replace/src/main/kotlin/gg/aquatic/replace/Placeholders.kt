@@ -71,6 +71,14 @@ object Placeholders {
         registered.getOrPut(clazz) { mutableListOf() }.addAll(placeholders)
     }
 
+    inline fun <reified T> registerDSL(
+        identifier: String,
+        isConst: Boolean = false,
+        noinline block: PlaceholderDSLNode<T>.() -> Unit
+    ) {
+        register(dslPlaceholder(identifier, isConst, block))
+    }
+
     inline fun <reified T> register(vararg placeholders: Placeholder<T>) {
         register(T::class.java, *placeholders)
     }
