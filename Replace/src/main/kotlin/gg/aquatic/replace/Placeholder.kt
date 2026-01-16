@@ -1,4 +1,4 @@
-package gg.aquatic.replace.placeholder
+package gg.aquatic.replace
 
 import me.clip.placeholderapi.PlaceholderAPI
 import org.bukkit.entity.Player
