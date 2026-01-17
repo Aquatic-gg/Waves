@@ -5,16 +5,21 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-A high-performance, read-optimized `MutableMap` wrapper for Kotlin/JVM. 
+A high-performance, read-optimized `MutableMap` wrapper for Kotlin/JVM.
 
-`SnapshotMap` is designed for scenarios where map iterations (`forEach`) are frequent but modifications are occasional. It uses an internal **Array-Snapshot** strategy to provide ultra-fast, lock-free iteration that significantly outperforms standard `ConcurrentHashMap`.
+`SnapshotMap` is designed for scenarios where map iterations (`forEach`) are frequent but modifications are occasional.
+It uses an internal **Array-Snapshot** strategy to provide ultra-fast, lock-free iteration that significantly
+outperforms standard `ConcurrentHashMap`.
 
 ## Features
 
-- **Zero-Allocation Iteration:** Once the snapshot is cached, `forEach` performs no allocations and avoids `Map.Entry` overhead.
+- **Zero-Allocation Iteration:** Once the snapshot is cached, `forEach` performs no allocations and avoids `Map.Entry`
+  overhead.
 - **CPU Cache Friendly:** Data is stored in contiguous arrays, maximizing L3 cache hits during full-map scans.
-- **Lock-Free Reads:** Standard point-lookups (`get`) delegate directly to the underlying map with zero-cost abstraction.
-- **Smart Invalidation:** Snapshots are lazily rebuilt only when data actually changes, preventing redundant work during frequent "no-op" writes.
+- **Lock-Free Reads:** Standard point-lookups (`get`) delegate directly to the underlying map with zero-cost
+  abstraction.
+- **Smart Invalidation:** Snapshots are lazily rebuilt only when data actually changes, preventing redundant work during
+  frequent "no-op" writes.
 
 ---
 
@@ -23,14 +28,20 @@ A high-performance, read-optimized `MutableMap` wrapper for Kotlin/JVM.
 `SnapshotMap` is a specialized tool. It is not a 1:1 replacement for `ConcurrentHashMap` in every scenario.
 
 ### ✅ Use SnapshotMap when:
-*   **Read-Iteration Heavy:** Your application calls `forEach` significantly more often than it calls `put` or `remove`.
-*   **High Thread Contention:** Multiple threads are iterating over the map simultaneously. `SnapshotMap` eliminates the internal locking bottlenecks of standard concurrent collections.
-*   **Data Stability:** Your data changes in bursts or at set intervals (e.g., a game tick or a periodic config reload).
-*   **Large Map Scans:** You are iterating over thousands of items where the CPU cache benefit of a flat array becomes noticeable.
+
+* **Read-Iteration Heavy:** Your application calls `forEach` significantly more often than it calls `put` or `remove`.
+* **High Thread Contention:** Multiple threads are iterating over the map simultaneously. `SnapshotMap` eliminates the
+  internal locking bottlenecks of standard concurrent collections.
+* **Data Stability:** Your data changes in bursts or at set intervals (e.g., a game tick or a periodic config reload).
+* **Large Map Scans:** You are iterating over thousands of items where the CPU cache benefit of a flat array becomes
+  noticeable.
 
 ### ❌ Avoid SnapshotMap when:
-*   **Write-Heavy Workloads:** If you are modifying the map as frequently as you are reading it, the overhead of constant array rebuilding will make it slower than a standard `ConcurrentHashMap`.
-*   **Memory Constrained:** This map stores a cached copy of your keys and values in arrays, effectively doubling the reference memory usage of the map.
+
+* **Write-Heavy Workloads:** If you are modifying the map as frequently as you are reading it, the overhead of constant
+  array rebuilding will make it slower than a standard `ConcurrentHashMap`.
+* **Memory Constrained:** This map stores a cached copy of your keys and values in arrays, effectively doubling the
+  reference memory usage of the map.
 
 ---
 
@@ -39,19 +50,25 @@ A high-performance, read-optimized `MutableMap` wrapper for Kotlin/JVM.
 In our JMH tests with 100,000 items, `SnapshotMap` demonstrates superior scalability in read-heavy environments.
 
 ### 1. Iteration Scalability (The "Win")
+
 *Measured with 7 threads iterating and 1 thread performing occasional writes (100ms interval).*
-Once the snapshot is cached, **SnapshotMap is ~2.5x faster** than `ConcurrentHashMap` due to its flat-array memory layout.
+Once the snapshot is cached, **SnapshotMap is ~2.5x faster** than `ConcurrentHashMap` due to its flat-array memory
+layout.
 
 ![Iteration Scalability](scalability_results.png)
 
 ### 2. Single-Threaded Baseline (vs HashMap)
-In a single-threaded environment, `SnapshotMap` trades a small amount of raw lookup speed for a massive boost in scan efficiency. It is **~50% faster in iteration** due to cache locality, but **~30% slower in point-reads** because of delegation and thread-safety overhead.
+
+In a single-threaded environment, `SnapshotMap` trades a small amount of raw lookup speed for a massive boost in scan
+efficiency. It is **~50% faster in iteration** due to cache locality, but **~30% slower in point-reads** because of
+delegation and thread-safety overhead.
 
 |  Point-Read Performance (HashMap Wins)  |   Iteration Performance (SnapshotMap Wins)   |
 |:---------------------------------------:|:--------------------------------------------:|
 | ![Single Read](single_read_results.png) | ![Single Iteration](single_iter_results.png) |
 
 ### 3. Multi-Threaded Point R/W
+
 *Standard point-lookups remain highly competitive with native `ConcurrentHashMap` performance.*
 
 ![Read/Write Contention](rw_results.png)
@@ -61,15 +78,16 @@ In a single-threaded environment, `SnapshotMap` trades a small amount of raw loo
 ## Usage
 
 ### Installation
+
 Add the library to your project:
 
 ````kotlin
 repositories {
-maven("https://repo.nekroplex.com/releases")
+    maven("https://repo.nekroplex.com/releases")
 }
 
 dependencies {
-implementation("gg.aquatic:snapshotmap:26.0.1")
+    implementation("gg.aquatic:snapshotmap:26.0.1")
 }
 ````
 
@@ -86,7 +104,7 @@ val count = map["Apple"]
 // High-Performance Iteration (Snapshot optimized)
 map.forEach { key, value ->
 // This uses a cached Array<Any?> internally
-println("$key -> $value")
+    println("$key -> $value")
 }
 
 // Batch updates (Optimized to only invalidate snapshot once)
