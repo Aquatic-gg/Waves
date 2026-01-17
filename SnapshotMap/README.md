@@ -45,11 +45,11 @@ Once the snapshot is cached, **SnapshotMap is ~2.5x faster** than `ConcurrentHas
 ![Iteration Scalability](scalability_results.png)
 
 ### 2. Single-Threaded Baseline (vs HashMap)
-In a single-threaded environment, `SnapshotMap` trades raw lookup speed for scan efficiency. It is **~50% faster in iteration** due to cache locality, but **~30% slower in point-reads** because of delegation and thread-safety overhead.
+In a single-threaded environment, `SnapshotMap` trades a small amount of raw lookup speed for a massive boost in scan efficiency. It is **~50% faster in iteration** due to cache locality, but **~30% slower in point-reads** because of delegation and thread-safety overhead.
 
-| Point-Read Performance (Lower is better for SnapshotMap) | Iteration Performance (Higher is better for SnapshotMap) |
-|:--------------------------------------------------------:|:--------------------------------------------------------:|
-|         ![Single Read](single_read_results.png)          |       ![Single Iteration](single_iter_results.png)       |
+|  Point-Read Performance (HashMap Wins)  |   Iteration Performance (SnapshotMap Wins)   |
+|:---------------------------------------:|:--------------------------------------------:|
+| ![Single Read](single_read_results.png) | ![Single Iteration](single_iter_results.png) |
 
 ### 3. Multi-Threaded Point R/W
 *Standard point-lookups remain highly competitive with native `ConcurrentHashMap` performance.*
