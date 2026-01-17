@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "gg.aquatic.shardedmap"
-version = "1.0-SNAPSHOT"
+version = "26.0.1"
 
 repositories {
     mavenCentral()
@@ -67,7 +67,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "gg.aquatic"
-            artifactId = "Kurrency"
+            artifactId = "shardedmap"
             version = "${project.version}"
             from(components["java"])
         }
