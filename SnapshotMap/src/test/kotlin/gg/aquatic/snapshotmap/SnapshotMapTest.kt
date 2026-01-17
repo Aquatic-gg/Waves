@@ -6,6 +6,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class SnapshotMapTest {
 
@@ -125,5 +126,59 @@ class SnapshotMapTest {
         count = 0
         map.forEach { _, _ -> count++ }
         assertEquals(0, count)
+    }
+
+    @Test
+    fun `test parallel chaos and consistency`() {
+        val map = SnapshotMap<Int, Int>()
+        val threadCount = 32
+        val itemsPerThread = 2000
+        val executor = Executors.newFixedThreadPool(threadCount)
+        val latch = CountDownLatch(threadCount)
+        val errors = AtomicInteger(0)
+
+        // Parallel writers and readers fighting for the snapshot
+        for (t in 0 until threadCount) {
+            executor.submit {
+                try {
+                    for (i in 0 until itemsPerThread) {
+                        val key = (t * itemsPerThread) + i
+
+                        // Concurrent writes
+                        map[key] = key
+
+                        // Frequent parallel iterations (forcing snapshot rebuilds)
+                        if (i % 50 == 0) {
+                            var iterationCount = 0
+                            map.forEach { _, _ -> iterationCount++ }
+                            // We don't assert size here because it's weakly consistent,
+                            // but we ensure it doesn't crash or throw exceptions.
+                        }
+
+                        // Concurrent removes
+                        if (i % 100 == 0) {
+                            map.remove(key)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    errors.incrementAndGet()
+                } finally {
+                    latch.countDown()
+                }
+            }
+        }
+
+        assertTrue(latch.await(20, TimeUnit.SECONDS), "Test timed out under contention")
+        executor.shutdown()
+
+        assertEquals(0, errors.get(), "Parallel chaos caused exceptions in SnapshotMap")
+
+        // Final Verification: Once activity stops, the snapshot MUST be correct
+        val finalMapSize = map.size
+        var finalIterationCount = 0
+        map.forEach { _, _ -> finalIterationCount++ }
+
+        assertEquals(finalMapSize.toInt(), finalIterationCount, "Final snapshot size mismatch after chaos stopped")
     }
 }

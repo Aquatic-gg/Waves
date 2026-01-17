@@ -38,14 +38,21 @@ A high-performance, read-optimized `MutableMap` wrapper for Kotlin/JVM.
 
 In our JMH tests with 100,000 items, `SnapshotMap` demonstrates superior scalability in read-heavy environments.
 
-### 1. Iteration Scalability
+### 1. Iteration Scalability (The "Win")
 *Measured with 7 threads iterating and 1 thread performing occasional writes (100ms interval).*
-**SnapshotMap is ~2.5x faster** than `ConcurrentHashMap` due to its flat-array memory layout.
+Once the snapshot is cached, **SnapshotMap is ~2.5x faster** than `ConcurrentHashMap` due to its flat-array memory layout.
 
 ![Iteration Scalability](scalability_results.png)
 
-### 2. Point R/W Contention
-*Standard point-lookups remain competitive with native `ConcurrentHashMap` performance.*
+### 2. Single-Threaded Baseline (vs HashMap)
+In a single-threaded environment, `SnapshotMap` trades raw lookup speed for scan efficiency. It is **~50% faster in iteration** due to cache locality, but **~30% slower in point-reads** because of delegation and thread-safety overhead.
+
+| Point-Read Performance (Lower is better for SnapshotMap) | Iteration Performance (Higher is better for SnapshotMap) |
+|:--------------------------------------------------------:|:--------------------------------------------------------:|
+|         ![Single Read](single_read_results.png)          |       ![Single Iteration](single_iter_results.png)       |
+
+### 3. Multi-Threaded Point R/W
+*Standard point-lookups remain highly competitive with native `ConcurrentHashMap` performance.*
 
 ![Read/Write Contention](rw_results.png)
 

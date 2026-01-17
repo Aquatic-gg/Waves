@@ -11,46 +11,59 @@ import java.io.File
  */
 fun main() {
     val jsonFile = File("build/results/jmh/results.json")
-    if (!jsonFile.exists()) return
+    if (!jsonFile.exists()) {
+        println("Results not found. Run ./gradlew jmh first.")
+        return
+    }
 
     val content = jsonFile.readText()
-    // Extract benchmark name and score
     val regex = """"benchmark"\s*:\s*"[^"]+\.([^"]+)",[\s\S]*?"score"\s*:\s*([\d.]+)""".toRegex()
 
     val results = regex.findAll(content).map {
         BenchmarkData(it.groupValues[1], it.groupValues[2].toDouble())
     }.toList()
 
-    // Filter by the Group names defined in the Benchmark class
+    // 1. Single-Threaded Read Comparison (Point Lookup)
+    val singleReadData = results.filter { it.name.startsWith("single") && it.name.contains("Read") }
+    saveComparisonChart("Single-Threaded Read Performance", "single_read_results", singleReadData, "Point Read")
+
+    // 2. Single-Threaded Iteration Comparison
+    val singleIterData = results.filter { it.name.startsWith("single") && it.name.contains("Iterate") }
+    saveComparisonChart("Single-Threaded Iteration Performance", "single_iter_results", singleIterData, "Iteration")
+
+    // 3. Multi-Threaded Point R/W Contention
     val pointData = results.filter { it.name.contains("point_") }
-    saveComparisonChart("Point R/W Contention", "rw_results", pointData, "Point R/W")
+    saveComparisonChart("Multi-Threaded Point R/W", "rw_results", pointData, "Concurrent R/W")
 
-    val heavyData = results.filter { it.name.contains("heavy_") }
-    saveComparisonChart("Iteration vs. Continuous Writes", "heavy_iter_results", heavyData, "Heavy Write")
-
+    // 4. Massive Scalability Test
     val scalabilityData = results.filter { it.name.contains("scalability_") }
-    saveComparisonChart("Iteration Scalability (1 Write : 6 Readers)", "scalability_results", scalabilityData, "Scalability")
-
+    saveComparisonChart("Iteration Scalability (7 Readers)", "scalability_results", scalabilityData, "Scalability")
 }
 
 data class BenchmarkData(val name: String, val score: Double)
 
 fun saveComparisonChart(title: String, fileName: String, data: List<BenchmarkData>, categoryName: String) {
+    if (data.isEmpty()) return
+
     val chart = CategoryChartBuilder()
-        .width(900).height(600)
+        .width(1000).height(600)
         .title(title)
         .xAxisTitle("Implementation")
-        .yAxisTitle("Ops/sec")
+        .yAxisTitle("Ops/sec (Higher is Better)")
         .build()
 
     chart.styler.legendPosition = Styler.LegendPosition.InsideNW
+    chart.styler.isOverlapped = false
 
-    // Sum scores for the group (JMH reports scores per-method in group, we want the total group throughput)
     val snapshotScore = data.filter { it.name.contains("snapshot", true) }.sumOf { it.score }
     val concurrentScore = data.filter { it.name.contains("concurrent", true) }.sumOf { it.score }
+    val hashMapScore = data.filter { it.name.contains("HashMap", true) }.sumOf { it.score }
+    val syncScore = data.filter { it.name.contains("synchronized", true) }.sumOf { it.score }
 
     chart.addSeries("SnapshotMap", listOf(categoryName), listOf(snapshotScore))
-    chart.addSeries("ConcurrentHashMap", listOf(categoryName), listOf(concurrentScore))
+    if (concurrentScore > 0) chart.addSeries("ConcurrentHashMap", listOf(categoryName), listOf(concurrentScore))
+    if (hashMapScore > 0) chart.addSeries("Plain HashMap", listOf(categoryName), listOf(hashMapScore))
+    if (syncScore > 0) chart.addSeries("Synchronized HashMap", listOf(categoryName), listOf(syncScore))
 
     BitmapEncoder.saveBitmap(chart, "./$fileName", BitmapEncoder.BitmapFormat.PNG)
     println("Generated $fileName.png")

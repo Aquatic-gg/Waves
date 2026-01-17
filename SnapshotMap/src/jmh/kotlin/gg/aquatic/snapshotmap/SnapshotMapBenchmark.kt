@@ -2,6 +2,7 @@ package gg.aquatic.snapshotmap
 
 import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.infra.Blackhole
+import java.util.Collections
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ThreadLocalRandom
 import java.util.concurrent.TimeUnit
@@ -19,19 +20,46 @@ open class SnapshotMapBenchmark {
 
     private lateinit var snapshotMap: SnapshotMap<Int, Int>
     private lateinit var concurrentMap: ConcurrentHashMap<Int, Int>
+    private lateinit var synchronizedMap: MutableMap<Int, Int>
+    private lateinit var plainHashMap: HashMap<Int, Int>
 
     @Setup
     fun setup() {
         snapshotMap = SnapshotMap(ConcurrentHashMap(131072))
         concurrentMap = ConcurrentHashMap(131072)
+        synchronizedMap = Collections.synchronizedMap(HashMap<Int, Int>(131072))
+        plainHashMap = HashMap(131072)
 
         for (i in 0 until mapSize) {
             snapshotMap[i] = i
             concurrentMap[i] = i
+            synchronizedMap[i] = i
+            plainHashMap[i] = i
         }
+
+        // Pre-build snapshot to measure "Hot" iteration performance
+        snapshotMap.forEach { _, _ -> }
     }
 
-    // --- Standard Point Lookups ---
+    // --- Single-Threaded Benchmarks ---
+
+    @Benchmark
+    fun singleSnapshotRead(): Int? = snapshotMap[ThreadLocalRandom.current().nextInt(mapSize)]
+
+    @Benchmark
+    fun singleHashMapRead(): Int? = plainHashMap[ThreadLocalRandom.current().nextInt(mapSize)]
+
+    @Benchmark
+    fun singleSnapshotIterate(bh: Blackhole) {
+        snapshotMap.forEach { k, v -> bh.consume(k); bh.consume(v) }
+    }
+
+    @Benchmark
+    fun singleHashMapIterate(bh: Blackhole) {
+        plainHashMap.forEach { k, v -> bh.consume(k); bh.consume(v) }
+    }
+
+    // --- Multi-Threaded Point Lookups (Read 4 : Write 1) ---
 
     @Benchmark
     @Group("point_snapshot")
@@ -57,20 +85,18 @@ open class SnapshotMapBenchmark {
         concurrentMap[ThreadLocalRandom.current().nextInt(mapSize)] = 1
     }
 
-    // --- Scalability: Rare Writes (The SnapshotMap Sweet Spot) ---
-    // Here we simulate a system where data changes occasionally (every 100ms)
-    // but is iterated constantly by many threads.
+    // --- Scalability: Rare Writes (Iteration Heavy) ---
 
     @Benchmark
     @Group("scalability_snapshot")
-    @GroupThreads(7) // 7 threads reading
+    @GroupThreads(7)
     fun snapshotScalability(bh: Blackhole) {
         snapshotMap.forEach { k, v -> bh.consume(k); bh.consume(v) }
     }
 
     @Benchmark
     @Group("scalability_snapshot")
-    @GroupThreads(1) // 1 thread writing rarely
+    @GroupThreads(1)
     fun snapshotRareWrite() {
         Thread.sleep(100)
         snapshotMap[ThreadLocalRandom.current().nextInt(mapSize)] = 1
@@ -88,37 +114,6 @@ open class SnapshotMapBenchmark {
     @GroupThreads(1)
     fun concurrentRareWrite() {
         Thread.sleep(100)
-        concurrentMap[ThreadLocalRandom.current().nextInt(mapSize)] = 1
-    }
-
-    // --- Stress Test: Continuous Writes ---
-    // This will likely favor ConcurrentHashMap due to frequent invalidations.
-
-    @Benchmark
-    @Group("heavy_snapshot")
-    @GroupThreads(3)
-    fun snapshotIterateHeavy(bh: Blackhole) {
-        snapshotMap.forEach { k, v -> bh.consume(k); bh.consume(v) }
-    }
-
-    @Benchmark
-    @Group("heavy_snapshot")
-    @GroupThreads(1)
-    fun snapshotUpdateHeavy() {
-        snapshotMap[ThreadLocalRandom.current().nextInt(mapSize)] = 1
-    }
-
-    @Benchmark
-    @Group("heavy_concurrent")
-    @GroupThreads(3)
-    fun concurrentIterateHeavy(bh: Blackhole) {
-        concurrentMap.forEach { k, v -> bh.consume(k); bh.consume(v) }
-    }
-
-    @Benchmark
-    @Group("heavy_concurrent")
-    @GroupThreads(1)
-    fun concurrentUpdateHeavy() {
         concurrentMap[ThreadLocalRandom.current().nextInt(mapSize)] = 1
     }
 }

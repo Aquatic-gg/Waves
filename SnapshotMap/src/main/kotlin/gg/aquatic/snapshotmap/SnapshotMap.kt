@@ -63,9 +63,10 @@ class SnapshotMap<K: Any, V: Any>(
         }
 
         synchronized(this) {
-            if (snapshot != null) {
-                val ks = snapshot!!.keys
-                val vs = snapshot!!.values
+            val secondCheck = snapshot
+            if (secondCheck != null) {
+                val ks = secondCheck.keys
+                val vs = secondCheck.values
                 for (i in ks.indices) {
                     action.accept(ks[i] as K, vs[i] as V)
                 }
