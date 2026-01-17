@@ -1,6 +1,5 @@
 package gg.aquatic.shardedmap
 
-import jdk.internal.vm.annotation.Contended
 import java.util.concurrent.atomic.LongAdder
 
 class ShardedMap<K, V>(
@@ -59,6 +58,23 @@ class ShardedMap<K, V>(
         for (segment in shards) segment.forEachValue(action)
     }
 
+    fun compute(key: K, remappingFunction: (K, V?) -> V?): V? {
+        val segment = shardFor(key)
+        var added = false
+        var removed = false
+
+        val result = segment.compute(key) { k, v ->
+            val newValue = remappingFunction(k, v)
+            if (v == null && newValue != null) added = true
+            else if (v != null && newValue == null) removed = true
+            newValue
+        }
+
+        if (added) size.increment()
+        else if (removed) size.decrement()
+        return result
+    }
+
     fun snapshot(): Map<K, V> {
         val snapshot = HashMap<K, V>()
         for (segment in shards) segment.forEach { key, value -> snapshot[key] = value }
@@ -95,6 +111,10 @@ class ShardedMap<K, V>(
         fun forEach(action: (K, V) -> Unit) = synchronized(lock) { map.forEach(action) }
         fun forEachKey(action: (K) -> Unit) = synchronized(lock) { map.keys.forEach(action) }
         fun forEachValue(action: (V) -> Unit) = synchronized(lock) { map.values.forEach(action) }
+
+        fun compute(key: K, remappingFunction: (K, V?) -> V?): V? = synchronized(lock) {
+            map.compute(key, remappingFunction)
+        }
     }
 
     companion object {
