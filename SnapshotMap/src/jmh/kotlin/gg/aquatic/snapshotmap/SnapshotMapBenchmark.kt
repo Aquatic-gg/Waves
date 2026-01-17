@@ -20,20 +20,17 @@ open class SnapshotMapBenchmark {
 
     private lateinit var snapshotMap: SnapshotMap<Int, Int>
     private lateinit var concurrentMap: ConcurrentHashMap<Int, Int>
-    private lateinit var synchronizedMap: MutableMap<Int, Int>
     private lateinit var plainHashMap: HashMap<Int, Int>
 
     @Setup
     fun setup() {
         snapshotMap = SnapshotMap(ConcurrentHashMap(131072))
         concurrentMap = ConcurrentHashMap(131072)
-        synchronizedMap = Collections.synchronizedMap(HashMap<Int, Int>(131072))
         plainHashMap = HashMap(131072)
 
         for (i in 0 until mapSize) {
             snapshotMap[i] = i
             concurrentMap[i] = i
-            synchronizedMap[i] = i
             plainHashMap[i] = i
         }
 
