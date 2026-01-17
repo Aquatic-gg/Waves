@@ -179,6 +179,94 @@ class SnapshotMapTest {
         var finalIterationCount = 0
         map.forEach { _, _ -> finalIterationCount++ }
 
-        assertEquals(finalMapSize.toInt(), finalIterationCount, "Final snapshot size mismatch after chaos stopped")
+        assertEquals(finalMapSize, finalIterationCount, "Final snapshot size mismatch after chaos stopped")
+    }
+
+    @Test
+    fun `test extreme atomic integrity chaos`() {
+        val map = SnapshotMap<Int, Int>()
+        val threadCount = 32
+        val itemsPerThread = 100000
+        val totalExpectedItems = threadCount * itemsPerThread
+        val executor = Executors.newFixedThreadPool(threadCount + 4)
+        val latch = CountDownLatch(threadCount)
+
+        // Truth tracking: 0 = not in map, 1 = in map
+        val truth = Array(totalExpectedItems) { AtomicInteger(0) }
+        val exceptions = java.util.concurrent.CopyOnWriteArrayList<Throwable>()
+
+        // 1. Extreme Writers: Toggling bits and map entries
+        for (t in 0 until threadCount) {
+            val startKey = t * itemsPerThread
+            executor.submit {
+                try {
+                    for (i in 0 until itemsPerThread) {
+                        val key = startKey + i
+
+                        // Add to map and update truth
+                        map[key] = key
+                        truth[key].set(1)
+
+                        // Stress the versioning by immediately updating some
+                        if (i % 3 == 0) {
+                            map[key] = key + 1
+                        }
+
+                        // Stress the invalidation with removes
+                        if (i % 10 == 0) {
+                            map.remove(key)
+                            truth[key].set(0)
+                        }
+                    }
+                } catch (e: Throwable) {
+                    exceptions.add(e)
+                } finally {
+                    latch.countDown()
+                }
+            }
+        }
+
+        // 2. High-Frequency Chaos Readers
+        val stopSignal = AtomicInteger(0)
+        repeat(4) {
+            executor.submit {
+                while (stopSignal.get() == 0) {
+                    try {
+                        var localCount = 0
+                        map.forEach { _, _ -> localCount++ }
+                        // We don't check localCount here because CHM is weakly consistent,
+                        // but we ensure it never crashes.
+                    } catch (e: Throwable) {
+                        exceptions.add(e)
+                    }
+                }
+            }
+        }
+
+        assertTrue(latch.await(60, TimeUnit.SECONDS), "Integrity test timed out")
+        stopSignal.set(1)
+        executor.shutdown()
+        executor.awaitTermination(5, TimeUnit.SECONDS)
+
+        // --- FINAL INTEGRITY VERIFICATION ---
+
+        assertTrue(exceptions.isEmpty(), "Exceptions caught during chaos: ${exceptions.firstOrNull()?.message}")
+
+        val expectedSize = truth.count { it.get() == 1 }
+        val actualMapSize = map.size
+
+        // Calculate snapshot size
+        var actualSnapshotSize = 0
+        map.forEach { _, _ -> actualSnapshotSize++ }
+
+        assertEquals(expectedSize, actualMapSize, "Final map size does not match atomic truth")
+        assertEquals(actualMapSize, actualSnapshotSize, "Final snapshot size is inconsistent with internal map")
+
+        // Deep verify every single key
+        for (i in 0 until totalExpectedItems) {
+            val shouldExist = truth[i].get() == 1
+            val existsInMap = map.containsKey(i)
+            assertEquals(shouldExist, existsInMap, "Integrity failure at key $i: expected presence $shouldExist")
+        }
     }
 }
