@@ -5,7 +5,7 @@ plugins {
     `maven-publish`
 }
 
-group = "gg.aquatic.shardedmap"
+group = "gg.aquatic.snapshotmap"
 version = "26.0.1"
 
 repositories {
@@ -30,7 +30,7 @@ tasks.register<JavaExec>("generateCharts") {
     group = "benchmark"
     description = "Runs benchmarks and generates PNG charts"
 
-    mainClass.set("gg.aquatic.shardedmap.ChartKt")
+    mainClass.set("gg.aquatic.snapshotmap.ChartKt")
     classpath = sourceSets["jmh"].runtimeClasspath
 
     workingDir = projectDir
@@ -42,7 +42,9 @@ jmh {
     benchmarkMode.set(listOf("thrpt"))
 
     jvmArgs.set(listOf(
-        "-XX:-RestrictContended"
+        "-XX:-RestrictContended",
+        "-XX:+UseParallelGC",
+        "-XX:MaxInlineLevel=20"
     ))
 }
 
@@ -67,7 +69,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "gg.aquatic"
-            artifactId = "shardedmap"
+            artifactId = "snapshotmap"
             version = "${project.version}"
             from(components["java"])
         }
