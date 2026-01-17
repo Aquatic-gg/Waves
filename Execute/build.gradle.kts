@@ -23,7 +23,7 @@ dependencies {
 
     compileOnly("gg.aquatic:KRegistry:25.0.1")
     compileOnly("gg.aquatic:KEvent:1.0.4")
-    compileOnly("gg.aquatic:Common:26.0.3")
+    compileOnly("gg.aquatic:Common:26.0.5")
 }
 
 kotlin {
