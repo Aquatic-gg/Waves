@@ -14,7 +14,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("org.knowm.xchart:xchart:3.8.1")
+    implementation("org.knowm.xchart:xchart:3.8.8")
 }
 
 kotlin {
