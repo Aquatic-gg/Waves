@@ -22,6 +22,7 @@ out/
 .idea
 iteration_results.png
 rw_results.png
+.env
 
 ### Eclipse ###
 .apt_generated
