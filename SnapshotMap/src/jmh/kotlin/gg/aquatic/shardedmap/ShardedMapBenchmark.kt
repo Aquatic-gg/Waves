@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.LongAdder
 
 @State(Scope.Benchmark)
-@BenchmarkMode(Mode.Throughput)
+@BenchmarkMode(Mode.All)
 @OutputTimeUnit(TimeUnit.SECONDS)
 @Warmup(iterations = 3, time = 2, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 5, time = 2, timeUnit = TimeUnit.SECONDS)

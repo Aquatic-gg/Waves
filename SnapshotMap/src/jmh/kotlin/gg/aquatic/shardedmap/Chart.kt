@@ -7,39 +7,81 @@ import java.io.File
 
 /**
  * Reads the JMH JSON output and generates a PNG chart.
+ * Completely AI generated, dunno this graphs lib
  */
 fun main() {
     val jsonFile = File("build/results/jmh/results.json")
     if (!jsonFile.exists()) return
 
     val content = jsonFile.readText()
-    val regex = """"benchmark"\s*:\s*"[^"]+\.([^"]+)",[\s\S]*?"score"\s*:\s*([\d.]+)""".toRegex()
-    val allResults = regex.findAll(content).map { it.groupValues[1] to it.groupValues[2].toDouble() }.toList()
+    val regex = """"benchmark"\s*:\s*"[^"]+\.([^"]+)",[\s\S]*?"mode"\s*:\s*"([^"]+)",[\s\S]*?"score"\s*:\s*([\d.]+)""".toRegex()
 
-    // 1. Filter for Iteration (Fast)
-    val iterationResults = allResults.filter { it.first.contains("ForEach", ignoreCase = true) }
-    saveChart("Iteration Performance", "iteration_results", iterationResults)
+    val allResults = regex.findAll(content).map {
+        val name = it.groupValues[1]
+        val mode = it.groupValues[2]
+        val score = it.groupValues[3].toDouble()
+        BenchmarkData(name, mode, score)
+    }.toList()
 
-    // 2. Filter for Read/Write (Heavy)
-    val rwResults = allResults.filter { !it.first.contains("ForEach", ignoreCase = true) }
-    saveChart("Read/Write Contention", "rw_results", rwResults)
+    val throughputResults = allResults.filter { it.mode == "thrpt" }
+
+    // Group ForEach results into a single "Iteration" category
+    val iterationData = throughputResults.filter { it.name.contains("ForEach", ignoreCase = true) }
+    saveComparisonChart("Iteration Performance (Throughput)", "iteration_results", iterationData, "Iteration")
+
+    // Group Read/Write results
+    val rwData = throughputResults.filter { !it.name.contains("ForEach", ignoreCase = true) }
+    saveComparisonChart("Read/Write Contention (Throughput)", "rw_results", rwData)
 }
 
-fun saveChart(title: String, fileName: String, data: List<Pair<String, Double>>) {
+data class BenchmarkData(val name: String, val mode: String, val score: Double)
+
+/**
+ * Saves a comparison chart. If [overrideCategory] is provided, all data points are grouped
+ * under that single X-axis label.
+ */
+fun saveComparisonChart(title: String, fileName: String, data: List<BenchmarkData>, overrideCategory: String? = null) {
     if (data.isEmpty()) return
 
     val chart = CategoryChartBuilder()
-        .width(800).height(500)
+        .width(900).height(600)
         .title(title)
-        .xAxisTitle("Operation")
-        .yAxisTitle("Ops/sec")
+        .xAxisTitle("Operation Type")
+        .yAxisTitle("Ops/sec (Higher is Better)")
         .build()
 
     chart.styler.legendPosition = Styler.LegendPosition.InsideNW
-    chart.styler.labelsRotation = 45
+    chart.styler.labelsRotation = 0
 
-    chart.addSeries("Throughput", data.map { it.first }, data.map { it.second })
+    val shardedScores = mutableListOf<Double>()
+    val concurrentScores = mutableListOf<Double>()
+    val categories = mutableListOf<String>()
+
+    // Determine category names on the X-axis
+    val types = if (overrideCategory != null) {
+        listOf(overrideCategory)
+    } else {
+        data.map {
+            it.name.replace("test", "")
+                .replace("sharded", "")
+                .replace("concurrent", "")
+                .trim()
+        }.distinct().sortedDescending()
+    }
+
+    for (type in types) {
+        categories.add(type)
+
+        // When overriding, we match based on implementation name regardless of the category suffix
+        val searchKey = if (overrideCategory != null) "" else type
+
+        shardedScores.add(data.find { it.name.contains("sharded", true) && it.name.contains(searchKey, true) }?.score ?: 0.0)
+        concurrentScores.add(data.find { it.name.contains("concurrent", true) && it.name.contains(searchKey, true) }?.score ?: 0.0)
+    }
+
+    chart.addSeries("ShardedMap", categories, shardedScores)
+    chart.addSeries("ConcurrentHashMap", categories, concurrentScores)
 
     BitmapEncoder.saveBitmap(chart, "./$fileName", BitmapEncoder.BitmapFormat.PNG)
-    println("Saved $fileName.png")
+    println("Saved $fileName.png with multiple series.")
 }
