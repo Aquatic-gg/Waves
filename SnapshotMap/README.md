@@ -16,6 +16,24 @@ A high-performance, read-optimized `MutableMap` wrapper for Kotlin/JVM.
 - **Lock-Free Reads:** Standard point-lookups (`get`) delegate directly to the underlying map with zero-cost abstraction.
 - **Smart Invalidation:** Snapshots are lazily rebuilt only when data actually changes, preventing redundant work during frequent "no-op" writes.
 
+---
+
+## When to use SnapshotMap
+
+`SnapshotMap` is a specialized tool. It is not a 1:1 replacement for `ConcurrentHashMap` in every scenario.
+
+### ✅ Use SnapshotMap when:
+*   **Read-Iteration Heavy:** Your application calls `forEach` significantly more often than it calls `put` or `remove`.
+*   **High Thread Contention:** Multiple threads are iterating over the map simultaneously. `SnapshotMap` eliminates the internal locking bottlenecks of standard concurrent collections.
+*   **Data Stability:** Your data changes in bursts or at set intervals (e.g., a game tick or a periodic config reload).
+*   **Large Map Scans:** You are iterating over thousands of items where the CPU cache benefit of a flat array becomes noticeable.
+
+### ❌ Avoid SnapshotMap when:
+*   **Write-Heavy Workloads:** If you are modifying the map as frequently as you are reading it, the overhead of constant array rebuilding will make it slower than a standard `ConcurrentHashMap`.
+*   **Memory Constrained:** This map stores a cached copy of your keys and values in arrays, effectively doubling the reference memory usage of the map.
+
+---
+
 ## Performance Benchmarks
 
 In our JMH tests with 100,000 items, `SnapshotMap` demonstrates superior scalability in read-heavy environments.
@@ -30,6 +48,8 @@ In our JMH tests with 100,000 items, `SnapshotMap` demonstrates superior scalabi
 *Standard point-lookups remain competitive with native `ConcurrentHashMap` performance.*
 
 ![Read/Write Contention](rw_results.png)
+
+---
 
 ## Usage
 
