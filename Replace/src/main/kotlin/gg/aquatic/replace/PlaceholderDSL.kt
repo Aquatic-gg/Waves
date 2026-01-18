@@ -1,7 +1,6 @@
 package gg.aquatic.replace
 
 import org.bukkit.Bukkit
-import kotlin.text.iterator
 
 class PlaceholderDSLContext<T>(
     val binder: T,

@@ -4,7 +4,6 @@ import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
-import kotlin.collections.iterator
 import kotlin.reflect.KProperty
 
 class PlaceholderContext<T>(
