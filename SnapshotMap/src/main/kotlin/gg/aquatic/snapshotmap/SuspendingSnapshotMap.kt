@@ -11,6 +11,33 @@ class SuspendingSnapshotMap<K : Any, V : Any>(
     @PublishedApi
     internal val mutex = Mutex()
 
+    /**
+     * Bridges the non-suspending Map API (keys, values, etc.) to the Mutex.
+     * Since we can't suspend here, we use a loop with tryLock.
+     */
+    override fun getOrComputeSnapshot(): Snapshot {
+        val current = snapshot
+        if (current != null) return current
+
+        // Spin-wait/Busy-wait on the mutex.
+        // In a SnapshotMap, snapshot creation is fast (just array copying),
+        // so this is more efficient than runBlocking.
+        while (true) {
+            val s = snapshot
+            if (s != null) return s
+
+            if (mutex.tryLock()) {
+                try {
+                    snapshot?.let { return it }
+                    return createSnapshotUnderLock()
+                } finally {
+                    mutex.unlock()
+                }
+            }
+            Thread.onSpinWait()
+        }
+    }
+
     @Suppress("UNCHECKED_CAST")
     suspend inline fun forEachSuspended(crossinline action: suspend (K, V) -> Unit) {
         val current = snapshot
