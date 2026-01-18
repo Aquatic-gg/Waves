@@ -146,9 +146,9 @@ class PaperMessage private constructor(
         mapOf(
             "%aq-player%" to if (sender is Player) sender.name else "*console",
             "%aq-page%" to page.toString(),
-            "%aq-prev-page%" to max((page - 1), 0).toString(),
+            "%aq-prev-page%" to max(page - 1, 0).toString(),
             "%aq-next-page%" to min(
-                (ceil(lines.count().toDouble() / lines.count().toDouble()).toInt() - 1),
+                ceil(lines.count().toDouble() / lines.count().toDouble()).toInt() - 1,
                 page + 1
             ).toString()
         )

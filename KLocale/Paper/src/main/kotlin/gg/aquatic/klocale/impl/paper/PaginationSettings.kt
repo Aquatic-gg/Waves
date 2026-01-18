@@ -6,5 +6,4 @@ data class PaginationSettings(
     val pageSize: Int,
     val header: Component? = null,
     val footer: Component? = null
-) {
-}
+)
