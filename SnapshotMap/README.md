@@ -20,12 +20,18 @@ outperforms standard `ConcurrentHashMap`.
   abstraction.
 - **Smart Invalidation:** Snapshots are lazily rebuilt only when data actually changes, preventing redundant work during
   frequent "no-op" writes.
+- **Coroutine Friendly:** Includes `SuspendingSnapshotMap` using `Mutex` for non-blocking iteration in asynchronous environments.
 
 ---
 
 ## When to use SnapshotMap
 
 `SnapshotMap` is a specialized tool. It is not a 1:1 replacement for `ConcurrentHashMap` in every scenario.
+
+### 💡 Which implementation to choose?
+
+*   **`SnapshotMap`**: Use this for standard threaded applications. It uses `synchronized` for snapshot rebuilding, which is highly optimized by the JVM.
+*   **`SuspendingSnapshotMap`**: Use this in **Kotlin Coroutines** (e.g., Ktor, Quarkus). It uses a `Mutex`, ensuring that threads are never blocked during a snapshot rebuild, keeping your event loop responsive.
 
 ### ✅ Use SnapshotMap when:
 
@@ -52,8 +58,7 @@ In our JMH tests with 100,000 items, `SnapshotMap` demonstrates superior scalabi
 ### 1. Iteration Scalability (The "Win")
 
 *Measured with 7 threads iterating and 1 thread performing occasional writes (100ms interval).*
-Once the snapshot is cached, **SnapshotMap is ~2.5x faster** than `ConcurrentHashMap` due to its flat-array memory
-layout.
+Once the snapshot is cached, **SnapshotMap is ~2.5x faster** than `ConcurrentHashMap`. The `SuspendingSnapshotMap` performs nearly identically to the synchronous version thanks to `inline` optimization.
 
 ![Iteration Scalability](scalability_results.png)
 
@@ -91,24 +96,30 @@ dependencies {
 }
 ````
 
-### Basic Example
+### Basic Example (Blocking)
 
 ```kotlin
 // Wraps any ConcurrentHashMap (defaults to a new one)
 val map = SnapshotMap<String, Int>()
 
-// Set and Get (Standard ConcurrentHashMap performance)
-map["Apple"] = 10
-val count = map["Apple"]
-
 // High-Performance Iteration (Snapshot optimized)
 map.forEach { key, value ->
-// This uses a cached Array<Any?> internally
     println("$key -> $value")
 }
+```
 
-// Batch updates (Optimized to only invalidate snapshot once)
-map.putAll(mapOf("Banana" to 5, "Orange" to 8))
+### Coroutine Example (Non-Blocking)
+
+```kotlin
+val map = SuspendingSnapshotMap<String, Int>()
+
+// Inside a coroutine scope
+suspend fun processData() {
+    // Non-blocking iteration using Mutex
+    map.forEachSuspended { key, value ->
+        println("Processing $key")
+    }
+}
 ```
 
 ---

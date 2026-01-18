@@ -14,7 +14,9 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
-    implementation("org.knowm.xchart:xchart:3.8.8")
+    jmh("org.knowm.xchart:xchart:3.8.8")
+    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    jmh("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
 kotlin {

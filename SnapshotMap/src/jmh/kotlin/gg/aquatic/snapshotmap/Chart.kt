@@ -23,7 +23,7 @@ fun main() {
         BenchmarkData(it.groupValues[1], it.groupValues[2].toDouble())
     }.toList()
 
-    // 1. Single-Threaded Read Comparison (Point Lookup)
+    // 1. Single-Threaded Read Comparison
     val singleReadData = results.filter { it.name.startsWith("single") && it.name.contains("Read") }
     saveComparisonChart("Single-Threaded Read Performance", "single_read_results", singleReadData, "Point Read")
 
@@ -55,15 +55,16 @@ fun saveComparisonChart(title: String, fileName: String, data: List<BenchmarkDat
     chart.styler.legendPosition = Styler.LegendPosition.InsideNW
     chart.styler.isOverlapped = false
 
-    val snapshotScore = data.filter { it.name.contains("snapshot", true) }.sumOf { it.score }
+    // Identify scores for different implementations
+    val syncScore = data.filter { it.name.contains("snapshot", true) && !it.name.contains("suspending", true) }.sumOf { it.score }
+    val mutexScore = data.filter { it.name.contains("suspending", true) }.sumOf { it.score }
     val concurrentScore = data.filter { it.name.contains("concurrent", true) }.sumOf { it.score }
     val hashMapScore = data.filter { it.name.contains("HashMap", true) }.sumOf { it.score }
-    val syncScore = data.filter { it.name.contains("synchronized", true) }.sumOf { it.score }
 
-    chart.addSeries("SnapshotMap", listOf(categoryName), listOf(snapshotScore))
+    if (syncScore > 0) chart.addSeries("SnapshotMap (Sync)", listOf(categoryName), listOf(syncScore))
+    if (mutexScore > 0) chart.addSeries("SnapshotMap (Mutex)", listOf(categoryName), listOf(mutexScore))
     if (concurrentScore > 0) chart.addSeries("ConcurrentHashMap", listOf(categoryName), listOf(concurrentScore))
     if (hashMapScore > 0) chart.addSeries("Plain HashMap", listOf(categoryName), listOf(hashMapScore))
-    if (syncScore > 0) chart.addSeries("Synchronized HashMap", listOf(categoryName), listOf(syncScore))
 
     BitmapEncoder.saveBitmap(chart, "./$fileName", BitmapEncoder.BitmapFormat.PNG)
     println("Generated $fileName.png")
