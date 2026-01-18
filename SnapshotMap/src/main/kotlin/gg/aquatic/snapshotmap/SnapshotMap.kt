@@ -3,52 +3,9 @@ package gg.aquatic.snapshotmap
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.BiConsumer
 
-class SnapshotMap<K: Any, V: Any>(
-    private val internalMap: ConcurrentHashMap<K, V> = ConcurrentHashMap()
-) : MutableMap<K, V> by internalMap {
-
-    private class Snapshot(val keys: Array<Any?>, val values: Array<Any?>, val version: Long)
-
-    @Volatile
-    private var snapshot: Snapshot? = null
-
-    @Volatile
-    private var version: Long = 0
-
-    private fun invalidate() {
-        version++
-        snapshot = null
-    }
-
-    override fun put(key: K, value: V): V? {
-        val prev = internalMap.put(key, value)
-        if (prev != value) {
-            invalidate()
-        }
-        return prev
-    }
-
-    override fun remove(key: K): V? {
-        val prev = internalMap.remove(key)
-        if (prev != null) {
-            invalidate()
-        }
-        return prev
-    }
-
-    override fun putAll(from: Map<out K, V>) {
-        internalMap.putAll(from)
-        invalidate()
-    }
-
-    override fun clear() {
-        internalMap.clear()
-        invalidate()
-    }
-
-    override fun remove(key: K, value: V): Boolean {
-        return internalMap.remove(key, value).also { if (it) invalidate() }
-    }
+class SnapshotMap<K : Any, V : Any>(
+    internalMap: ConcurrentHashMap<K, V> = ConcurrentHashMap()
+) : AbstractSnapshotMap<K, V>(internalMap) {
 
     @Suppress("UNCHECKED_CAST")
     override fun forEach(action: BiConsumer<in K, in V>) {
