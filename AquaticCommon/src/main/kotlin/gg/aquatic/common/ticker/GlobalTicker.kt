@@ -8,7 +8,7 @@ import kotlinx.coroutines.launch
 
 object GlobalTicker {
 
-    private val tickers = ArrayList<Ticker>(HashSet())
+    private val tickers = ArrayList<Ticker>()
     private val scheduler = SingleThreadedContext("GlobalTicker")
 
     private lateinit var tickerJob: Job
