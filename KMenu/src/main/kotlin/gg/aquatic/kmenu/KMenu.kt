@@ -6,11 +6,11 @@ import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.replace.Placeholders
-import io.github.charlietap.cachemap.cacheMapOf
 import org.bukkit.entity.Player
+import java.util.concurrent.ConcurrentHashMap
 
 object KMenu {
-    val packetInventories = cacheMapOf<Player, PacketInventory>()
+    val packetInventories = ConcurrentHashMap<Player, PacketInventory>()
 
     fun initialize() {
         InventoryModule.onLoad()
