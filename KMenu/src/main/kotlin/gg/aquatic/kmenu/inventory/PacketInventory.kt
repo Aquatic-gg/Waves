@@ -3,9 +3,8 @@ package gg.aquatic.kmenu.inventory
 import gg.aquatic.kmenu.inventory.InventoryModule.playerSlotFromMenuSlot
 import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.sendPacket
-import io.github.charlietap.cachemap.cacheMapOf
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
+import gg.aquatic.snapshotmap.SnapshotMap
+import gg.aquatic.snapshotmap.SuspendingSnapshotMap
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -16,24 +15,19 @@ open class PacketInventory(
     val type: InventoryType
 ) : Cloneable {
 
-    val viewers = cacheMapOf<UUID, InventoryViewer>()
-    val content = cacheMapOf<Int, ItemStack>()
-
-    private val logicMutex = Mutex()
-
-    val viewerPlayers: Array<Player>
-        get() = viewers.values.map { it.player }.toTypedArray()
+    val viewers = SuspendingSnapshotMap<UUID, InventoryViewer>()
+    val content = SnapshotMap<Int, ItemStack>()
 
     var title: Component = title
         private set
 
-    suspend fun updateTitle(newTitle: Component) = logicMutex.withLock {
+    suspend fun updateTitle(newTitle: Component) {
         this.title = newTitle
         this.inventoryOpenPacket = createOpenPacket()
 
-        for (player in viewerPlayers) {
+        viewers.forEachSuspended { _, viewer ->
+            val player = viewer.player
             player.sendPacket(inventoryOpenPacket)
-            val viewer = viewers[player.uniqueId] ?: continue
             InventoryModule.updateInventoryContent(this, viewer)
         }
     }
@@ -58,56 +52,53 @@ open class PacketInventory(
     }
 
     suspend fun setItem(slot: Int, item: ItemStack?, update: Boolean = true) {
-        logicMutex.withLock {
-            if (item == null) content.remove(slot) else content[slot] = item
 
-            if (update) {
-                if (slot > type.size + 36) return
-                if (item == null) {
-                    content.remove(slot)
+        if (item == null) content.remove(slot) else content[slot] = item
+
+        if (update) {
+            if (slot > type.size + 36) return
+            if (item == null) {
+                content.remove(slot)
+            } else {
+                addItem(slot, item)
+            }
+            val packet = Pakket.handler.createSetSlotItemPacket(126, 0, slot, item)
+            viewers.forEachSuspended { _, player ->
+                if (slot > type.lastIndex && item == null) {
+                    val playerItemIndex = playerSlotFromMenuSlot(slot, this)
+                    val playerItem = player.player.inventory.getItem(playerItemIndex)
+                    val packet = Pakket.handler.createSetSlotItemPacket(126, 0, slot, playerItem)
+                    player.player.sendPacket(packet, true)
                 } else {
-                    addItem(slot, item)
-                }
-                val packet = Pakket.handler.createSetSlotItemPacket(126, 0, slot, item)
-                for (player in viewers.values) {
-                    if (slot > type.lastIndex && item == null) {
-                        val playerItemIndex = playerSlotFromMenuSlot(slot, this)
-                        val playerItem = player.player.inventory.getItem(playerItemIndex)
-                        val packet = Pakket.handler.createSetSlotItemPacket(126, 0, slot, playerItem)
-                        player.player.sendPacket(packet, true)
-                    } else {
-                        player.player.sendPacket(packet, true)
-                    }
+                    player.player.sendPacket(packet, true)
                 }
             }
         }
+
     }
 
     suspend fun changeItems(items: Map<Int, ItemStack?>) {
-        logicMutex.withLock {
-            for ((slot, item) in items) {
-                if (item == null) {
-                    content.remove(slot)
-                } else {
-                    addItem(slot, item)
-                }
+        for ((slot, item) in items) {
+            if (item == null) {
+                content.remove(slot)
+            } else {
+                addItem(slot, item)
             }
         }
-        for ((_, viewer) in viewers) {
+
+        viewers.forEachSuspended { _, viewer ->
             InventoryModule.updateInventoryContent(this, viewer)
         }
     }
 
     suspend fun setItems(items: Map<Int, ItemStack>) {
-        logicMutex.withLock {
-            this.content.clear()
-            for ((slot, item) in items) {
-                this.content[slot] = item
-            }
+        this.content.clear()
+        for ((slot, item) in items) {
+            this.content[slot] = item
+        }
 
-            for (viewer in viewers.values) {
-                InventoryModule.updateInventoryContent(this, viewer)
-            }
+        viewers.forEachSuspended { _, viewer ->
+            InventoryModule.updateInventoryContent(this, viewer)
         }
     }
 
@@ -116,8 +107,8 @@ open class PacketInventory(
         InventoryModule.updateInventoryContent(this, viewer)
     }
 
-    fun updateItems() {
-        for ((_, viewer) in viewers) {
+    suspend fun updateItems() {
+        viewers.forEachSuspended { _, viewer ->
             InventoryModule.updateInventoryContent(this, viewer)
         }
     }
