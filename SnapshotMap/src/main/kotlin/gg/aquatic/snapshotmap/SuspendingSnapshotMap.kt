@@ -12,7 +12,7 @@ class SuspendingSnapshotMap<K : Any, V : Any>(
     internal val mutex = Mutex()
 
     @Suppress("UNCHECKED_CAST")
-    suspend inline fun forEachSuspended(crossinline action: (K, V) -> Unit) {
+    suspend inline fun forEachSuspended(crossinline action: suspend (K, V) -> Unit) {
         val current = snapshot
         if (current != null) {
             val ks = current.keys
