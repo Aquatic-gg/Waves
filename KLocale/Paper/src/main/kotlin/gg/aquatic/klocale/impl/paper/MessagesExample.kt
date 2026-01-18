@@ -5,7 +5,6 @@ import gg.aquatic.klocale.LocaleProvider
 import gg.aquatic.klocale.impl.paper.handler.CfgMessageHandler
 import gg.aquatic.klocale.impl.paper.provider.YamlLocaleProvider
 import java.io.File
-import java.util.Locale
 
 enum class MessagesExample(
     override val path: String

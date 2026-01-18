@@ -2,7 +2,7 @@ package gg.aquatic.klocale
 
 import gg.aquatic.klocale.message.Message
 import gg.aquatic.klocale.message.MessageCache
-import java.util.Locale
+import java.util.*
 
 open class BaseLocaleManager<A : Message<A>>(
     override val cache: MessageCache<A> = MessageCache.MapCache(),

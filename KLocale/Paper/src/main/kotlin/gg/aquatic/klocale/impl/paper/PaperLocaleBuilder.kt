@@ -4,8 +4,7 @@ import gg.aquatic.klocale.BaseLocaleManager
 import gg.aquatic.klocale.LocaleProvider
 import gg.aquatic.klocale.MissingKeyHandler
 import net.kyori.adventure.text.minimessage.MiniMessage
-import java.util.Locale
-import kotlin.io.resolve
+import java.util.*
 
 class PaperLocaleBuilder {
     var defaultLanguage: Locale = Locale.ENGLISH
