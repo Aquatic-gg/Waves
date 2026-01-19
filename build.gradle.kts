@@ -162,7 +162,7 @@ dependencies {
     runtimeDownload("com.undefined:stellar:1.2.0-SNAPSHOT:paper")
 
     compileOnly("net.momirealms:craft-engine-core:0.0.66")
-    compileOnly("net.momirealms:craft-engine-bukkit:0.0.66")
+    compileOnly("net.momirealms:craft-engine-bukkit:0.0.67")
 
     compileOnly("com.nexomc:nexo:1.17.0") //Nexo 1.X -> 1.X.0
     compileOnly("io.netty:netty-all:4.2.9.Final")
