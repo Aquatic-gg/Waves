@@ -131,34 +131,41 @@ fun BigDecimal.formatCompactBalance(maxDecimalPlaces: Int = 2): String {
     }
 }
 
+private val SUFFIX_MULTIPLIERS = mapOf(
+    "" to BigDecimal.ONE,
+    "K" to BigDecimal("1000"),
+    "M" to BigDecimal("1000000"),
+    "B" to BigDecimal("1000000000"),
+    "T" to BigDecimal("1000000000000"),
+    "Q" to BigDecimal("1000000000000000"),
+    "QQ" to BigDecimal("1000000000000000000"),
+    "S" to BigDecimal("1000000000000000000000"),
+    "SS" to BigDecimal("1000000000000000000000000"),
+    "O" to BigDecimal("1000000000000000000000000000"),
+    "N" to BigDecimal("1000000000000000000000000000000"),
+    "D" to BigDecimal("1000000000000000000000000000000000"),
+    "UD" to BigDecimal("1000000000000000000000000000000000000")
+)
+
 /**
  * Parses a string with a suffix (k, M, B, etc.) back to a BigDecimal
  * @param value String like "1.23k" or "45M"
  * @return BigDecimal value or null if parsing failed
  */
-fun parseSuffixedBalance(value: String): BigDecimal? {
-    val regex = """^([-+]?\d*\.?\d+)([kMBTQSOnNdU]*)$""".toRegex()
-    val match = regex.find(value.trim()) ?: return null
+@Suppress("unused")
+fun parseSuffixedBalance(value: String): Result<BigDecimal> {
+    val trimmed = value.trim()
+    if (trimmed.isEmpty()) return Result.failure(IllegalArgumentException("Input is empty"))
 
-    val (number, suffix) = match.destructured
-    val numValue = number.toBigDecimalOrNull() ?: return null
+    val regex = """^([-+]?\d*\.?\d+)([a-zA-Z]*)$""".toRegex()
+    val match = regex.find(trimmed) ?: return Result.failure(IllegalArgumentException("Invalid number format: $trimmed"))
 
-    val multiplier = when (suffix.uppercase()) {
-        "" -> BigDecimal.ONE
-        "K" -> BigDecimal("1000")
-        "M" -> BigDecimal("1000000")
-        "B" -> BigDecimal("1000000000")
-        "T" -> BigDecimal("1000000000000")
-        "Q" -> BigDecimal("1000000000000000")
-        "QQ" -> BigDecimal("1000000000000000000")
-        "S" -> BigDecimal("1000000000000000000000")
-        "SS" -> BigDecimal("1000000000000000000000000")
-        "O" -> BigDecimal("1000000000000000000000000000")
-        "N" -> BigDecimal("1000000000000000000000000000000")
-        "D" -> BigDecimal("1000000000000000000000000000000000")
-        "UD" -> BigDecimal("1000000000000000000000000000000000000")
-        else -> return null
-    }
+    val (numberStr, suffix) = match.destructured
+    val numValue = numberStr.toBigDecimalOrNull()
+        ?: return Result.failure(IllegalArgumentException("Invalid numeric part: $numberStr"))
 
-    return numValue.multiply(multiplier)
+    val multiplier = SUFFIX_MULTIPLIERS[suffix.uppercase()]
+        ?: return Result.failure(IllegalArgumentException("Unknown suffix: $suffix"))
+
+    return Result.success(numValue.multiply(multiplier))
 }
