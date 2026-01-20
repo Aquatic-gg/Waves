@@ -1,12 +1,12 @@
 package gg.aquatic.statistik.impl
 
+import gg.aquatic.common.AquaticCommon
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.statistik.StatisticAddEvent
 import gg.aquatic.statistik.StatisticHandle
 import gg.aquatic.statistik.StatisticType
 import gg.aquatic.treepapi.updatePAPIPlaceholders
-import gg.aquatic.waves.Waves
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.scheduler.BukkitRunnable
@@ -56,7 +56,7 @@ object PlaceholderStatistic : StatisticType<Player>() {
             override fun run() {
                 check()
             }
-        }.runTaskTimer(Waves, 0L, interval.toLong())
+        }.runTaskTimer(AquaticCommon.plugin, 0L, interval.toLong())
 
         fun check() {
             for (player in Bukkit.getOnlinePlayers()) {
