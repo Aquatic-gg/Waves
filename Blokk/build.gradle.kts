@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("gg.aquatic:KRegistry:25.0.1")
+    compileOnly("gg.aquatic:KRegistry:25.0.2")
     compileOnly("gg.aquatic:Common:26.0.5")
     testImplementation(kotlin("test"))
 
