@@ -4,8 +4,8 @@ import gg.aquatic.execute.Action
 import gg.aquatic.execute.ClassTransform
 import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.action.impl.logical.SmartAction
-import gg.aquatic.execute.argument.ArgumentContext
-import gg.aquatic.execute.argument.ObjectArgument
+import gg.aquatic.common.argument.ArgumentContext
+import gg.aquatic.common.argument.ObjectArgument
 import org.bukkit.configuration.ConfigurationSection
 
 object ActionSerializer {

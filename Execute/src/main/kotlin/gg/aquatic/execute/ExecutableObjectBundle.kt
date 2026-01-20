@@ -1,7 +1,7 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.argument.ArgumentContext
-import gg.aquatic.execute.argument.ObjectArgument
+import gg.aquatic.common.argument.ArgumentContext
+import gg.aquatic.common.argument.ObjectArgument
 
 class ExecutableObjectBundle<T,U>(
     val objects: List<ExecutableObject<T, U>>

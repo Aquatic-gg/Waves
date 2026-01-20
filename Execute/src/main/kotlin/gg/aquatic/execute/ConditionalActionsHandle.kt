@@ -1,6 +1,6 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.argument.ObjectArguments
+import gg.aquatic.common.argument.ObjectArguments
 import gg.aquatic.execute.requirement.RequirementHandleWithFailActions
 
 open class ConditionalActionsHandle<A>(

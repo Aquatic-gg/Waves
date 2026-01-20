@@ -2,10 +2,10 @@ package gg.aquatic.execute.action.impl.logical
 
 import gg.aquatic.execute.ClassTransform
 import gg.aquatic.execute.ExecutableObjectHandle
-import gg.aquatic.execute.argument.ArgumentContext
-import gg.aquatic.execute.argument.ObjectArgument
-import gg.aquatic.execute.argument.impl.ActionsArgument
-import gg.aquatic.execute.argument.impl.ConditionsArgument
+import gg.aquatic.common.argument.ArgumentContext
+import gg.aquatic.common.argument.ObjectArgument
+import gg.aquatic.execute.arguments.ActionsArgument
+import gg.aquatic.execute.arguments.ConditionsArgument
 
 @Suppress("UNCHECKED_CAST")
 class ConditionalActionsAction<T : Any>(

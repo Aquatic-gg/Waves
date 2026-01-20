@@ -1,8 +1,8 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.argument.ArgumentContext
-import gg.aquatic.execute.argument.ObjectArgument
-import gg.aquatic.execute.argument.impl.PrimitiveObjectArgument
+import gg.aquatic.common.argument.ArgumentContext
+import gg.aquatic.common.argument.ObjectArgument
+import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.kregistry.*
 
 interface ExecutableObject<A, B> {

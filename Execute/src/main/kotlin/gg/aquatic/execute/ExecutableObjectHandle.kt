@@ -1,6 +1,6 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.argument.ObjectArguments
+import gg.aquatic.common.argument.ObjectArguments
 
 open class ExecutableObjectHandle<B, C>(
     val executableObject: ExecutableObject<B, C>,
