@@ -21,7 +21,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
     compileOnly("gg.aquatic:Pakket:26.1.0")
-    compileOnly("gg.aquatic:KRegistry:25.0.1")
+    compileOnly("gg.aquatic:KRegistry:25.0.2")
     compileOnly("gg.aquatic.execute:Execute:26.0.1")
     compileOnly("gg.aquatic.replace:Replace:26.0.2")
     compileOnly("gg.aquatic:Stacked:26.0.1")
