@@ -43,20 +43,22 @@ ones.
 
 ### Implementing a Custom Statistic
 
-Creating a new statistic is simple. Extend `ListenerStatisticType` and define your listener logic:
+### Implementing a Custom Statistic
+
+Creating a new statistic is simple. While `ListenerStatisticType` is available for Bukkit events, you can extend the base `StatisticType` for any custom logic:
 
 ```kotlin
-object MyCustomStatistic : ListenerStatisticType<Player>() {
+object MyCustomStatistic : StatisticType<Player>() {
     override val arguments = listOf(/* Your arguments here */)
 
-    override fun createListener() = listen<SomeBukkitEvent> { event ->
-        val player = event.player
+    override fun initialize() {
+        // Logic to run when the first handle is registered
+        // (e.g., starting a repeating task)
+    }
 
-        // Logic to notify handles
-        for (handle in handles) {
-            val statisticEvent = StatisticAddEvent(this, 1, player)
-            handle.consumer(statisticEvent)
-        }
+    override fun terminate() {
+        // Logic to run when the last handle is unregistered
+        // (e.g., stopping a repeating task)
     }
 }
 ```
