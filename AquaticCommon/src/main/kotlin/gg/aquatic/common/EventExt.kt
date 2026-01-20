@@ -14,7 +14,7 @@ fun Listener.register() {
 inline fun <reified T : Event> event(
     ignoredCancelled: Boolean = false,
     priority: EventPriority = EventPriority.NORMAL,
-    callback: Consumer<T>
+    crossinline callback: (T) -> Unit
 ): Listener {
     val listener = object : Listener {}
     Bukkit.getPluginManager().registerEvent(
@@ -23,7 +23,7 @@ inline fun <reified T : Event> event(
         priority,
         { _, event ->
             if (event is T) {
-                callback.accept(event)
+                callback(event)
             }
         },
         AquaticCommon.plugin,
