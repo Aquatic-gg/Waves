@@ -107,7 +107,6 @@ class PacketListener(
                 if (event.cancelled) {
                     return null
                 }
-                //packet.extraPackets!!.addAll(event.extraPackets.map { it as Packet<*> })
                 return packet to event
             }
 
@@ -209,37 +208,27 @@ class PacketListener(
             return
         }
 
-        when (msg) {
+        val event = when (msg) {
             is ServerboundInteractPacket -> {
                 val action = interactActionField.get(msg)
                 val actionType = interactTypeMethod.invoke(action) as Enum<*>
                 val actionTypeId = actionType.ordinal
 
-                val event = PacketInteractEvent(
+                PacketInteractEvent(
                     player,
                     msg.isAttack,
                     msg.isUsingSecondaryAction,
                     msg.entityId,
                     PacketInteractEvent.InteractType.entries[actionTypeId]
                 )
-                NMSHandler.eventBus.post(event)
-                if (event.cancelled) {
-                    return
-                }
-                super.channelRead(ctx, msg)
-                event.thens.forEach { it() }
-                return
             }
 
             is ServerboundContainerClosePacket -> {
-                val event = PacketContainerCloseEvent(player)
-                NMSHandler.eventBus.post(event)
-                if (event.cancelled) {
-                    return
-                }
-                super.channelRead(ctx, msg)
-                event.thens.forEach { it() }
-                return
+                PacketContainerCloseEvent(player)
+            }
+
+            is ServerboundRenameItemPacket -> {
+                PacketItemRenameEvent(player, msg.name)
             }
 
             is ServerboundContainerClickPacket -> {
@@ -259,7 +248,7 @@ class PacketListener(
                     }
                     item
                 }
-                val event = PacketContainerClickEvent(
+                PacketContainerClickEvent(
                     player,
                     msg.containerId,
                     msg.stateId,
@@ -269,19 +258,20 @@ class PacketListener(
                     carriedItem,
                     msg.changedSlots.mapValues { null as ItemStack? },
                 )
-
-                NMSHandler.eventBus.post(event)
-
-                if (event.cancelled) {
-                    return
-                }
-                super.channelRead(ctx, msg)
-                event.thens.forEach { it() }
+            }
+            else -> null
+        }
+        if (event != null) {
+            NMSHandler.eventBus.post(event)
+            if (event.cancelled) {
                 return
             }
+            super.channelRead(ctx, msg)
+            event.thens.forEach { it() }
+            return
         }
 
-        super.channelRead(ctx, msg)
 
+        super.channelRead(ctx, msg)
     }
 }

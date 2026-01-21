@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "gg.aquatic"
-version = "26.1.0"
+version = "26.1.1"
 
 repositories {
     maven("https://repo.nekroplex.com/releases")
