@@ -59,10 +59,6 @@ dependencies {
     implementation("gg.aquatic.replace:Replace:26.0.2")
     implementation("gg.aquatic:Stacked:26.0.1")
     implementation("gg.aquatic:KEvent:1.0.4")
-
-    // Left-Right Caching
-    implementation("io.github.charlietap:cachemap:0.2.4")
-    implementation("io.github.charlietap:cachemap-suspend:0.2.4")
 }
 ```
 
