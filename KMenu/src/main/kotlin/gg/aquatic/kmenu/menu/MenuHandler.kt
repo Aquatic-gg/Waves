@@ -3,7 +3,7 @@ package gg.aquatic.kmenu.menu
 import gg.aquatic.common.event
 import gg.aquatic.kevent.subscribe
 import gg.aquatic.kmenu.coroutine.KMenuCtx
-import gg.aquatic.kmenu.inventory.InventoryModule
+import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.packetInventory
 import kotlinx.coroutines.withContext
@@ -17,7 +17,7 @@ import org.bukkit.event.player.PlayerDropItemEvent
 object MenuHandler {
     fun initialize() {
 
-        InventoryModule.eventBus.subscribe<AsyncPacketInventoryInteractEvent> {
+        InventoryHandler.eventBus.subscribe<AsyncPacketInventoryInteractEvent> {
             val inv = it.inventory
             if (inv !is Menu) return@subscribe
             inv.onInteract(it)

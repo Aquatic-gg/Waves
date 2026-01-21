@@ -1,7 +1,7 @@
 package gg.aquatic.kmenu.menu
 
 import gg.aquatic.kmenu.coroutine.KMenuCtx
-import gg.aquatic.kmenu.inventory.InventoryModule
+import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.settings.PrivateMenuSettings
 import kotlinx.coroutines.withContext
@@ -21,7 +21,7 @@ open class PrivateMenu(
     )
 
     open suspend fun open() = withContext(KMenuCtx) {
-        InventoryModule.openMenu(player, this@PrivateMenu)
+        InventoryHandler.openMenu(player, this@PrivateMenu)
     }
 
     fun close() {

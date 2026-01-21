@@ -1,6 +1,6 @@
 package gg.aquatic.kmenu
 
-import gg.aquatic.kmenu.inventory.InventoryModule
+import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.PacketInventory
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
@@ -13,7 +13,7 @@ object KMenu {
     val packetInventories = ConcurrentHashMap<Player, PacketInventory>()
 
     fun initialize() {
-        InventoryModule.onLoad()
+        InventoryHandler.onLoad()
     }
 }
 

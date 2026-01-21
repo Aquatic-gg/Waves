@@ -19,7 +19,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
 
-object InventoryModule {
+object InventoryHandler {
 
     val eventBus = eventBusBuilder {
         scope = KMenuCtx.scope
@@ -73,6 +73,14 @@ object InventoryModule {
 
         packetEvent<PacketContainerClickEvent> { event ->
             handlePacketClick(event)
+        }
+
+        packetEvent<PacketItemRenameEvent> { event ->
+            val inventory = event.player.packetInventory() ?: return@packetEvent
+            val type = inventory.type
+            if (type is AnvilInventoryType) {
+                type.onRename?.invoke(event.player, event.name, inventory)
+            }
         }
     }
 
@@ -356,7 +364,10 @@ object InventoryModule {
         }
     }
 
-    private fun handleStandardClick(event: PacketContainerClickEvent, viewer: InventoryViewer): Pair<ButtonType, ClickType> {
+    private fun handleStandardClick(
+        event: PacketContainerClickEvent,
+        viewer: InventoryViewer
+    ): Pair<ButtonType, ClickType> {
         val carried = event.carriedItem ?: ItemStack.empty()
         val cursor = viewer.carriedItem
         val hasCarried = !carried.isEmpty && carried.type != Material.AIR

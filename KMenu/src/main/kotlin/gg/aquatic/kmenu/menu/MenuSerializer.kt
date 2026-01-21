@@ -32,7 +32,7 @@ object MenuSerializer {
             SIZE_TO_TYPE[size] ?: InventoryType.GENERIC9X6
         } else {
             val typeStr = section.getString("type", "GENERIC9X6")!!
-            try { InventoryType.valueOf(typeStr.uppercase()) } catch (e: Exception) { InventoryType.GENERIC9X6 }
+            try { InventoryType.valueOf(typeStr.uppercase()) } catch (_: Exception) { InventoryType.GENERIC9X6 }
         }
 
         val title = section.getString("title") ?: ""
@@ -45,7 +45,6 @@ object MenuSerializer {
                 }
             }
         }
-
         return PrivateMenuSettings(type, MiniMessage.miniMessage().deserialize(title), components)
     }
 

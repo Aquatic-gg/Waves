@@ -20,7 +20,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
-    compileOnly("gg.aquatic:Pakket:26.1.0")
+    compileOnly("gg.aquatic:Pakket:26.1.1")
     compileOnly("gg.aquatic:KRegistry:25.0.2")
     compileOnly("gg.aquatic.execute:Execute:26.0.1")
     compileOnly("gg.aquatic.replace:Replace:26.0.2")

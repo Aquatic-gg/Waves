@@ -1,6 +1,6 @@
 package gg.aquatic.kmenu.inventory
 
-import gg.aquatic.kmenu.inventory.InventoryModule.playerSlotFromMenuSlot
+import gg.aquatic.kmenu.inventory.InventoryHandler.playerSlotFromMenuSlot
 import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.sendPacket
 import gg.aquatic.snapshotmap.SnapshotMap
@@ -28,7 +28,7 @@ open class PacketInventory(
         viewers.forEachSuspended { _, viewer ->
             val player = viewer.player
             player.sendPacket(inventoryOpenPacket)
-            InventoryModule.updateInventoryContent(this, viewer)
+            InventoryHandler.updateInventoryContent(this, viewer)
         }
     }
 
@@ -87,7 +87,7 @@ open class PacketInventory(
         }
 
         viewers.forEachSuspended { _, viewer ->
-            InventoryModule.updateInventoryContent(this, viewer)
+            InventoryHandler.updateInventoryContent(this, viewer)
         }
     }
 
@@ -98,18 +98,18 @@ open class PacketInventory(
         }
 
         viewers.forEachSuspended { _, viewer ->
-            InventoryModule.updateInventoryContent(this, viewer)
+            InventoryHandler.updateInventoryContent(this, viewer)
         }
     }
 
     fun updateItems(player: Player) {
         val viewer = viewers[player.uniqueId] ?: return
-        InventoryModule.updateInventoryContent(this, viewer)
+        InventoryHandler.updateInventoryContent(this, viewer)
     }
 
     suspend fun updateItems() {
         viewers.forEachSuspended { _, viewer ->
-            InventoryModule.updateInventoryContent(this, viewer)
+            InventoryHandler.updateInventoryContent(this, viewer)
         }
     }
 

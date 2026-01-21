@@ -1,7 +1,7 @@
 package gg.aquatic.kmenu.menu
 
 import gg.aquatic.kmenu.coroutine.KMenuCtx
-import gg.aquatic.kmenu.inventory.InventoryModule
+import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.inventory.PacketInventory
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
@@ -23,7 +23,7 @@ open class Menu(
     protected val components get() = slotManager.components
 
     open suspend fun open(player: Player) = withContext(KMenuCtx) {
-        InventoryModule.openMenu(player, this@Menu)
+        InventoryHandler.openMenu(player, this@Menu)
     }
 
     suspend fun addComponent(component: MenuComponent) {
