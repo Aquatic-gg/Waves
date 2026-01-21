@@ -7,7 +7,7 @@ plugins {
     java
 }
 group = "gg.aquatic.replace"
-version = "26.0.2"
+version = "26.0.3"
 
 repositories {
     mavenCentral()
