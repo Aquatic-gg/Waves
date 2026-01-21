@@ -1,13 +1,12 @@
 plugins {
     kotlin("jvm") version "2.3.0"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
-    id("com.gradleup.shadow") version "9.3.1"
     `maven-publish`
     `java-library`
 }
 
 group = "gg.aquatic"
-version = "26.1.1"
+version = "26.1.2"
 
 repositories {
     maven("https://repo.nekroplex.com/releases")
@@ -24,27 +23,13 @@ dependencies {
     api(project(":API"))
     api(project(":NMS_1_21_9"))
     compileOnly("gg.aquatic:KEvent:1.0.4")
-    compileOnly("gg.aquatic:Common:26.0.8")
+    compileOnly("gg.aquatic:Common:26.0.9") {
+        isChanging = true
+    }
 }
 
 kotlin {
     jvmToolchain(21)
-}
-
-tasks {
-    build {
-        dependsOn(shadowJar)
-    }
-
-    shadowJar {
-        archiveClassifier.set("")
-
-        dependencies {
-            exclude(dependency("org.jetbrains.kotlin:.*:.*"))
-            exclude(dependency("org.jetbrains.kotlinx:.*:.*"))
-            exclude(dependency("org.jetbrains:annotations:.*"))
-        }
-    }
 }
 
 subprojects {
