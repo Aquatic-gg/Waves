@@ -4,11 +4,11 @@ import gg.aquatic.clientside.EntityBased
 import gg.aquatic.clientside.FakeObject
 import gg.aquatic.clientside.FakeObjectHandler
 import gg.aquatic.clientside.ObjectInteractEvent
-import gg.aquatic.clientside.entity.data.impl.ItemEntityData
 import gg.aquatic.common.audience.AquaticAudience
 import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
+import gg.aquatic.pakket.api.nms.entity.data.impl.ItemEntityData
 import gg.aquatic.pakket.sendPacket
 import org.bukkit.Location
 import org.bukkit.Material
