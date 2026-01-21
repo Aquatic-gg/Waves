@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "gg.aquatic.stacked"
-version = "26.0.1"
+version = "26.0.2"
 
 repositories {
     mavenCentral()
@@ -29,7 +29,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("gg.aquatic:KRegistry:25.0.2")
-    compileOnly("gg.aquatic:Common:26.0.7")
+    compileOnly("gg.aquatic:Common:26.0.10")
     compileOnly("gg.aquatic:KEvent:1.0.4")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
