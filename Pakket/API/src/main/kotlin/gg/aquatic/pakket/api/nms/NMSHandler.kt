@@ -94,6 +94,7 @@ abstract class NMSHandler {
     abstract fun closeWindow(inventoryId: Int, vararg players: Player)
     abstract fun closeWindowPacket(inventoryId: Int): Any
     abstract fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
+    abstract fun createContainerPropertyPacket(inventoryId: Int, property: Int, value: Int): Any
 
     abstract fun sendPacket(packet: Any, silent: Boolean = false, vararg players: Player)
     abstract fun sendPacketBundle(bundle: PacketBundle, silent: Boolean = false, vararg players: Player)

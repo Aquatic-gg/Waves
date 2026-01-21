@@ -804,6 +804,14 @@ object NMSHandlerImpl : NMSHandler() {
         return packet
     }
 
+    override fun createContainerPropertyPacket(
+        inventoryId: Int,
+        property: Int,
+        value: Int
+    ): Any {
+        return ClientboundContainerSetDataPacket(inventoryId, property, value)
+    }
+
     override fun openWindow(
         inventoryId: Int,
         menuType: MenuType,
