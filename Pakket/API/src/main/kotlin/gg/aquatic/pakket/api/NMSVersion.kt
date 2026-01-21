@@ -1,4 +1,4 @@
-package gg.aquatic.pakket
+package gg.aquatic.pakket.api
 
 import org.bukkit.Bukkit
 

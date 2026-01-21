@@ -1,6 +1,7 @@
 package gg.aquatic.pakket
 
 import gg.aquatic.kevent.subscribe
+import gg.aquatic.pakket.api.NMSVersion
 import gg.aquatic.pakket.api.event.PacketEvent
 import gg.aquatic.pakket.api.nms.NMSHandler
 import gg.aquatic.pakket.nms_1_21_9.NMSHandlerImpl

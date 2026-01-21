@@ -11,4 +11,11 @@ dependencies {
     compileOnly("gg.aquatic:KEvent:1.0.4")
 
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
+
+
+    compileOnly("gg.aquatic:Common:26.0.10") {
+        isChanging = true
+    }
+    compileOnly("gg.aquatic:Blokk:26.0.2")
+    compileOnly("gg.aquatic:Stacked:26.0.2")
 }
