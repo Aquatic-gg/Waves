@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "gg.aquatic.blokk"
-version = "26.0.1"
+version = "26.0.2"
 
 repositories {
     maven("https://repo.nekroplex.com/releases")
@@ -22,7 +22,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("gg.aquatic:KRegistry:25.0.2")
-    compileOnly("gg.aquatic:Common:26.0.7")
+    compileOnly("gg.aquatic:Common:26.0.10")
     testImplementation(kotlin("test"))
 
     // Implementations
