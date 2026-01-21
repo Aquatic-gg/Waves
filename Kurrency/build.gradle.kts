@@ -23,7 +23,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("gg.aquatic:KRegistry:25.0.2")
     compileOnly("gg.aquatic:KEvent:1.0.4")
-    compileOnly("gg.aquatic:Common:26.0.7")
+    compileOnly("gg.aquatic:Common:26.0.10")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         exclude(group = "org.bukkit", module = "bukkit")
     }
