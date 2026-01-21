@@ -24,6 +24,7 @@ dependencies {
     api(project(":API"))
     api(project(":NMS_1_21_9"))
     compileOnly("gg.aquatic:KEvent:1.0.4")
+    compileOnly("gg.aquatic:Common:26.0.8")
 }
 
 kotlin {
