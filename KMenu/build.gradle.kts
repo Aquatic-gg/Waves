@@ -20,7 +20,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 
-    compileOnly("gg.aquatic:Pakket:26.1.1") {
+    compileOnly("gg.aquatic:Pakket:26.1.6") {
         exclude(group = "gg.aquatic.pakket",module = "API")
         exclude(group = "gg.aquatic.pakket.nms",module = "NMS_1_21_9")
     }
