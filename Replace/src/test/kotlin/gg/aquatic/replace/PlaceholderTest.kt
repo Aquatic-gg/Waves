@@ -1,9 +1,11 @@
 package gg.aquatic.replace
 
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.TextReplacementConfig
 import net.kyori.adventure.text.format.NamedTextColor
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import kotlin.system.measureNanoTime
 
 class PlaceholderTest {
 
@@ -27,6 +29,7 @@ class PlaceholderTest {
     @Test
     fun `test context transformation`() {
         data class User(val name: String)
+
         val binder = User("Aquatic")
 
         val namePlaceholder = Placeholder.Literal<String>("name") { target, _ -> target }
@@ -72,6 +75,7 @@ class PlaceholderTest {
     @Test
     fun `test transform with kyori components`() {
         data class Game(val name: String)
+
         val binder = Game("Survival")
 
         // Identifier with underscore works now!
@@ -93,6 +97,7 @@ class PlaceholderTest {
     fun `test placeholder with arguments`() {
         // Use a unique data class for this test
         data class ArgumentUser(val name: String)
+
         val binder = ArgumentUser("Larkyy")
 
         val statPlaceholder = Placeholder.Literal<String>("stat") { _, fullMatch ->
@@ -200,5 +205,68 @@ class PlaceholderTest {
         // -> parent resolve() falls back to its own handler -> target is "Other" -> 0
         val item2 = context.createItem(binder, "%stat_wins_Other%")
         assertEquals("0", item2.latestState.value)
+    }
+
+    @Test
+    fun runBenchmarks() {
+        val iterations = 10_000
+        val warmup = 2_000
+
+        // Create a complex component with multiple placeholders and nesting
+        val component = Component.text()
+            .append(Component.text("Welcome %player%, your rank is %rank% "))
+            .append(Component.text("and you have %coins% coins.")
+                .hoverEvent(Component.text("Stats for %player%: %kills% kills")))
+            .build()
+
+        val replacements = mapOf(
+            "player" to "Larkyy",
+            "rank" to "Admin",
+            "coins" to "5000",
+            "kills" to "150"
+        )
+
+        println("Starting Benchmark ($iterations iterations)...")
+
+        // 1. Warmup
+        repeat(warmup) {
+            runReplacePlaceholders(component, replacements)
+            runReplaceText(component, replacements)
+        }
+
+        // 2. Benchmark your method
+        val yourTime = measureNanoTime {
+            repeat(iterations) {
+                runReplacePlaceholders(component, replacements)
+            }
+        }
+
+        // 3. Benchmark native replaceText
+        val nativeTime = measureNanoTime {
+            repeat(iterations) {
+                runReplaceText(component, replacements)
+            }
+        }
+
+        println("---------------------------------------")
+        println("Replace (Your Method): ${yourTime / 1_000_000.0} ms")
+        println("Component#replaceText: ${nativeTime / 1_000_000.0} ms")
+        println("Difference: ${String.format("%.2f", nativeTime.toDouble() / yourTime)}x speedup")
+        println("---------------------------------------")
+    }
+
+    private fun runReplacePlaceholders(comp: Component, cached: Map<String, String>) {
+        comp.replacePlaceholders(cached)
+    }
+
+    private fun runReplaceText(comp: Component, cached: Map<String, String>) {
+        var result = comp
+        for ((key, value) in cached) {
+            result = result.replaceText(
+                TextReplacementConfig.builder()
+                .match("%$key%")
+                .replacement(value)
+                .build())
+        }
     }
 }
