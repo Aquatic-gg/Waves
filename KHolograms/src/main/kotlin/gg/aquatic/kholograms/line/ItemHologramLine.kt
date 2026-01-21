@@ -16,7 +16,7 @@ import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.DisplayEntityData
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.ItemDisplayEntityData
 import gg.aquatic.pakket.sendPacket
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.stacked.StackedItem
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection

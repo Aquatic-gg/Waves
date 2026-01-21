@@ -14,7 +14,7 @@ import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.sendPacket
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.snapshotmap.SnapshotMap
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
