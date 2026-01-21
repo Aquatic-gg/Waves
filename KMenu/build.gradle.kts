@@ -26,7 +26,7 @@ dependencies {
     compileOnly("gg.aquatic.replace:Replace:26.0.2")
     compileOnly("gg.aquatic:Stacked:26.0.1")
     compileOnly("gg.aquatic:KEvent:1.0.4")
-    compileOnly("gg.aquatic:Common:26.0.7")
+    compileOnly("gg.aquatic:Common:26.0.10")
     compileOnly("gg.aquatic:snapshotmap:26.0.2")
 
     // TEST
