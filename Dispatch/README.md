@@ -13,9 +13,10 @@ metrics and event tracking.
 ## Features
 
 - **Flexible Scheduling**: Schedule tasks to run once after a delay, or repeatedly at fixed intervals (delay or
-  rate-based).
+  rate-based). Supports **limited repeats** and **delayed starts**.
 - **Coroutine-Powered**: Built on Kotlin coroutines for efficient, non-blocking execution.
-- **Task Management**: Pause, resume, or cancel tasks directly on returned task objects.
+- **Task Management**: Pause, resume, or cancel tasks directly on returned task objects. Includes a **built-in
+  status flow** to track a task's lifecycle.
 - **Customizable Execution Context**: Specify your own coroutine scope and dispatcher for integration with frameworks
   like BukkitScheduler.
 - **Metrics and Monitoring**: Access live statistics on task counts, executions, and failures.
@@ -128,6 +129,47 @@ val rateTask = scheduler.runRepeatFixedRate(1000L) {
 rateTask.cancel() // Stop permanently
 ```
 
+#### Advanced Scheduling Options
+
+You can specify an `initialDelayMs` and a limit on `repeats`:
+
+```kotlin
+// Start after 5 seconds, repeat every 1 second, but only 10 times total
+val limitedTask = scheduler.runRepeatFixedDelay(
+    intervalMs = 1000L, 
+    initialDelayMs = 5000L, // Optional - uses intervalMs if not specified
+    repeats = 10 // Optional - runs forever if not specified
+) {
+    println("I will only run 10 times!")
+}
+```
+
+#### Task Status Tracking
+
+Every `ScheduledTask` exposes a `status` as a `StateFlow`, allowing you to react to its lifecycle:
+
+```kotlin
+val task = scheduler.runLater(2000L) { /* ... */ }
+
+// Check status directly
+if (task.isFinished) {
+    println("Task is no longer active")
+}
+
+// Or collect status changes reactively
+scope.launch {
+    task.status.collect { status ->
+        when (status) {
+            ScheduledTask.Status.SCHEDULED -> println("Waiting...")
+            ScheduledTask.Status.RUNNING   -> println("Executing...")
+            ScheduledTask.Status.PAUSED    -> println("On hold")
+            ScheduledTask.Status.FINISHED  -> println("Done!")
+            ScheduledTask.Status.CANCELLED -> println("Stopped")
+        }
+    }
+}
+```
+
 #### Key Differences Between Fixed Delay and Fixed Rate
 
 - **Fixed Delay**: The interval is measured from the end of one execution to the start of the next. If a task takes
@@ -204,5 +246,5 @@ Got questions, need help, or want to showcase what you've built with **Dispatch*
 
 [![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
+* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
+* **Issues**: Open a ticket on GitHub for bugs or feature requests.

@@ -62,7 +62,11 @@ class CoroutineScheduler(
     private val logger = LoggerFactory.getLogger(CoroutineScheduler::class.java)
 
     private sealed class SchedulerMsg {
-        data class Add(val task: Task, val firstRunMs: Long) : SchedulerMsg()
+        data class Add(
+            val task: Task,
+            val firstRunMs: Long,
+            val statusFlow: MutableStateFlow<ScheduledTask.Status>
+        ) : SchedulerMsg()
         data class Pause(val id: TaskId) : SchedulerMsg()
         data class Resume(val id: TaskId) : SchedulerMsg()
         data class Cancel(val id: TaskId) : SchedulerMsg()
@@ -92,6 +96,8 @@ class CoroutineScheduler(
     init {
         scope.launch {
             val tasks = mutableMapOf<TaskId, TaskState>()
+            val runCounts = mutableMapOf<TaskId, Int>()
+            val taskStatuses = mutableMapOf<TaskId, MutableStateFlow<ScheduledTask.Status>>()
 
             fun now() = System.currentTimeMillis()
 
@@ -107,11 +113,23 @@ class CoroutineScheduler(
 
             suspend fun runTask(state: TaskState) {
                 val start = now()
+                taskStatuses[state.task.id]?.value = ScheduledTask.Status.RUNNING
                 _events.tryEmit(SchedulerEvent.TaskStarted(state.task.id))
 
                 try {
                     state.task.action()
                     executions++
+
+                    val currentCount = (runCounts[state.task.id] ?: 0) + 1
+                    runCounts[state.task.id] = currentCount
+
+                    if (state.task.maxRepeats != null && currentCount >= state.task.maxRepeats) {
+                        state.cancelled = true
+                        taskStatuses[state.task.id]?.value = ScheduledTask.Status.FINISHED
+                    } else {
+                        taskStatuses[state.task.id]?.value = ScheduledTask.Status.SCHEDULED
+                    }
+
                     _events.tryEmit(SchedulerEvent.TaskCompleted(state.task.id, now() - start))
                 } catch (t: Throwable) {
                     failures++
@@ -121,7 +139,10 @@ class CoroutineScheduler(
 
                 // Updates next run time based on schedule type
                 when (state.task.type) {
-                    ScheduleType.ONCE -> state.cancelled = true
+                    ScheduleType.ONCE -> {
+                        state.cancelled = true
+                        taskStatuses[state.task.id]?.value = ScheduledTask.Status.FINISHED
+                    }
                     ScheduleType.FIXED_DELAY -> state.nextRunTime = now() + state.task.intervalMs
                     ScheduleType.FIXED_RATE -> {
                         state.nextRunTime += state.task.intervalMs
@@ -158,17 +179,27 @@ class CoroutineScheduler(
                                 is SchedulerMsg.Add -> {
                                     tasks[msg.task.id] = TaskState(msg.task, msg.firstRunMs)
                                 }
-                                is SchedulerMsg.Pause -> tasks[msg.id]?.paused = true
+                                is SchedulerMsg.Pause -> {
+                                    tasks[msg.id]?.paused = true
+                                    taskStatuses[msg.id]?.value = ScheduledTask.Status.PAUSED
+                                }
                                 is SchedulerMsg.Resume -> tasks[msg.id]?.let {
                                     it.paused = false
                                     it.nextRunTime = now() + it.task.intervalMs
+                                    taskStatuses[msg.id]?.value = ScheduledTask.Status.SCHEDULED
                                 }
-                                is SchedulerMsg.Cancel -> tasks.remove(msg.id)
+                                is SchedulerMsg.Cancel -> {
+                                    tasks.remove(msg.id)
+                                    runCounts.remove(msg.id)
+                                    taskStatuses.remove(msg.id)?.value = ScheduledTask.Status.CANCELLED
+                                }
                                 SchedulerMsg.Shutdown -> {
                                     logger.info("Scheduler is shutting down...")
                                     tasks.clear()
+                                    runCounts.clear()
+                                    taskStatuses.values.forEach { it.value = ScheduledTask.Status.CANCELLED }
+                                    taskStatuses.clear()
                                     msgChannel.close()
-                                    scope.cancel()
                                 }
                             }
                         }
@@ -185,22 +216,33 @@ class CoroutineScheduler(
     private fun addTask(
         type: ScheduleType,
         intervalMs: Long,
+        initialDelayMs: Long = intervalMs,
+        maxRepeats: Int? = null,
         block: suspend () -> Unit
     ): ScheduledTask {
         val id = UUID.randomUUID()
-        val task = Task(id, type, intervalMs, block)
-        msgChannel.trySend(SchedulerMsg.Add(task, System.currentTimeMillis() + intervalMs))
-        return ScheduledTask(this, id)
+        val statusFlow = MutableStateFlow(ScheduledTask.Status.SCHEDULED)
+        val task = Task(id, type, intervalMs, initialDelayMs, maxRepeats, block)
+        msgChannel.trySend(SchedulerMsg.Add(task, System.currentTimeMillis() + initialDelayMs, statusFlow))
+        return ScheduledTask(this, id, statusFlow.asStateFlow())
     }
 
     fun runLater(delayMs: Long, block: suspend () -> Unit): ScheduledTask =
-        addTask(ScheduleType.ONCE, delayMs, block)
+        addTask(ScheduleType.ONCE, delayMs, delayMs, 1, block)
 
-    fun runRepeatFixedDelay(intervalMs: Long, block: suspend () -> Unit): ScheduledTask =
-        addTask(ScheduleType.FIXED_DELAY, intervalMs, block)
+    fun runRepeatFixedDelay(
+        intervalMs: Long,
+        initialDelayMs: Long = intervalMs,
+        repeats: Int? = null,
+        block: suspend () -> Unit
+    ): ScheduledTask = addTask(ScheduleType.FIXED_DELAY, intervalMs, initialDelayMs, repeats, block)
 
-    fun runRepeatFixedRate(intervalMs: Long, block: suspend () -> Unit): ScheduledTask =
-        addTask(ScheduleType.FIXED_RATE, intervalMs, block)
+    fun runRepeatFixedRate(
+        intervalMs: Long,
+        initialDelayMs: Long = intervalMs,
+        repeats: Int? = null,
+        block: suspend () -> Unit
+    ): ScheduledTask = addTask(ScheduleType.FIXED_RATE, intervalMs, initialDelayMs, repeats, block)
 
     fun pause(id: TaskId) = msgChannel.trySend(SchedulerMsg.Pause(id))
     fun resume(id: TaskId) = msgChannel.trySend(SchedulerMsg.Resume(id))
