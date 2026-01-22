@@ -223,7 +223,7 @@ class CoroutineScheduler(
         val id = UUID.randomUUID()
         val statusFlow = MutableStateFlow(ScheduledTask.Status.SCHEDULED)
         val task = Task(id, type, intervalMs, initialDelayMs, maxRepeats, block)
-        msgChannel.trySend(SchedulerMsg.Add(task, System.currentTimeMillis() + initialDelayMs, statusFlow))
+        msgChannel.trySend(SchedulerMsg.Add(task, System.currentTimeMillis() + initialDelayMs, statusFlow)).getOrThrow()
         return ScheduledTask(this, id, statusFlow.asStateFlow())
     }
 
