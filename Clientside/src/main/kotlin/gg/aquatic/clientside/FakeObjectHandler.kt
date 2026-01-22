@@ -10,6 +10,7 @@ import gg.aquatic.clientside.block.FakeBlock
 import gg.aquatic.clientside.entity.FakeEntity
 import gg.aquatic.clientside.meg.MEGInteractableHandler
 import gg.aquatic.common.ChunkId
+import gg.aquatic.pakket.isChunkTracked
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -87,7 +88,7 @@ object FakeObjectHandler {
      */
     fun updateVisibilityBatch(player: Player, blocks: Collection<FakeBlock>) {
         // Group by chunk so we can send one packet per chunk
-        blocks.groupBy { it.location.chunk }.forEach { (_, chunkBlocks) ->
+        blocks.groupBy { it.location.chunk }.filter { player.isChunkTracked(it.key) }.forEach { (_, chunkBlocks) ->
             val updateMap = mutableMapOf<Location, org.bukkit.block.data.BlockData>()
 
             for (block in chunkBlocks) {
