@@ -1,6 +1,6 @@
 package gg.aquatic.dispatch
 
-import java.util.UUID
+import java.util.*
 
 typealias TaskId = UUID
 

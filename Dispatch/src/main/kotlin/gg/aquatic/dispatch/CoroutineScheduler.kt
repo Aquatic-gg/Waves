@@ -3,8 +3,8 @@ package gg.aquatic.dispatch
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.selects.onTimeout
+import kotlinx.coroutines.selects.select
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.Executors
