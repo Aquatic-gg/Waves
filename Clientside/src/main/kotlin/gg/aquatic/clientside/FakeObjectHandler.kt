@@ -29,7 +29,7 @@ object FakeObjectHandler {
     internal val locationToBlocks = ConcurrentHashMap<Location, MutableSet<FakeBlock>>()
     private val objectRemovalQueue: MutableSet<FakeObject> = ConcurrentHashMap.newKeySet()
 
-    private val chunkCache = ConcurrentHashMap<String,MutableMap<ChunkId, ChunkBundle>>()
+    private val chunkCache = ConcurrentHashMap<String, MutableMap<ChunkId, ChunkBundle>>()
 
     private var tickCycle = 0
 
@@ -70,7 +70,7 @@ object FakeObjectHandler {
         packetEvent<PacketChunkLoadEvent> {
             val bundle = getChunkCacheBundle(it.x, it.z, it.player.world) ?: return@packetEvent
             it.then {
-                for (block in bundle.blocks) block.updateVisibility(it.player)
+                updateVisibilityBatch(it.player, bundle.blocks)
                 for (entity in bundle.entities) entity.updateVisibility(it.player)
             }
         }
@@ -78,6 +78,38 @@ object FakeObjectHandler {
             val bundle = getChunkCacheBundle(it.chunk.x, it.chunk.z, it.world) ?: return@event
             for (block in bundle.blocks) block.updateVisibility(it.player)
             for (entity in bundle.entities) entity.updateVisibility(it.player)
+        }
+    }
+
+    /**
+     * Dynamically updates visibility for a batch of blocks in a single packet per chunk.
+     * Combines hiding old blocks and showing new blocks into one multi-block change.
+     */
+    fun updateVisibilityBatch(player: Player, blocks: Collection<FakeBlock>) {
+        // Group by chunk so we can send one packet per chunk
+        blocks.groupBy { it.location.chunk }.forEach { (_, chunkBlocks) ->
+            val updateMap = mutableMapOf<Location, org.bukkit.block.data.BlockData>()
+
+            for (block in chunkBlocks) {
+                val shouldSee = block.shouldSee(player)
+                val isViewing = block.isViewing.contains(player)
+
+                if (shouldSee && !isViewing) {
+                    // Needs to be shown
+                    updateMap[block.location] = block.block.blockData
+                    block.injectViewer(player)
+                } else if (!shouldSee && isViewing) {
+                    if (!updateMap.containsKey(block.location)) {
+                        updateMap[block.location] = block.location.block.blockData
+                    }
+                    block.ejectViewer(player)
+                }
+            }
+
+            // Only send if there's actually something to change in this chunk
+            if (updateMap.isNotEmpty()) {
+                player.sendMultiBlockChange(updateMap)
+            }
         }
     }
 

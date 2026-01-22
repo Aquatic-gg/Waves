@@ -34,6 +34,13 @@ class FakeBlock(
         isViewing.forEach { onShow(it) }
     }
 
+    internal fun injectViewer(player: Player) {
+        this._isViewing += player.uniqueId
+    }
+    internal fun ejectViewer(player: Player) {
+        this._isViewing += player.uniqueId
+    }
+
     override fun onShow(player: Player) {
         val packet = Pakket.handler.createBlockChangePacket(location, block.blockData)
         player.sendPacket(packet, true)
