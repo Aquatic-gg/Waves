@@ -34,7 +34,10 @@ import kotlin.math.max
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("unused")
 class CoroutineScheduler(
-    parentScope: CoroutineScope = CoroutineScope(SupervisorJob())
+    scope: CoroutineScope = CoroutineScope(SupervisorJob()),
+    val dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor { r ->
+        Thread(r, "SchedulerThread").apply { isDaemon = true }
+    }.asCoroutineDispatcher()
 ) {
     private val logger = LoggerFactory.getLogger(CoroutineScheduler::class.java)
 
@@ -49,8 +52,7 @@ class CoroutineScheduler(
     private val executor = Executors.newSingleThreadExecutor { r ->
         Thread(r, "SchedulerThread").apply { isDaemon = true }
     }
-    private val dispatcher = executor.asCoroutineDispatcher()
-    private val scope = CoroutineScope(parentScope.coroutineContext + dispatcher)
+    private val scope = CoroutineScope(scope.coroutineContext + dispatcher)
 
     private val msgChannel = Channel<SchedulerMsg>(capacity = Channel.UNLIMITED)
 
@@ -164,20 +166,20 @@ class CoroutineScheduler(
         type: ScheduleType,
         intervalMs: Long,
         block: suspend () -> Unit
-    ): TaskId {
+    ): ScheduledTask {
         val id = UUID.randomUUID()
         val task = Task(id, type, intervalMs, block)
         msgChannel.trySend(SchedulerMsg.Add(task, System.currentTimeMillis() + intervalMs))
-        return id
+        return ScheduledTask(this, id)
     }
 
-    fun runLater(delayMs: Long, block: suspend () -> Unit): TaskId =
+    fun runLater(delayMs: Long, block: suspend () -> Unit): ScheduledTask =
         addTask(ScheduleType.ONCE, delayMs, block)
 
-    fun runRepeatFixedDelay(intervalMs: Long, block: suspend () -> Unit): TaskId =
+    fun runRepeatFixedDelay(intervalMs: Long, block: suspend () -> Unit): ScheduledTask =
         addTask(ScheduleType.FIXED_DELAY, intervalMs, block)
 
-    fun runRepeatFixedRate(intervalMs: Long, block: suspend () -> Unit): TaskId =
+    fun runRepeatFixedRate(intervalMs: Long, block: suspend () -> Unit): ScheduledTask =
         addTask(ScheduleType.FIXED_RATE, intervalMs, block)
 
     fun pause(id: TaskId) = msgChannel.trySend(SchedulerMsg.Pause(id))
@@ -187,7 +189,8 @@ class CoroutineScheduler(
     fun shutdown() {
         msgChannel.trySend(SchedulerMsg.Shutdown)
         scope.cancel()
-        dispatcher.close()
-        executor.shutdown()
+        if (dispatcher is CloseableCoroutineDispatcher) {
+            dispatcher.close()
+        }
     }
 }
