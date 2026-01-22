@@ -26,11 +26,19 @@ abstract class FakeObject(
 
     // List of players that can see the object
     protected val _viewers = ConcurrentHashMap.newKeySet<UUID>()
-    val viewers: Set<Player> get() = _viewers.mapNotNull { Bukkit.getPlayer(it) }.toSet()
+    val viewers: Set<Player> get() = buildSet {
+        for (uUID in _viewers) {
+            add(Bukkit.getPlayer(uUID) ?: continue)
+        }
+    }
 
     // List of players that are currently viewing the object
     protected val _isViewing = ConcurrentHashMap.newKeySet<UUID>()
-    val isViewing: Set<Player> get() = _isViewing.mapNotNull { Bukkit.getPlayer(it) }.toSet()
+    val isViewing: Set<Player> get() = buildSet {
+        for (uUID in _isViewing) {
+            add(Bukkit.getPlayer(uUID) ?: continue)
+        }
+    }
 
     fun isAudienceMember(player: Player): Boolean = _viewers.contains(player.uniqueId)
     fun isPacketViewer(player: Player): Boolean = _isViewing.contains(player.uniqueId)
