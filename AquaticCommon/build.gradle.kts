@@ -10,6 +10,7 @@ version = "26.0.10"
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.nekroplex.com/releases")
 }
 
 val exposedVersion = "0.61.0"
@@ -22,6 +23,7 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    compileOnly("gg.aquatic:Dispatch:26.0.1")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
 }
 
