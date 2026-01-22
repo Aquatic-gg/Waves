@@ -1,6 +1,5 @@
 package gg.aquatic.pakket.api.nms.entity.data.impl.display
 
-import gg.aquatic.pakket.api.nms.entity.data.impl.living.BaseEntityData
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.ObjectArguments
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
@@ -8,6 +7,7 @@ import gg.aquatic.pakket.api.NMSVersion
 import gg.aquatic.pakket.api.nms.entity.DataSerializerTypes
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
+import gg.aquatic.pakket.api.nms.entity.data.impl.living.BaseEntityData
 import org.bukkit.entity.Display
 import org.bukkit.entity.Entity
 import org.joml.Quaternionf

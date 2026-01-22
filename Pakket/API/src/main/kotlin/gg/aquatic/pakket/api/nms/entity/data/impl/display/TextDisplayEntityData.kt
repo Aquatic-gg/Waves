@@ -1,14 +1,14 @@
 package gg.aquatic.pakket.api.nms.entity.data.impl.display
 
-import gg.aquatic.common.toMMComponent
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.ObjectArguments
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
+import gg.aquatic.common.toMMComponent
+import gg.aquatic.pakket.api.NMSVersion
 import gg.aquatic.pakket.api.nms.entity.DataSerializerTypes
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
 import gg.aquatic.pakket.api.nms.entity.data.impl.living.BaseEntityData
-import gg.aquatic.pakket.api.NMSVersion
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.entity.TextDisplay
