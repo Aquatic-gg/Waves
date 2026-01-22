@@ -53,7 +53,7 @@ import kotlin.math.max
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("unused")
-class CoroutineScheduler(
+open class CoroutineScheduler(
     scope: CoroutineScope = CoroutineScope(SupervisorJob()),
     val dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor { r ->
         Thread(r, "SchedulerThread").apply { isDaemon = true }
