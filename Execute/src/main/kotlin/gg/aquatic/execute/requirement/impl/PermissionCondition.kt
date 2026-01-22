@@ -1,9 +1,9 @@
 package gg.aquatic.execute.requirement.impl
 
-import gg.aquatic.execute.Condition
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
+import gg.aquatic.execute.Condition
 import org.bukkit.entity.Player
 
 object PermissionCondition : Condition<Player> {

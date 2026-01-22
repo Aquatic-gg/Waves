@@ -1,10 +1,10 @@
 package gg.aquatic.execute.requirement
 
-import gg.aquatic.execute.ClassTransform
-import gg.aquatic.execute.Condition
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
+import gg.aquatic.execute.ClassTransform
+import gg.aquatic.execute.Condition
 import org.bukkit.configuration.ConfigurationSection
 
 object ConditionSerializer {

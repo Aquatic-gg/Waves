@@ -1,10 +1,10 @@
 package gg.aquatic.execute.arguments
 
+import gg.aquatic.common.argument.ObjectArgument
+import gg.aquatic.common.argument.ObjectArgumentFactory
 import gg.aquatic.common.getSectionList
 import gg.aquatic.execute.ClassTransform
 import gg.aquatic.execute.ExecutableObjectHandle
-import gg.aquatic.common.argument.ObjectArgument
-import gg.aquatic.common.argument.ObjectArgumentFactory
 import gg.aquatic.execute.requirement.ConditionSerializer
 import org.bukkit.configuration.ConfigurationSection
 

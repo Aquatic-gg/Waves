@@ -1,10 +1,10 @@
 package gg.aquatic.execute.action.impl
 
-import gg.aquatic.common.coroutine.BukkitCtx
-import gg.aquatic.execute.Action
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
+import gg.aquatic.common.coroutine.BukkitCtx
+import gg.aquatic.execute.Action
 import kotlinx.coroutines.withContext
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
