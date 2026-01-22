@@ -1,16 +1,16 @@
 package gg.aquatic.clientside
 
-import gg.aquatic.common.event
-import gg.aquatic.pakket.api.event.packet.PacketBlockChangeEvent
-import gg.aquatic.pakket.api.event.packet.PacketChunkLoadEvent
-import gg.aquatic.pakket.api.event.packet.PacketInteractEvent
-import gg.aquatic.pakket.packetEvent
 import gg.aquatic.clientside.block.FakeBlock
 import gg.aquatic.clientside.entity.FakeEntity
 import gg.aquatic.clientside.meg.MEGInteractableHandler
 import gg.aquatic.common.ChunkId
+import gg.aquatic.common.event
 import gg.aquatic.common.ticker.GlobalTicker
+import gg.aquatic.pakket.api.event.packet.PacketBlockChangeEvent
+import gg.aquatic.pakket.api.event.packet.PacketChunkLoadEvent
+import gg.aquatic.pakket.api.event.packet.PacketInteractEvent
 import gg.aquatic.pakket.isChunkTracked
+import gg.aquatic.pakket.packetEvent
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
 import org.bukkit.Bukkit
 import org.bukkit.Location
