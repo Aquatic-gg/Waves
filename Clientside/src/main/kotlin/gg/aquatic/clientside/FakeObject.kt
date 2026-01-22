@@ -115,13 +115,10 @@ abstract class FakeObject(
     open suspend fun tick() {}
     abstract fun destroy()
 
+    private val myCycleSlot = this.hashCode().let { if (it < 0) -it else it } % 4
     internal suspend fun handleTick(tickCount: Int) {
         if (destroyed) return
         tick()
-
-        // Spread distance checks across different ticks
-        // Only check visibility every 4 ticks based on object's hash to stagger load
-        val myCycleSlot = this.hashCode().let { if (it < 0) -it else it } % 4
 
         if (tickCount == myCycleSlot) {
             refreshVisibility()
