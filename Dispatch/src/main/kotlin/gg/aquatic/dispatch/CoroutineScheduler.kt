@@ -11,25 +11,45 @@ import java.util.concurrent.Executors
 import kotlin.math.max
 
 /**
- * A class responsible for scheduling and executing coroutines based on fixed intervals, delays, or rates.
- * This scheduler provides task management functionality, allowing tasks to be paused, resumed, or canceled.
+ * CoroutineScheduler handles task scheduling and execution with support for adjustable scheduling
+ * strategies and lifecycle management. Task scheduling is managed using coroutines and configurable
+ * dispatchers, allowing precise control over task execution timing and concurrency.
  *
- * @constructor Creates an instance of CoroutineScheduler with an optional parent CoroutineScope.
- * The scheduler operates on a dedicated single-threaded executor for task execution.
+ * @constructor Creates a CoroutineScheduler with a specified scope and dispatcher.
+ * @param scope The CoroutineScope used to launch the main scheduler coroutine. Defaults to a SupervisorJob-based scope.
+ * @param dispatcher The CoroutineDispatcher for executing scheduler-related tasks. Defaults to a single-threaded dispatcher.
  *
- * @param parentScope The parent [CoroutineScope] to inherit coroutine context from. Defaults to a [SupervisorJob] scope.
+ * @property events A read-only [Flow] that emits scheduler events such as task started, completed, or failed.
+ * @property metrics A read-only [StateFlow] that provides real-time metrics about the scheduler's state, such as active tasks,
+ * paused tasks, total executions, and failures.
  *
- * The scheduler supports the following scheduling types:
- * - Execute a task once after a specified delay.
- * - Repeatedly execute a task at fixed intervals, starting after the initial execution's completion.
- * - Repeatedly execute a task at fixed rates, adhering to a fixed time between task starts.
+ * ### Core Methods:
+ * - `runLater`: Schedules a task to run once after a specified delay.
+ * - `runRepeatFixedDelay`: Schedules a recurring task with a fixed delay between executions.
+ * - `runRepeatFixedRate`: Schedules a recurring task at a fixed rate.
+ * - `pause`: Pauses a specific task by its ID.
+ * - `resume`: Resumes a previously paused task.
+ * - `cancel`: Cancels a scheduled task and removes it from the scheduler.
+ * - `shutdown`: Shuts down the scheduler, cleaning up resources and stopping all executions.
  *
- * Core Features:
- * - Task Execution: Supports single and recurring task execution of coroutines.
- * - Metrics Collection: Provides live metrics such as total tasks, active tasks, paused tasks,
- *   completed executions, and failures.
- * - Event Emission: Offers a [Flow] for tracking task lifecycle events (start, completion, failure).
- * - Task Management: Allows runtime suspension, resumption, or cancellation of tasks.
+ * ### Task Scheduling:
+ * Tasks can be scheduled with different strategies:
+ * - **Once (`ONCE`)**: Executes a task once after a delay.
+ * - **Fixed Delay (`FIXED_DELAY`)**: Executes a task repeatedly with a delay applied after the completion of each execution.
+ * - **Fixed Rate (`FIXED_RATE`)**: Executes a task repeatedly at fixed intervals from the task start time, ensuring a consistent rate.
+ *
+ * ### Lifecycle:
+ * - The scheduler runs a continuous loop, maintaining an internal task queue to manage task execution.
+ * - Task states such as paused, cancelled, or completed are dynamically updated.
+ * - Uses a message-driven architecture via [Channel] to process task-related commands like add, pause, resume, and cancel.
+ *
+ * ### Events and Metrics:
+ * - Provides real-time feedback through [SchedulerEvent], such as task state changes.
+ * - Monitors scheduler performance with [SchedulerMetrics], including the number of active, paused, and completed tasks, execution count, and failure count.
+ *
+ * ### Error Handling:
+ * - Failed tasks generate a [SchedulerEvent.TaskFailed] event, and the failure count is incremented.
+ * - Ensures that task failures do not disrupt the scheduler.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("unused")
