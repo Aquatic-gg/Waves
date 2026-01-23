@@ -160,6 +160,7 @@ object FakeObjectHandler {
         }
 
         packetEvent<PacketInteractEvent> {
+            if (it.isSecondary) return@packetEvent
             val entity = idToEntity[it.entityId] ?: return@packetEvent
             entity.handleInteract(it.player, it.isAttack)
         }
