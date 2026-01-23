@@ -213,7 +213,6 @@ class PacketListener(
                 val action = interactActionField.get(msg)
                 val actionType = interactTypeMethod.invoke(action) as Enum<*>
                 val actionTypeId = actionType.ordinal
-
                 PacketInteractEvent(
                     player,
                     msg.isAttack,
