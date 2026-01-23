@@ -20,11 +20,11 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("gg.aquatic:Common:26.0.10") {
+    compileOnly("gg.aquatic:Common:26.0.11") {
         isChanging = true
     }
     compileOnly("gg.aquatic:KRegistry:25.0.2")
-    compileOnly("gg.aquatic:Dispatch:26.0.1")
+    compileOnly("gg.aquatic:Dispatch:26.0.2")
     compileOnly("gg.aquatic.execute:Execute:26.0.1")
     compileOnly("gg.aquatic.replace:Replace:26.0.3")
     compileOnly("gg.aquatic:snapshotmap:26.0.2")
