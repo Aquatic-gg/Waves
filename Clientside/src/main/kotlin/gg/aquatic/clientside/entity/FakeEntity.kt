@@ -24,7 +24,7 @@ class FakeEntity(
     override val viewRange: Int,
     audience: AquaticAudience,
     consumer: FakeEntity.() -> Unit = {},
-    var onInteract: ObjectInteractEvent<FakeEntity> = {},
+    var onInteract: ObjectInteractEvent<FakeEntity> = { _, _, _ -> },
     var onUpdate: (Player) -> Unit = {},
     var onTick: suspend () -> Unit = {}
 ) : FakeObject(viewRange, audience), EntityBased {
@@ -40,7 +40,7 @@ class FakeEntity(
 
     val entityData = ConcurrentHashMap<Int, EntityDataValue>()
     val equipment = ConcurrentHashMap<EquipmentSlot, ItemStack>()
-    val passengers: MutableSet<Int> = ConcurrentHashMap.newKeySet<Int>()
+    val passengers: MutableSet<Int> = ConcurrentHashMap.newKeySet()
 
     init {
         if (type == EntityType.ITEM) {
