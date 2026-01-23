@@ -73,9 +73,6 @@ open class CoroutineScheduler(
         object Shutdown : SchedulerMsg()
     }
 
-    private val executor = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "SchedulerThread").apply { isDaemon = true }
-    }
     private val scope = CoroutineScope(scope.coroutineContext + dispatcher)
 
     private val msgChannel = Channel<SchedulerMsg>(capacity = Channel.UNLIMITED)
