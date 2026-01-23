@@ -112,15 +112,23 @@ class FakeEntity(
         registered = true
         FakeObjectHandler.tickableObjects += this
         FakeObjectHandler.idToEntity += entityId to this
-        val bundle = FakeObjectHandler.getOrCreateChunkCacheBundle(location.chunk.x, location.chunk.z, location.world!!)
+
+        val chunkX = Math.floorDiv(location.blockX, 16)
+        val chunkZ = Math.floorDiv(location.blockZ, 16)
+
+        val bundle = FakeObjectHandler.getOrCreateChunkCacheBundle(chunkX, chunkZ, location.world!!)
         bundle.entities += this
     }
 
     fun unregister() {
         if (!registered) return
         registered = false
+
+        val chunkX = Math.floorDiv(location.blockX, 16)
+        val chunkZ = Math.floorDiv(location.blockZ, 16)
+
         val bundle =
-            FakeObjectHandler.getChunkCacheBundle(location.chunk.x, location.chunk.z, location.world!!) ?: return
+            FakeObjectHandler.getChunkCacheBundle(chunkX, chunkZ, location.world!!) ?: return
         bundle.entities -= this
     }
 

@@ -66,16 +66,19 @@ class FakeBlock(
 
         FakeObjectHandler.locationToBlocks.getOrPut(this.location) { ConcurrentHashMap.newKeySet() } += this
         FakeObjectHandler.tickableObjects += this
-        val chunk = location.chunk
-        val bundle = FakeObjectHandler.getOrCreateChunkCacheBundle(chunk.x, chunk.z, chunk.world)
+
+        val chunkX = Math.floorDiv(location.blockX, 16)
+        val chunkZ = Math.floorDiv(location.blockZ, 16)
+        val bundle = FakeObjectHandler.getOrCreateChunkCacheBundle(chunkX, chunkZ, location.world)
         bundle.blocks += this
     }
 
     fun unregister() {
         if (!registered) return
         registered = false
-        val chunk = location.chunk
-        val bundle = FakeObjectHandler.getChunkCacheBundle(chunk.x, chunk.z, chunk.world) ?: return
+        val chunkX = Math.floorDiv(location.blockX, 16)
+        val chunkZ = Math.floorDiv(location.blockZ, 16)
+        val bundle = FakeObjectHandler.getChunkCacheBundle(chunkX, chunkZ, location.world) ?: return
         bundle.blocks -= this
     }
 
