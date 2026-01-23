@@ -28,7 +28,7 @@ dependencies {
     compileOnly("gg.aquatic.execute:Execute:26.0.1")
     compileOnly("gg.aquatic.replace:Replace:26.0.3")
     compileOnly("gg.aquatic:snapshotmap:26.0.2")
-    compileOnly("gg.aquatic:Pakket:26.1.6")
+    compileOnly("gg.aquatic:Pakket:26.1.7")
     compileOnly("gg.aquatic:Stacked:26.0.2")
     compileOnly("gg.aquatic:TreePAPI:26.0.1")
     testImplementation(kotlin("test"))
