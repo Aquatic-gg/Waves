@@ -1,4 +1,4 @@
-package gg.aquatic.pakket.api.nms.entity.data.impl.living
+package gg.aquatic.pakket.api.nms.entity.data.impl
 
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.ObjectArguments
@@ -10,7 +10,7 @@ import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Entity
-import java.util.*
+import java.util.Optional
 
 open class BaseEntityData internal constructor() {
 
@@ -62,10 +62,10 @@ open class BaseEntityData internal constructor() {
                 isElytraFlying
             )
 
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             0,
                             DataSerializerTypes.BYTE,
                             packedByte
@@ -121,10 +121,10 @@ open class BaseEntityData internal constructor() {
         }
 
         fun generate(airTicks: Int): Collection<EntityDataValue> {
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             1,
                             DataSerializerTypes.INT,
                             airTicks
@@ -150,10 +150,10 @@ open class BaseEntityData internal constructor() {
         }
 
         fun generate(customName: Optional<Component>): Collection<EntityDataValue> {
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             2,
                             DataSerializerTypes.OPTIONAL_COMPONENT,
                             customName
@@ -178,10 +178,10 @@ open class BaseEntityData internal constructor() {
         }
 
         fun generate(isVisible: Boolean): Collection<EntityDataValue> {
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             3,
                             DataSerializerTypes.BOOLEAN,
                             isVisible
@@ -205,10 +205,10 @@ open class BaseEntityData internal constructor() {
         }
 
         fun generate(silent: Boolean): Collection<EntityDataValue> {
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             4,
                             DataSerializerTypes.BOOLEAN,
                             silent
@@ -232,10 +232,10 @@ open class BaseEntityData internal constructor() {
         }
 
         fun generate(hasGravity: Boolean): Collection<EntityDataValue> {
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             5,
                             DataSerializerTypes.BOOLEAN,
                             !hasGravity
@@ -259,10 +259,10 @@ open class BaseEntityData internal constructor() {
         }
 
         fun generate(pose: org.bukkit.entity.Pose): Collection<EntityDataValue> {
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             6,
                             DataSerializerTypes.POSE,
                             pose
@@ -287,10 +287,10 @@ open class BaseEntityData internal constructor() {
         }
 
         fun generate(ticks: Int): Collection<EntityDataValue> {
-            when (NMSVersion.ofAquatic()) {
+            when (NMSVersion.Companion.ofAquatic()) {
                 NMSVersion.V_1_21_4, NMSVersion.V_1_21_1, NMSVersion.V_1_21_5, NMSVersion.V_1_21_7, NMSVersion.V_1_21_9 -> {
                     return listOf(
-                        EntityDataValue.create(
+                        EntityDataValue.Companion.create(
                             7,
                             DataSerializerTypes.INT,
                             ticks

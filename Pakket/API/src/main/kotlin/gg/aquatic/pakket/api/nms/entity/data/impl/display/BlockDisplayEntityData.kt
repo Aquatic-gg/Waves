@@ -17,7 +17,7 @@ import org.bukkit.entity.Entity
 object BlockDisplayEntityData: DisplayEntityData() {
 
     abstract class Base: EntityData {
-        override val entityClass: Class<out Entity> = BlockDisplay::class.java
+        override val entityClass: Class<out BlockDisplay> = BlockDisplay::class.java
     }
 
     object BlockState: Base() {

@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemStack
 object ItemDisplayEntityData: DisplayEntityData() {
 
     abstract class Base: EntityData {
-        override val entityClass: Class<out Entity> = ItemDisplay::class.java
+        override val entityClass: Class<out ItemDisplay> = ItemDisplay::class.java
     }
 
     object Item: Base() {

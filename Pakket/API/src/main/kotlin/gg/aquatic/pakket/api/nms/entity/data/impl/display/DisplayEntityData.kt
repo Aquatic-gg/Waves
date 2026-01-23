@@ -7,7 +7,7 @@ import gg.aquatic.pakket.api.NMSVersion
 import gg.aquatic.pakket.api.nms.entity.DataSerializerTypes
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
-import gg.aquatic.pakket.api.nms.entity.data.impl.living.BaseEntityData
+import gg.aquatic.pakket.api.nms.entity.data.impl.BaseEntityData
 import org.bukkit.entity.Display
 import org.bukkit.entity.Entity
 import org.joml.Quaternionf

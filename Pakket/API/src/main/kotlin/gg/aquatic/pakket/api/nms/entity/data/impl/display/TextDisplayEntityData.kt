@@ -8,7 +8,7 @@ import gg.aquatic.pakket.api.NMSVersion
 import gg.aquatic.pakket.api.nms.entity.DataSerializerTypes
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
-import gg.aquatic.pakket.api.nms.entity.data.impl.living.BaseEntityData
+import gg.aquatic.pakket.api.nms.entity.data.impl.BaseEntityData
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.entity.TextDisplay
