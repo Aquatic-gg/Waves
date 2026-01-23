@@ -11,6 +11,7 @@ enum class ItemOptions(val key: Key) {
     DYE(DyeOptionHandle.Companion.key),
     ENCHANTS(EnchantsOptionHandle.Companion.key),
     FLAGS(FlagsOptionHandle.Companion.key),
+    HIDE_TOOLTIP(HideTooltipOptionHandle.Companion.key),
     ITEM_MODEL(ItemModelOptionHandle.key),
     LORE(LoreOptionHandle.Companion.key),
     MAX_DAMAGE(MaxDamageOptionHandle.Companion.key),
