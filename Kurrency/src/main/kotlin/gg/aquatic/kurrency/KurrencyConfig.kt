@@ -3,7 +3,7 @@ package gg.aquatic.kurrency
 import gg.aquatic.common.HikariDBFactory
 import gg.aquatic.kregistry.*
 import gg.aquatic.kurrency.db.BalancesTable
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.v1.jdbc.Database
 
 object KurrencyConfig {
 

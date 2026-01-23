@@ -3,16 +3,18 @@ package gg.aquatic.kurrency.db
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.plus
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
+import org.jetbrains.exposed.v1.jdbc.upsert
 import java.math.BigDecimal
 import java.util.*
 
 class CurrencyDBHandler(val database: Database) {
 
     private suspend fun <T> dbQuery(block: suspend Transaction.() -> T): T =
-        newSuspendedTransaction(db = database) { block() }
+        suspendTransaction(db = database) { block() }
 
     suspend fun getBalance(uuid: UUID, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
         dbQuery {
