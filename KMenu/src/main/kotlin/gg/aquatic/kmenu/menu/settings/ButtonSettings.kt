@@ -12,7 +12,7 @@ import org.bukkit.entity.Player
 
 class ButtonSettings(
     val id: String,
-    val item: StackedItem?,
+    val item: StackedItem<*>?,
     val slots: Collection<Int>,
     val viewRequirements: Collection<ConditionHandle<Player>>,
     val click: ClickSettings?,
