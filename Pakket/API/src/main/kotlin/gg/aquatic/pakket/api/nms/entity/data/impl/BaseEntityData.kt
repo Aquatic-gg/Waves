@@ -10,7 +10,7 @@ import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
 import net.kyori.adventure.text.Component
 import org.bukkit.entity.Entity
-import java.util.Optional
+import java.util.*
 
 open class BaseEntityData internal constructor() {
 

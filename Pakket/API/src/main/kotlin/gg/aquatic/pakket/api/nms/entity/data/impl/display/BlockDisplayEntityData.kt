@@ -12,7 +12,6 @@ import gg.aquatic.pakket.api.nms.entity.data.EntityData
 import org.bukkit.Material
 import org.bukkit.block.data.BlockData
 import org.bukkit.entity.BlockDisplay
-import org.bukkit.entity.Entity
 
 object BlockDisplayEntityData: DisplayEntityData() {
 

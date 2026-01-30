@@ -8,7 +8,6 @@ import gg.aquatic.pakket.api.nms.entity.DataSerializerTypes
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
 import gg.aquatic.stacked.argument.ItemObjectArgument
-import org.bukkit.entity.Entity
 import org.bukkit.entity.ItemDisplay
 import org.bukkit.inventory.ItemStack
 

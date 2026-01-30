@@ -7,7 +7,6 @@ import gg.aquatic.pakket.api.NMSVersion
 import gg.aquatic.pakket.api.nms.entity.DataSerializerTypes
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.EntityData
-import gg.aquatic.pakket.api.nms.entity.data.impl.BaseEntityData
 import org.bukkit.entity.Interaction
 
 object InteractionEntityData: BaseEntityData() {
