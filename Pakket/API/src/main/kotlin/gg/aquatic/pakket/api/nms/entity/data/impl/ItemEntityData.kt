@@ -41,5 +41,4 @@ object ItemEntityData {
             ItemObjectArgument(id, null, false),
         )
     }
-
 }
