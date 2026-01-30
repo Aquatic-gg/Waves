@@ -8,6 +8,7 @@ import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.kmenu.menu.component.Button
 import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.stacked.StackedItem
+import gg.aquatic.stacked.StackedItemImpl
 import org.bukkit.entity.Player
 
 class ButtonSettings(
