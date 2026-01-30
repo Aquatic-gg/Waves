@@ -43,7 +43,7 @@ fun initializeStacked(plugin: JavaPlugin, scope: CoroutineScope, miniMessage: Mi
         initializeCommon(plugin)
     }
 
-    val registry = MutableRegistry<String, ItemHandler<*>>()
+    val registry = MutableRegistry<String, ItemHandler<*,*>>()
     Registry.update {
         registerRegistry(ItemHandler.REGISTRY_KEY, registry.freeze())
     }

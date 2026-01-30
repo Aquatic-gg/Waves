@@ -4,6 +4,7 @@ import gg.aquatic.common.event
 import gg.aquatic.kregistry.Registry
 import gg.aquatic.stacked.ItemHandler.Companion.REGISTRY_KEY
 import gg.aquatic.stacked.event.StackedItemInteractEvent
+import gg.aquatic.stacked.serialize.ItemSerializer
 import org.bukkit.entity.Player
 import org.bukkit.event.block.Action
 import org.bukkit.event.inventory.ClickType
@@ -28,7 +29,7 @@ object ItemManager {
         }
     }
 
-    fun injectHandler(id: String, itemHandler: ItemHandler<*>) {
+    fun injectHandler(id: String, itemHandler: ItemHandler<*, *>) {
         Registry.update {
             itemHandler.id = id
             replaceRegistry(REGISTRY_KEY) { register(id, itemHandler) }
@@ -36,8 +37,8 @@ object ItemManager {
     }
 
     @Suppress("UNCHECKED_CAST")
-    fun <T: StackedItem<T>> getHandler(id: String): ItemHandler<T>? {
-        return Registry[REGISTRY_KEY][id] as? ItemHandler<T>
+    fun <T : StackedItem<T>> getHandler(id: String): ItemHandler<T, ItemSerializer<T>>? {
+        return Registry[REGISTRY_KEY][id] as? ItemHandler<T, ItemSerializer<T>>
     }
 
     private fun handleInteract(event: PlayerInteractEvent) {

@@ -1,21 +1,20 @@
 package gg.aquatic.stacked
 
-import com.google.common.collect.HashMultimap
 import gg.aquatic.kregistry.FrozenRegistry
 import gg.aquatic.kregistry.Registry
 import gg.aquatic.kregistry.RegistryId
 import gg.aquatic.kregistry.RegistryKey
 import gg.aquatic.stacked.option.ItemOptionHandle
 import gg.aquatic.stacked.option.ItemOptions
+import gg.aquatic.stacked.serialize.ItemSerializer
 import net.kyori.adventure.key.Key
-import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 interface StackedItem<T: StackedItem<T>> {
     val options: MutableMap<Key, ItemOptionHandle>
 
-    val handler: ItemHandler<T>
+    val handler: ItemHandler<T, out ItemSerializer<T>>
 
     fun getBaseItem(): ItemStack
     fun getItem(): ItemStack
