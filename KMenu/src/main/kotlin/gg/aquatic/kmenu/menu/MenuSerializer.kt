@@ -10,8 +10,6 @@ import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.settings.*
 import gg.aquatic.stacked.ItemHandler
-import gg.aquatic.stacked.ItemSerializer
-import gg.aquatic.stacked.impl.StackedItemImpl
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
