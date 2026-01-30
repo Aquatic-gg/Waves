@@ -46,7 +46,7 @@ object ItemHandler {
         item: ItemStack,
         options: List<ItemOptionHandle>
     ): StackedItem {
-        return StackedItem(
+        return StackedItemImpl(
             item,
             options
         )

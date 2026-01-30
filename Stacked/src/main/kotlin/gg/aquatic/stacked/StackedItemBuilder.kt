@@ -117,7 +117,7 @@ class StackedItemBuilder(private val baseStack: ItemStack) {
             options[FlagsOptionHandle::class.java] = FlagsOptionHandle(flags.toList())
         }
 
-        return StackedItem(
+        return StackedItemImpl(
             item = baseStack,
             options = options.values
         )

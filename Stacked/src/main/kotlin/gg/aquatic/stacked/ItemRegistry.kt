@@ -28,7 +28,7 @@ private fun StackedItem.register(
     interactionHandler: (StackedItemInteractEvent) -> Unit = {}, registerInteraction: Boolean
 ): Boolean {
     val registryId = registryId()
-    val item = getUnmodifiedItem()
+    val item = getBaseItem()
     if (registryId != null && registryId != "$namespace:$id") return false
 
     item.editPersistentDataContainer {
@@ -63,7 +63,7 @@ fun StackedItem.removeInteractionHandler(): Boolean {
 
 fun StackedItem.unregister(): Boolean {
     val registryId = registryId() ?: return false
-    val item = getUnmodifiedItem()
+    val item = getBaseItem()
     item.editPersistentDataContainer {
         it.remove(ItemHandler.NAMESPACE_KEY)
     }
@@ -82,7 +82,7 @@ fun StackedItem.unregister(): Boolean {
 }
 
 fun StackedItem.registryId(): String? {
-    val pdc = getUnmodifiedItem().persistentDataContainer
+    val pdc = getBaseItem().persistentDataContainer
     return pdc.get(ItemHandler.NAMESPACE_KEY, PersistentDataType.STRING)
 }
 

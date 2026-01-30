@@ -12,12 +12,11 @@ import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-open class StackedItem(
-    private val item: ItemStack,
-    options: Collection<ItemOptionHandle>
-) {
+interface StackedItem {
+    val options: MutableMap<Key, ItemOptionHandle>
 
-    val options = options.associateBy { it.key }.toMutableMap()
+    fun getBaseItem(): ItemStack
+    fun getItem(): ItemStack
 
     fun getOption(key: Key): ItemOptionHandle? {
         return options[key]
@@ -27,40 +26,10 @@ open class StackedItem(
         return options[option.key]
     }
 
-    fun giveItem(player: Player) {
+    fun giveItem(player: Player, amount: Int? = null) {
         val iS = getItem()
+        amount?.let { iS.amount = it }
         player.inventory.addItem(iS)
-    }
-
-    fun giveItem(player: Player, amount: Int) {
-        val iS = getItem()
-        iS.amount = amount
-
-        player.inventory.addItem(iS)
-    }
-
-    fun getUnmodifiedItem(): ItemStack {
-        return item.clone()
-    }
-
-    fun getItem(): ItemStack {
-        val iS = getUnmodifiedItem()
-
-        val im = iS.itemMeta ?: return iS
-        val modifiers = im.attributeModifiers
-        if (modifiers == null) {
-            im.attributeModifiers = HashMultimap.create(iS.type.defaultAttributeModifiers)
-        }
-
-        for (handle in options) {
-            handle.value.apply(im)
-        }
-
-        iS.itemMeta = im
-        for (handle in options) {
-            handle.value.apply(iS)
-        }
-        return iS
     }
 
     companion object {
@@ -85,5 +54,37 @@ open class StackedItem(
             get() {
                 return Registry[ITEM_FACTORY_REGISTRY_KEY]
             }
+    }
+}
+
+open class StackedItemImpl(
+    private val item: ItemStack,
+    options: Collection<ItemOptionHandle>
+) : StackedItem {
+
+    override val options = options.associateBy { it.key }.toMutableMap()
+
+    override fun getBaseItem(): ItemStack {
+        return item.clone()
+    }
+
+    override fun getItem(): ItemStack {
+        val iS = getBaseItem()
+
+        val im = iS.itemMeta ?: return iS
+        val modifiers = im.attributeModifiers
+        if (modifiers == null) {
+            im.attributeModifiers = HashMultimap.create(iS.type.defaultAttributeModifiers)
+        }
+
+        for (handle in options) {
+            handle.value.apply(im)
+        }
+
+        iS.itemMeta = im
+        for (handle in options) {
+            handle.value.apply(iS)
+        }
+        return iS
     }
 }

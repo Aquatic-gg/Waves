@@ -22,7 +22,7 @@ class ItemObjectArgument(
 
     object Serializer : ObjectArgumentFactory<StackedItem?>() {
         override fun load(section: ConfigurationSection, id: String): StackedItem? {
-            return StackedItem.Companion.loadFromYml(section.getConfigurationSection(id) ?: return null)
+            return StackedItem.loadFromYml(section.getConfigurationSection(id) ?: return null)
         }
     }
 }
