@@ -5,8 +5,9 @@ import org.bukkit.Material
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.inventory.ItemStack
 
-object ItemSerializer {
-
+class ItemSerializer<T: StackedItem<T>>(
+    val handler: ItemHandler<T>,
+) {
     val optionFactories = hashSetOf(
         AmountOptionHandle,
         CustomModelDataLegacyOptionHandle,
@@ -26,9 +27,9 @@ object ItemSerializer {
         UnbreakableOptionHandle
     )
 
-    inline fun <reified T : Any> fromSection(
-        section: ConfigurationSection?, crossinline mapper: (ConfigurationSection, StackedItem) -> T
-    ): T? {
+    inline fun <reified A : Any> fromSection(
+        section: ConfigurationSection?, crossinline mapper: (ConfigurationSection, T) -> A
+    ): A? {
         val item = fromSection(section) ?: return null
 
         return mapper(section!!, item)
@@ -36,7 +37,7 @@ object ItemSerializer {
 
     fun fromSection(
         section: ConfigurationSection?
-    ): StackedItemImpl? {
+    ): T? {
         section ?: return null
         return try {
             val material = section.getString("material", "STONE")!!
@@ -52,21 +53,21 @@ object ItemSerializer {
         }
     }
 
-    fun fromSections(sections: List<ConfigurationSection>): List<StackedItem> {
+    fun fromSections(sections: List<ConfigurationSection>): List<T> {
         return sections.mapNotNull { fromSection(it) }
     }
 
-    inline fun <reified T : Any> fromSections(
+    inline fun <reified A : Any> fromSections(
         sections: List<ConfigurationSection>,
-        crossinline mapper: (ConfigurationSection, StackedItem) -> T
-    ): List<T> {
+        crossinline mapper: (ConfigurationSection, T) -> A
+    ): List<A> {
         return sections.mapNotNull { fromSection(it, mapper) }
     }
 
     private fun create(
         namespace: String,
         options: List<ItemOptionHandle>
-    ): StackedItemImpl? {
+    ): T? {
         val itemStack = if (namespace.contains(":")) {
             val id = namespace.split(":").first().uppercase()
 
@@ -76,10 +77,9 @@ object ItemSerializer {
             ItemStack(Material.valueOf(namespace.uppercase()))
         } ?: return null
 
-        return ItemHandler.create(
+        return handler.create(
             itemStack,
             options
         )
     }
-
 }

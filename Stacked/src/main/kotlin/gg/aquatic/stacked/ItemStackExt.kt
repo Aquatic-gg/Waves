@@ -1,5 +1,6 @@
 package gg.aquatic.stacked
 
+import gg.aquatic.stacked.impl.StackedItemImpl
 import org.bukkit.Material
 import org.bukkit.block.CreatureSpawner
 import org.bukkit.entity.EntityType
@@ -29,8 +30,8 @@ fun ItemMeta.setSpawnerType(type: EntityType) {
     this.blockState = blockState
 }
 
-fun Material.toCustomItem(): StackedItem {
-    return ItemHandler.create(ItemStack(this), listOf())
+fun Material.toCustomItem(): StackedItemImpl {
+    return ItemHandler.Impl.create(ItemStack(this), listOf())
 }
 
 fun ItemStack.modifyMeta(block: (ItemMeta) -> Unit): ItemStack {

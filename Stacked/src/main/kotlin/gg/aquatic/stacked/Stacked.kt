@@ -15,7 +15,7 @@ object Stacked {
     lateinit var scope: CoroutineScope
     lateinit var miniMessage: MiniMessage
 
-    fun injectFactories(customFactories: Map<String, ItemHandler.Factory> = emptyMap()) {
+    fun injectFactories(customFactories: Map<String, ItemFactory> = emptyMap()) {
         Registry.update {
             replaceRegistry(StackedItem.ITEM_FACTORY_REGISTRY_KEY) {
                 injectFactories(this, customFactories)
@@ -24,8 +24,8 @@ object Stacked {
     }
 
     fun injectFactories(
-        registry: MutableRegistry<String, ItemHandler.Factory>,
-        customFactories: Map<String, ItemHandler.Factory> = emptyMap()
+        registry: MutableRegistry<String, ItemFactory>,
+        customFactories: Map<String, ItemFactory> = emptyMap()
     ) {
         registry.register("registry", RegistryFactory)
         registry.register("base64", Base64Factory)
@@ -43,6 +43,12 @@ fun initializeStacked(plugin: JavaPlugin, scope: CoroutineScope, miniMessage: Mi
         initializeCommon(plugin)
     }
 
-    ItemHandler.initialize()
+    val registry = MutableRegistry<String, ItemHandler<*>>()
+    Registry.update {
+        registerRegistry(ItemHandler.REGISTRY_KEY, registry.freeze())
+    }
+
+    ItemManager.injectHandler("aquatic", ItemHandler.Impl)
+    ItemManager.initialize()
 }
 

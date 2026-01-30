@@ -1,5 +1,6 @@
 package gg.aquatic.stacked
 
+import gg.aquatic.stacked.impl.StackedItemImpl
 import gg.aquatic.stacked.option.*
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
@@ -106,7 +107,7 @@ class StackedItemBuilder(private val baseStack: ItemStack) {
     val enchants = mutableMapOf<String, Int>()
     val flags = mutableSetOf<ItemFlag>()
 
-    fun build(): StackedItem {
+    fun build(): StackedItemImpl {
         if (lore.isNotEmpty()) {
             options[LoreOptionHandle::class.java] = LoreOptionHandle(lore)
         }
@@ -119,20 +120,21 @@ class StackedItemBuilder(private val baseStack: ItemStack) {
 
         return StackedItemImpl(
             item = baseStack,
-            options = options.values
+            options = options.values,
+            handler = ItemHandler.Impl
         )
     }
 }
 
-fun stackedItem(material: Material, builder: StackedItemBuilder.() -> Unit): StackedItem {
+fun stackedItem(material: Material, builder: StackedItemBuilder.() -> Unit): StackedItemImpl {
     return StackedItemBuilder(ItemStack(material)).apply(builder).build()
 }
 
-fun ItemStack.toStackedBuilder(builder: StackedItemBuilder.() -> Unit): StackedItem {
+fun ItemStack.toStackedBuilder(builder: StackedItemBuilder.() -> Unit): StackedItemImpl {
     return StackedItemBuilder(this.clone()).apply(builder).build()
 }
 
-fun Material.toStackedBuilder(builder: StackedItemBuilder.() -> Unit): StackedItem {
+fun Material.toStackedBuilder(builder: StackedItemBuilder.() -> Unit): StackedItemImpl {
     return StackedItemBuilder(ItemStack(this)).apply(builder).build()
 }
 
