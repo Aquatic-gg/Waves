@@ -17,7 +17,7 @@ import gg.aquatic.pakket.api.nms.entity.data.impl.display.DisplayEntityData
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.ItemDisplayEntityData
 import gg.aquatic.pakket.sendPacket
 import gg.aquatic.replace.PlaceholderContext
-import gg.aquatic.stacked.StackedItem
+import gg.aquatic.stacked.StackedItemImpl
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
@@ -141,7 +141,7 @@ class ItemHologramLine(
 
     companion object : LineFactory {
         override fun load(section: ConfigurationSection, commonOptions: CommonHologramLineSettings): LineSettings? {
-            val item = StackedItem.loadFromYml(section.getConfigurationSection("item")) ?: return null
+            val item = StackedItemImpl.loadFromYml(section.getConfigurationSection("item")) ?: return null
             val height = section.getDouble("height", commonOptions.height)
             val scale = section.getDouble("scale", commonOptions.scale.toDouble()).toFloat()
             val billboard = section.getString("billboard")?.let {
