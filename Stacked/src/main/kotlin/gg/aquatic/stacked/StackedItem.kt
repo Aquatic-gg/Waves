@@ -7,11 +7,12 @@ import gg.aquatic.kregistry.RegistryKey
 import gg.aquatic.stacked.option.ItemOptionHandle
 import gg.aquatic.stacked.option.ItemOptions
 import gg.aquatic.stacked.serialize.ItemSerializer
+import gg.aquatic.stacked.serialize.ItemSerializerImpl
 import net.kyori.adventure.key.Key
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-interface StackedItem<T: StackedItem<T>> {
+interface StackedItem<T : StackedItem<T>> {
     val options: MutableMap<Key, ItemOptionHandle>
 
     val handler: ItemHandler<T, out ItemSerializer<T>>
@@ -51,5 +52,9 @@ interface StackedItem<T: StackedItem<T>> {
             get() {
                 return Registry[ITEM_FACTORY_REGISTRY_KEY]
             }
+
+        @Suppress("UNCHECKED_CAST")
+        fun <T : StackedItem<T>> serializer(id: String): ItemSerializer<T> = (ItemHandler.REGISTRY[id]?.serializer
+            ?: throw IllegalArgumentException("No $id item handler found")) as ItemSerializer<T>
     }
 }
