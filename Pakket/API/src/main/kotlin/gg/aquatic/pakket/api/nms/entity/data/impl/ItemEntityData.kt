@@ -18,7 +18,7 @@ object ItemEntityData {
         override val entityClass: Class<out Entity> = org.bukkit.entity.Item::class.java
 
         override fun generate(arguments: ObjectArguments, updater: (String) -> String): Collection<EntityDataValue> {
-            return generate((arguments.any(id, updater) as? StackedItem)?.getItem() ?: return emptyList())
+            return generate((arguments.any(id, updater) as? StackedItem<*>)?.getItem() ?: return emptyList())
         }
         fun generate(itemStack: ItemStack): Collection<EntityDataValue> {
             when (NMSVersion.ofAquatic()) {
