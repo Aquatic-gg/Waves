@@ -29,14 +29,9 @@ open class StackedItemImpl(
             im.attributeModifiers = HashMultimap.create(iS.type.defaultAttributeModifiers)
         }
 
-        for (handle in options) {
-            handle.value.apply(im)
-        }
-
+        options.values.forEach { it.apply(im) }
         iS.itemMeta = im
-        for (handle in options) {
-            handle.value.apply(iS)
-        }
+        options.values.forEach { it.apply(iS) }
         return iS
     }
 

@@ -49,6 +49,6 @@ abstract class ItemHandler<T : StackedItem<T>, S: ItemSerializer<T>> {
             return StackedItemImpl(item, options, this)
         }
 
-        override val serializer: ItemSerializerImpl = ItemSerializerImpl()
+        override val serializer: ItemSerializerImpl = ItemSerializerImpl
     }
 }
