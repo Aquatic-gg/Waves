@@ -118,8 +118,6 @@ class StackedItemBuilder(private val baseStack: ItemStack) {
         }
 
         return StackedItem(
-            factoryId = null,
-            internalId = null,
             item = baseStack,
             options = options.values
         )

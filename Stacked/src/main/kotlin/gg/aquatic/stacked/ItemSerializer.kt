@@ -67,10 +67,8 @@ object ItemSerializer {
         namespace: String,
         options: List<ItemOptionHandle>
     ): StackedItem? {
-        var factoryId: String? = null
         val itemStack = if (namespace.contains(":")) {
             val id = namespace.split(":").first().uppercase()
-            factoryId = id
 
             val factory = StackedItem.ITEM_FACTORIES[id] ?: return null
             factory.create(namespace.substring(id.length + 1))
@@ -79,8 +77,6 @@ object ItemSerializer {
         } ?: return null
 
         return ItemHandler.create(
-            factoryId,
-            namespace,
             itemStack,
             options
         )

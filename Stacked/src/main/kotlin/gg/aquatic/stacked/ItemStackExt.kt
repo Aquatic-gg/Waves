@@ -30,7 +30,7 @@ fun ItemMeta.setSpawnerType(type: EntityType) {
 }
 
 fun Material.toCustomItem(): StackedItem {
-    return ItemHandler.create(null, null, ItemStack(this), listOf())
+    return ItemHandler.create(ItemStack(this), listOf())
 }
 
 fun ItemStack.modifyMeta(block: (ItemMeta) -> Unit): ItemStack {

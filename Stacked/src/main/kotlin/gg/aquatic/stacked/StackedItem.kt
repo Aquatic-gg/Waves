@@ -12,9 +12,7 @@ import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
-class StackedItem(
-    val factoryId: String?,
-    val internalId: String? = null,
+open class StackedItem(
     private val item: ItemStack,
     options: Collection<ItemOptionHandle>
 ) {

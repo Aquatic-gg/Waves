@@ -43,14 +43,10 @@ object ItemHandler {
     }
 
     fun create(
-        factoryId: String?,
-        internalId: String?,
         item: ItemStack,
         options: List<ItemOptionHandle>
     ): StackedItem {
         return StackedItem(
-            factoryId,
-            internalId,
             item,
             options
         )
