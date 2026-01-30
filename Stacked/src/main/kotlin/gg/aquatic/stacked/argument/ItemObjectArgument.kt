@@ -3,6 +3,7 @@ package gg.aquatic.stacked.argument
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.ObjectArgumentFactory
 import gg.aquatic.stacked.StackedItem
+import gg.aquatic.stacked.StackedItemImpl
 import org.bukkit.configuration.ConfigurationSection
 
 class ItemObjectArgument(
@@ -22,7 +23,7 @@ class ItemObjectArgument(
 
     object Serializer : ObjectArgumentFactory<StackedItem?>() {
         override fun load(section: ConfigurationSection, id: String): StackedItem? {
-            return StackedItem.loadFromYml(section.getConfigurationSection(id) ?: return null)
+            return StackedItemImpl.loadFromYml(section.getConfigurationSection(id) ?: return null)
         }
     }
 }

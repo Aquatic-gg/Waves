@@ -33,10 +33,6 @@ interface StackedItem {
     }
 
     companion object {
-        fun loadFromYml(section: ConfigurationSection?): StackedItem? {
-            return ItemSerializer.fromSection(section)
-        }
-
         val ITEM_REGISTRY_KEY = RegistryKey<String, StackedItem>(
             RegistryId("aquatic", "items")
         )
@@ -86,5 +82,11 @@ open class StackedItemImpl(
             handle.value.apply(iS)
         }
         return iS
+    }
+
+    companion object {
+        fun loadFromYml(section: ConfigurationSection?): StackedItemImpl? {
+            return ItemSerializer.fromSection(section)
+        }
     }
 }

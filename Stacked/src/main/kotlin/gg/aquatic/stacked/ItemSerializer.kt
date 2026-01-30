@@ -36,7 +36,7 @@ object ItemSerializer {
 
     fun fromSection(
         section: ConfigurationSection?
-    ): StackedItem? {
+    ): StackedItemImpl? {
         section ?: return null
         return try {
             val material = section.getString("material", "STONE")!!
@@ -66,7 +66,7 @@ object ItemSerializer {
     private fun create(
         namespace: String,
         options: List<ItemOptionHandle>
-    ): StackedItem? {
+    ): StackedItemImpl? {
         val itemStack = if (namespace.contains(":")) {
             val id = namespace.split(":").first().uppercase()
 

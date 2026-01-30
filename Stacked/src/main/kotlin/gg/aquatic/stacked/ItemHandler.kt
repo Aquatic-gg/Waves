@@ -45,7 +45,7 @@ object ItemHandler {
     fun create(
         item: ItemStack,
         options: List<ItemOptionHandle>
-    ): StackedItem {
+    ): StackedItemImpl {
         return StackedItemImpl(
             item,
             options
