@@ -17,7 +17,7 @@ open class StackedItemImpl(
     override val options = options.associateBy { it.key }.toMutableMap()
 
     override fun getBaseItem(): ItemStack {
-        return item.clone()
+        return item
     }
 
     override fun getItem(): ItemStack {
