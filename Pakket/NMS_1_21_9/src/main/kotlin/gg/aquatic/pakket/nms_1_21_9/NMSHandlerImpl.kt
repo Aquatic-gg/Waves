@@ -49,6 +49,13 @@ import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.inventory.ClickType
+import net.minecraft.world.item.crafting.RecipeHolder
+import net.minecraft.world.item.crafting.ShapedRecipePattern
+import net.minecraft.world.item.crafting.display.RecipeDisplay
+import net.minecraft.world.item.crafting.display.RecipeDisplayEntry
+import net.minecraft.world.item.crafting.display.RecipeDisplayId
+import net.minecraft.world.item.crafting.display.RecipeDisplays
+import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec3
@@ -66,12 +73,19 @@ import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
+import org.bukkit.craftbukkit.inventory.CraftRecipe
+import org.bukkit.craftbukkit.inventory.CraftShapedRecipe
+import org.bukkit.craftbukkit.inventory.CraftShapelessRecipe
+import org.bukkit.craftbukkit.util.CraftNamespacedKey
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.entity.Pose
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
+import org.bukkit.inventory.Recipe
+import org.bukkit.inventory.ShapedRecipe
+import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.util.Vector
 import org.joml.Quaternionf
 import org.joml.Vector3d
@@ -693,8 +707,8 @@ object NMSHandlerImpl : NMSHandler() {
             team.teamName
         )
         scoreboard.addPlayerTeam(team.teamName)
-        playerTeam.playerPrefix = team.prefix.toNMSComponent()
-        playerTeam.playerSuffix = team.suffix.toNMSComponent()
+        playerTeam.setPlayerPrefix(team.prefix.toNMSComponent())
+        playerTeam.setPlayerSuffix(team.suffix.toNMSComponent())
         playerTeam.collisionRule = Team.CollisionRule.entries[team.collisionRule.ordinal]
         playerTeam.nameTagVisibility =
             Team.Visibility.entries[team.nametagVisibility.ordinal]
@@ -732,6 +746,70 @@ object NMSHandlerImpl : NMSHandler() {
             else -> throw IllegalArgumentException("Invalid team action ID: $actionId")
         }
         return packet
+    }
+
+    fun createRecipeBookAddPacket(
+        id: Int,
+        recipe: Recipe,
+        showNotifications: Boolean,
+        highlight: Boolean,
+        replace: Boolean
+    ): Any {
+        val (nmsRecipe, ingredients) = when (recipe) {
+            is ShapedRecipe -> {
+                recipe.choiceMap
+                val ingredients = recipe.choiceMap.mapValues {
+                    CraftRecipe.toIngredient(it.value, false)
+                }
+
+                val pattern = ShapedRecipePattern.of(ingredients, recipe.shape.toList())
+
+                net.minecraft.world.item.crafting.ShapedRecipe(
+                    recipe.group,
+                    CraftRecipe.getCategory(recipe.category),
+                    pattern,
+                    recipe.result.toNMS()
+                ) to ingredients.values
+            }
+
+            is ShapelessRecipe -> {
+                val ingredients = recipe.choiceList.map {
+                    CraftRecipe.toIngredient(it, false)
+                }
+                net.minecraft.world.item.crafting.ShapelessRecipe(
+                    recipe.group,
+                    CraftRecipe.getCategory(recipe.category),
+                    recipe.result.toNMS(),
+                    ingredients
+                ) to ingredients
+            }
+
+            else -> throw IllegalArgumentException("Unsupported recipe type")
+        }
+
+        val nmsRecipeDisplay = when(nmsRecipe) {
+            is net.minecraft.world.item.crafting.ShapedRecipe -> {
+                nmsRecipe.display().first()
+            }
+            is net.minecraft.world.item.crafting.ShapelessRecipe -> {
+                nmsRecipe.display().first()
+            }
+            else -> throw IllegalArgumentException("Unsupported recipe type")
+        }
+
+        val entry = ClientboundRecipeBookAddPacket.Entry(
+            RecipeDisplayEntry(
+                RecipeDisplayId(id),
+                nmsRecipeDisplay,
+                OptionalInt.empty(),
+                nmsRecipe.recipeBookCategory(),
+                Optional.of(ingredients.toList())
+            ),
+            showNotifications,
+            highlight
+        )
+
+        return ClientboundRecipeBookAddPacket(listOf(entry), replace)
     }
 
     override fun createSetSlotItemPacket(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?): Any {
