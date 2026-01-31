@@ -43,19 +43,17 @@ import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.server.network.ServerCommonPacketListenerImpl
+import net.minecraft.stats.RecipeBookSettings
 import net.minecraft.util.HashOps
 import net.minecraft.world.entity.Entity
 import net.minecraft.world.entity.EntitySpawnReason
 import net.minecraft.world.entity.Mob
 import net.minecraft.world.entity.PositionMoveRotation
 import net.minecraft.world.inventory.ClickType
-import net.minecraft.world.item.crafting.RecipeHolder
+import net.minecraft.world.inventory.RecipeBookType
 import net.minecraft.world.item.crafting.ShapedRecipePattern
-import net.minecraft.world.item.crafting.display.RecipeDisplay
 import net.minecraft.world.item.crafting.display.RecipeDisplayEntry
 import net.minecraft.world.item.crafting.display.RecipeDisplayId
-import net.minecraft.world.item.crafting.display.RecipeDisplays
-import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay
 import net.minecraft.world.level.ChunkPos
 import net.minecraft.world.level.GameType
 import net.minecraft.world.phys.Vec3
@@ -74,18 +72,11 @@ import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftPlayer
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.craftbukkit.inventory.CraftRecipe
-import org.bukkit.craftbukkit.inventory.CraftShapedRecipe
-import org.bukkit.craftbukkit.inventory.CraftShapelessRecipe
-import org.bukkit.craftbukkit.util.CraftNamespacedKey
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.entity.Pose
-import org.bukkit.inventory.EquipmentSlot
-import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.MenuType
-import org.bukkit.inventory.Recipe
-import org.bukkit.inventory.ShapedRecipe
-import org.bukkit.inventory.ShapelessRecipe
+import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
+import org.bukkit.inventory.*
 import org.bukkit.util.Vector
 import org.joml.Quaternionf
 import org.joml.Vector3d
@@ -748,7 +739,7 @@ object NMSHandlerImpl : NMSHandler() {
         return packet
     }
 
-    fun createRecipeBookAddPacket(
+    override fun createRecipeBookAddPacket(
         id: Int,
         recipe: Recipe,
         showNotifications: Boolean,
@@ -810,6 +801,32 @@ object NMSHandlerImpl : NMSHandler() {
         )
 
         return ClientboundRecipeBookAddPacket(listOf(entry), replace)
+    }
+
+    override fun createRecipeBookRemovePacket(ids: Collection<Int>): Any {
+        val displayIds = ids.map { RecipeDisplayId(it) }
+
+        return ClientboundRecipeBookRemovePacket(displayIds)
+    }
+
+    override fun createRecipeBookSettingsPacket(
+        type: PlayerRecipeBookSettingsChangeEvent.RecipeBookType,
+        isOpen: Boolean,
+        filtering: Boolean,
+    ): Any {
+
+        val nmsType = RecipeBookType.entries[type.ordinal]
+
+        val settings = RecipeBookSettings().apply {
+            this.setOpen(nmsType,isOpen)
+            this.setFiltering(nmsType, filtering)
+        }
+
+        return ClientboundRecipeBookSettingsPacket(settings)
+    }
+
+    override fun getPlayerInventoryState(player: Player): Int {
+        return (player as CraftPlayer).handle.inventoryMenu.stateId
     }
 
     override fun createSetSlotItemPacket(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?): Any {

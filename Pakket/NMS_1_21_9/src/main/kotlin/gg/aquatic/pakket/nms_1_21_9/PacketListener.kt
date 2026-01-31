@@ -18,6 +18,7 @@ import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftEntityType
 import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
 import org.bukkit.inventory.ItemStack
 
 class PacketListener(
@@ -198,7 +199,8 @@ class PacketListener(
         isAccessible = true
     }
 
-    @Suppress("DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused",
+    @Suppress(
+        "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused",
         "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused",
         "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused"
     )
@@ -230,6 +232,19 @@ class PacketListener(
                 PacketItemRenameEvent(player, msg.name)
             }
 
+            is ServerboundRecipeBookSeenRecipePacket -> {
+                PacketRecipeBookSeenRecipeReceiveEvent(player, msg.recipe.index)
+            }
+
+            is ServerboundRecipeBookChangeSettingsPacket -> {
+                PacketRecipeBookChangeSettingsReceiveEvent(
+                    player,
+                    PlayerRecipeBookSettingsChangeEvent.RecipeBookType.entries[msg.bookType.ordinal],
+                    msg.isOpen,
+                    msg.isFiltering
+                )
+            }
+
             is ServerboundContainerClickPacket -> {
                 val carriedItem = (msg.carriedItem as? HashedStack.ActualItem)?.let { carried ->
                     val type = carried.item.registeredName
@@ -258,6 +273,7 @@ class PacketListener(
                     msg.changedSlots.mapValues { null as ItemStack? },
                 )
             }
+
             else -> null
         }
         if (event != null) {

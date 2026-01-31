@@ -13,9 +13,13 @@ import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
+import org.bukkit.inventory.Recipe
+import org.bukkit.inventory.ShapedRecipe
+import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.util.Vector
 import org.joml.Vector3d
 import java.util.*
@@ -95,6 +99,24 @@ abstract class NMSHandler {
     abstract fun closeWindowPacket(inventoryId: Int): Any
     abstract fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
     abstract fun createContainerPropertyPacket(inventoryId: Int, property: Int, value: Int): Any
+
+    abstract fun createRecipeBookAddPacket(
+        id: Int,
+        recipe: Recipe,
+        showNotifications: Boolean,
+        highlight: Boolean,
+        replace: Boolean
+    ): Any
+
+    abstract fun createRecipeBookRemovePacket(ids: Collection<Int>): Any
+
+    abstract fun createRecipeBookSettingsPacket(
+        type: PlayerRecipeBookSettingsChangeEvent.RecipeBookType,
+        isOpen: Boolean,
+        filtering: Boolean,
+    ): Any
+
+    abstract fun getPlayerInventoryState(player: Player): Int
 
     abstract fun sendPacket(packet: Any, silent: Boolean = false, vararg players: Player)
     abstract fun sendPacketBundle(bundle: PacketBundle, silent: Boolean = false, vararg players: Player)
