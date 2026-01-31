@@ -44,9 +44,12 @@ fun initializeStacked(plugin: JavaPlugin, scope: CoroutineScope, miniMessage: Mi
     }
 
     val registry = MutableRegistry<String, ItemHandler<*,*>>()
+    val itemsRegistry = MutableRegistry<String, StackedItem<*>>()
     Registry.update {
         registerRegistry(ItemHandler.REGISTRY_KEY, registry.freeze())
+        registerRegistry(StackedItem.ITEM_REGISTRY_KEY, itemsRegistry.freeze())
     }
+
 
     ItemManager.injectHandler("aquatic", ItemHandler.Impl)
     ItemManager.initialize()
