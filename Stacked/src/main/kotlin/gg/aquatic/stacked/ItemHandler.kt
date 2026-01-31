@@ -20,7 +20,7 @@ abstract class ItemHandler<T : StackedItem<T>, S: ItemSerializer<T>> {
 
     companion object {
         val NAMESPACE_KEY by lazy {
-            NamespacedKey("Stacked", "Custom_Item_Registry")
+            NamespacedKey("stacked", "custom_item_registry")
         }
 
         val REGISTRY_KEY = RegistryKey<String, ItemHandler<*,*>>(RegistryId("aquatic", "item_handlers"))
