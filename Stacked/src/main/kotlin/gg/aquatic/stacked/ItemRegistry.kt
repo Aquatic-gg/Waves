@@ -33,7 +33,7 @@ private fun <T: StackedItem<T>> StackedItem<T>.register(
     if (registryId != null && registryId != "${handler.id}:$namespace:$id") return false
 
     item.editPersistentDataContainer {
-        it.set(ItemHandler.NAMESPACE_KEY, PersistentDataType.STRING, "$namespace:$id")
+        it.set(ItemHandler.NAMESPACE_KEY, PersistentDataType.STRING, "${handler.id}$namespace:$id")
     }
 
     Registry.update {
