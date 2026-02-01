@@ -6,7 +6,7 @@ plugins {
 
 allprojects {
     group = "gg.aquatic"
-    version = "26.0.5"
+    version = "26.0.6"
 
     repositories {
         mavenCentral()

@@ -86,15 +86,17 @@ public class DependencyLoader implements PluginLoader {
 
     @Override
     public void classloader(PluginClasspathBuilder classpathBuilder) {
-        try {
+        try (InputStream in = getClass().getResourceAsStream("/dependencies.json")) {
+            if (in == null) {
+                throw new IllegalStateException("dependencies.json not found inside plugin jar");
+            }
+
             Path baseDir = Path.of("plugins/Core/dependencies");
 
             DependencyManager.create(baseDir)
                     .loadSecrets(Path.of("plugins/Core/.env"))
                     .loadSecrets(Path.of(".env"))
-                    .process(getClass().getResourceAsStream("/dependencies.json"), jar -> {
-                        classpathBuilder.addLibrary(new JarLibrary(jar));
-                    });
+                    .process(in, jar -> classpathBuilder.addLibrary(new JarLibrary(jar)));
 
             System.out.println("[DependencyLoader] Runtime dependencies loaded successfully.");
         } catch (Exception e) {

@@ -15,7 +15,6 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
@@ -186,9 +185,9 @@ class DependencyGeneratorPlugin : Plugin<Project> {
                 extendsFrom(runtimeDownload)
             }
 
-            project.tasks.named("processResources", ProcessResources::class.java) {
+            project.tasks.withType(org.gradle.api.tasks.bundling.Jar::class.java).configureEach {
                 dependsOn(genTask)
-                from(genTask.map { it.outputFile.get().asFile.parentFile })
+                from(genTask.map { it.outputFile.get().asFile })
             }
         }
     }
