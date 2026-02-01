@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
+import io.papermc.paper.command.brigadier.Commands
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.argument.ArgumentTypes
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver
@@ -25,6 +26,15 @@ import java.util.regex.Pattern
 
 @DslMarker
 annotation class BrigadierDsl
+
+enum class StringArgumentFormat {
+    // WORD: no spaces, limited charset (e.g., "abc123", "foo_bar"); ":" is not allowed.
+    // STRING: quoted or unquoted; supports special chars (":"), but spaces require quotes.
+    // GREEDY_STRING: takes the rest of the input as-is, including spaces.
+    WORD,
+    STRING,
+    GREEDY_STRING,
+}
 
 @BrigadierDsl
 class CommandBuilder<S : CommandSourceStack>(
@@ -86,27 +96,49 @@ class CommandBuilder<S : CommandSourceStack>(
         finalFilter: (CommandContext<S>, Player) -> Boolean,
         block: CommandBuilder<S>.() -> Unit
     ) {
-        argumentMappers[id] = { ctx ->
-            val resolved = try {
-                ctx.getArgument(id, PlayerSelectorArgumentResolver::class.java)
-                    .resolve(ctx.source)
-                    .firstOrNull()
-            } catch (e: Exception) { null }
+        val usePaperArguments = KommandConfig.commands != null
+        if (usePaperArguments) {
+            argumentMappers[id] = { ctx ->
+                val resolved = try {
+                    ctx.getArgument(id, PlayerSelectorArgumentResolver::class.java)
+                        .resolve(ctx.source)
+                        .firstOrNull()
+                } catch (e: Exception) { null }
 
-            resolved?.takeIf { finalFilter(ctx, it) }
-        }
-
-        argument(id, ArgumentTypes.player()) {
-            suggests { ctx, builder ->
-                val remaining = builder.remaining.lowercase()
-                Bukkit.getOnlinePlayers().forEach { player ->
-                    if (finalFilter(ctx, player) && player.name.lowercase().startsWith(remaining)) {
-                        builder.suggest(player.name)
-                    }
-                }
-                builder.buildFuture()
+                resolved?.takeIf { finalFilter(ctx, it) }
             }
-            block()
+
+            argument(id, ArgumentTypes.player()) {
+                suggests { ctx, builder ->
+                    val remaining = builder.remaining.lowercase()
+                    Bukkit.getOnlinePlayers().forEach { player ->
+                        if (finalFilter(ctx, player) && player.name.lowercase().startsWith(remaining)) {
+                            builder.suggest(player.name)
+                        }
+                    }
+                    builder.buildFuture()
+                }
+                block()
+            }
+        } else {
+            argumentMappers[id] = { ctx ->
+                val name = try { StringArgumentType.getString(ctx, id) } catch (_: Exception) { "" }
+                val resolved = if (name.isNotBlank()) Bukkit.getPlayerExact(name) ?: Bukkit.getPlayer(name) else null
+                resolved?.takeIf { finalFilter(ctx, it) }
+            }
+
+            argument(id, StringArgumentType.word()) {
+                suggests { ctx, builder ->
+                    val remaining = builder.remaining.lowercase()
+                    Bukkit.getOnlinePlayers().forEach { player ->
+                        if (finalFilter(ctx, player) && player.name.lowercase().startsWith(remaining)) {
+                            builder.suggest(player.name)
+                        }
+                    }
+                    builder.buildFuture()
+                }
+                block()
+            }
         }
     }
 
@@ -240,12 +272,13 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         values: (CommandContext<S>) -> Iterable<T>,
         mapper: (T) -> String,
+        format: StringArgumentFormat = StringArgumentFormat.WORD,
         block: CommandBuilder<S>.() -> Unit = {}
     ) {
         // Register the "parser" for this ID in the CURRENT builder
         argumentMappers[id] = { ctx ->
             val input = try {
-                StringArgumentType.getString(ctx, id)
+                ctx.getArgument(id, String::class.java)
             } catch (e: Exception) {
                 null
             }
@@ -253,12 +286,19 @@ class CommandBuilder<S : CommandSourceStack>(
             else values(ctx).find { mapper(it) == input }
         }
 
-        val arg = RequiredArgumentBuilder.argument<S, String>(id, StringArgumentType.word())
+        val argumentType = when (format) {
+            StringArgumentFormat.WORD -> StringArgumentType.word()
+            StringArgumentFormat.STRING -> StringArgumentType.string()
+            StringArgumentFormat.GREEDY_STRING -> StringArgumentType.greedyString()
+        }
+        val arg = RequiredArgumentBuilder.argument<S, String>(id, argumentType)
         arg.suggests { ctx, builder ->
             val remaining = builder.remaining.lowercase()
             values(ctx).forEach { item ->
                 val str = mapper(item)
-                if (str.lowercase().startsWith(remaining)) builder.suggest(str)
+                if (str.lowercase().startsWith(remaining)) {
+                    builder.suggest(quoteIfNeeded(str, format))
+                }
             }
             builder.buildFuture()
         }
@@ -302,9 +342,24 @@ class CommandBuilder<S : CommandSourceStack>(
         }
     }
 
-    fun listArgument(id: String, values: List<String>, block: CommandBuilder<S>.() -> Unit = {}) {
-        listArgument(id, { values }, { it }, block)
+    fun listArgument(
+        id: String,
+        values: List<String>,
+        format: StringArgumentFormat = StringArgumentFormat.WORD,
+        block: CommandBuilder<S>.() -> Unit = {}
+    ) {
+        listArgument(id, { values }, { it }, format, block)
     }
+}
+
+private fun quoteIfNeeded(value: String, format: StringArgumentFormat): String {
+    if (format != StringArgumentFormat.STRING) return value
+
+    val needsQuotes = value.any { !StringReader.isAllowedInUnquotedString(it) }
+    if (!needsQuotes) return value
+
+    val escaped = value.replace("\\", "\\\\").replace("\"", "\\\"")
+    return "\"$escaped\""
 }
 
 class ExecutionContext<S : CommandSourceStack, out T : CommandSender>(
@@ -340,6 +395,9 @@ class ExecutionContext<S : CommandSourceStack, out T : CommandSender>(
     }
 
     fun player(id: String): Player? {
+        val mapped = getOrNull<Player>(id)
+        if (mapped != null) return mapped
+
         return try {
             context.getArgument(id, PlayerSelectorArgumentResolver::class.java)
                 .resolve(context.source)
@@ -388,14 +446,31 @@ fun command(
     vararg aliases: String,
     block: CommandBuilder<CommandSourceStack>.() -> Unit
 ) {
+    val commands = KommandConfig.commands
+    if (commands != null) {
+        val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(name)
+        CommandBuilder(builder).apply(block)
+        commands.register(builder.build(), aliases.toList())
+        return
+    }
+
     val names = listOf(name) + aliases.toList()
     val dispatcher = KommandConfig.commandDispatcher
-
     names.forEach { cmdName ->
         val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(cmdName)
         CommandBuilder(builder).apply(block)
         dispatcher.register(builder)
     }
+}
+
+fun Commands.command(
+    name: String,
+    vararg aliases: String,
+    block: CommandBuilder<CommandSourceStack>.() -> Unit
+) {
+    val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(name)
+    CommandBuilder(builder).apply(block)
+    this.register(builder.build(), aliases.toList())
 }
 
 fun CommandDispatcher<CommandSourceStack>.command(
