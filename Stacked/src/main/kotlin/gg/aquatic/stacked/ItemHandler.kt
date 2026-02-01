@@ -1,6 +1,6 @@
 package gg.aquatic.stacked
 
-import gg.aquatic.kevent.eventBusBuilder
+import gg.aquatic.kevent.suspendingEventBusBuilder
 import gg.aquatic.kregistry.FrozenRegistry
 import gg.aquatic.kregistry.Registry
 import gg.aquatic.kregistry.RegistryId
@@ -35,7 +35,7 @@ abstract class ItemHandler<T : StackedItem<T>, S: ItemSerializer<T>> {
     val listenInteractions = mutableMapOf<String, (StackedItemInteractEvent) -> Unit>()
 
     val eventBus by lazy {
-        eventBusBuilder {
+        suspendingEventBusBuilder {
             scope = Stacked.scope
             hierarchical = false
         }
