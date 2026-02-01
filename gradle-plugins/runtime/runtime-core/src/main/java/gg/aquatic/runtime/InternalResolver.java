@@ -61,10 +61,8 @@ public class InternalResolver {
         if (value.startsWith("${") && value.endsWith("}")) {
             String envKey = value.substring(2, value.length() - 1);
 
-            // 1. Check local .env file first
             String secret = localSecrets.get(envKey);
 
-            // 2. Fallback to System Environment
             if (secret == null) {
                 secret = System.getenv(envKey);
             }
@@ -126,7 +124,6 @@ public class InternalResolver {
         String actualUser = resolveSecret(user);
         String actualPass = resolveSecret(pass);
 
-        // actualUser and actualPass are guaranteed to be non-null by resolveSecret
         if (!actualUser.isEmpty()) {
             String auth = Base64.getEncoder().encodeToString((actualUser + ":" + actualPass).getBytes());
             builder.header("Authorization", "Basic " + auth);
@@ -154,7 +151,6 @@ public class InternalResolver {
         int idx = json.indexOf("\"" + key + "\":");
         if (idx == -1) return "";
 
-        // Find start and end of the string value
         int start = json.indexOf("\"", idx + key.length() + 2) + 1;
         int end = json.indexOf("\"", start);
         if (start <= 0 || end <= 0) return "";
@@ -170,7 +166,6 @@ public class InternalResolver {
         int endIdx = json.indexOf("]", startIdx);
         String content = json.substring(startIdx + key.length() + 4, endIdx);
 
-        // Primitive split by object boundaries
         String[] parts = content.split("\\},\\{");
         for (String p : parts) {
             String sanitized = p.startsWith("{") ? p : "{" + p;

@@ -85,25 +85,17 @@ public class Relocator {
                     byte[] data = jin.readAllBytes();
 
                     if (name.endsWith(".class")) {
-                        // 1. Initialize Reader
                         Object reader = classReaderClass.getConstructor(byte[].class).newInstance((Object) data);
 
-                        // 2. Initialize Writer in "Copying Mode"
-                        // Using (reader, 0) is CRITICAL. It prevents ASM from calling getCommonSuperClass,
-                        // which avoids the TypeNotPresentException/ClassNotFoundException during relocation.
                         Constructor<?> writerCons = classWriterClass.getConstructor(classReaderClass, int.class);
                         Object writer = writerCons.newInstance(reader, 0);
-
-                        // 3. Setup Remapper
                         Constructor<?> remapConstructor = remapClass.getConstructor(classVisitorClass, remapperClass);
                         Object visitor = remapConstructor.newInstance(writer, remapper);
 
-                        // 4. Transform
                         Method accept = classReaderClass.getMethod("accept", classVisitorClass, int.class);
                         accept.invoke(reader, visitor, 0);
                         data = (byte[]) classWriterClass.getMethod("toByteArray").invoke(writer);
 
-                        // 5. Handle Multi-Release Path mapping
                         String prefix = "";
                         String internalName = name.substring(0, name.length() - 6);
                         if (internalName.startsWith("META-INF/versions/")) {

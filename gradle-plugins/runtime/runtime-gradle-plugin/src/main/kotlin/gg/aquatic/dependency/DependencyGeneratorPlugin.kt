@@ -23,6 +23,7 @@ import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
 
+@Suppress("unused")
 open class DependencyExtension @Inject constructor(private val objects: ObjectFactory) {
     val repositories: ListProperty<RuntimeRepository> = objects.listProperty(RuntimeRepository::class.java)
     val relocations: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
@@ -78,7 +79,6 @@ abstract class GenerateManifestTask : DefaultTask() {
 
     @TaskAction
     fun generate() {
-        // 1. Map Dependencies
         val deps = libraryConfiguration.resolvedConfiguration.resolvedArtifacts.map { artifact ->
             val id = artifact.moduleVersion.id
             mapOf(
@@ -89,11 +89,9 @@ abstract class GenerateManifestTask : DefaultTask() {
             )
         }
 
-        // 2. Map Repositories (including per-repo credentials)
         val repoData = repositories.get().map { repo ->
             mapOf(
                 "url" to repo.url.get(),
-                // We save the placeholder strings, NOT the actual secrets
                 "user" to repo.username.get(),
                 "pass" to repo.password.get()
             )
@@ -144,12 +142,9 @@ class DependencyGeneratorPlugin : Plugin<Project> {
 
             if (relocations.isNotEmpty()) {
                 if (project.plugins.hasPlugin("com.gradleup.shadow") || project.plugins.hasPlugin("com.github.johnrengelman.shadow")) {
-                    // We look for the task by name and type generically to avoid classloading issues
                     project.tasks.matching { it.name == "shadowJar" }.configureEach {
                         val task = this
                         extension.relocations.get().forEach { (from, to) ->
-                            // Use reflection to call 'relocate' so the ShadowJar class
-                            // is only needed at runtime by Gradle, not by our plugin's classloader verification
                             try {
                                 val relocateMethod = task.javaClass.getMethod("relocate", String::class.java, String::class.java)
                                 relocateMethod.invoke(task, from, to)
@@ -165,7 +160,6 @@ class DependencyGeneratorPlugin : Plugin<Project> {
         }
 
         project.plugins.withId("java") {
-            // Include runtimeDownload in compilation classpaths
             project.configurations.named("compileOnly") {
                 extendsFrom(runtimeDownload)
             }
@@ -173,7 +167,6 @@ class DependencyGeneratorPlugin : Plugin<Project> {
                 extendsFrom(runtimeDownload)
             }
 
-            // Ensure manifest is generated before resources are processed
             project.tasks.named("processResources", ProcessResources::class.java) {
                 dependsOn(genTask)
                 from(genTask.map { it.outputFile.get().asFile.parentFile })

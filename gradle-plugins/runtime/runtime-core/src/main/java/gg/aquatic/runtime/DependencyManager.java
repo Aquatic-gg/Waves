@@ -29,19 +29,16 @@ public class DependencyManager {
     public void process(InputStream manifestStream, Consumer<Path> jarConsumer) throws Exception {
         String manifest = new String(manifestStream.readAllBytes(), StandardCharsets.UTF_8);
 
-        // 1. Bootstrap internal tools (ASM)
         Path asm = resolver.downloadTool("org.ow2.asm", "asm", "9.7");
         Path asmCommons = resolver.downloadTool("org.ow2.asm", "asm-commons", "9.7");
         Relocator relocator = new Relocator(asm, asmCommons);
 
-        // 2. Load mappings
         resolver.extractList(manifest, "relocations").forEach(relocJson -> {
             String from = resolver.extractValue(relocJson, "from");
             String to = resolver.extractValue(relocJson, "to");
             if (!from.isEmpty()) relocator.addMapping(from, to);
         });
 
-        // 3. Resolve & Relocate
         List<Path> downloaded = resolver.resolve(manifest);
         relocator.prepareClassMappings(downloaded);
 
