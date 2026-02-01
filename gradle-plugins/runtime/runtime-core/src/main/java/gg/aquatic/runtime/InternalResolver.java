@@ -8,6 +8,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.*;
 
@@ -130,8 +131,19 @@ public class InternalResolver {
                     .resolve(artifact + "-" + version + ".jar");
             Files.createDirectories(target.getParent());
 
-            if (!Files.exists(target) || !verify(target, checksum)) {
-                if (!tryDownloadFromRepos(reposJson, group, artifact, version, target)) {
+            boolean needsDownload = true;
+            if (Files.exists(target)) {
+                if (checksum == null || checksum.isEmpty()) {
+                    needsDownload = false;
+                } else if (verify(target, checksum)) {
+                    needsDownload = false;
+                } else {
+                    Files.deleteIfExists(target);
+                }
+            }
+
+            if (needsDownload) {
+                if (!tryDownloadFromRepos(reposJson, group, artifact, version, checksum, target)) {
                     throw new RuntimeException("Could not resolve " + artifact + " from any repository");
                 }
             }
@@ -140,17 +152,17 @@ public class InternalResolver {
         return resolved;
     }
 
-    private boolean tryDownloadFromRepos(List<String> repos, String g, String a, String v, Path target) throws Exception {
+    private boolean tryDownloadFromRepos(List<String> repos, String g, String a, String v, String checksum, Path target) throws Exception {
         for (String repoJson : repos) {
             if (download(extractValue(repoJson, "url"), g, a, v, target,
-                    extractValue(repoJson, "user"), extractValue(repoJson, "pass"))) {
+                    extractValue(repoJson, "user"), extractValue(repoJson, "pass"), checksum)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean download(String repo, String g, String a, String v, Path target, String user, String pass) throws Exception {
+    private boolean download(String repo, String g, String a, String v, Path target, String user, String pass, String checksum) throws Exception {
         String baseUrl = repo.endsWith("/") ? repo.substring(0, repo.length() - 1) : repo;
         String url = String.format("%s/%s/%s/%s/%s-%s.jar",
                 baseUrl,
@@ -158,7 +170,6 @@ public class InternalResolver {
 
         HttpRequest.Builder builder = HttpRequest.newBuilder().uri(URI.create(url)).GET();
 
-        // Resolve placeholders from Environment Variables (e.g. ${MAVEN_USER})
         String actualUser = resolveSecret(user);
         String actualPass = resolveSecret(pass);
 
@@ -167,12 +178,20 @@ public class InternalResolver {
             builder.header("Authorization", "Basic " + auth);
         }
 
-        HttpResponse<Path> resp = client.send(builder.build(), HttpResponse.BodyHandlers.ofFile(target));
+        Path tempFile = Files.createTempFile(target.getParent(), "download-", ".tmp");
+        HttpResponse<Path> resp = client.send(builder.build(), HttpResponse.BodyHandlers.ofFile(tempFile));
 
         if (resp.statusCode() != 200) {
-            Files.deleteIfExists(target);
+            Files.deleteIfExists(tempFile);
             return false;
         }
+
+        if (checksum != null && !checksum.isEmpty() && !verify(tempFile, checksum)) {
+            Files.deleteIfExists(tempFile);
+            return false;
+        }
+
+        Files.move(tempFile, target, StandardCopyOption.REPLACE_EXISTING);
         return true;
     }
 

@@ -18,6 +18,7 @@ import java.util.function.Consumer;
  * to resolve dependencies and apply relocations defined in a manifest file, ultimately
  * processing each relocated JAR file using a provided consumer.
  */
+@SuppressWarnings("unused")
 public class DependencyManager {
     private static final String DEFAULT_ASM_VERSION = "9.9.1";
     private final InternalResolver resolver;
@@ -87,9 +88,8 @@ public class DependencyManager {
 
         for (Path jar : downloaded) {
             Path output = relocatedDir.resolve("relocated-" + jar.getFileName());
-            if (!Files.exists(output)) {
-                relocator.relocate(jar, output);
-            }
+            Files.deleteIfExists(output);
+            relocator.relocate(jar, output);
             jarConsumer.accept(output);
         }
     }
