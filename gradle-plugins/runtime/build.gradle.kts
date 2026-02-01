@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.2.20" apply false
+    kotlin("jvm") version "2.3.0" apply false
     id("com.gradle.plugin-publish") version "1.3.1" apply false
 }
 
