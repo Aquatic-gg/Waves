@@ -1,6 +1,8 @@
 package gg.aquatic.kevent
 
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.EmptyCoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -11,7 +13,8 @@ class CancellableEvent(override var cancelled: Boolean = false) : Cancellable
 
 class SubscriptionTests {
 
-    private fun createBus(): EventBus = eventBusBuilder {
+    private fun createBus(): SuspendingEventBus = suspendingEventBusBuilder {
+        scope = CoroutineScope(EmptyCoroutineContext)
         hierarchical = true
     }
 
