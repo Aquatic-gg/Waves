@@ -19,6 +19,7 @@ import java.util.function.Consumer;
  * processing each relocated JAR file using a provided consumer.
  */
 public class DependencyManager {
+    private static final String DEFAULT_ASM_VERSION = "9.9.1";
     private final InternalResolver resolver;
     private final Path relocatedDir;
 
@@ -70,8 +71,9 @@ public class DependencyManager {
     public void process(InputStream manifestStream, Consumer<Path> jarConsumer) throws Exception {
         String manifest = new String(manifestStream.readAllBytes(), StandardCharsets.UTF_8);
 
-        Path asm = resolver.downloadTool("org.ow2.asm", "asm", "9.7");
-        Path asmCommons = resolver.downloadTool("org.ow2.asm", "asm-commons", "9.7");
+        String asmVersion = resolveAsmVersion();
+        Path asm = resolver.downloadTool("org.ow2.asm", "asm", asmVersion);
+        Path asmCommons = resolver.downloadTool("org.ow2.asm", "asm-commons", asmVersion);
         Relocator relocator = new Relocator(asm, asmCommons);
 
         resolver.extractList(manifest, "relocations").forEach(relocJson -> {
@@ -90,5 +92,19 @@ public class DependencyManager {
             }
             jarConsumer.accept(output);
         }
+    }
+
+    private String resolveAsmVersion() {
+        String prop = System.getProperty("runtime.asm.version");
+        if (prop != null && !prop.isBlank()) {
+            return prop.trim();
+        }
+
+        String env = System.getenv("RUNTIME_ASM_VERSION");
+        if (env != null && !env.isBlank()) {
+            return env.trim();
+        }
+
+        return DEFAULT_ASM_VERSION;
     }
 }
