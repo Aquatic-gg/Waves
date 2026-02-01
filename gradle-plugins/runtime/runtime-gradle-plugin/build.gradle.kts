@@ -22,8 +22,8 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 gradlePlugin {
-    website.set("https://github.com/johndoe/GradlePlugins")
-    vcsUrl.set("https://github.com/johndoe/GradlePlugins")
+    website.set("https://github.com/MrLarkyy/Runtime")
+    vcsUrl.set("https://github.com/MrLarkyy/Runtime")
     plugins {
         create("runtime") {
             id = "gg.aquatic.runtime"
