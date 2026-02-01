@@ -1,8 +1,6 @@
 package gg.aquatic.kevent
 
-import gg.aquatic.kevent.subscription.Subscription
-
-interface PostResult<T> {
+interface PostResult<T, S> {
 
     val event: T
 
@@ -10,6 +8,6 @@ interface PostResult<T> {
 
     fun getFailedCalls(): Int
 
-    fun getExecutionTimes(): Map<Subscription<T>, Long>
+    fun getExecutionTimes(): Map<S, Long>
 
 }

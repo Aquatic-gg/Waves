@@ -1,14 +1,13 @@
 package gg.aquatic.kevent.base
 
 import gg.aquatic.kevent.PostResult
-import gg.aquatic.kevent.subscription.Subscription
 
-class BasicMeasuredPostResult<T>(
+class BasicMeasuredPostResult<T, S>(
     override val event: T,
     private val success: Int,
     private val fail: Int,
-    private val executionTimes: Map<Subscription<T>, Long>
-) : PostResult<T> {
+    private val executionTimes: Map<S, Long>
+) : PostResult<T, S> {
     override fun getSuccessfulCalls(): Int {
         return success
     }
@@ -17,7 +16,7 @@ class BasicMeasuredPostResult<T>(
         return fail
     }
 
-    override fun getExecutionTimes(): Map<Subscription<T>, Long> {
+    override fun getExecutionTimes(): Map<S, Long> {
         return executionTimes
     }
 }

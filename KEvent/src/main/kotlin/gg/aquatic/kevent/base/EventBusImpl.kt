@@ -4,14 +4,15 @@ import gg.aquatic.kevent.*
 import gg.aquatic.kevent.subscription.StrongSubscription
 import gg.aquatic.kevent.subscription.Subscription
 import gg.aquatic.kevent.subscription.WeakSubscription
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.coroutines.EmptyCoroutineContext
 
-class EventBusImpl(
+open class EventBusImpl(
     private val exceptionHandler: EventExceptionHandler,
-    private val scope: CoroutineScope?,
     private val hierarchical: Boolean
 ) : EventBus {
 
@@ -24,21 +25,15 @@ class EventBusImpl(
 
     private val dispatchCache = ConcurrentHashMap<CacheKey, List<Subscription<*>>>()
 
-    @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> post(event: T): Deferred<PostResult<T>> {
-        return scope?.async {
-            return@async postSuspend(event)
-        }
-            ?: CompletableDeferred(runBlocking {
-                postSuspend(event)
-            })
+    override fun <T : Any> post(event: T): PostResult<T, Subscription<T>> {
+        return dispatch(event)
     }
 
     /**
      * Posts event; measures handler execution; returns a measured result
      */
     @Suppress("UNCHECKED_CAST")
-    override suspend fun <T : Any> postSuspend(event: T): PostResult<T> = withContext(scope?.coroutineContext ?: EmptyCoroutineContext) {
+    protected fun <T : Any> dispatch(event: T): PostResult<T, Subscription<T>> {
         val executionTimes = HashMap<Subscription<T>, Long>()
         var failed = 0
         var success = 0
@@ -67,7 +62,7 @@ class EventBusImpl(
             try {
                 val time = System.nanoTime()
                 listener.handle(event)
-                executionTimes[rawSub] = System.nanoTime() - time
+                executionTimes[sub] = System.nanoTime() - time
                 success++
             } catch (ex: Exception) {
                 failed++
@@ -75,7 +70,7 @@ class EventBusImpl(
             }
         }
 
-        BasicMeasuredPostResult(event, success, failed, executionTimes)
+        return BasicMeasuredPostResult(event, success, failed, executionTimes)
     }
 
     private fun buildDispatchList(
@@ -161,5 +156,4 @@ class EventBusImpl(
     }
 
     override fun getEventExceptionHandler(): EventExceptionHandler = exceptionHandler
-    override fun getScope(): CoroutineScope? = scope
 }
