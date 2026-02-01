@@ -1,9 +1,10 @@
 package gg.aquatic.kurrency
 
-import gg.aquatic.kevent.EventBus
-import gg.aquatic.kevent.eventBusBuilder
+import gg.aquatic.kevent.SuspendingEventBus
+import gg.aquatic.kevent.suspendingEventBusBuilder
 import gg.aquatic.kurrency.event.CurrencyTransactionEvent
 import gg.aquatic.kurrency.impl.RegisteredCurrency
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
@@ -12,13 +13,15 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.EmptyCoroutineContext
 
 class CurrencyHandler(
     val cache: CurrencyCache
 ) {
     private val locks = ConcurrentHashMap<Pair<UUID, String>, Mutex>()
 
-    val eventBus: EventBus = eventBusBuilder {
+    val eventBus: SuspendingEventBus = suspendingEventBusBuilder {
+        scope = CoroutineScope(EmptyCoroutineContext)
     }
 
     private fun getLock(uuid: UUID, currency: RegisteredCurrency) =
