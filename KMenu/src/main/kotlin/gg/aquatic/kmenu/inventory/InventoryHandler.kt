@@ -3,6 +3,7 @@ package gg.aquatic.kmenu.inventory
 import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.common.event
 import gg.aquatic.kevent.eventBusBuilder
+import gg.aquatic.kevent.suspendingEventBusBuilder
 import gg.aquatic.kmenu.KMenu
 import gg.aquatic.kmenu.coroutine.KMenuCtx
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryCloseEvent
@@ -21,7 +22,7 @@ import org.bukkit.inventory.ItemStack
 
 object InventoryHandler {
 
-    val eventBus = eventBusBuilder {
+    val eventBus = suspendingEventBusBuilder {
         scope = KMenuCtx.scope
         hierarchical = false
     }
