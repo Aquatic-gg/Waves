@@ -27,10 +27,13 @@ import javax.inject.Inject
 open class DependencyExtension @Inject constructor(private val objects: ObjectFactory) {
     val repositories: ListProperty<RuntimeRepository> = objects.listProperty(RuntimeRepository::class.java)
     val relocations: MapProperty<String, String> = objects.mapProperty(String::class.java, String::class.java)
+    val addRuntimeCore: Property<Boolean> = objects.property(Boolean::class.java)
+    val runtimeCoreVersion: Property<String> = objects.property(String::class.java)
 
     init {
         repositories.convention(emptyList())
         relocations.convention(emptyMap())
+        addRuntimeCore.convention(true)
     }
 
     fun repo(url: String, configure: RuntimeRepository.() -> Unit = {}) {
@@ -121,6 +124,7 @@ abstract class GenerateManifestTask : DefaultTask() {
 class DependencyGeneratorPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         val extension = project.extensions.create<DependencyExtension>("dependencyResolution")
+        val pluginVersion = javaClass.`package`.implementationVersion
 
         // Create the configuration for runtime downloading
         val runtimeDownload = project.configurations.create("runtimeDownload") {
@@ -160,6 +164,21 @@ class DependencyGeneratorPlugin : Plugin<Project> {
         }
 
         project.plugins.withId("java") {
+            if (extension.addRuntimeCore.getOrElse(true)) {
+                val resolvedVersion = extension.runtimeCoreVersion.orNull ?: pluginVersion
+                if (resolvedVersion.isNullOrBlank()) {
+                    project.logger.warn("Unable to determine runtime-core version. Set dependencyResolution.runtimeCoreVersion to force one.")
+                } else {
+                    val implementationConfig = project.configurations.getByName("implementation")
+                    val alreadyAdded = implementationConfig.dependencies.any {
+                        it.group == "gg.aquatic" && it.name == "runtime-core"
+                    }
+                    if (!alreadyAdded) {
+                        project.dependencies.add(implementationConfig.name, "gg.aquatic:runtime-core:$resolvedVersion")
+                    }
+                }
+            }
+
             project.configurations.named("compileOnly") {
                 extendsFrom(runtimeDownload)
             }

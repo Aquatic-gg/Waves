@@ -18,6 +18,7 @@ out/
 !**/src/test/**/out/
 
 .idea
+.env
 
 ### Eclipse ###
 .apt_generated

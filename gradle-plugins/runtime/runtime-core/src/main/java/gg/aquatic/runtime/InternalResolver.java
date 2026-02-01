@@ -11,15 +11,33 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.*;
 
+/**
+ * The InternalResolver class provides utility methods for managing and resolving dependencies,
+ * downloading tools, and handling secrets. It interacts with local files, remote repositories,
+ * and environment variables to facilitate dependency resolution.
+ */
 public class InternalResolver {
     private final Path cacheDir;
     private final Map<String, String> localSecrets = new HashMap<>();
     private final HttpClient client = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.ALWAYS).build();
 
+    /**
+     * Constructs an instance of InternalResolver with the specified cache directory.
+     *
+     * @param cacheDir the directory where cache data will be stored
+     */
     public InternalResolver(Path cacheDir) {
         this.cacheDir = cacheDir;
     }
 
+    /**
+     * Loads secrets from a given environment file and stores them in a local secrets map.
+     * Each line in the file should represent a key-value pair separated by an '='. Lines
+     * that are empty or start with a '#' are ignored. If the file does not exist, the
+     * method returns without performing any operation.
+     *
+     * @param envFile the path to the environment file containing secrets to be loaded
+     */
     public void loadSecrets(Path envFile) {
         if (!Files.exists(envFile)) return;
         try (BufferedReader reader = Files.newBufferedReader(envFile)) {
@@ -35,6 +53,17 @@ public class InternalResolver {
         } catch (IOException ignored) {}
     }
 
+    /**
+     * Downloads a specific version of a tool specified by its group, artifact, and version
+     * from the Maven Central Repository. If the tool is already cached, it returns the cached
+     * path. Otherwise, it downloads the tool and saves it to the local cache directory.
+     *
+     * @param group the group ID of the tool to be downloaded
+     * @param artifact the artifact ID of the tool to be downloaded
+     * @param version the version of the tool to be downloaded
+     * @return the path to the downloaded tool file
+     * @throws Exception if the tool cannot be downloaded or any error occurs during the process
+     */
     public Path downloadTool(String group, String artifact, String version) throws Exception {
         Path toolDir = cacheDir.resolve("tools");
         if (!Files.exists(toolDir)) Files.createDirectories(toolDir);
@@ -76,6 +105,15 @@ public class InternalResolver {
         return value;
     }
 
+    /**
+     * Resolves the dependencies specified in the given manifest content by downloading them
+     * from the listed repositories. The method verifies the downloaded files using provided
+     * checksums and avoids re-downloading files that are already cached and verified.
+     *
+     * @param manifestContent the JSON content of the manifest containing dependencies and repositories
+     * @return a list of paths to the resolved and cached dependency files
+     * @throws Exception if any dependency cannot be resolved or if an error occurs during processing
+     */
     public List<Path> resolve(String manifestContent) throws Exception {
         List<Path> resolved = new ArrayList<>();
         List<String> depsJson = extractList(manifestContent, "dependencies");

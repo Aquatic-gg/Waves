@@ -15,16 +15,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.jar.*;
 
+/**
+ * The {@code Relocator} class provides functionality for relocating, remapping,
+ * and processing class and package names in JAR files. It leverages the ASM library
+ * for manipulation of bytecode and provides tools for transforming classes and
+ * resources within JAR files based on configurable mappings.
+ */
 public class Relocator {
     private final Map<String, String> prefixMappings = new HashMap<>();
     private final Map<String, String> classMappings = new HashMap<>();
     private final List<Map.Entry<String, String>> orderedPrefixMappings = new ArrayList<>();
     private final URLClassLoader toolLoader;
 
+    /**
+     * Constructs a {@code Relocator} instance with the specified ASM jar files.
+     * The ASM and ASM Commons JAR files are loaded into a {@link URLClassLoader}
+     * to facilitate relocation operations.
+     *
+     * @param asmJar the path to the ASM JAR file used for class manipulation
+     * @param asmCommonsJar the path to the ASM Commons JAR file for additional utilities
+     * @throws Exception if an error occurs while initializing the class loader
+     */
     public Relocator(Path asmJar, Path asmCommonsJar) throws Exception {
         this.toolLoader = new URLClassLoader(new URL[]{asmJar.toUri().toURL(), asmCommonsJar.toUri().toURL()}, null);
     }
 
+    /**
+     * Adds a mapping from one package or class name to another. This method processes
+     * the provided source and destination names, ensuring that they are properly formatted
+     * with forward slashes and trailing slashes as required.
+     *
+     * @param from the original package or class name, using dot notation (e.g., "com.example")
+     * @param to the target package or class name, using dot notation (e.g., "org.example")
+     */
     public void addMapping(String from, String to) {
         String f = from.replace('.', '/');
         String t = to.replace('.', '/');
@@ -35,6 +58,14 @@ public class Relocator {
         rebuildPrefixCache();
     }
 
+    /**
+     * Prepares a mapping of class names based on the provided JAR files. This method processes the
+     * class entries within the JARs and updates the class mappings to reflect any modifications
+     * made during name remapping processes.
+     *
+     * @param jars a list of paths to JAR files that will be processed for class name mappings
+     * @throws Exception if an error occurs during the reading of JAR files or the mapping process
+     */
     public void prepareClassMappings(List<Path> jars) throws Exception {
         classMappings.clear();
         for (Path jar : jars) {
@@ -59,6 +90,15 @@ public class Relocator {
         }
     }
 
+    /**
+     * Relocates and processes the classes and resources from the input JAR file to the output JAR file
+     * by applying remappings and transformations as defined in the class configuration.
+     *
+     * @param input the path to the input JAR file that contains the classes and resources to be relocated
+     * @param output the path to the output JAR file where the relocated and transformed classes and resources will be written
+     * @throws Exception if an error occurs during the relocation process, such as IO exceptions,
+     *                   reflection issues, or JAR file handling errors
+     */
     public void relocate(Path input, Path output) throws Exception {
         Class<?> classReaderClass = toolLoader.loadClass("org.objectweb.asm.ClassReader");
         Class<?> classWriterClass = toolLoader.loadClass("org.objectweb.asm.ClassWriter");
