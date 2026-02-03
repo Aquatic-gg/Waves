@@ -1,14 +1,13 @@
 package gg.aquatic.kmenu
 
+import gg.aquatic.kmenu.KMenu.initialize
 import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.PacketInventory
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.replace.Placeholders
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.entity.Player
@@ -52,12 +51,12 @@ fun Player.packetInventory(): PacketInventory? {
 
 /** Initialize KMenu using an existing [CoroutineScope]. */
 fun initializeKMenu(plugin: Plugin, scope: CoroutineScope) {
-    KMenu.initialize(plugin, scope)
+    initialize(plugin, scope)
 }
 
 /** Initialize KMenu using a raw [CoroutineContext]. */
 fun initializeKMenu(plugin: Plugin, context: CoroutineContext) {
-    KMenu.initialize(plugin, context)
+    initialize(plugin, context)
 }
 
 /** Placeholder context scoped to a private menu's player. */
