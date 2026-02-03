@@ -23,7 +23,7 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     api(project(":API"))
     api(project(":NMS_1_21_9"))
-    compileOnly("gg.aquatic:KEvent:1.0.4")
+    compileOnly("gg.aquatic:KEvent:26.0.5")
     compileOnly("gg.aquatic:Common:26.0.13") {
         isChanging = true
     }

@@ -8,7 +8,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("io.netty:netty-all:4.2.9.Final")
-    compileOnly("gg.aquatic:KEvent:1.0.4")
+    compileOnly("gg.aquatic:KEvent:26.0.5")
 
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
 
