@@ -5,7 +5,10 @@ plugins {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    api("gg.aquatic:Pakket:26.1.7")
+    api("gg.aquatic:Pakket:26.1.7") {
+        isTransitive = false
+    }
+    api("gg.aquatic.pakket:API:26.1.7")
     api("gg.aquatic:Common:26.0.13") {
         isChanging = true
     }
