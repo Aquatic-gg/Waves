@@ -2,6 +2,7 @@ package gg.aquatic.kholograms.serialize
 
 import gg.aquatic.common.getSectionList
 import gg.aquatic.common.toMMComponent
+import gg.aquatic.execute.checkConditions
 import gg.aquatic.execute.requirement.ConditionSerializer
 import gg.aquatic.kholograms.CommonHologramLineSettings
 import gg.aquatic.kholograms.HologramSerializer
@@ -57,7 +58,7 @@ object TextHologramLineFactory : LineFactory {
             lineWidth,
             scale,
             billboard,
-            conditions,
+            { p -> conditions.checkConditions(p) },
             hasShadow,
             backgroundColor,
             isSeeThrough,
@@ -95,7 +96,7 @@ object ItemHologramLineFactory : LineFactory {
             scale,
             billboard,
             itemDisplayTransform,
-            conditions,
+            { p -> conditions.checkConditions(p) },
             failLine,
             transformationDuration,
             teleportInterpolation,
@@ -121,7 +122,7 @@ object AnimatedHologramLineFactory : LineFactory {
         return AnimatedHologramLine.Settings(
             frames,
             height,
-            conditions,
+            { p -> conditions.checkConditions(p) },
             failLine
         )
     }

@@ -1,7 +1,5 @@
 package gg.aquatic.kholograms.line
 
-import gg.aquatic.execute.checkConditions
-import gg.aquatic.execute.requirement.ConditionHandle
 import gg.aquatic.kholograms.HologramLine
 import gg.aquatic.kholograms.HologramLineHandle
 import gg.aquatic.kholograms.serialize.LineSettings
@@ -212,7 +210,7 @@ class TextHologramLine(
         val lineWidth: Int,
         val scale: Float = 1.0f,
         val billboard: Billboard = Billboard.CENTER,
-        val conditions: List<ConditionHandle<Player>>,
+        val filter: suspend (Player) -> Boolean,
         val hasShadow: Boolean,
         val backgroundColor: Color?,
         val isSeeThrough: Boolean,
@@ -224,9 +222,7 @@ class TextHologramLine(
         override fun create(): HologramLine {
             return TextHologramLine(
                 height,
-                { p ->
-                    conditions.checkConditions(p)
-                },
+                filter,
                 failLine?.create(),
                 text,
                 lineWidth,

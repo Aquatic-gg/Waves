@@ -8,7 +8,6 @@ dependencies {
     api("gg.aquatic:Common:26.0.13") {
         isChanging = true
     }
-    api("gg.aquatic.execute:Execute:26.0.1")
     api("gg.aquatic.replace:Replace:26.0.3")
     api("gg.aquatic:snapshotmap:26.0.2")
     api("gg.aquatic:Pakket:26.1.7") {

@@ -1,7 +1,5 @@
 package gg.aquatic.kholograms.line
 
-import gg.aquatic.execute.checkConditions
-import gg.aquatic.execute.requirement.ConditionHandle
 import gg.aquatic.kholograms.HologramLine
 import gg.aquatic.kholograms.HologramLineHandle
 import gg.aquatic.kholograms.serialize.LineSettings
@@ -108,7 +106,7 @@ class ItemHologramLine(
         val scale: Float = 1.0f,
         val billboard: Billboard = Billboard.CENTER,
         val itemDisplayTransform: ItemDisplayTransform,
-        val conditions: List<ConditionHandle<Player>>,
+        val filter: suspend (Player) -> Boolean,
         val failLine: LineSettings?,
         val transformationDuration: Int,
         val teleportInterpolation: Int,
@@ -121,9 +119,7 @@ class ItemHologramLine(
                 scale,
                 billboard,
                 itemDisplayTransform,
-                { p ->
-                    conditions.checkConditions(p)
-                },
+                filter,
                 failLine?.create(),
                 transformationDuration,
                 teleportInterpolation,

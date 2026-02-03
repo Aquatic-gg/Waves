@@ -1,6 +1,12 @@
 package gg.aquatic.kholograms
 
-import gg.aquatic.common.*
+import gg.aquatic.common.AquaticCommon
+import gg.aquatic.common.Config
+import gg.aquatic.common.createConfigurationSectionFromMap
+import gg.aquatic.common.deepFilesLookup
+import gg.aquatic.common.getSectionList
+import gg.aquatic.common.toMMComponent
+import gg.aquatic.execute.checkConditions
 import gg.aquatic.common.location.LazyLocation
 import gg.aquatic.common.location.toLazyLocation
 import gg.aquatic.execute.requirement.ConditionSerializer
@@ -55,7 +61,7 @@ object HologramSerializer {
                     100,
                     commonOptions.scale,
                     commonOptions.billboard,
-                    listOf(),
+                    { true },
                     true,
                     null,
                     true,
@@ -101,7 +107,7 @@ object HologramSerializer {
                                 100,
                                 commonOptions.scale,
                                 commonOptions.billboard,
-                                listOf(),
+                                { true },
                                 true,
                                 null,
                                 true,
@@ -123,7 +129,7 @@ object HologramSerializer {
                         100,
                         commonOptions.scale,
                         commonOptions.billboard,
-                        listOf(),
+                        { true },
                         true,
                         null,
                         true,
@@ -138,7 +144,7 @@ object HologramSerializer {
                     lines += AnimatedHologramLine.Settings(
                         frames,
                         commonOptions.height,
-                        listOf(),
+                        { true },
                         null
                     )
                 }
@@ -150,7 +156,7 @@ object HologramSerializer {
     fun loadHologram(objectList: List<*>): Hologram.Settings {
         val commonOptions = CommonHologramLineSettings(1.0f, Display.Billboard.CENTER, 0, 0, 0.25, Vector3f(0f, 0f, 0f))
         val lines = loadLines(objectList, commonOptions)
-        return Hologram.Settings(lines, listOf(), 50)
+        return Hologram.Settings(lines, { true }, 50)
     }
 
     fun loadHologram(section: ConfigurationSection): Hologram.Settings {
@@ -162,7 +168,7 @@ object HologramSerializer {
         //val lines = loadLines(section.getSectionList("lines"))
         val conditions = ConditionSerializer.fromSections<Player>(section.getSectionList("view-requirements"))
         val viewDistance = section.getInt("view-distance", 100)
-        return Hologram.Settings(lines, conditions, viewDistance)
+        return Hologram.Settings(lines, { p -> conditions.checkConditions(p) }, viewDistance)
     }
 
     fun loadCommonSettings(section: ConfigurationSection): CommonHologramLineSettings {

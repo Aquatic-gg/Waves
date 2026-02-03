@@ -1,7 +1,5 @@
 package gg.aquatic.kholograms.line
 
-import gg.aquatic.execute.checkConditions
-import gg.aquatic.execute.requirement.ConditionHandle
 import gg.aquatic.kholograms.HologramLine
 import gg.aquatic.kholograms.HologramLineHandle
 import gg.aquatic.kholograms.serialize.LineSettings
@@ -97,14 +95,14 @@ class AnimatedHologramLine(
     class Settings(
         val frames: MutableList<Pair<Int, LineSettings>>,
         val height: Double,
-        val conditions: List<ConditionHandle<Player>>,
+        val filter: suspend (Player) -> Boolean,
         val failLine: LineSettings?,
     ) : LineSettings {
         override fun create(): HologramLine {
             return AnimatedHologramLine(
                 frames.map { it.first to it.second.create() }.toMutableList(),
                 height,
-                { p -> conditions.checkConditions(p) },
+                filter,
                 failLine?.create(),
                 0f,
                 Display.Billboard.FIXED,

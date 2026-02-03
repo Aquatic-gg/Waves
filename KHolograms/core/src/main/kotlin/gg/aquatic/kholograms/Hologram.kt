@@ -1,8 +1,6 @@
 package gg.aquatic.kholograms
 
 import gg.aquatic.common.coroutine.VirtualsCtx
-import gg.aquatic.execute.checkConditions
-import gg.aquatic.execute.requirement.ConditionHandle
 import gg.aquatic.kholograms.line.TextHologramLine
 import gg.aquatic.kholograms.serialize.LineSettings
 import gg.aquatic.pakket.Pakket
@@ -237,7 +235,7 @@ class Hologram(
 
     class Settings(
         val lines: List<LineSettings>,
-        val conditions: List<ConditionHandle<Player>>,
+        val filter: suspend (Player) -> Boolean,
         val viewDistance: Int,
     ) {
         fun create(
@@ -247,7 +245,7 @@ class Hologram(
         ): Hologram = Hologram(
             location,
             { p ->
-                filter(p) && conditions.checkConditions(p)
+                filter(p) && this.filter(p)
             },
             placeholderContext,
             viewDistance,
