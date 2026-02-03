@@ -40,7 +40,7 @@ object NmsMappings {
         GameEventAction.LEVEL_CHUNKS_LOAD_START to ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START
     )
 
-    private fun <T> dataValue(
+    private fun <T: Any> dataValue(
         original: EntityDataValue,
         serializer: net.minecraft.network.syncher.EntityDataSerializer<T>,
         value: T
@@ -119,7 +119,7 @@ object NmsMappings {
                 dataValue(
                     original,
                     EntityDataSerializers.POSE,
-                    net.minecraft.world.entity.Pose.entries[(original.value as Pose).ordinal]
+                    Pose.entries[(original.value as Pose).ordinal]
                 )
 
             DataSerializerTypes.VECTOR3 ->
