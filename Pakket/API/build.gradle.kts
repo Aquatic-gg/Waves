@@ -1,3 +1,7 @@
+plugins {
+    `maven-publish`
+}
+
 group = "gg.aquatic.pakket"
 
 repositories {
@@ -18,4 +22,33 @@ dependencies {
     }
     compileOnly("gg.aquatic:Blokk:26.0.2")
     compileOnly("gg.aquatic:Stacked:26.0.2")
+}
+
+val mavenUsername = System.getenv("MAVEN_USERNAME") ?: ""
+val mavenPassword = System.getenv("MAVEN_PASSWORD") ?: ""
+
+publishing {
+    repositories {
+        maven {
+            name = "aquaticRepository"
+            url = uri("https://repo.nekroplex.com/releases")
+
+            credentials {
+                username = mavenUsername
+                password = mavenPassword
+            }
+            authentication {
+                create<BasicAuthentication>("basic")
+            }
+        }
+    }
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
+
+            from(components["java"])
+        }
+    }
 }
