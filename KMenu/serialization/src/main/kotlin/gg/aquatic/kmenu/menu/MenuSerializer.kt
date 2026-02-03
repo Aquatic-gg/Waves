@@ -10,7 +10,7 @@ import gg.aquatic.execute.requirement.RequirementHandleWithFailActions
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.settings.*
-import gg.aquatic.stacked.ItemSerializer
+import gg.aquatic.stacked.serialize.ItemSerializerImpl
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Player
@@ -76,7 +76,7 @@ object MenuSerializer {
             return AnimatedButtonSettings(id, frames, viewRequirements, clickActions, priority, updateEvery, failComponent)
         }
 
-        val item = ItemSerializer.fromSection(section)?.getItem()
+        val item = ItemSerializerImpl.fromSection(section)?.getItem()
         val slots = loadSlotSelection(section.getStringList("slots")).slots
         return ButtonSettings(id, item, slots, viewRequirements, clickActions, priority, updateEvery, failComponent)
     }
