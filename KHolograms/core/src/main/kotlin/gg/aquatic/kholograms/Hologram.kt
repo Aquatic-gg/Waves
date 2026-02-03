@@ -9,7 +9,7 @@ import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.chunkId
 import gg.aquatic.pakket.sendPacket
 import gg.aquatic.pakket.trackedBy
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.snapshotmap.SuspendingSnapshotMap
 import net.kyori.adventure.text.Component
 import org.bukkit.Chunk

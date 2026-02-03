@@ -1,6 +1,5 @@
 package gg.aquatic.kholograms.line
 
-import gg.aquatic.common.toMMComponent
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.execute.requirement.ConditionHandle
 import gg.aquatic.kholograms.HologramLine
@@ -12,7 +11,7 @@ import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.DisplayEntityData
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.TextDisplayEntityData
 import gg.aquatic.pakket.sendPacket
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.Location
