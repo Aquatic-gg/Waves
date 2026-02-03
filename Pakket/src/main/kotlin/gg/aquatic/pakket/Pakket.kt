@@ -9,7 +9,7 @@ import org.bukkit.entity.Player
 
 object Pakket {
 
-    val handler by lazy {
+    val handler: NMSHandler by lazy {
         when (NMSVersion.ofAquatic()) {
             NMSVersion.V_1_21_9 -> NMSHandlerImpl
             else -> throw IllegalStateException("Unsupported server version.")
