@@ -11,8 +11,7 @@ dependencies {
     api("gg.aquatic.replace:Replace:26.0.3")
     api("gg.aquatic:snapshotmap:26.0.2")
     api("gg.aquatic:Pakket:26.1.7") {
-        exclude(group = "gg.aquatic.pakket")
-        exclude(group = "gg.aquatic.pakket.nms")
+        isTransitive = false
     }
     api("gg.aquatic:Dispatch:26.0.2")
     testImplementation(kotlin("test"))
