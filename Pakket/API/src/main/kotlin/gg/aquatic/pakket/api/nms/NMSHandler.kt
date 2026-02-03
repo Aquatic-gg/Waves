@@ -7,6 +7,8 @@ import gg.aquatic.pakket.api.nms.profile.GameEventAction
 import gg.aquatic.pakket.api.nms.profile.ProfileEntry
 import gg.aquatic.pakket.api.nms.scoreboard.Team
 import net.kyori.adventure.text.Component
+import io.netty.channel.Channel
+import io.netty.channel.ChannelHandler
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
@@ -167,4 +169,29 @@ abstract class NMSHandler {
         changedSlots: Map<Int, ItemStack?>,
         vararg players: Player
     )
+
+    protected fun removePacketListener(channel: Channel, name: String) {
+        val pipeline = channel.pipeline()
+        try {
+            if (pipeline.names().contains(name)) {
+                pipeline.remove(name)
+            }
+        } catch (_: Exception) {
+        }
+    }
+
+    protected fun addPacketListener(channel: Channel, name: String, handler: ChannelHandler) {
+        val pipeline = channel.pipeline()
+        try {
+            if (pipeline.get(name) != null) {
+                return
+            }
+            if (pipeline.names().contains("packet_handler")) {
+                pipeline.addBefore("packet_handler", name, handler)
+            } else {
+                pipeline.addLast(name, handler)
+            }
+        } catch (_: Exception) {
+        }
+    }
 }

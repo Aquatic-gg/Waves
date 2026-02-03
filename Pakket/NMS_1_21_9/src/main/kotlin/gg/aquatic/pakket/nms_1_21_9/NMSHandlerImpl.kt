@@ -75,9 +75,6 @@ import kotlin.jvm.optionals.getOrNull
 
 object NMSHandlerImpl : NMSHandler() {
 
-    private val playerConnectionField =
-        ReflectionUtils.getField("connection", ServerCommonPacketListenerImpl::class.java)
-    private val entityCounterField = ReflectionUtils.getStatic<AtomicInteger>("ENTITY_COUNTER", Entity::class.java)
     private val setPassengersConstructor =
         ClientboundSetPassengersPacket::class.java.getDeclaredConstructor(FriendlyByteBuf::class.java).apply {
             isAccessible = true
@@ -86,30 +83,15 @@ object NMSHandlerImpl : NMSHandler() {
     override fun injectPacketListener(player: Player) {
         val craftPlayer = player as CraftPlayer
         val packetListener = PacketListener(craftPlayer)
-        val connection = playerConnectionField.get(craftPlayer.handle.connection) as Connection
-        val pipeline = connection.channel.pipeline()
-
-        for ((_, handler) in pipeline.toMap()) {
-            if (handler is Connection) {
-                pipeline.addBefore("packet_handler", "waves_packet_listener", packetListener)
-                break
-            }
-        }
+        val connection = craftPlayer.handle.connection.connection
+        addPacketListener(connection.channel, "waves_packet_listener", packetListener)
     }
 
     override fun unregisterPacketListener(player: Player) {
         val craftPlayer = player as CraftPlayer
-        val connection = playerConnectionField.get(craftPlayer.handle.connection) as Connection
-        val channel = connection.channel
-        val pipeline = channel.pipeline()
-        if (channel != null) {
-            try {
-                if (pipeline.names().contains("waves_packet_listener")) {
-                    pipeline.remove("waves_packet_listener")
-                }
-            } catch (_: Exception) {
-            }
-        }
+        val connection = craftPlayer.handle.connection.connection
+        val channel = connection.channel ?: return
+        removePacketListener(channel, "waves_packet_listener")
     }
 
 
@@ -675,7 +657,7 @@ object NMSHandlerImpl : NMSHandler() {
     }
 
     override fun generateEntityId(): Int {
-        return entityCounterField.getAndIncrement()
+        return Entity.nextEntityId()
     }
 
     private fun Player.sendPacket(packet: Packet<*>) {
@@ -688,8 +670,8 @@ object NMSHandlerImpl : NMSHandler() {
         for (player in players) {
             if (silent) {
                 val protectedPacket = ProtectedPacket(packet)
-                val playerConnection =
-                    playerConnectionField.get((player as CraftPlayer).handle.connection) as Connection
+
+                val playerConnection = (player as CraftPlayer).handle.connection.connection
                 playerConnection.channel.pipeline().write(protectedPacket)
             } else {
                 player.sendPacket(packet)
