@@ -5,7 +5,7 @@ import gg.aquatic.stacked.event.StackedItemInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
-fun StackedItem.register(
+fun <T: StackedItem<T>> StackedItem<T>.register(
     namespace: String,
     id: String
 ): Boolean {
@@ -15,7 +15,7 @@ fun StackedItem.register(
     )
 }
 
-fun StackedItem.register(
+fun <T: StackedItem<T>> StackedItem<T>.register(
     namespace: String,
     id: String,
     interactionHandler: (StackedItemInteractEvent) -> Unit
@@ -23,47 +23,48 @@ fun StackedItem.register(
     return register(namespace, id, interactionHandler, true)
 }
 
-private fun StackedItem.register(
+private fun <T: StackedItem<T>> StackedItem<T>.register(
     namespace: String, id: String,
     interactionHandler: (StackedItemInteractEvent) -> Unit = {}, registerInteraction: Boolean
 ): Boolean {
     val registryId = registryId()
-    val item = getUnmodifiedItem()
-    if (registryId != null && registryId != "$namespace:$id") return false
+    val item = getBaseItem()
+
+    if (registryId != null && registryId != "${handler.id}:$namespace:$id") return false
 
     item.editPersistentDataContainer {
-        it.set(ItemHandler.NAMESPACE_KEY, PersistentDataType.STRING, "$namespace:$id")
+        it.set(ItemHandler.NAMESPACE_KEY, PersistentDataType.STRING, "${handler.id}:$namespace:$id")
     }
 
     Registry.update {
         replaceRegistry(
             StackedItem.ITEM_REGISTRY_KEY
         ) {
-            register("$namespace:$id", this@register)
+            register("${handler.id}:$namespace:$id", this@register)
         }
     }
 
     if (registerInteraction) {
-        ItemHandler.listenInteractions["$namespace:$id"] = interactionHandler
+        handler.listenInteractions["${handler.id}:$namespace:$id"] = interactionHandler
     }
     return true
 }
 
-fun StackedItem.setInteractionHandler(interactionHandler: (StackedItemInteractEvent) -> Unit): Boolean {
+fun <T: StackedItem<T>> StackedItem<T>.setInteractionHandler(interactionHandler: (StackedItemInteractEvent) -> Unit): Boolean {
     val registryId = registryId() ?: return false
-    ItemHandler.listenInteractions[registryId] = interactionHandler
+    handler.listenInteractions[registryId] = interactionHandler
     return true
 }
 
-fun StackedItem.removeInteractionHandler(): Boolean {
+fun <T: StackedItem<T>> StackedItem<T>.removeInteractionHandler(): Boolean {
     val registryId = registryId() ?: return false
-    ItemHandler.listenInteractions.remove(registryId)
+    handler.listenInteractions.remove(registryId)
     return true
 }
 
-fun StackedItem.unregister(): Boolean {
+fun <T: StackedItem<T>> StackedItem<T>.unregister(): Boolean {
     val registryId = registryId() ?: return false
-    val item = getUnmodifiedItem()
+    val item = getBaseItem()
     item.editPersistentDataContainer {
         it.remove(ItemHandler.NAMESPACE_KEY)
     }
@@ -77,16 +78,16 @@ fun StackedItem.unregister(): Boolean {
         }
     }
     if (!found) return false
-    ItemHandler.listenInteractions.remove(registryId)
+    handler.listenInteractions.remove(registryId)
     return true
 }
 
-fun StackedItem.registryId(): String? {
-    val pdc = getUnmodifiedItem().persistentDataContainer
+fun <T: StackedItem<T>> StackedItem<T>.registryId(): String? {
+    val pdc = getBaseItem().persistentDataContainer
     return pdc.get(ItemHandler.NAMESPACE_KEY, PersistentDataType.STRING)
 }
 
-fun ItemStack.toStacked(): StackedItem? {
+fun ItemStack.toStacked(): StackedItem<*>? {
     val pdc = persistentDataContainer
     val namespacedKey = ItemHandler.NAMESPACE_KEY
     if (!pdc.has(namespacedKey, PersistentDataType.STRING)) return null

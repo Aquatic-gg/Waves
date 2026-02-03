@@ -8,7 +8,7 @@ import org.bukkit.inventory.ItemStack
 
 class StackedItemInteractEvent(
     val player: Player,
-    val item: StackedItem,
+    val item: StackedItem<*>,
     val itemStack: ItemStack,
     var originalEvent: Event,
     val interactType: InteractType

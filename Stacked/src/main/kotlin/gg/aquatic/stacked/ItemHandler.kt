@@ -1,144 +1,54 @@
 package gg.aquatic.stacked
 
-import gg.aquatic.common.event
-import gg.aquatic.kevent.eventBusBuilder
+import gg.aquatic.kevent.suspendingEventBusBuilder
+import gg.aquatic.kregistry.FrozenRegistry
+import gg.aquatic.kregistry.Registry
+import gg.aquatic.kregistry.RegistryId
+import gg.aquatic.kregistry.RegistryKey
 import gg.aquatic.stacked.event.StackedItemInteractEvent
+import gg.aquatic.stacked.impl.StackedItemImpl
 import gg.aquatic.stacked.option.ItemOptionHandle
+import gg.aquatic.stacked.serialize.ItemSerializer
+import gg.aquatic.stacked.serialize.ItemSerializerImpl
 import org.bukkit.NamespacedKey
-import org.bukkit.entity.Player
-import org.bukkit.event.block.Action
-import org.bukkit.event.inventory.ClickType
-import org.bukkit.event.inventory.InventoryClickEvent
-import org.bukkit.event.player.PlayerInteractEvent
-import org.bukkit.event.player.PlayerSwapHandItemsEvent
-import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 
-object ItemHandler {
+abstract class ItemHandler<T : StackedItem<T>, S: ItemSerializer<T>> {
 
-    val NAMESPACE_KEY by lazy {
-        NamespacedKey("Stacked", "Custom_Item_Registry")
+    lateinit var id: String
+        internal set
+
+    companion object {
+        val NAMESPACE_KEY by lazy {
+            NamespacedKey("stacked", "custom_item_registry")
+        }
+
+        val REGISTRY_KEY = RegistryKey<String, ItemHandler<*,*>>(RegistryId("aquatic", "item_handlers"))
+        val REGISTRY: FrozenRegistry<String, ItemHandler<*,*>>
+            get() {
+                return Registry[REGISTRY_KEY]
+            }
     }
+
+    abstract val serializer: ItemSerializer<T>
+
     val listenInteractions = mutableMapOf<String, (StackedItemInteractEvent) -> Unit>()
 
     val eventBus by lazy {
-        eventBusBuilder {
+        suspendingEventBusBuilder {
             scope = Stacked.scope
             hierarchical = false
         }
     }
 
-    fun initialize() {
-        event<PlayerInteractEvent> {
-            handleInteract(it)
+    object Impl : ItemHandler<StackedItemImpl, ItemSerializerImpl>() {
+        fun create(
+            item: ItemStack,
+            options: List<ItemOptionHandle>
+        ): StackedItemImpl {
+            return StackedItemImpl(item, options, this)
         }
 
-        event<PlayerSwapHandItemsEvent> {
-            handleSwapHandItems(it)
-        }
-
-        event<InventoryClickEvent> {
-            handleInventoryClick(it)
-        }
+        override val serializer: ItemSerializerImpl = ItemSerializerImpl
     }
-
-    fun create(
-        factoryId: String?,
-        internalId: String?,
-        item: ItemStack,
-        options: List<ItemOptionHandle>
-    ): StackedItem {
-        return StackedItem(
-            factoryId,
-            internalId,
-            item,
-            options
-        )
-    }
-
-    private fun handleInteract(event: PlayerInteractEvent) {
-        if (event.hand == EquipmentSlot.OFF_HAND) return
-        if (listenInteractions.isEmpty()) return
-        val item = event.item ?: return
-        val aitem = item.toStacked() ?: return
-        val registry = aitem.registryId() ?: return
-
-        val interaction = listenInteractions[registry] ?: return
-
-        val interactType = when (event.action) {
-            Action.RIGHT_CLICK_AIR, Action.RIGHT_CLICK_BLOCK -> if (event.player.isSneaking) StackedItemInteractEvent.InteractType.SHIFT_RIGHT else StackedItemInteractEvent.InteractType.RIGHT
-            Action.LEFT_CLICK_AIR, Action.LEFT_CLICK_BLOCK -> if (event.player.isSneaking) StackedItemInteractEvent.InteractType.SHIFT_LEFT else StackedItemInteractEvent.InteractType.LEFT
-            else -> return
-        }
-
-        val aitemEvent = StackedItemInteractEvent(
-            event.player, aitem, item, event, interactType,
-        )
-        interaction(aitemEvent)
-        eventBus.post(aitemEvent)
-    }
-
-    private fun handleSwapHandItems(event: PlayerSwapHandItemsEvent) {
-        val item = event.mainHandItem
-        val aitem = item.toStacked() ?: return
-        val registry = aitem.registryId() ?: return
-        val interaction = listenInteractions[registry] ?: return
-
-        val interactType =
-            if (event.player.isSneaking) StackedItemInteractEvent.InteractType.SHIFT_SWAP else StackedItemInteractEvent.InteractType.SWAP
-        val aitemEvent = StackedItemInteractEvent(
-            event.player, aitem, item, event, interactType,
-        )
-        interaction(aitemEvent)
-        eventBus.post(aitemEvent)
-    }
-
-    private fun handleInventoryClick(event: InventoryClickEvent) {
-        val player = event.whoClicked as? Player ?: return
-        val item = event.currentItem ?: return
-        val aitem = item.toStacked() ?: return
-        val registry = aitem.registryId() ?: return
-        val interaction = listenInteractions[registry] ?: return
-
-        val interactType = when (event.click) {
-            ClickType.SHIFT_LEFT -> StackedItemInteractEvent.InteractType.INVENTORY_SHIFT_LEFT
-            ClickType.LEFT -> StackedItemInteractEvent.InteractType.INVENTORY_LEFT
-            ClickType.SHIFT_RIGHT -> StackedItemInteractEvent.InteractType.INVENTORY_SHIFT_RIGHT
-            ClickType.RIGHT -> StackedItemInteractEvent.InteractType.INVENTORY_RIGHT
-            ClickType.NUMBER_KEY -> {
-                when (event.hotbarButton) {
-                    1 -> StackedItemInteractEvent.InteractType.NUM_1
-                    2 -> StackedItemInteractEvent.InteractType.NUM_2
-                    3 -> StackedItemInteractEvent.InteractType.NUM_3
-                    4 -> StackedItemInteractEvent.InteractType.NUM_4
-                    5 -> StackedItemInteractEvent.InteractType.NUM_5
-                    6 -> StackedItemInteractEvent.InteractType.NUM_6
-                    7 -> StackedItemInteractEvent.InteractType.NUM_7
-                    8 -> StackedItemInteractEvent.InteractType.NUM_8
-                    9 -> StackedItemInteractEvent.InteractType.NUM_9
-                    else -> StackedItemInteractEvent.InteractType.NUM_0
-                }
-            }
-
-            ClickType.DROP -> StackedItemInteractEvent.InteractType.INVENTORY_DROP
-            ClickType.SWAP_OFFHAND -> StackedItemInteractEvent.InteractType.INVENTORY_SWAP
-            else -> return
-        }
-        val aitemEvent = StackedItemInteractEvent(
-            player,
-            aitem,
-            item,
-            event,
-            interactType,
-        )
-        interaction(aitemEvent)
-        eventBus.post(aitemEvent)
-    }
-
-    interface Factory {
-
-        fun create(id: String): ItemStack?
-
-    }
-
 }
