@@ -32,6 +32,12 @@ dependencies {
     testImplementation("net.kyori:adventure-text-serializer-plain:4.26.1")
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 tasks.named<JmhBytecodeGeneratorTask>("jmhRunBytecodeGenerator") {
 }
 
