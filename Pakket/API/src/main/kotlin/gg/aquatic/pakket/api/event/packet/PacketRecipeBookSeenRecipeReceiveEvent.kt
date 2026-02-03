@@ -6,5 +6,4 @@ import org.bukkit.entity.Player
 class PacketRecipeBookSeenRecipeReceiveEvent(
     val player: Player,
     val recipeId: Int
-): PacketEvent() {
-}
+): PacketEvent()

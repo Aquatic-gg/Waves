@@ -9,5 +9,4 @@ class PacketRecipeBookChangeSettingsReceiveEvent(
     val type: PlayerRecipeBookSettingsChangeEvent.RecipeBookType,
     val isOpen: Boolean,
     val filtering: Boolean
-): PacketEvent() {
-}
+): PacketEvent()

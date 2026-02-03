@@ -6,5 +6,4 @@ import org.bukkit.entity.Player
 class PacketItemRenameEvent(
     val player: Player,
     val name: String
-): PacketEvent() {
-}
+): PacketEvent()
