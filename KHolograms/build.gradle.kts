@@ -1,71 +1,69 @@
+import org.gradle.api.publish.PublishingExtension
+
 plugins {
-    kotlin("jvm") version "2.3.0"
-    id("co.uzzu.dotenv.gradle") version "4.0.0"
-    `maven-publish`
+    kotlin("jvm") version "2.3.0" apply false
 }
 
 group = "gg.aquatic.kholograms"
 version = "26.0.1"
 
-repositories {
-    maven("https://repo.nekroplex.com/releases")
-    maven {
-        name = "papermc"
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-    mavenCentral()
-    maven("https://jitpack.io")
+fun loadDotenv(rootDir: File): Map<String, String> {
+    val file = rootDir.resolve(".env")
+    if (!file.exists()) return emptyMap()
+    return file.readLines()
+        .mapNotNull { line ->
+            val trimmed = line.trim()
+            if (trimmed.isEmpty() || trimmed.startsWith("#") || !trimmed.contains("=")) return@mapNotNull null
+            val (key, value) = trimmed.split("=", limit = 2)
+            key.trim() to value.trim()
+        }
+        .toMap()
 }
 
-dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("gg.aquatic:Common:26.0.9") {
-        isChanging = true
-    }
-    compileOnly("gg.aquatic:KRegistry:25.0.2")
-    compileOnly("gg.aquatic.execute:Execute:26.0.1")
-    compileOnly("gg.aquatic.replace:Replace:26.0.2")
-    compileOnly("gg.aquatic:snapshotmap:26.0.2")
-    compileOnly("gg.aquatic:Pakket:26.1.6")
-    compileOnly("gg.aquatic:Stacked:26.0.2")
-    compileOnly("gg.aquatic:TreePAPI:26.0.1")
-    testImplementation(kotlin("test"))
-}
+val dotenv = loadDotenv(rootDir)
+fun envValue(key: String): String = dotenv[key] ?: System.getenv(key).orEmpty()
 
-kotlin {
-    jvmToolchain(21)
-}
+subprojects {
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "maven-publish")
 
-tasks.test {
-    useJUnitPlatform()
-}
-
-val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
-val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
-
-publishing {
     repositories {
+        maven("https://repo.nekroplex.com/releases")
         maven {
-            name = "aquaticRepository"
-            url = uri("https://repo.nekroplex.com/releases")
+            name = "papermc"
+            url = uri("https://repo.papermc.io/repository/maven-public/")
+        }
+        mavenCentral()
+        maven("https://jitpack.io")
+    }
 
-            credentials {
-                username = maven_username
-                password = maven_password
-            }
-            authentication {
-                create<BasicAuthentication>("basic")
-            }
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
+            jvmToolchain(21)
         }
     }
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "gg.aquatic"
-            artifactId = "KHolograms"
-            version = "${project.version}"
 
-            from(components["java"])
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
+
+    val maven_username = envValue("MAVEN_USERNAME")
+    val maven_password = envValue("MAVEN_PASSWORD")
+
+    extensions.configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "aquaticRepository"
+                url = uri("https://repo.nekroplex.com/releases")
+
+                credentials {
+                    username = maven_username
+                    password = maven_password
+                }
+                authentication {
+                    create<BasicAuthentication>("basic")
+                }
+            }
         }
     }
 }

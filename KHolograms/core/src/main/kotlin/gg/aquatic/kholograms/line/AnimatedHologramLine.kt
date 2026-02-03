@@ -1,14 +1,9 @@
 package gg.aquatic.kholograms.line
 
-import gg.aquatic.common.getSectionList
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.execute.requirement.ConditionHandle
-import gg.aquatic.execute.requirement.ConditionSerializer
-import gg.aquatic.kholograms.CommonHologramLineSettings
 import gg.aquatic.kholograms.HologramLine
 import gg.aquatic.kholograms.HologramLineHandle
-import gg.aquatic.kholograms.HologramSerializer
-import gg.aquatic.kholograms.serialize.LineFactory
 import gg.aquatic.kholograms.serialize.LineSettings
 import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.api.nms.PacketEntity
@@ -17,7 +12,6 @@ import gg.aquatic.pakket.sendPacket
 import gg.aquatic.replace.placeholder.PlaceholderContext
 import gg.aquatic.snapshotmap.SnapshotMap
 import org.bukkit.Location
-import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display
 import org.bukkit.entity.Player
 import org.joml.Vector3f
@@ -120,27 +114,4 @@ class AnimatedHologramLine(
         }
     }
 
-    companion object : LineFactory {
-        override fun load(section: ConfigurationSection, commonOptions: CommonHologramLineSettings): LineSettings? {
-            val frames = ArrayList<Pair<Int, LineSettings>>()
-            val height = section.getDouble("height", commonOptions.height)
-            val conditions = ConditionSerializer.fromSections<Player>(section.getSectionList("view-conditions"))
-            val failLine = section.getConfigurationSection("fail-line")?.let {
-                HologramSerializer.loadLine(it, commonOptions)
-            }
-            for (configurationSection in section.getSectionList("frames")) {
-                val frame = HologramSerializer.loadLine(configurationSection, commonOptions) ?: continue
-                val stay = configurationSection.getInt("stay", 1)
-                frames.add(stay to frame)
-            }
-            if (frames.isEmpty()) return null
-            return Settings(
-                frames,
-                height,
-                conditions,
-                failLine
-            )
-        }
-
-    }
 }
