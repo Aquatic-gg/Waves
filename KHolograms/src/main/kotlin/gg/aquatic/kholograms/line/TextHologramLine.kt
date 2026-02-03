@@ -18,6 +18,7 @@ import gg.aquatic.pakket.api.nms.entity.data.impl.display.DisplayEntityData
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.TextDisplayEntityData
 import gg.aquatic.pakket.sendPacket
 import gg.aquatic.replace.PlaceholderContext
+import net.kyori.adventure.text.Component
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.configuration.ConfigurationSection
@@ -32,7 +33,7 @@ class TextHologramLine(
     override var height: Double,
     override var filter: suspend (Player) -> Boolean,
     override var failLine: HologramLine?,
-    text: String,
+    text: Component,
     lineWidth: Int,
     scale: Float = 1.0f,
     billboard: Billboard = Billboard.CENTER,
@@ -132,7 +133,7 @@ class TextHologramLine(
         }
     }
 
-    var text: String by Delegates.observable(text) { _, old, new ->
+    var text: Component by Delegates.observable(text) { _, old, new ->
         if (old == new) return@observable
         textContextItem = null
     }
@@ -161,7 +162,7 @@ class TextHologramLine(
 
         val item = textContextItem
         list += if (item == null) {
-            val item = placeholderContext.createItem(player, text.toMMComponent())
+            val item = placeholderContext.createItem(player, text)
             textContextItem = item
             TextDisplayEntityData.Text.generate(item.latestState.value)
         } else {
@@ -195,7 +196,7 @@ class TextHologramLine(
 
         val item = textContextItem
         if (item == null) {
-            val item = placeholderContext.createItem(player, text.toMMComponent())
+            val item = placeholderContext.createItem(player, text)
             textContextItem = item
 
             data += TextDisplayEntityData.Text.generate(item.latestState.value)
@@ -214,7 +215,7 @@ class TextHologramLine(
 
     class Settings(
         val height: Double,
-        val text: String,
+        val text: Component,
         val lineWidth: Int,
         val scale: Float = 1.0f,
         val billboard: Billboard = Billboard.CENTER,
@@ -277,7 +278,7 @@ class TextHologramLine(
 
             return Settings(
                 height,
-                text,
+                text.toMMComponent(),
                 lineWidth,
                 scale,
                 billboard,
