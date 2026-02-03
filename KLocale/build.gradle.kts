@@ -14,10 +14,6 @@ repositories {
 dependencies {
 }
 
-kotlin {
-    jvmToolchain(21)
-}
-
 tasks.test {
     useJUnitPlatform()
 }
@@ -27,4 +23,8 @@ subprojects {
     apply(plugin = "maven-publish")
 
     version = rootProject.version
+
+    kotlin {
+        jvmToolchain(21)
+    }
 }
