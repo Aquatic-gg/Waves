@@ -2,45 +2,43 @@
 
 [![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/kmenu/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kmenu)
 [![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/KMenu?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/KMenu)
-![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
+![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-blue.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-A high-performance, **completely packet-based**, asynchronous, and reactive Minecraft Menu framework for PaperMC.
+A high-performance, packet-based, asynchronous Minecraft menu framework for Paper.
 Designed to be lightweight, packet-efficient, and easy to unit test.
 
-## 🚀 Key Features
+## Key Features
 
 * **Zero Bukkit Inventories:** Uses pure packets for window management via [Pakket](https://github.com/aquatic/Pakket).
-* **Asynchronous & Coroutine-based**: Built from the ground up to support Kotlin Coroutines.
-* **Packet-Efficient**: Uses a 'Packet Saver' logic to compare item states and only send updates when visually
-  necessary.
-* **Reactive Components**: Buttons and lists update dynamically without re-creating objects.
-* **Advanced Slot Management**: Built-in support for priorities, overlaps, and complex geometry (rectangles, ranges).
+* **Async by Design:** Built for Kotlin coroutines with non-blocking updates.
+* **Packet-Efficient:** Sends only the slots that actually changed.
+* **Reactive Components:** Buttons and lists update dynamically without re-creating objects.
+* **Advanced Slot Management:** Priorities, overlaps, rectangles, and ranges.
 
-### ❓ Why KMenu?
+### Why KMenu?
 
-Unlike standard GUI APIs, KMenu operates **entirely on the client-side**.
+Unlike standard GUI APIs, KMenu operates entirely on the client side.
 
 **Who should use this?**
-*   **Server Owners** building complex navigation menus, shops, or profile views.
-*   **Developers** who want absolute control over the inventory behavior without fighting Bukkit's internal `InventoryView` state.
+* **Server owners** building complex navigation menus, shops, or profile views.
+* **Developers** who want full control without Bukkit inventory quirks.
 
-**The "Ghost" Advantage:**
+**The "Ghost" Advantage**
 Because the inventory logic is handled via packets:
-1.  **Item Security:** The items displayed are "virtual." Players cannot "steal" items through glitches because the server doesn't believe they are holding anything.
-2.  **Button Logic:** Every slot behaves as a programmable button rather than a storage container.
-3.  **Performance:** No overhead from the server-side `Container` logic, ticking, or player-inventory synchronization.
+1. **Item Security:** Items are virtual; players cannot steal them via glitches.
+2. **Button Logic:** Every slot behaves like a programmable button.
+3. **Performance:** No server-side container ticking or sync overhead.
 
+### Technical Overview
 
-### 🛠️ Technical Overview
-
-KMenu bypasses the standard Bukkit/Spigot `InventoryView` system. It listens to incoming packet events, processes click
-logic internally, and sends `WindowItems` packets directly to the client. This allows for custom container types and
-titles without the limitations of the native API.
+KMenu bypasses the Bukkit `InventoryView` system. It listens to packet events, processes click logic
+internally, and sends window packets directly to the client. This allows for custom container types
+and titles without the limitations of the native API.
 
 ---
 
-## 🛠 Installation
+## Installation
 
 Add the repository and dependency to your `build.gradle.kts`:
 
@@ -50,36 +48,30 @@ repositories {
 }
 
 dependencies {
+    // Core runtime
     implementation("gg.aquatic:KMenu:26.0.1")
 
-    // Aquatic Libraries
-    implementation("gg.aquatic:Pakket:26.1.1")
+    // Optional: configuration serialization (Execute + Stacked)
+    implementation("gg.aquatic:KMenu-serialization:26.0.1")
+
+    // Aquatic Libraries (core)
+    implementation("gg.aquatic:Pakket:26.1.7")
     implementation("gg.aquatic:KRegistry:25.0.1")
-    implementation("gg.aquatic.execute:Execute:26.0.1")
     implementation("gg.aquatic.replace:Replace:26.0.2")
-    implementation("gg.aquatic:Stacked:26.0.1")
     implementation("gg.aquatic:KEvent:1.0.4")
 }
 ```
 
 ---
 
-## 💻 Code Showcase
+## Code Showcase
 
 ### 1. Creating a Basic Menu
 
-Menus are built using components that automatically handle their own rendering and interaction logic.
+KMenu manages its own ticker internally. Initialize it once during plugin startup.
 
 ```kotlin
-// INITIALIZE THE LIBRARY & TICKER FIRST!
-KMenu.initialize()
-
-/*
-Add to your coroutine ticker (every tick)
-I did not want to create my own ticker, 
-as you could have had your own one already made...
- */
-MenuHandler.tick()
+KMenu.initialize(plugin, scope)
 
 val menu = PrivateMenu(player, Component.text("My Menu"), InventoryType.GENERIC9X3, true)
 
@@ -88,7 +80,7 @@ val button = Button(
     itemstack = ItemStack(Material.DIAMOND),
     slots = listOf(13),
     priority = 1,
-    updateEvery = 20, // Ticks
+    updateEvery = 20, // ticks
     textUpdater = placeholderContext,
     onClick = { event ->
         player.sendMessage("You clicked a diamond!")
@@ -96,7 +88,7 @@ val button = Button(
 )
 
 menu.addComponent(button)
-menu.open()
+menu.open(player)
 ```
 
 ### 2. Scrolling Buttons
@@ -120,8 +112,8 @@ val scrollingBtn = ScrollingButton.create(
 
 ### 3. High-Performance Lists
 
-The `ListMenu` handles pagination, searching, and filtering with built-in component re-use to prevent flickering and
-packet spam.
+The `ListMenu` handles pagination, searching, and filtering with built-in component re-use to prevent flickering
+and packet spam.
 
 ```kotlin
 class MyList(player: Player, items: List<MyItem>) : ListMenu<MyItem>(
@@ -132,7 +124,6 @@ class MyList(player: Player, items: List<MyItem>) : ListMenu<MyItem>(
         Entry(
             value = item,
             itemVisual = { ItemStack(Material.PAPER) },
-            searchString = item.name,
             placeholderContext = myContext,
             onClick = { /* Handle click */ }
         )
@@ -144,9 +135,7 @@ class MyList(player: Player, items: List<MyItem>) : ListMenu<MyItem>(
 
 ---
 
-## 🚀 Kotlin DSL Showcase
-
-The most intuitive way to build menus in Kotlin.
+## Kotlin DSL Showcase
 
 ```kotlin
 val menu = player.createMenu(Component.text("Main Menu")) {
@@ -173,40 +162,34 @@ val menu = player.createMenu(Component.text("Main Menu")) {
     }
 }
 
-menu.open()
+menu.open(player)
 ```
 
 ---
 
-## 🏗 Performance & Architecture
+## Performance & Architecture
 
 ### SlotManager (Pure Logic)
 
-KMenu decouples menu logic from Bukkit's heavy registry system. The `SlotManager` handles all priority and ownership
-calculations using pure Kotlin math ($y \times 9 + x$), making it lightning-fast and **100% unit-testable** without a
-Minecraft server.
+KMenu decouples menu logic from Bukkit's heavy registry system. The `SlotManager` handles priority and ownership
+calculations using pure Kotlin math (`y * 9 + x`), making it lightning-fast and unit-testable without a server.
 
 ### Packet Saver
 
-The framework caches the visual state of the inventory. Before sending an update to the player, it performs a
-triple-check:
-
-1. **Reference check** (same object?)
-2. **Basic check** (Amount + Type match?)
-3. **Deep check** (NBT/isSimilar match?)
-   This ensures zero redundant packets are sent, significantly improving network stability for high-player-count
-   servers.
+Before sending a slot update, KMenu performs:
+1. **Reference check** (same object)
+2. **Basic check** (amount + type)
+3. **Deep check** (`isSimilar`)
+This ensures zero redundant packets, improving network stability for large servers.
 
 ### Reactive ListMenu
 
-The `ListMenu` implementation re-uses `Button` objects across page changes and searches. Instead of clearing the
-inventory and redrawing (which causes items to flicker), it simply updates the internal state of the existing buttons.
+`ListMenu` re-uses `Button` objects across page changes and searches. Instead of clearing and redrawing
+(causing flicker), it updates the internal state of existing buttons.
 
 ---
 
-## 🧪 Unit Testing
-
-Verify your UI logic in milliseconds:
+## Unit Testing
 
 ```kotlin
 @Test
@@ -221,7 +204,7 @@ fun `test priority ownership`() {
 
 ---
 
-## 📜 Documentation
+## Documentation
 
 | Class            | Description                                          |
 |:-----------------|:-----------------------------------------------------|
@@ -229,15 +212,14 @@ fun `test priority ownership`() {
 | `PrivateMenu`    | A menu bound to a specific player.                   |
 | `MenuComponent`  | Abstract base for all UI elements.                   |
 | `Button`         | Standard interactive component.                      |
-| `SlotSelection`  | Utility for defining slot groups (Rect, Range, etc). |
-| `SlotManager`    | Internal logic handler for slot ownership.           |
-| `MenuSerializer` | Utility to load menu configurations from YAML.       |
+| `SlotSelection`  | Utility for defining slot groups (rect, range, etc). |
+| `MenuSerializer` | Load menu configurations from YAML (serialization).  |
 
 ---
 
-## 💬 Community & Support
+## Community & Support
 
-Got questions, need help, or want to showcase what you've built with **Pakket**? Join our community!
+Got questions or want to showcase what you've built with KMenu?
 
 [![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
