@@ -173,11 +173,6 @@ class PacketListener(player: Player) : PacketListenerBase(
             isAccessible = true
         }
 
-        @Suppress(
-            "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused",
-            "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused",
-            "DeferredResultUnused", "DeferredResultUnused", "DeferredResultUnused"
-        )
         override fun handle(packet: Any, player: Player): PacketEvent? {
             return when (packet) {
                 is ServerboundInteractPacket -> {
