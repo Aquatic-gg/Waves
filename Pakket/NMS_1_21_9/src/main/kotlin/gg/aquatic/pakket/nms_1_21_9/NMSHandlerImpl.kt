@@ -73,6 +73,7 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
 
+@Suppress("unused")
 object NMSHandlerImpl : NMSHandler() {
 
     private val setPassengersConstructor =
@@ -581,6 +582,7 @@ object NMSHandlerImpl : NMSHandler() {
         return packet
     }
 
+    @Suppress("UnstableApiUsage")
     override fun openWindowPacket(
         inventoryId: Int,
         menuType: MenuType,

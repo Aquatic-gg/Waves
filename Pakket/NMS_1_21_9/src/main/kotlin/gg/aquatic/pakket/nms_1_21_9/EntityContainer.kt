@@ -11,9 +11,7 @@ import net.minecraft.world.level.storage.ValueOutput
 
 class EntityContainer(id: Int) : Entity(EntityType.INTERACTION, MinecraftServer.getServer().overworld()) {
 
-    override fun defineSynchedData(p0: SynchedEntityData.Builder) {
-
-    }
+    override fun defineSynchedData(p0: SynchedEntityData.Builder) {}
 
     override fun hurtServer(
         p0: ServerLevel,
@@ -23,17 +21,11 @@ class EntityContainer(id: Int) : Entity(EntityType.INTERACTION, MinecraftServer.
         return false
     }
 
-    override fun readAdditionalSaveData(p0: ValueInput) {
+    override fun readAdditionalSaveData(p0: ValueInput) {}
 
-    }
+    override fun addAdditionalSaveData(output: ValueOutput, includeAll: Boolean) {}
 
-    override fun addAdditionalSaveData(output: ValueOutput, includeAll: Boolean) {
-
-    }
-
-    override fun addAdditionalSaveData(p0: ValueOutput) {
-
-    }
+    override fun addAdditionalSaveData(p0: ValueOutput) {}
 
     init {
         this.id = id
@@ -41,5 +33,4 @@ class EntityContainer(id: Int) : Entity(EntityType.INTERACTION, MinecraftServer.
         setRot(0.0f, 0.0f)
         setOnGround(false)
     }
-
 }

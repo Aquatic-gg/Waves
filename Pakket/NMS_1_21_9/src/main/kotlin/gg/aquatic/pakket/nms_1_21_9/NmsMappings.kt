@@ -20,7 +20,6 @@ import org.joml.Quaternionf
 import org.joml.Vector3f
 import java.util.Optional
 import java.util.OptionalInt
-import kotlin.jvm.optionals.getOrNull
 
 object NmsMappings {
 
@@ -41,137 +40,123 @@ object NmsMappings {
         GameEventAction.LEVEL_CHUNKS_LOAD_START to ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START
     )
 
+    private fun <T> dataValue(
+        original: EntityDataValue,
+        serializer: net.minecraft.network.syncher.EntityDataSerializer<T>,
+        value: T
+    ) = SynchedEntityData.DataValue(original.id, serializer, value)
+
+    private fun <T, R : Any> optionalDataValue(
+        original: EntityDataValue,
+        serializer: net.minecraft.network.syncher.EntityDataSerializer<Optional<R>>,
+        value: Optional<T>,
+        mapper: (T) -> R
+    ): SynchedEntityData.DataValue<Optional<R>> {
+        val mapped = if (value.isPresent) Optional.of<R>(mapper(value.get())) else Optional.empty<R>()
+        return dataValue(original, serializer, mapped)
+    }
+
     @Suppress("UNCHECKED_CAST")
     fun mapEntityDataValue(original: EntityDataValue): SynchedEntityData.DataValue<*>? {
         return when (original.serializerType) {
-            DataSerializerTypes.BYTE -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.BYTE,
-                original.value as Byte
-            )
+            DataSerializerTypes.BYTE ->
+                dataValue(original, EntityDataSerializers.BYTE, original.value as Byte)
 
-            DataSerializerTypes.INT -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.INT,
-                original.value as Int
-            )
+            DataSerializerTypes.INT ->
+                dataValue(original, EntityDataSerializers.INT, original.value as Int)
 
-            DataSerializerTypes.FLOAT -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.FLOAT,
-                original.value as Float
-            )
+            DataSerializerTypes.FLOAT ->
+                dataValue(original, EntityDataSerializers.FLOAT, original.value as Float)
 
-            DataSerializerTypes.STRING -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.STRING,
-                original.value as String
-            )
+            DataSerializerTypes.STRING ->
+                dataValue(original, EntityDataSerializers.STRING, original.value as String)
 
-            DataSerializerTypes.BOOLEAN -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.BOOLEAN,
-                original.value as Boolean
-            )
+            DataSerializerTypes.BOOLEAN ->
+                dataValue(original, EntityDataSerializers.BOOLEAN, original.value as Boolean)
 
-            DataSerializerTypes.OPTIONAL_COMPONENT -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.OPTIONAL_COMPONENT,
-                (original.value as Optional<Component>).getOrNull().let {
-                    val nmsComponent = it?.let { component -> NmsConversions.toNmsComponent(component) }
-                    Optional.ofNullable(nmsComponent)
-                }
-            )
+            DataSerializerTypes.OPTIONAL_COMPONENT ->
+                optionalDataValue(
+                    original,
+                    EntityDataSerializers.OPTIONAL_COMPONENT,
+                    original.value as Optional<Component>,
+                ) { component -> NmsConversions.toNmsComponent(component) }
 
-            DataSerializerTypes.ITEM_STACK -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.ITEM_STACK,
-                CraftItemStack.asNMSCopy(original.value as ItemStack)
-            )
+            DataSerializerTypes.ITEM_STACK ->
+                dataValue(
+                    original,
+                    EntityDataSerializers.ITEM_STACK,
+                    CraftItemStack.asNMSCopy(original.value as ItemStack)
+                )
 
-            DataSerializerTypes.ROTATIONS -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.ROTATIONS,
-                (original.value as Vector).let {
-                    Rotations(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
-                }
-            )
+            DataSerializerTypes.ROTATIONS ->
+                dataValue(
+                    original,
+                    EntityDataSerializers.ROTATIONS,
+                    (original.value as Vector).let { Rotations(it.x.toFloat(), it.y.toFloat(), it.z.toFloat()) }
+                )
 
-            DataSerializerTypes.BLOCK_POS -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.BLOCK_POS,
-                (original.value as BlockPos).let { BlockPos(it.x, it.y, it.z) }
-            )
+            DataSerializerTypes.BLOCK_POS ->
+                dataValue(
+                    original,
+                    EntityDataSerializers.BLOCK_POS,
+                    (original.value as BlockPos).let { BlockPos(it.x, it.y, it.z) }
+                )
 
-            DataSerializerTypes.BLOCK_STATE -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.BLOCK_STATE,
-                (original.value as CraftBlockData).state
-            )
+            DataSerializerTypes.BLOCK_STATE ->
+                dataValue(original, EntityDataSerializers.BLOCK_STATE, (original.value as CraftBlockData).state)
 
-            DataSerializerTypes.COMPONENT -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.COMPONENT,
-                NmsConversions.toNmsComponent(original.value as Component)
-            )
+            DataSerializerTypes.COMPONENT ->
+                dataValue(
+                    original,
+                    EntityDataSerializers.COMPONENT,
+                    NmsConversions.toNmsComponent(original.value as Component)
+                )
 
-            DataSerializerTypes.LONG -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.LONG,
-                original.value as Long
-            )
+            DataSerializerTypes.LONG ->
+                dataValue(original, EntityDataSerializers.LONG, original.value as Long)
 
-            DataSerializerTypes.POSE -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.POSE,
-                (original.value as Pose).let {
-                    net.minecraft.world.entity.Pose.entries[it.ordinal]
-                }
-            )
+            DataSerializerTypes.POSE ->
+                dataValue(
+                    original,
+                    EntityDataSerializers.POSE,
+                    net.minecraft.world.entity.Pose.entries[(original.value as Pose).ordinal]
+                )
 
-            DataSerializerTypes.VECTOR3 -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.VECTOR3,
-                original.value as Vector3f
-            )
+            DataSerializerTypes.VECTOR3 ->
+                dataValue(original, EntityDataSerializers.VECTOR3, original.value as Vector3f)
 
-            DataSerializerTypes.DIRECTION -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.DIRECTION,
-                (original.value as Direction).let {
-                    Direction.entries[it.ordinal]
-                }
-            )
+            DataSerializerTypes.DIRECTION ->
+                dataValue(
+                    original,
+                    EntityDataSerializers.DIRECTION,
+                    Direction.entries[(original.value as Direction).ordinal]
+                )
 
-            DataSerializerTypes.OPTIONAL_BLOCK_POS -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.OPTIONAL_BLOCK_POS,
-                (original.value as Optional<BlockPos>).let {
-                    Optional.ofNullable(it.getOrNull()?.let { pos -> BlockPos(pos.x, pos.y, pos.z) })
-                }
-            )
+            DataSerializerTypes.OPTIONAL_BLOCK_POS ->
+                optionalDataValue(
+                    original,
+                    EntityDataSerializers.OPTIONAL_BLOCK_POS,
+                    original.value as Optional<BlockPos>
+                ) { pos -> BlockPos(pos.x, pos.y, pos.z) }
 
-            DataSerializerTypes.OPTIONAL_BLOCK_STATE -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.OPTIONAL_BLOCK_STATE,
-                (original.value as Optional<BlockData>).let {
-                    Optional.ofNullable(it.getOrNull()?.let { blockData -> (blockData as CraftBlockData).state })
-                }
-            )
+            DataSerializerTypes.OPTIONAL_BLOCK_STATE ->
+                optionalDataValue(
+                    original,
+                    EntityDataSerializers.OPTIONAL_BLOCK_STATE,
+                    original.value as Optional<BlockData>
+                ) { blockData -> (blockData as CraftBlockData).state }
 
-            DataSerializerTypes.QUATERNION -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.QUATERNION,
-                original.value as Quaternionf
-            )
+            DataSerializerTypes.QUATERNION ->
+                dataValue(original, EntityDataSerializers.QUATERNION, original.value as Quaternionf)
 
-            DataSerializerTypes.OPTIONAL_UNSIGNED_INT -> SynchedEntityData.DataValue(
-                original.id,
-                EntityDataSerializers.OPTIONAL_UNSIGNED_INT,
-                (original.value as Optional<Int>).getOrNull().let {
-                    if (it == null) OptionalInt.empty() else OptionalInt.of(it)
-                }
-            )
+            DataSerializerTypes.OPTIONAL_UNSIGNED_INT ->
+                dataValue(
+                    original,
+                    EntityDataSerializers.OPTIONAL_UNSIGNED_INT,
+                    (original.value as Optional<Int>).let { value ->
+                        if (value.isPresent) OptionalInt.of(value.get()) else OptionalInt.empty()
+                    }
+                )
 
             else -> null
         }
