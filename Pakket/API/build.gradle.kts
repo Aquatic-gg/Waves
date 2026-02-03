@@ -12,16 +12,13 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("io.netty:netty-all:4.2.9.Final")
-    compileOnly("gg.aquatic:KEvent:26.0.5")
-
+    api("gg.aquatic:KEvent:26.0.5")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
-
-
-    compileOnly("gg.aquatic:Common:26.0.13") {
+    api("gg.aquatic:Common:26.0.13") {
         isChanging = true
     }
-    compileOnly("gg.aquatic:Blokk:26.0.2")
-    compileOnly("gg.aquatic:Stacked:26.0.3")
+    api("gg.aquatic:Blokk:26.0.2")
+    api("gg.aquatic:Stacked:26.0.3")
 }
 
 val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""

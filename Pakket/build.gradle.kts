@@ -1,7 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.0"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
-    id("com.gradleup.shadow") version "9.3.1"
     `maven-publish`
     `java-library`
 }
@@ -23,30 +22,12 @@ dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     api(project(":API"))
     api(project(":NMS_1_21_9"))
-    compileOnly("gg.aquatic:KEvent:26.0.5")
-    compileOnly("gg.aquatic:Common:26.0.13") {
-        isChanging = true
-    }
+    api("gg.aquatic:KEvent:26.0.5")
+    api("gg.aquatic:Common:26.0.13")
 }
 
 kotlin {
     jvmToolchain(21)
-}
-
-tasks {
-    build {
-        dependsOn(shadowJar)
-    }
-
-    shadowJar {
-        archiveClassifier.set("")
-
-        dependencies {
-            exclude(dependency("org.jetbrains.kotlin:.*:.*"))
-            exclude(dependency("org.jetbrains.kotlinx:.*:.*"))
-            exclude(dependency("org.jetbrains:annotations:.*"))
-        }
-    }
 }
 
 subprojects {

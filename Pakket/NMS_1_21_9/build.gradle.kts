@@ -12,8 +12,8 @@ repositories {
 
 dependencies {
     paperweight.paperDevBundle("1.21.9-R0.1-SNAPSHOT")
-    compileOnly(project(":API"))
-    compileOnly("gg.aquatic:KEvent:26.0.5")
+    api(project(":API"))
+    api("gg.aquatic:KEvent:26.0.5")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
