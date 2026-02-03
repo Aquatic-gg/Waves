@@ -2,26 +2,13 @@ import org.gradle.api.publish.PublishingExtension
 
 plugins {
     kotlin("jvm") version "2.3.0" apply false
+    id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
 
 group = "gg.aquatic.kholograms"
 version = "26.0.1"
 
-fun loadDotenv(rootDir: File): Map<String, String> {
-    val file = rootDir.resolve(".env")
-    if (!file.exists()) return emptyMap()
-    return file.readLines()
-        .mapNotNull { line ->
-            val trimmed = line.trim()
-            if (trimmed.isEmpty() || trimmed.startsWith("#") || !trimmed.contains("=")) return@mapNotNull null
-            val (key, value) = trimmed.split("=", limit = 2)
-            key.trim() to value.trim()
-        }
-        .toMap()
-}
 
-val dotenv = loadDotenv(rootDir)
-fun envValue(key: String): String = dotenv[key] ?: System.getenv(key).orEmpty()
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -47,8 +34,8 @@ subprojects {
         useJUnitPlatform()
     }
 
-    val maven_username = envValue("MAVEN_USERNAME")
-    val maven_password = envValue("MAVEN_PASSWORD")
+    val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
+    val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 
     extensions.configure<PublishingExtension> {
         repositories {

@@ -5,7 +5,7 @@ plugins {
 dependencies {
     api(project(":core"))
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("gg.aquatic:Common:26.0.9") {
+    compileOnly("gg.aquatic:Common:26.0.13") {
         isChanging = true
     }
     compileOnly("gg.aquatic:KRegistry:25.0.2")
