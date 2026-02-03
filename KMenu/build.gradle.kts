@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "gg.aquatic.kmenu"
-version = "26.0.1"
+version = "26.0.2"
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -30,6 +30,8 @@ subprojects {
     tasks.withType<Test>().configureEach {
         useJUnitPlatform()
     }
+
+    version = rootProject.version
 
     val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
     val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
