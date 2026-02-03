@@ -24,7 +24,7 @@ publishing {
         create<MavenPublication>("maven") {
             groupId = "gg.aquatic"
             artifactId = "KMenu"
-            version = "${project.version}"
+            version = "${rootProject.version}"
 
             from(components["java"])
         }
