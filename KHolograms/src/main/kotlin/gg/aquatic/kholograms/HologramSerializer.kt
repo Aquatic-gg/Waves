@@ -51,7 +51,7 @@ object HologramSerializer {
             if (obj is String) {
                 lines += TextHologramLine.Settings(
                     commonOptions.height,
-                    obj,
+                    obj.toMMComponent(),
                     100,
                     commonOptions.scale,
                     commonOptions.billboard,
@@ -97,7 +97,7 @@ object HologramSerializer {
 
                             frames += it to TextHologramLine.Settings(
                                 commonOptions.height,
-                                string,
+                                string.toMMComponent(),
                                 100,
                                 commonOptions.scale,
                                 commonOptions.billboard,
@@ -119,7 +119,7 @@ object HologramSerializer {
                 if (strings.isNotEmpty()) {
                     lines += TextHologramLine.Settings(
                         commonOptions.height,
-                        strings.joinToString("\n"),
+                        strings.joinToString("\n").toMMComponent(),
                         100,
                         commonOptions.scale,
                         commonOptions.billboard,

@@ -11,6 +11,7 @@ import gg.aquatic.pakket.sendPacket
 import gg.aquatic.pakket.trackedBy
 import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.snapshotmap.SuspendingSnapshotMap
+import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -54,7 +55,7 @@ class Hologram(
         }
     }
 
-    fun setLineText(lineIndex: Int, text: String) {
+    fun setLineText(lineIndex: Int, text: Component) {
         val line = lines.elementAtOrNull(lineIndex) ?: return
         if (line !is TextHologramLine) return
 
