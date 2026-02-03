@@ -2,18 +2,14 @@ package gg.aquatic.pakket.nms_1_21_9
 
 import com.google.common.collect.LinkedHashMultimap
 import com.google.common.hash.HashCode
-import com.google.gson.JsonParser
 import com.mojang.authlib.GameProfile
 import com.mojang.authlib.properties.Property
 import com.mojang.authlib.properties.PropertyMap
 import com.mojang.datafixers.util.Pair
-import com.mojang.serialization.JsonOps
 import gg.aquatic.pakket.api.ReflectionUtils
 import gg.aquatic.pakket.api.nms.NMSHandler
-import gg.aquatic.pakket.api.nms.PacketBundle
 import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.pakket.api.nms.ProtectedPacket
-import gg.aquatic.pakket.api.nms.entity.DataSerializerTypes
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.profile.GameEventAction
 import gg.aquatic.pakket.api.nms.profile.ProfileEntry
@@ -21,17 +17,13 @@ import gg.aquatic.pakket.api.nms.profile.UserProfile
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
-import net.minecraft.core.Direction
 import net.minecraft.core.NonNullList
-import net.minecraft.core.Rotations
 import net.minecraft.network.Connection
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
-import net.minecraft.network.chat.ComponentSerialization
 import net.minecraft.network.protocol.Packet
 import net.minecraft.network.protocol.game.*
 import net.minecraft.network.syncher.EntityDataAccessor
@@ -70,17 +62,13 @@ import org.bukkit.craftbukkit.CraftServer
 import org.bukkit.craftbukkit.CraftWorld
 import org.bukkit.craftbukkit.block.data.CraftBlockData
 import org.bukkit.craftbukkit.entity.CraftPlayer
-import org.bukkit.craftbukkit.inventory.CraftItemStack
 import org.bukkit.craftbukkit.inventory.CraftRecipe
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
-import org.bukkit.entity.Pose
 import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
 import org.bukkit.inventory.*
 import org.bukkit.util.Vector
-import org.joml.Quaternionf
 import org.joml.Vector3d
-import org.joml.Vector3f
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
@@ -155,15 +143,6 @@ object NMSHandlerImpl : NMSHandler() {
             packets.map { it as Packet<ClientGamePacketListener> }
         )
         return packet
-    }
-
-    override fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity? {
-        val packetEntity = createEntity(location, entityType, null) ?: return null
-
-        for (item in player) {
-            item.sendPacket(packetEntity.spawnPacket as Packet<*>)
-        }
-        return packetEntity
     }
 
     private fun Entity.absMoveTo(x: Double, y: Double, z: Double, yaw: Float, pitch: Float) {
@@ -304,19 +283,6 @@ object NMSHandlerImpl : NMSHandler() {
         return entity as T?
     }
 
-    override fun updateEntity(
-        packetEntity: PacketEntity,
-        consumer: (org.bukkit.entity.Entity) -> Unit,
-        vararg players: Player,
-    ) {
-        val packet = createEntityUpdatePacket(packetEntity, consumer) as Packet<*>
-        packetEntity.updatePacket = packet
-
-        for (player in players) {
-            player.sendPacket(packet)
-        }
-    }
-
     override fun createTeleportPacket(entityId: Int, location: Location): Any {
         val container = EntityContainer(entityId)
         container.setPosRaw(location.x, location.y, location.z)
@@ -326,186 +292,8 @@ object NMSHandlerImpl : NMSHandler() {
         return packet
     }
 
-    @Suppress("UNCHECKED_CAST")
-    private fun mapEntityDataValue(original: EntityDataValue): SynchedEntityData.DataValue<*>? {
-        when (original.serializerType) {
-            DataSerializerTypes.BYTE -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.BYTE,
-                    original.value as Byte
-                )
-            }
-
-            DataSerializerTypes.INT -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.INT,
-                    original.value as Int
-                )
-            }
-
-            DataSerializerTypes.FLOAT -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.FLOAT,
-                    original.value as Float
-                )
-            }
-
-            DataSerializerTypes.STRING -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.STRING,
-                    original.value as String
-                )
-            }
-
-            DataSerializerTypes.BOOLEAN -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.BOOLEAN,
-                    original.value as Boolean
-                )
-            }
-
-            DataSerializerTypes.OPTIONAL_COMPONENT -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.OPTIONAL_COMPONENT,
-                    (original.value as Optional<Component>).getOrNull().let {
-                        val nmsComponent = it?.toNMSComponent()
-                        Optional.ofNullable(nmsComponent)
-                    }
-                )
-            }
-
-            DataSerializerTypes.ITEM_STACK -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.ITEM_STACK,
-                    CraftItemStack.asNMSCopy(original.value as ItemStack)
-                )
-            }
-
-            DataSerializerTypes.ROTATIONS -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.ROTATIONS,
-                    (original.value as Vector).let {
-                        Rotations(it.x.toFloat(), it.y.toFloat(), it.z.toFloat())
-                    }
-                )
-            }
-
-            DataSerializerTypes.BLOCK_POS -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.BLOCK_POS,
-                    (original.value as BlockPos).let {
-                        BlockPos(it.x, it.y, it.z)
-                    }
-                )
-            }
-
-            DataSerializerTypes.BLOCK_STATE -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.BLOCK_STATE,
-                    (original.value as CraftBlockData).state
-                )
-            }
-
-            DataSerializerTypes.COMPONENT -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.COMPONENT,
-                    (original.value as Component).toNMSComponent()
-                )
-            }
-
-            DataSerializerTypes.LONG -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.LONG,
-                    original.value as Long
-                )
-            }
-
-            DataSerializerTypes.POSE -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.POSE,
-                    (original.value as Pose).let {
-                        net.minecraft.world.entity.Pose.entries[it.ordinal]
-                    }
-                )
-            }
-
-            DataSerializerTypes.VECTOR3 -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.VECTOR3,
-                    original.value as Vector3f
-                )
-            }
-
-            DataSerializerTypes.DIRECTION -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.DIRECTION,
-                    (original.value as Direction).let {
-                        Direction.entries[it.ordinal]
-                    }
-                )
-            }
-
-            DataSerializerTypes.OPTIONAL_BLOCK_POS -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.OPTIONAL_BLOCK_POS,
-                    (original.value as Optional<BlockPos>).let {
-                        Optional.ofNullable(
-                            it.getOrNull()?.let { pos -> BlockPos(pos.x, pos.y, pos.z) })
-                    }
-                )
-            }
-
-            DataSerializerTypes.OPTIONAL_BLOCK_STATE -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.OPTIONAL_BLOCK_STATE,
-                    (original.value as Optional<BlockData>).let {
-                        Optional.ofNullable(it.getOrNull()?.let { blockData -> (blockData as CraftBlockData).state })
-                    }
-                )
-            }
-
-            DataSerializerTypes.QUATERNION -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.QUATERNION,
-                    original.value as Quaternionf
-                )
-            }
-
-            DataSerializerTypes.OPTIONAL_UNSIGNED_INT -> {
-                return SynchedEntityData.DataValue(
-                    original.id,
-                    EntityDataSerializers.OPTIONAL_UNSIGNED_INT,
-                    (original.value as Optional<Int>).getOrNull().let {
-                        if (it == null) {
-                            OptionalInt.empty()
-                        } else OptionalInt.of(it)
-                    }
-                )
-            }
-        }
-        return null
-    }
-
     override fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any {
-        val data = values.mapNotNull { mapEntityDataValue(it) }
+        val data = values.mapNotNull { NmsMappings.mapEntityDataValue(it) }
         val packet = ClientboundSetEntityDataPacket(id, data)
         return packet
     }
@@ -524,14 +312,6 @@ object NMSHandlerImpl : NMSHandler() {
                 ?: emptyList<SynchedEntityData.DataValue<*>>()
         )
         return packet
-    }
-
-    override fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player) {
-        val packet = createPassengersPacket(packetEntity.entityId, passengerIds) as Packet<*>
-        packetEntity.passengerPacket = packet
-        for (player in players) {
-            player.sendPacket(packet)
-        }
     }
 
     override fun createPassengersPacket(holderId: Int, passengerIds: IntArray): Any {
@@ -559,27 +339,12 @@ object NMSHandlerImpl : NMSHandler() {
         return teleportPacket
     }
 
-    override fun setEquipment(
-        packetEntity: PacketEntity,
-        equipment: Map<EquipmentSlot, ItemStack?>,
-        vararg players: Player,
-    ) {
-        val packet = createEquipmentPacket(packetEntity, equipment) as Packet<*>
-        //packetEntity.equipmentPacket = packet
-
-        for (player in players) {
-            player.sendPacket(packet)
-        }
-    }
-
     override fun createEquipmentPacket(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>): Any {
         val mappedEquipment = equipment.map {
             Pair(
                 net.minecraft.world.entity.EquipmentSlot.entries[it.key.ordinal],
                 it.value?.let { item ->
-                    CraftItemStack.asNMSCopy(
-                        item
-                    )
+                    NmsConversions.toNmsItemStack(item)
                 } ?: net.minecraft.world.item.ItemStack.EMPTY)
         }
         val packet = ClientboundSetEquipmentPacket(packetEntity.entityId, mappedEquipment)
@@ -594,10 +359,6 @@ object NMSHandlerImpl : NMSHandler() {
         ReflectionUtils.getField("entries", ClientboundPlayerInfoUpdatePacket::class.java).apply {
             this.isAccessible = true
         }
-
-    override fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any {
-        return createPlayerInfoUpdatePacket(listOf(actionId), listOf(profileEntry))
-    }
 
     override fun createPlayerInfoUpdatePacket(
         actionIds: Collection<Int>,
@@ -617,7 +378,7 @@ object NMSHandlerImpl : NMSHandler() {
                 profileEntry.listed,
                 profileEntry.latency,
                 GameType.entries[profileEntry.gameMode.ordinal],
-                profileEntry.displayName?.toNMSComponent(),
+                profileEntry.displayName?.let { NmsConversions.toNmsComponent(it) },
                 profileEntry.showHat,
                 profileEntry.listOrder,
                 null
@@ -632,26 +393,10 @@ object NMSHandlerImpl : NMSHandler() {
         return packet
     }
 
-    private val gameStateTypesMapper = hashMapOf(
-        GameEventAction.NO_RESPAWN_BLOCK_AVAILABLE to ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE,
-        GameEventAction.START_RAINING to ClientboundGameEventPacket.START_RAINING,
-        GameEventAction.STOP_RAINING to ClientboundGameEventPacket.STOP_RAINING,
-        GameEventAction.CHANGE_GAME_MODE to ClientboundGameEventPacket.CHANGE_GAME_MODE,
-        GameEventAction.WIN_GAME to ClientboundGameEventPacket.WIN_GAME,
-        GameEventAction.DEMO_EVENT to ClientboundGameEventPacket.DEMO_EVENT,
-        GameEventAction.ARROW_HIT_PLAYER to ClientboundGameEventPacket.PLAY_ARROW_HIT_SOUND,
-        GameEventAction.RAIN_LEVEL_CHANGE to ClientboundGameEventPacket.RAIN_LEVEL_CHANGE,
-        GameEventAction.THUNDER_LEVEL_CHANGE to ClientboundGameEventPacket.THUNDER_LEVEL_CHANGE,
-        GameEventAction.PUFFER_FISH_STING to ClientboundGameEventPacket.PUFFER_FISH_STING,
-        GameEventAction.GUARDIAN_ELDER_EFFECT to ClientboundGameEventPacket.GUARDIAN_ELDER_EFFECT,
-        GameEventAction.IMMEDIATE_RESPAWN to ClientboundGameEventPacket.IMMEDIATE_RESPAWN,
-        GameEventAction.LIMITED_CRAFTING to ClientboundGameEventPacket.LIMITED_CRAFTING,
-        GameEventAction.LEVEL_CHUNKS_LOAD_START to ClientboundGameEventPacket.LEVEL_CHUNKS_LOAD_START
-    )
-
     override fun createChangeGameStatePacket(action: GameEventAction, value: Float): Any {
         val mappedAction =
-            gameStateTypesMapper[action] ?: throw IllegalArgumentException("Unknown game event action: $action")
+            NmsMappings.gameStateTypesMapper[action]
+                ?: throw IllegalArgumentException("Unknown game event action: $action")
         val packet = ClientboundGameEventPacket(mappedAction, value)
         return packet
     }
@@ -685,11 +430,6 @@ object NMSHandlerImpl : NMSHandler() {
         return entity.bukkitEntity
     }
 
-    private val chunkDataBufferField =
-        ReflectionUtils.getField("buffer", ClientboundLevelChunkPacketData::class.java).apply {
-            isAccessible = true
-        }
-
     override fun createTeamsPacket(
         team: gg.aquatic.pakket.api.nms.scoreboard.Team,
         actionId: Int,
@@ -701,8 +441,8 @@ object NMSHandlerImpl : NMSHandler() {
             team.teamName
         )
         scoreboard.addPlayerTeam(team.teamName)
-        playerTeam.setPlayerPrefix(team.prefix.toNMSComponent())
-        playerTeam.setPlayerSuffix(team.suffix.toNMSComponent())
+        playerTeam.setPlayerPrefix(NmsConversions.toNmsComponent(team.prefix))
+        playerTeam.setPlayerSuffix(NmsConversions.toNmsComponent(team.suffix))
         playerTeam.collisionRule = Team.CollisionRule.entries[team.collisionRule.ordinal]
         playerTeam.nameTagVisibility =
             Team.Visibility.entries[team.nametagVisibility.ordinal]
@@ -762,7 +502,7 @@ object NMSHandlerImpl : NMSHandler() {
                     recipe.group,
                     CraftRecipe.getCategory(recipe.category),
                     pattern,
-                    recipe.result.toNMS()
+                    NmsConversions.toNmsItemStack(recipe.result)
                 ) to ingredients.values
             }
 
@@ -773,7 +513,7 @@ object NMSHandlerImpl : NMSHandler() {
                 net.minecraft.world.item.crafting.ShapelessRecipe(
                     recipe.group,
                     CraftRecipe.getCategory(recipe.category),
-                    recipe.result.toNMS(),
+                    NmsConversions.toNmsItemStack(recipe.result),
                     ingredients
                 ) to ingredients
             }
@@ -821,7 +561,7 @@ object NMSHandlerImpl : NMSHandler() {
         val nmsType = RecipeBookType.entries[type.ordinal]
 
         val settings = RecipeBookSettings().apply {
-            this.setOpen(nmsType,isOpen)
+            this.setOpen(nmsType, isOpen)
             this.setFiltering(nmsType, filtering)
         }
 
@@ -837,22 +577,9 @@ object NMSHandlerImpl : NMSHandler() {
             inventoryId,
             stateId,
             slot,
-            itemStack?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+            itemStack?.let { NmsConversions.toNmsItemStack(it) } ?: net.minecraft.world.item.ItemStack.EMPTY
         )
         return packet
-    }
-
-    override fun setSlotItem(
-        inventoryId: Int,
-        stateId: Int,
-        slot: Int,
-        itemStack: ItemStack?,
-        vararg players: Player,
-    ) {
-        val packet = createSetSlotItemPacket(inventoryId, stateId, slot, itemStack) as Packet<*>
-        for (player in players) {
-            player.sendPacket(packet)
-        }
     }
 
     override fun createSetWindowItemsPacket(
@@ -862,27 +589,14 @@ object NMSHandlerImpl : NMSHandler() {
         carriedItem: ItemStack?,
     ): Any {
         val nmsItems = NonNullList.create<net.minecraft.world.item.ItemStack>()
-        nmsItems += items.map { it?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY }
+        nmsItems += items.map { it?.let { item -> NmsConversions.toNmsItemStack(item) } ?: net.minecraft.world.item.ItemStack.EMPTY }
         val packet = ClientboundContainerSetContentPacket(
             inventoryId,
             stateId,
             nmsItems,
-            carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+            carriedItem?.let { NmsConversions.toNmsItemStack(it) } ?: net.minecraft.world.item.ItemStack.EMPTY
         )
         return packet
-    }
-
-    override fun setWindowItems(
-        inventoryId: Int,
-        stateId: Int,
-        items: Collection<ItemStack?>,
-        carriedItem: ItemStack?,
-        vararg players: Player,
-    ) {
-        val packet = createSetWindowItemsPacket(inventoryId, stateId, items, carriedItem) as Packet<*>
-        for (player in players) {
-            player.sendPacket(packet)
-        }
     }
 
     override fun openWindowPacket(
@@ -897,7 +611,7 @@ object NMSHandlerImpl : NMSHandler() {
         val packet = ClientboundOpenScreenPacket(
             inventoryId,
             nmsType,
-            title.toNMSComponent()
+            NmsConversions.toNmsComponent(title)
         )
         return packet
     }
@@ -908,24 +622,6 @@ object NMSHandlerImpl : NMSHandler() {
         value: Int
     ): Any {
         return ClientboundContainerSetDataPacket(inventoryId, property, value)
-    }
-
-    override fun openWindow(
-        inventoryId: Int,
-        menuType: MenuType,
-        title: Component,
-        vararg players: Player,
-    ) {
-        val packet = openWindowPacket(inventoryId, menuType, title) as Packet<*>
-
-        for (player in players) {
-            player.sendPacket(packet)
-        }
-    }
-
-    override fun closeWindow(inventoryId: Int, vararg players: Player) {
-        val packet = closeWindowPacket(inventoryId)
-        sendPacket(packet, silent = false, *players)
     }
 
     override fun closeWindowPacket(inventoryId: Int): Any {
@@ -952,7 +648,8 @@ object NMSHandlerImpl : NMSHandler() {
 
         val map = Int2ObjectOpenHashMap<HashedStack>()
         changedSlots.forEach { (key, value) ->
-            val nmsItem = value?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY
+            val nmsItem = value?.let { item -> NmsConversions.toNmsItemStack(item) }
+                ?: net.minecraft.world.item.ItemStack.EMPTY
             map[key] = HashedStack.create(nmsItem, hashOpsGenerator)
         }
 
@@ -963,7 +660,11 @@ object NMSHandlerImpl : NMSHandler() {
             buttonNum.toByte(),
             ClickType.entries[clickTypeNum],
             map,
-            HashedStack.create(carriedItem?.toNMS() ?: net.minecraft.world.item.ItemStack.EMPTY, hashOpsGenerator)
+            HashedStack.create(
+                carriedItem?.let { item -> NmsConversions.toNmsItemStack(item) }
+                    ?: net.minecraft.world.item.ItemStack.EMPTY,
+                hashOpsGenerator
+            )
         )
 
         (Bukkit.getServer() as CraftServer).server.scheduleOnMain {
@@ -975,10 +676,6 @@ object NMSHandlerImpl : NMSHandler() {
 
     override fun generateEntityId(): Int {
         return entityCounterField.getAndIncrement()
-    }
-
-    private fun ItemStack.toNMS(): net.minecraft.world.item.ItemStack {
-        return CraftItemStack.asNMSCopy(this)
     }
 
     private fun Player.sendPacket(packet: Packet<*>) {
@@ -1000,17 +697,4 @@ object NMSHandlerImpl : NMSHandler() {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
-    override fun sendPacketBundle(bundle: PacketBundle, silent: Boolean, vararg players: Player) {
-        val packet = ClientboundBundlePacket(bundle.packets.map { it as Packet<ClientGamePacketListener> })
-        sendPacket(packet, silent, *players)
-    }
-
-    fun Component.toNMSComponent(): net.minecraft.network.chat.Component {
-        val kyoriJson = GsonComponentSerializer.gson().serialize(this)
-        return ComponentSerialization.CODEC.parse(
-            JsonOps.INSTANCE,
-            JsonParser.parseString(kyoriJson)
-        ).orThrow
-    }
 }

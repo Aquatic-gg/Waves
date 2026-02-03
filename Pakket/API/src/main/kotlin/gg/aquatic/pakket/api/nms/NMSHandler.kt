@@ -44,7 +44,10 @@ abstract class NMSHandler {
 
     abstract fun createBundlePacket(packets: Collection<Any>): Any
     abstract fun createSetSlotItemPacket(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?): Any
-    abstract fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player)
+    open fun setSlotItem(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?, vararg players: Player) {
+        val packet = createSetSlotItemPacket(inventoryId, stateId, slot, itemStack)
+        sendPacket(packet, silent = false, *players)
+    }
     abstract fun createSetWindowItemsPacket(
         inventoryId: Int,
         stateId: Int,
@@ -52,15 +55,22 @@ abstract class NMSHandler {
         carriedItem: ItemStack?
     ): Any
 
-    abstract fun setWindowItems(
+    open fun setWindowItems(
         inventoryId: Int,
         stateId: Int,
         items: Collection<ItemStack?>,
         carriedItem: ItemStack?,
         vararg players: Player
-    )
+    ) {
+        val packet = createSetWindowItemsPacket(inventoryId, stateId, items, carriedItem)
+        sendPacket(packet, silent = false, *players)
+    }
 
-    abstract fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity?
+    open fun showEntity(location: Location, entityType: EntityType, vararg player: Player): PacketEntity? {
+        val packetEntity = createEntity(location, entityType, null) ?: return null
+        sendPacket(packetEntity.spawnPacket, silent = false, *player)
+        return packetEntity
+    }
     abstract fun createEntity(location: Location, entityType: EntityType, uuid: UUID? = null): PacketEntity?
     abstract fun createEntitySpawnPacket(
         entityId: Int,
@@ -72,18 +82,35 @@ abstract class NMSHandler {
     ): Any
 
     abstract fun recreateEntityPacket(packetEntity: PacketEntity, location: Location): Any
-    abstract fun updateEntity(packetEntity: PacketEntity, consumer: (Entity) -> Unit, vararg players: Player)
+    open fun updateEntity(packetEntity: PacketEntity, consumer: (Entity) -> Unit, vararg players: Player) {
+        val packet = createEntityUpdatePacket(packetEntity, consumer)
+        packetEntity.updatePacket = packet
+        sendPacket(packet, silent = false, *players)
+    }
     abstract fun createEntityUpdatePacket(packetEntity: PacketEntity, consumer: (Entity) -> Unit): Any
     abstract fun createEntityUpdatePacket(id: Int, values: Collection<EntityDataValue>): Any
-    abstract fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player)
+    open fun setPassengers(packetEntity: PacketEntity, passengerIds: IntArray, vararg players: Player) {
+        val packet = createPassengersPacket(packetEntity.entityId, passengerIds)
+        packetEntity.passengerPacket = packet
+        sendPacket(packet, silent = false, *players)
+    }
     abstract fun createPassengersPacket(holderId: Int, passengerIds: IntArray): Any
     abstract fun createDestroyEntitiesPacket(vararg entityIds: Int): Any
     abstract fun createPositionSyncPacket(entityId: Int, location: Location): Any
-    abstract fun setEquipment(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>, vararg players: Player)
+    open fun setEquipment(
+        packetEntity: PacketEntity,
+        equipment: Map<EquipmentSlot, ItemStack?>,
+        vararg players: Player
+    ) {
+        val packet = createEquipmentPacket(packetEntity, equipment)
+        sendPacket(packet, silent = false, *players)
+    }
     abstract fun createEquipmentPacket(packetEntity: PacketEntity, equipment: Map<EquipmentSlot, ItemStack?>): Any
     abstract fun createTeleportPacket(entityId: Int, location: Location): Any
     abstract fun createPlayerInfoUpdatePacket(actionIds: Collection<Int>, profileEntries: Collection<ProfileEntry>): Any
-    abstract fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any
+    open fun createPlayerInfoUpdatePacket(actionId: Int, profileEntry: ProfileEntry): Any {
+        return createPlayerInfoUpdatePacket(listOf(actionId), listOf(profileEntry))
+    }
     abstract fun createTeamsPacket(team: Team, actionId: Int, playerName: String): Any
     abstract fun createEntityMotionPacket(entityId: Int, motion: Vector): Any
 
@@ -94,8 +121,14 @@ abstract class NMSHandler {
     abstract fun createCameraPacket(entityId: Int): Any
     //fun modifyChunkPacketBlocks(world: World, packet: Any, func: (List<WrappedChunkSection>) -> Unit)
 
-    abstract fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player)
-    abstract fun closeWindow(inventoryId: Int, vararg players: Player)
+    open fun openWindow(inventoryId: Int, menuType: MenuType, title: Component, vararg players: Player) {
+        val packet = openWindowPacket(inventoryId, menuType, title)
+        sendPacket(packet, silent = false, *players)
+    }
+    open fun closeWindow(inventoryId: Int, vararg players: Player) {
+        val packet = closeWindowPacket(inventoryId)
+        sendPacket(packet, silent = false, *players)
+    }
     abstract fun closeWindowPacket(inventoryId: Int): Any
     abstract fun openWindowPacket(inventoryId: Int, menuType: MenuType, title: Component): Any
     abstract fun createContainerPropertyPacket(inventoryId: Int, property: Int, value: Int): Any
@@ -119,7 +152,10 @@ abstract class NMSHandler {
     abstract fun getPlayerInventoryState(player: Player): Int
 
     abstract fun sendPacket(packet: Any, silent: Boolean = false, vararg players: Player)
-    abstract fun sendPacketBundle(bundle: PacketBundle, silent: Boolean = false, vararg players: Player)
+    open fun sendPacketBundle(bundle: PacketBundle, silent: Boolean = false, vararg players: Player) {
+        val packet = createBundlePacket(bundle.packets)
+        sendPacket(packet, silent, *players)
+    }
 
     abstract fun receiveWindowClick(
         inventoryId: Int,
