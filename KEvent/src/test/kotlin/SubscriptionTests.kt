@@ -33,7 +33,7 @@ class SubscriptionTests {
         val bus = createBus()
         var callCount = 0
 
-        var listener: EventListener<TestEvent>? = EventListener { callCount++ }
+        var listener: SuspendingEventListener<TestEvent>? = SuspendingEventListener { callCount++ }
 
         bus.subscribeWeak<TestEvent>(listener = listener!!)
         bus.postSuspend(TestEvent())
@@ -43,7 +43,6 @@ class SubscriptionTests {
 
         repeat(10) {
             System.gc()
-            System.runFinalization()
             // Allocation of some "garbage" to trigger GC
             ByteArray(1024 * 1024)
         }
