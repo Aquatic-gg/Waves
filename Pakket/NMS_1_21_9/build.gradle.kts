@@ -17,8 +17,8 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
 }
 
-val mavenUsername = System.getenv("MAVEN_USERNAME") ?: ""
-val mavenPassword = System.getenv("MAVEN_PASSWORD") ?: ""
+val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
+val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 
 publishing {
     repositories {

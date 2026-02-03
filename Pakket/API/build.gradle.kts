@@ -21,11 +21,11 @@ dependencies {
         isChanging = true
     }
     compileOnly("gg.aquatic:Blokk:26.0.2")
-    compileOnly("gg.aquatic:Stacked:26.0.2")
+    compileOnly("gg.aquatic:Stacked:26.0.3")
 }
 
-val mavenUsername = System.getenv("MAVEN_USERNAME") ?: ""
-val mavenPassword = System.getenv("MAVEN_PASSWORD") ?: ""
+val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
+val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 
 publishing {
     repositories {

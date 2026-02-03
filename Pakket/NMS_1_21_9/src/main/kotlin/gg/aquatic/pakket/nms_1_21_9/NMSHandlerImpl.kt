@@ -149,6 +149,7 @@ object NMSHandlerImpl : NMSHandler() {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     override fun createBundlePacket(packets: Collection<Any>): Any {
         val packet = ClientboundBundlePacket(
             packets.map { it as Packet<ClientGamePacketListener> }
@@ -268,6 +269,7 @@ object NMSHandlerImpl : NMSHandler() {
         )
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun <T : Entity> createEntity(
         entityType: net.minecraft.world.entity.EntityType<T>,
         uuid: UUID?,
@@ -324,6 +326,7 @@ object NMSHandlerImpl : NMSHandler() {
         return packet
     }
 
+    @Suppress("UNCHECKED_CAST")
     private fun mapEntityDataValue(original: EntityDataValue): SynchedEntityData.DataValue<*>? {
         when (original.serializerType) {
             DataSerializerTypes.BYTE -> {
