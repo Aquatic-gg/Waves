@@ -8,8 +8,6 @@ plugins {
 group = "gg.aquatic.kholograms"
 version = "26.0.1"
 
-
-
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "maven-publish")
