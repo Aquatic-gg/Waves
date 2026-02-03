@@ -10,7 +10,7 @@ import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.kmenu.menu.component.Button
 import gg.aquatic.kmenu.menu.settings.IButtonSettings
 import gg.aquatic.kmenu.privateMenu
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.replace.toPlain
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin

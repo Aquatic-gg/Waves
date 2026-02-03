@@ -4,8 +4,8 @@ import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.PacketInventory
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
-import gg.aquatic.replace.placeholder.PlaceholderContext
-import gg.aquatic.replace.placeholder.Placeholders
+import gg.aquatic.replace.PlaceholderContext
+import gg.aquatic.replace.Placeholders
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
