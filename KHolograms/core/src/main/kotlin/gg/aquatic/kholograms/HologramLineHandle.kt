@@ -2,7 +2,7 @@ package gg.aquatic.kholograms
 
 import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.api.nms.PacketEntity
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import org.bukkit.Location
 import org.bukkit.entity.Player
 

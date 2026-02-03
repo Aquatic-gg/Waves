@@ -9,13 +9,13 @@ import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.chunkId
 import gg.aquatic.pakket.sendPacket
 import gg.aquatic.pakket.trackedBy
-import gg.aquatic.replace.placeholder.PlaceholderContext
+import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.snapshotmap.SuspendingSnapshotMap
+import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.iterator
 
 class Hologram(
     location: Location,
@@ -55,7 +55,7 @@ class Hologram(
         }
     }
 
-    fun setLineText(lineIndex: Int, text: String) {
+    fun setLineText(lineIndex: Int, text: Component) {
         val line = lines.elementAtOrNull(lineIndex) ?: return
         if (line !is TextHologramLine) return
 

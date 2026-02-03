@@ -2,7 +2,7 @@ package gg.aquatic.kholograms
 
 import gg.aquatic.common.ChunkId
 import gg.aquatic.common.event
-import gg.aquatic.common.ticker.Ticker
+import gg.aquatic.common.ticker.GlobalTicker
 import gg.aquatic.pakket.chunkId
 import gg.aquatic.snapshotmap.SuspendingSnapshotMap
 import org.bukkit.event.world.ChunkLoadEvent
@@ -13,7 +13,7 @@ object HologramHandler {
     val waitingHolograms = SuspendingSnapshotMap<ChunkId, MutableCollection<Hologram>>()
 
     fun initialize() {
-        Ticker {
+        GlobalTicker.runRepeatFixedDelay(50L) {
             tickingHolograms.forEachSuspended { _, list ->
                 val iterator = list.iterator()
                 while (iterator.hasNext()) {
@@ -25,7 +25,7 @@ object HologramHandler {
                     }
                 }
             }
-        }.register()
+        }
 
         event<ChunkLoadEvent> {
             val chunkId = it.chunk.chunkId()

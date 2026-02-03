@@ -1,8 +1,8 @@
 package gg.aquatic.kholograms.serialize
 
+import gg.aquatic.kholograms.CommonHologramLineSettings
 import gg.aquatic.kregistry.RegistryId
 import gg.aquatic.kregistry.RegistryKey
-import gg.aquatic.kholograms.CommonHologramLineSettings
 import org.bukkit.configuration.ConfigurationSection
 
 interface LineFactory {
