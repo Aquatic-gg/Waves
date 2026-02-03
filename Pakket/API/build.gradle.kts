@@ -13,7 +13,7 @@ dependencies {
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.8")
 
 
-    compileOnly("gg.aquatic:Common:26.0.12") {
+    compileOnly("gg.aquatic:Common:26.0.13") {
         isChanging = true
     }
     compileOnly("gg.aquatic:Blokk:26.0.2")
