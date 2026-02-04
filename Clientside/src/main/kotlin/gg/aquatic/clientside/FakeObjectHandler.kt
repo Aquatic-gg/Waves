@@ -128,43 +128,47 @@ object FakeObjectHandler {
     }
 
     private fun setupInteractionEvents() {
-        packetEvent<PacketBlockChangeEvent> {
-            val player = it.player
-            val blocks = locationToBlocks[Location(
-                player.world,
-                it.x.toDouble(),
-                it.y.toDouble(),
-                it.z.toDouble()
-            ).toBlockLocation()] ?: return@packetEvent
+        packetEvent<PacketBlockChangeEvent> { handlePacketBlockChange(it) }
+        event<PlayerInteractEvent> { handlePlayerInteract(it) }
+        packetEvent<PacketInteractEvent> { handleEntityInteract(it) }
+    }
 
-            for (block in blocks) {
-                if (block.isAudienceMember(player) && !block.destroyed) {
-                    it.blockData = block.block.blockData
-                    break
-                }
+    private fun handlePacketBlockChange(event: PacketBlockChangeEvent) {
+        val player = event.player
+        val blocks = locationToBlocks[Location(
+            player.world,
+            event.x.toDouble(),
+            event.y.toDouble(),
+            event.z.toDouble()
+        ).toBlockLocation()] ?: return
+
+        for (block in blocks) {
+            if (block.isAudienceMember(player) && !block.destroyed) {
+                event.blockData = block.block.blockData
+                break
             }
         }
+    }
 
-        event<PlayerInteractEvent> {
-            if (it.hand == EquipmentSlot.OFF_HAND) return@event
-            val blocks = locationToBlocks[it.clickedBlock?.location ?: return@event] ?: return@event
-            for (block in blocks) {
-                if (block.destroyed) continue
-                if (block.isAudienceMember(it.player)) {
-                    it.isCancelled = true
-                    val isLeft = it.action == Action.LEFT_CLICK_BLOCK || it.action == Action.LEFT_CLICK_AIR
-                    block.handleInteract(it.player, isLeft)
-                    break
-                }
+    private fun handlePlayerInteract(event: PlayerInteractEvent) {
+        if (event.hand == EquipmentSlot.OFF_HAND) return
+        val blocks = locationToBlocks[event.clickedBlock?.location ?: return] ?: return
+        for (block in blocks) {
+            if (block.destroyed) continue
+            if (block.isAudienceMember(event.player)) {
+                event.isCancelled = true
+                val isLeft = event.action == Action.LEFT_CLICK_BLOCK || event.action == Action.LEFT_CLICK_AIR
+                block.handleInteract(event.player, isLeft)
+                break
             }
         }
+    }
 
-        packetEvent<PacketInteractEvent> {
-            if (it.isSecondary) return@packetEvent
-            if (it.interactType == PacketInteractEvent.InteractType.INTERACT_AT) return@packetEvent
-            val entity = idToEntity[it.entityId] ?: return@packetEvent
-            entity.handleInteract(it.player, it.isAttack)
-        }
+    private fun handleEntityInteract(event: PacketInteractEvent) {
+        if (event.isSecondary) return
+        if (event.interactType == PacketInteractEvent.InteractType.INTERACT_AT) return
+        val entity = idToEntity[event.entityId] ?: return
+        entity.handleInteract(event.player, event.isAttack)
     }
 
     fun getChunkCacheBundle(chunkX: Int, chunkZ: Int, world: World): ChunkBundle? {
