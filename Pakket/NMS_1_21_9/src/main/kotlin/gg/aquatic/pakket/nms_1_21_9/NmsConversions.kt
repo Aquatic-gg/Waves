@@ -12,6 +12,6 @@ object NmsConversions {
     }
 
     fun toNmsItemStack(itemStack: ItemStack): net.minecraft.world.item.ItemStack {
-        return (itemStack as CraftItemStack).handle
+        return CraftItemStack.asNMSCopy(itemStack)
     }
 }
