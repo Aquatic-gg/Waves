@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "2.3.0"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     `maven-publish`
+    `java-library`
 }
 
 group = "gg.aquatic.clientside"
@@ -21,15 +22,15 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("gg.aquatic:Common:26.0.13") {
+    api("gg.aquatic:Common:26.0.13") {
         isChanging = true
     }
-    compileOnly("gg.aquatic.execute:Execute:26.0.1")
-    compileOnly("gg.aquatic:snapshotmap:26.0.2")
-    compileOnly("gg.aquatic:Pakket:26.1.10")
-    compileOnly("gg.aquatic:Dispatch:26.0.2")
-    compileOnly("gg.aquatic:KEvent:26.0.5")
-    compileOnly("gg.aquatic:Blokk:26.0.2")
+    api("gg.aquatic.execute:Execute:26.0.1")
+    api("gg.aquatic:snapshotmap:26.0.2")
+    api("gg.aquatic:Pakket:26.1.10")
+    api("gg.aquatic:Dispatch:26.0.2")
+    api("gg.aquatic:KEvent:26.0.5")
+    api("gg.aquatic:Blokk:26.0.2")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     testImplementation(kotlin("test"))
 }
