@@ -205,14 +205,7 @@ internal object InventoryHandler {
     internal fun updateInventoryContent(inventory: PacketInventory, viewer: InventoryViewer) {
         val items = arrayOfNulls<ItemStack?>(inventory.type.size + 36)
         for (i in 0 until inventory.type.size + 36) {
-            val contentItem = inventory.content[i]
-            if (contentItem == null && i > inventory.type.lastIndex) {
-                val playerItemIndex = playerSlotFromMenuSlot(i, inventory)
-                val playerItem = viewer.player.inventory.getItem(playerItemIndex)
-                items[i] = playerItem
-            } else {
-                items[i] = contentItem
-            }
+            items[i] = inventoryItemAt(inventory, viewer, i, allowPlayerFallback = false)
         }
 
         // Offhand item
@@ -230,15 +223,8 @@ internal object InventoryHandler {
     }
 
     internal fun updateInventorySlot(inventory: PacketInventory, viewer: InventoryViewer, slot: Int) {
-        val contentItem = inventory.content[slot]
-        val packet = if (contentItem == null) {
-            val playerItemIndex = playerSlotFromMenuSlot(slot, inventory)
-            val playerItem = viewer.player.inventory.getItem(playerItemIndex)
-
-            Pakket.handler.createSetSlotItemPacket(126, 0, slot, playerItem)
-        } else {
-            Pakket.handler.createSetSlotItemPacket(126, 0, slot, contentItem)
-        }
+        val item = inventoryItemAt(inventory, viewer, slot, allowPlayerFallback = true)
+        val packet = Pakket.handler.createSetSlotItemPacket(126, 0, slot, item)
         viewer.player.sendPacket(packet, true)
     }
 
@@ -270,13 +256,9 @@ internal object InventoryHandler {
         slotOffset: Int,
         player: Player,
     ) {
-        Pakket.handler.receiveWindowClick(
-            0,
-            originalPacket.stateId,
+        receiveWindowClick(
+            originalPacket,
             originalPacket.slotNum + slotOffset,
-            originalPacket.buttonNum,
-            originalPacket.clickTypeId,
-            originalPacket.carriedItem,
             originalPacket.changedSlots,
             player,
         )
@@ -296,16 +278,7 @@ internal object InventoryHandler {
         val adjustedSlots = changedSlots.mapKeys { (slot, _) ->
             slot - inventory.type.size + 9
         }
-        Pakket.handler.receiveWindowClick(
-            0,
-            packet.stateId,
-            slotOffset,
-            packet.buttonNum,
-            packet.clickTypeId,
-            packet.carriedItem,
-            adjustedSlots,
-            player
-        )
+        receiveWindowClick(packet, slotOffset, adjustedSlots, player)
     }
 
     fun accumulateDrag(player: Player, packet: PacketContainerClickEvent, type: ClickType) {
@@ -401,19 +374,50 @@ internal object InventoryHandler {
         val menu = player.packetInventory() ?: error("Menu under player key not found.")
         val slotRange = 0..menu.type.lastIndex
 
+        fun inMenuSlots(slot: Int): Boolean = slot in slotRange || slot in menu.content.keys
+
         return when (clickType.second) {
             ClickType.SHIFT_CLICK -> true
-            in listOf(
-                ClickType.PICKUP,
-                ClickType.PLACE
-            ),
-                -> wrapper.slotNum in slotRange || wrapper.slotNum in menu.content.keys
+            ClickType.PICKUP,
+            ClickType.PLACE -> inMenuSlots(wrapper.slotNum)
 
             ClickType.DRAG_END, ClickType.PICKUP_ALL ->
-                wrapper.slotNum in slotRange || wrapper.slotNum in menu.content.keys || wrapper.changedSlots.keys.any { it in slotRange }
+                inMenuSlots(wrapper.slotNum) || wrapper.changedSlots.keys.any { it in slotRange }
 
             else -> false
         }
+    }
+
+    private fun inventoryItemAt(
+        inventory: PacketInventory,
+        viewer: InventoryViewer,
+        slot: Int,
+        allowPlayerFallback: Boolean,
+    ): ItemStack? {
+        val contentItem = inventory.content[slot]
+        if (contentItem != null) return contentItem
+        if (!allowPlayerFallback && slot <= inventory.type.lastIndex) return null
+        val playerItemIndex = playerSlotFromMenuSlot(slot, inventory)
+        return viewer.player.inventory.getItem(playerItemIndex)
+    }
+
+    private fun receiveWindowClick(
+        packet: PacketContainerClickEvent,
+        slot: Int,
+        changedSlots: Map<Int, ItemStack?>,
+        player: Player,
+    ) {
+        val normalizedSlots = changedSlots.mapValues { (_, item) -> item ?: ItemStack.empty() }
+        Pakket.handler.receiveWindowClick(
+            0,
+            packet.stateId,
+            slot,
+            packet.buttonNum,
+            packet.clickTypeId,
+            packet.carriedItem,
+            normalizedSlots,
+            player
+        )
     }
 
 }
