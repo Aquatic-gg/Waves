@@ -26,7 +26,7 @@ dependencies {
     }
     compileOnly("gg.aquatic.execute:Execute:26.0.1")
     compileOnly("gg.aquatic:snapshotmap:26.0.2")
-    compileOnly("gg.aquatic:Pakket:26.1.9")
+    compileOnly("gg.aquatic:Pakket:26.1.10")
     compileOnly("gg.aquatic:Dispatch:26.0.2")
     compileOnly("gg.aquatic:KEvent:26.0.5")
     compileOnly("gg.aquatic:Blokk:26.0.2")
