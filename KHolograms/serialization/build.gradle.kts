@@ -10,7 +10,7 @@ dependencies {
     }
     api("gg.aquatic:KRegistry:25.0.2")
     api("gg.aquatic.execute:Execute:26.0.1")
-    api("gg.aquatic:Stacked:26.0.2")
+    api("gg.aquatic:Stacked:26.0.3")
     testImplementation(kotlin("test"))
 }
 
