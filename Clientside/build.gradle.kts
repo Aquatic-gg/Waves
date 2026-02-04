@@ -28,7 +28,7 @@ dependencies {
     compileOnly("gg.aquatic:snapshotmap:26.0.2")
     compileOnly("gg.aquatic:Pakket:26.1.9")
     compileOnly("gg.aquatic:Dispatch:26.0.2")
-    compileOnly("gg.aquatic:KEvent:1.0.4")
+    compileOnly("gg.aquatic:KEvent:26.0.5")
     compileOnly("gg.aquatic:Blokk:26.0.2")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     testImplementation(kotlin("test"))
