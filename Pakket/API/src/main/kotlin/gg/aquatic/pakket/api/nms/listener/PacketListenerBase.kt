@@ -79,18 +79,21 @@ abstract class PacketListenerBase(
     private fun handleOutgoing(packet: Any): OutgoingDispatchResult {
         for (handler in outgoingHandlers) {
             val result = handler.handle(packet, player) ?: continue
-            val dispatch = when (result) {
-                is OutgoingHandlerResult.Drop -> OutgoingDispatchResult(null, result.event)
-                is OutgoingHandlerResult.Forward ->
-                    OutgoingDispatchResult(result.packetFactory(), result.event)
+            val event = when (result) {
+                is OutgoingHandlerResult.Drop -> result.event
+                is OutgoingHandlerResult.Forward -> result.event
             }
-            dispatch.event?.let {
+            event?.let {
                 NMSHandler.eventBus.post(it)
                 if (it.cancelled) {
                     return OutgoingDispatchResult(null, null)
                 }
             }
-            return dispatch
+            return when (result) {
+                is OutgoingHandlerResult.Drop -> OutgoingDispatchResult(null, event)
+                is OutgoingHandlerResult.Forward ->
+                    OutgoingDispatchResult(result.packetFactory(), event)
+            }
         }
         return OutgoingDispatchResult(packet, null)
     }
