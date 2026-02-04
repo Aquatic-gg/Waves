@@ -1,10 +1,10 @@
 package gg.aquatic.kmenu.menu
 
+import gg.aquatic.common.getSectionList
 import gg.aquatic.execute.ConditionalActionHandle
 import gg.aquatic.execute.ConditionalActionsHandle
 import gg.aquatic.execute.action.ActionSerializer
 import gg.aquatic.execute.checkConditions
-import gg.aquatic.execute.getSectionList
 import gg.aquatic.execute.requirement.ConditionSerializer
 import gg.aquatic.execute.requirement.RequirementHandleWithFailActions
 import gg.aquatic.kmenu.inventory.ButtonType
