@@ -84,34 +84,41 @@ internal object InventoryHandler {
             if (shouldIgnore(event.containerId, event.player)) return
             event.cancelled = true
 
-            val player = event.player
-            val inventory = player.packetInventory() ?: return
-            val viewer = inventory.viewers[player.uniqueId] ?: return
-
-            val (buttonType, clickType) = getClickType(event, viewer)
-
-            // 1. Handle Drags
-            if (clickType == ClickType.DRAG_START || clickType == ClickType.DRAG_ADD) {
-                accumulateDrag(player, event, clickType)
-                return
-            }
-
-            // 2. Handle Clicks outside the window
-            if (event.slotNum == -999) {
-                inventory.updateItems(player)
-                return
-            }
-
-            // 3. Process the interaction
-            val changedSlots = calculateChangedSlots(player, inventory, event)
-
-            if (isMenuClick(event, buttonType to clickType, player)) {
-                dispatchMenuInteraction(viewer, inventory, event, buttonType, clickType, changedSlots)
-            } else {
-                handleClickInventory(player, event, clickType, changedSlots)
+            withMenuViewer(event.player) { inventory, viewer ->
+                handleClickForViewer(event, inventory, viewer)
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    private fun handleClickForViewer(
+        event: PacketContainerClickEvent,
+        inventory: PacketInventory,
+        viewer: InventoryViewer,
+    ) {
+        val player = event.player
+        val (buttonType, clickType) = getClickType(event, viewer)
+
+        // 1. Handle Drags
+        if (clickType == ClickType.DRAG_START || clickType == ClickType.DRAG_ADD) {
+            accumulateDrag(player, event, clickType)
+            return
+        }
+
+        // 2. Handle Clicks outside the window
+        if (event.slotNum == -999) {
+            inventory.updateItems(player)
+            return
+        }
+
+        // 3. Process the interaction
+        val changedSlots = calculateChangedSlots(player, inventory, event)
+
+        if (isMenuClick(event, buttonType to clickType, player)) {
+            dispatchMenuInteraction(viewer, inventory, event, buttonType, clickType, changedSlots)
+        } else {
+            handleClickInventory(player, inventory, event, clickType, changedSlots)
         }
     }
 
@@ -190,16 +197,16 @@ internal object InventoryHandler {
 
     private fun handleClickInventory(
         player: Player,
+        inventory: PacketInventory,
         packet: PacketContainerClickEvent,
         clickType: ClickType,
         changedSlots: Map<Int, ItemStack>,
     ) {
-        val menu = player.packetInventory() ?: error("Menu under player key not found.")
         //updateCarriedItem(player, packet.carriedItem.asItem(), clickType)
         if (clickType == ClickType.DRAG_END) {
-            handleDragEnd(player, menu)
+            handleDragEnd(player, inventory)
         }
-        createAdjustedClickPacket(packet, menu, player, changedSlots)
+        createAdjustedClickPacket(packet, inventory, player, changedSlots)
     }
 
     internal fun updateInventoryContent(inventory: PacketInventory, viewer: InventoryViewer) {
@@ -233,10 +240,9 @@ internal object InventoryHandler {
         if (click.clickType == ClickType.DRAG_END) {
             clearAccumulatedDrag(click.player)
         }
-        val inventory = click.player.player.packetInventory() ?: error("Menu under player key not found.")
-        val viewer = inventory.viewers[click.player.player.uniqueId] ?: return
-
-        updateInventoryContent(inventory, viewer)
+        withMenuViewer(click.player.player) { inventory, viewer ->
+            updateInventoryContent(inventory, viewer)
+        }
     }
 
     private fun handleDragEnd(player: Player, inventory: PacketInventory) {
@@ -282,19 +288,19 @@ internal object InventoryHandler {
     }
 
     fun accumulateDrag(player: Player, packet: PacketContainerClickEvent, type: ClickType) {
-        val inventory = player.packetInventory() ?: return
-        val viewer = inventory.viewers[player.uniqueId] ?: return
-        viewer.accumulatedDrag.add(AccumulatedDrag(packet, type))
+        withMenuViewer(player) { _, viewer ->
+            viewer.accumulatedDrag.add(AccumulatedDrag(packet, type))
+        }
     }
 
     fun shouldIgnore(id: Int, player: Player): Boolean = id != 126 || player.packetInventory() == null
 
     fun reRenderCarriedItem(player: Player) {
-        val menu = player.packetInventory() ?: error("Menu under player key not found.")
-        val carriedItem = menu.viewers[player.uniqueId]?.carriedItem ?: return
-
-        val packet = Pakket.handler.createSetSlotItemPacket(-1, 0, -1, carriedItem)
-        player.sendPacket(packet, false)
+        withMenuViewer(player) { _, viewer ->
+            val carriedItem = viewer.carriedItem ?: return@withMenuViewer
+            val packet = Pakket.handler.createSetSlotItemPacket(-1, 0, -1, carriedItem)
+            player.sendPacket(packet, false)
+        }
     }
 
     private fun updateCarriedItem(
@@ -302,19 +308,19 @@ internal object InventoryHandler {
         carriedItemStack: ItemStack?,
         clickType: ClickType,
     ) {
-        val inv = player.packetInventory() ?: return
-        val viewer = inv.viewers[player.uniqueId] ?: return
-        viewer.carriedItem = when (clickType) {
-            ClickType.PICKUP, ClickType.PICKUP_ALL, ClickType.DRAG_START, ClickType.DRAG_END -> {
-                carriedItemStack
-            }
+        withMenuViewer(player) { _, viewer ->
+            viewer.carriedItem = when (clickType) {
+                ClickType.PICKUP, ClickType.PICKUP_ALL, ClickType.DRAG_START, ClickType.DRAG_END -> {
+                    carriedItemStack
+                }
 
-            ClickType.PLACE -> {
-                if (carriedItemStack == null || carriedItemStack.isEmpty || carriedItemStack.type == Material.AIR) null else carriedItemStack
-            }
+                ClickType.PLACE -> {
+                    if (carriedItemStack == null || carriedItemStack.isEmpty || carriedItemStack.type == Material.AIR) null else carriedItemStack
+                }
 
-            else -> {
-                null
+                else -> {
+                    null
+                }
             }
         }
     }
@@ -351,19 +357,7 @@ internal object InventoryHandler {
     }
 
     private fun handleDragClick(button: Int): Pair<ButtonType, ClickType> {
-        val type = when (button) {
-            0, 4, 8 -> ClickType.DRAG_START
-            1, 5, 9 -> ClickType.DRAG_ADD
-            2, 6, 10 -> ClickType.DRAG_END
-            else -> return ButtonType.LEFT to ClickType.UNDEFINED
-        }
-        val buttonType = when (button) {
-            0, 1, 2 -> ButtonType.LEFT
-            4, 5, 6 -> ButtonType.RIGHT
-            8, 9, 10 -> ButtonType.MIDDLE
-            else -> ButtonType.LEFT
-        }
-        return buttonType to type
+        return dragClickMap[button] ?: (ButtonType.LEFT to ClickType.UNDEFINED)
     }
 
     fun isMenuClick(
@@ -419,5 +413,26 @@ internal object InventoryHandler {
             player
         )
     }
+
+    private inline fun withMenuViewer(
+        player: Player,
+        block: (PacketInventory, InventoryViewer) -> Unit,
+    ) {
+        val inventory = player.packetInventory() ?: return
+        val viewer = inventory.viewers[player.uniqueId] ?: return
+        block(inventory, viewer)
+    }
+
+    private val dragClickMap = mapOf(
+        0 to (ButtonType.LEFT to ClickType.DRAG_START),
+        1 to (ButtonType.LEFT to ClickType.DRAG_ADD),
+        2 to (ButtonType.LEFT to ClickType.DRAG_END),
+        4 to (ButtonType.RIGHT to ClickType.DRAG_START),
+        5 to (ButtonType.RIGHT to ClickType.DRAG_ADD),
+        6 to (ButtonType.RIGHT to ClickType.DRAG_END),
+        8 to (ButtonType.MIDDLE to ClickType.DRAG_START),
+        9 to (ButtonType.MIDDLE to ClickType.DRAG_ADD),
+        10 to (ButtonType.MIDDLE to ClickType.DRAG_END),
+    )
 
 }
