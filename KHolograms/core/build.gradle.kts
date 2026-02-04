@@ -10,7 +10,7 @@ dependencies {
     }
     api("gg.aquatic.replace:Replace:26.0.3")
     api("gg.aquatic:snapshotmap:26.0.2")
-    api("gg.aquatic:Pakket:26.1.7") {
+    api("gg.aquatic:Pakket:26.1.10") {
         isTransitive = false
     }
     api("gg.aquatic.pakket:API:26.1.7")
