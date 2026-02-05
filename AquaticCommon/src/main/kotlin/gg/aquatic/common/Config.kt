@@ -19,7 +19,7 @@ class Config {
         this.main = main
         file = File(main.dataFolder, path)
     }
-    private var _config: FileConfiguration? = null
+    private val _config: FileConfiguration = YamlConfiguration()
 
     suspend fun load() = withContext(VirtualsCtx) {
         loadSync()
@@ -40,12 +40,12 @@ class Config {
                     .onFailure { it.printStackTrace() }
             }
         }
-        _config = YamlConfiguration.loadConfiguration(file)
+        _config.load(file)
         return configuration
     }
 
     val configuration: FileConfiguration
-        get() = _config ?: error("Configuration ${file.name} has not been loaded!")
+        get() = _config
 
     @Suppress("unused")
     suspend fun save() = withContext(VirtualsCtx) {
