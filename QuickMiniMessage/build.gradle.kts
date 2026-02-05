@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "2.3.0"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
-    id("me.champeau.jmh") version "0.7.2"
+    id("me.champeau.jmh") version "0.7.3"
     `maven-publish`
 }
 
