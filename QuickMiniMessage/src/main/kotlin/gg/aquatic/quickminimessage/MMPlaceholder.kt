@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.format.StyleBuilderApplicable
 
+@Suppress("unused")
 object MMPlaceholder {
     @JvmStatic
     fun parsed(name: String, value: String): MMTagResolver {

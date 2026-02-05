@@ -12,19 +12,12 @@ import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.DataComponentValue
 import net.kyori.adventure.text.event.HoverEvent
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.ShadowColor
-import net.kyori.adventure.text.format.Style
-import net.kyori.adventure.text.format.TextColor
-import net.kyori.adventure.text.format.TextDecoration
+import net.kyori.adventure.text.format.*
 import net.kyori.adventure.text.`object`.ObjectContents
-import net.kyori.adventure.text.`object`.PlayerHeadObjectContents
 import net.kyori.adventure.util.HSVLike
-import java.util.Locale
-import java.util.UUID
+import java.util.*
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.text.iterator
 
 object MMParser {
     @JvmStatic
@@ -69,11 +62,13 @@ object MMParser {
         return Parser(input, resolver, pointered, dataComponentResolver).parse()
     }
 
+    @Suppress("unused")
     @JvmStatic
     fun deserialize(input: String, vararg resolvers: MMTagResolver): Component {
         return deserialize(input, MMTagResolver.resolver(*resolvers))
     }
 
+    @Suppress("unused")
     @JvmStatic
     fun parse(input: String): Component = deserialize(input)
 
@@ -299,7 +294,8 @@ object MMParser {
             }
             val custom = resolveCustom(rawLower, token.args)
             if (custom != null) {
-                return handleCustomTag(rawLower, custom, token)
+                handleCustomTag(rawLower, custom, token)
+                return true
             }
             val name = normalizeTagName(rawLower)
             when (name) {
@@ -484,11 +480,10 @@ object MMParser {
             return resolver.resolve(name, args, context)
         }
 
-        private fun handleCustomTag(name: String, tag: MMTag, token: TagToken): Boolean {
-            return when (tag) {
+        private fun handleCustomTag(name: String, tag: MMTag, token: TagToken) {
+            when (tag) {
                 is MMTag.PreProcess -> {
                     parseSegment(tag.value)
-                    true
                 }
                 is MMTag.Styling -> {
                     if (token.isSelfClosing) {
@@ -496,7 +491,6 @@ object MMParser {
                     } else {
                         pushStyle(name, tag.style)
                     }
-                    true
                 }
                 is MMTag.Inserting -> {
                     if (!token.isSelfClosing && tag.allowsChildren) {
@@ -504,7 +498,6 @@ object MMParser {
                     } else {
                         frames.last().children.add(tag.component)
                     }
-                    true
                 }
             }
         }
@@ -730,9 +723,9 @@ object MMParser {
                 isUuid(input) -> ObjectContents.playerHead(UUID.fromString(input))
                 input.contains("/") || input.contains(":") -> {
                     val textureKey = parseKey(input) ?: return null
-                    ObjectContents.playerHead(PlayerHeadObjectContents.SkinSource { builder ->
+                    ObjectContents.playerHead { builder ->
                         builder.texture(textureKey)
-                    })
+                    }
                 }
                 else -> ObjectContents.playerHead(input)
             }
@@ -811,7 +804,6 @@ object MMParser {
                         return null
                     }
                     phase = possiblePhase
-                    index++
                     break
                 }
                 return null
@@ -1182,7 +1174,26 @@ object MMParser {
         }
     }
 
-    private data class ColorListResult(val colors: Array<TextColor>, val phase: Double)
+    private data class ColorListResult(val colors: Array<TextColor>, val phase: Double) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other !is ColorListResult) {
+                return false
+            }
+            if (!colors.contentEquals(other.colors)) {
+                return false
+            }
+            return phase == other.phase
+        }
+
+        override fun hashCode(): Int {
+            var result = colors.contentHashCode()
+            result = 31 * result + phase.hashCode()
+            return result
+        }
+    }
 
     private fun transitionColor(colors: Array<TextColor>, phase: Double): TextColor {
         var adjustedPhase = phase.toFloat()

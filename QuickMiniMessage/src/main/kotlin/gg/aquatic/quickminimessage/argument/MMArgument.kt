@@ -9,6 +9,7 @@ import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.TranslationArgument
 import net.kyori.adventure.text.TranslationArgumentLike
 
+@Suppress("unused")
 object MMArgument {
     @JvmStatic
     fun bool(name: String, value: Boolean): ComponentLike {

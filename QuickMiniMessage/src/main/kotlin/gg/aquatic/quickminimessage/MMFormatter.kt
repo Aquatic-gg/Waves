@@ -14,6 +14,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAccessor
 import java.util.Locale
 
+@Suppress("unused")
 object MMFormatter {
     @JvmStatic
     fun number(name: String, number: Number): MMTagResolver {
