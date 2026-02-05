@@ -1,30 +1,35 @@
-package gg.aquatic.quickminimessage
+﻿package gg.aquatic.quickminimessage.parser
 
-import gg.aquatic.quickminimessage.parser.MMParserEngine
 import gg.aquatic.quickminimessage.tag.resolver.MMDataComponentResolver
 import gg.aquatic.quickminimessage.tag.resolver.MMTagResolver
 import net.kyori.adventure.pointer.Pointered
 import net.kyori.adventure.text.Component
 
-object MMParser {
+internal object MMParserEngine {
     @JvmStatic
     fun deserialize(input: String): Component {
-        return MMParserEngine.deserialize(input)
+        return deserialize(input, MMTagResolver.empty(), MMDataComponentResolver.empty())
     }
 
     @JvmStatic
     fun deserialize(input: String, resolver: MMTagResolver): Component {
-        return MMParserEngine.deserialize(input, resolver)
+        return deserialize(input, resolver, MMDataComponentResolver.empty())
     }
 
     @JvmStatic
     fun deserialize(input: String, resolver: MMTagResolver, dataComponentResolver: MMDataComponentResolver): Component {
-        return MMParserEngine.deserialize(input, resolver, dataComponentResolver)
+        if (input.isEmpty()) {
+            return Component.empty()
+        }
+        if (input.indexOf(TAG_OPEN) < 0 && input.indexOf(ESCAPE) < 0) {
+            return Component.text(input)
+        }
+        return Parser(input, resolver, null, dataComponentResolver).parse()
     }
 
     @JvmStatic
     fun deserialize(input: String, resolver: MMTagResolver, pointered: Pointered?): Component {
-        return MMParserEngine.deserialize(input, resolver, pointered)
+        return deserialize(input, resolver, pointered, MMDataComponentResolver.empty())
     }
 
     @JvmStatic
@@ -34,14 +39,22 @@ object MMParser {
         pointered: Pointered?,
         dataComponentResolver: MMDataComponentResolver
     ): Component {
-        return MMParserEngine.deserialize(input, resolver, pointered, dataComponentResolver)
+        if (input.isEmpty()) {
+            return Component.empty()
+        }
+        if (input.indexOf(TAG_OPEN) < 0 && input.indexOf(ESCAPE) < 0) {
+            return Component.text(input)
+        }
+        return Parser(input, resolver, pointered, dataComponentResolver).parse()
     }
 
+    @Suppress("unused")
     @JvmStatic
     fun deserialize(input: String, vararg resolvers: MMTagResolver): Component {
-        return MMParserEngine.deserialize(input, *resolvers)
+        return deserialize(input, MMTagResolver.resolver(*resolvers))
     }
 
+    @Suppress("unused")
     @JvmStatic
     fun parse(input: String): Component = deserialize(input)
 }
