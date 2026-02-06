@@ -37,7 +37,7 @@ dependencies {
     compileOnly("gg.aquatic:AEAPI:1.0")
     compileOnly("io.th0rgal:oraxen:1.207.0")
     compileOnly("com.github.LoneDev6:API-ItemsAdder:3.6.2-beta-r3")
-    compileOnly("io.lumine:Mythic-Dist:5.11.1")
+    compileOnly("io.lumine:Mythic-Dist:5.11.2")
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
