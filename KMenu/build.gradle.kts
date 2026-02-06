@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 import org.gradle.api.tasks.testing.Test
 
 plugins {
-    kotlin("jvm") version "2.3.0" apply false
+    kotlin("jvm") version "2.3.10" apply false
     id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
 
