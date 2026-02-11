@@ -20,7 +20,6 @@ import net.kyori.adventure.text.Component
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.NonNullList
-import net.minecraft.network.Connection
 import net.minecraft.network.FriendlyByteBuf
 import net.minecraft.network.HashedPatchMap
 import net.minecraft.network.HashedStack
@@ -34,7 +33,6 @@ import net.minecraft.server.level.ClientInformation
 import net.minecraft.server.level.ServerEntity
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.server.network.ServerCommonPacketListenerImpl
 import net.minecraft.stats.RecipeBookSettings
 import net.minecraft.util.HashOps
 import net.minecraft.world.entity.Entity
@@ -70,7 +68,6 @@ import org.bukkit.inventory.*
 import org.bukkit.util.Vector
 import org.joml.Vector3d
 import java.util.*
-import java.util.concurrent.atomic.AtomicInteger
 import kotlin.jvm.optionals.getOrNull
 
 @Suppress("unused")
