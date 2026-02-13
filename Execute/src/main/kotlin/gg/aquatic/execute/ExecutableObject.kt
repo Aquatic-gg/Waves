@@ -42,7 +42,7 @@ interface Action<A>: ExecutableObject<A, Unit> {
 
         val REGISTRY: ActionRegistry
             get() {
-                return Registry.get(REGISTRY_KEY)
+                return Registry[REGISTRY_KEY]
             }
     }
 }
@@ -55,7 +55,7 @@ interface Condition<A>: ExecutableObject<A, Boolean> {
 
         val REGISTRY: ConditionRegistry
             get() {
-                return Registry.get(REGISTRY_KEY)
+                return Registry[REGISTRY_KEY]
             }
     }
 }
