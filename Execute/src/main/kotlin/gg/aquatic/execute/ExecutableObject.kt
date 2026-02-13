@@ -10,13 +10,13 @@ interface ExecutableObject<A, B> {
     suspend fun execute(binder: A, args: ArgumentContext<A>): B
     val arguments: List<ObjectArgument<*>>
 
-    fun arguments(builder: (ArgumentBuilder<A, B>).() -> Unit): List<ObjectArgument<*>> {
-        val argumentBuilder = ArgumentBuilder<A, B>()
+    fun arguments(builder: (ArgumentBuilder).() -> Unit): List<ObjectArgument<*>> {
+        val argumentBuilder = ArgumentBuilder()
         builder(argumentBuilder)
         return argumentBuilder.build()
     }
 
-    class ArgumentBuilder<A, B> {
+    class ArgumentBuilder {
         private val arguments = mutableListOf<ObjectArgument<*>>()
 
         fun primitive(id: String, def: Any? = null, required: Boolean = false) {
