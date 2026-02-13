@@ -20,6 +20,11 @@ class MMParserComparisonTest {
     }
 
     @Test
+    fun parseSimpleNonAscii() {
+        assertMatches("<光>光</光> world")
+    }
+
+    @Test
     fun parseNested() {
         assertMatches("<bold><blue>Hello</blue> <italic>world</italic></bold>")
     }

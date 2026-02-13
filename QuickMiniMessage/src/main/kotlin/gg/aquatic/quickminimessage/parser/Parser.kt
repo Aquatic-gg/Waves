@@ -237,8 +237,7 @@ internal class Parser(
         }
         val rawLower = rawName
         if (token.isClosing) {
-            closeTag(rawLower)
-            return true
+            return closeTag(rawLower)
         }
         val custom = resolveCustom(rawLower, token.args)
         if (custom != null) {
@@ -450,14 +449,15 @@ internal class Parser(
         }
     }
 
-    private fun closeTag(name: String) {
+    private fun closeTag(name: String): Boolean {
         if (tryClose(name)) {
-            return
+            return true
         }
         val normalized = normalizeTagName(name)
         if (normalized != name) {
-            tryClose(normalized)
+            return tryClose(normalized)
         }
+        return false
     }
 
     private fun tryClose(name: String): Boolean {
