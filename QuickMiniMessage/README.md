@@ -68,28 +68,28 @@ JMH results below come from `build/reports/jmh/results.json` on this machine (JD
 
 ### Parsing Scenarios
 
-| Scenario     | QuickMiniMessage     | MiniMessage      | Speedup |
-|--------------|----------------------|------------------|---------|
-| plain        | 266,551,008.97 ops/s | 694,679.73 ops/s | 383.7x  |
-| simple       | 4,852,675.34 ops/s   | 254,844.58 ops/s | 19.0x   |
-| nested       | 1,055,032.85 ops/s   | 252,931.94 ops/s | 4.2x    |
-| gradient     | 37,984.31 ops/s      | 18,735.17 ops/s  | 2.0x    |
-| rainbow      | 37,757.89 ops/s      | 38,652.76 ops/s  | 1.0x    |
-| hover        | 800,271.07 ops/s     | 136,987.02 ops/s | 5.8x    |
-| nbt          | 1,561,248.44 ops/s   | 271,604.62 ops/s | 5.7x    |
-| translatable | 1,346,849.98 ops/s   | 88,216.11 ops/s  | 15.3x   |
+| Scenario     | QuickMiniMessage       | MiniMessage        | Speedup |
+|--------------|------------------------|--------------------|---------|
+| plain        | 112,775,021.24 ops/s   | 909,037.76 ops/s   | 124.1x  |
+| simple       | 2,863,604.58 ops/s     | 291,353.07 ops/s   | 9.8x    |
+| nested       | 2,081,179.07 ops/s     | 129,104.32 ops/s   | 16.1x   |
+| gradient     | 57,589.83 ops/s        | 14,784.48 ops/s    | 3.9x    |
+| rainbow      | 64,206.62 ops/s        | 18,831.82 ops/s    | 3.4x    |
+| hover        | 1,124,064.33 ops/s     | 70,513.54 ops/s    | 15.9x   |
+| nbt          | 1,667,070.91 ops/s     | 158,112.84 ops/s   | 10.5x   |
+| translatable | 878,501.71 ops/s       | 48,536.56 ops/s    | 18.1x   |
 
 ![Parse benchmark](docs/benchmarks/mmparserbenchmark.png)
 
 ### Resolver Scenarios
 
-| Scenario | QuickMiniMessage   | MiniMessage      | Speedup |
-|----------|--------------------|------------------|---------|
-| parsed   | 3,933,961.11 ops/s | 417,781.49 ops/s | 9.4x    |
-| unparsed | 8,283,153.03 ops/s | 744,363.75 ops/s | 11.1x   |
-| styling  | 5,324,275.95 ops/s | 642,034.98 ops/s | 8.3x    |
-| number   | 1,943,916.79 ops/s | 244,943.60 ops/s | 7.9x    |
-| joining  | 1,173,354.57 ops/s | 82,949.85 ops/s  | 14.1x   |
+| Scenario | QuickMiniMessage     | MiniMessage        | Speedup |
+|----------|----------------------|--------------------|---------|
+| parsed   | 4,155,240.71 ops/s   | 232,270.92 ops/s   | 17.9x   |
+| unparsed | 4,340,742.90 ops/s   | 487,208.89 ops/s   | 8.9x    |
+| styling  | 5,576,573.43 ops/s   | 390,397.35 ops/s   | 14.3x   |
+| number   | 1,878,860.44 ops/s   | 127,031.63 ops/s   | 14.8x   |
+| joining  | 896,475.11 ops/s     | 53,166.22 ops/s    | 16.8x   |
 
 ![Resolver benchmark](docs/benchmarks/mmparserresolverbenchmark.png)
 
