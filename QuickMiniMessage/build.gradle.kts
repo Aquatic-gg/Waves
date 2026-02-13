@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm") version "2.3.10"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     id("me.champeau.jmh") version "0.7.3"
     `maven-publish`
@@ -19,8 +19,8 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     jmhImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    jmhImplementation("net.kyori:adventure-text-minimessage:4.25.0")
-    jmhImplementation("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    jmhImplementation("net.kyori:adventure-text-minimessage:4.26.1")
+    jmhImplementation("com.fasterxml.jackson.core:jackson-databind:2.21.0")
     jmhImplementation("org.knowm.xchart:xchart:3.8.8")
 
     // Testing
