@@ -47,7 +47,7 @@ publishing {
     publications {
         create<MavenPublication>("maven") {
             groupId = "gg.aquatic"
-            artifactId = "Dispatch"
+            artifactId = "Dispatch-bukkit"
             version = "${project.version}"
             from(components["java"])
         }
