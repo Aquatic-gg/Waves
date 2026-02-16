@@ -245,8 +245,8 @@ Add the following dependency to your `build.gradle.kts`:
 ```kotlin
 dependencies {
     // Core module
-    implementation("gg.aquatic.dispatch:dispatch:26.0.1")
-    implementation("gg.aquatic.dispatch:dispatch:26.0.1:bukkit")
+    implementation("gg.aquatic.dispatch:Dispatch:26.0.1")
+    implementation("gg.aquatic.dispatch:Dispatch-bukkit:26.0.1")
 }
   ```
 ---
