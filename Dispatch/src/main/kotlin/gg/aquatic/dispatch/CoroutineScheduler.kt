@@ -59,6 +59,8 @@ open class CoroutineScheduler(
         Thread(r, "SchedulerThread").apply { isDaemon = true }
     }.asCoroutineDispatcher()
 ) {
+    constructor(baseCtx: BaseCtx) : this(dispatcher = baseCtx, scope = baseCtx.scope)
+
     private val logger = LoggerFactory.getLogger(CoroutineScheduler::class.java)
 
     private sealed class SchedulerMsg {

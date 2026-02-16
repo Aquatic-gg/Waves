@@ -228,6 +228,45 @@ be reused.
 
 ---
 
+## 🚀 Platform Support (Paper/Bukkit)
+
+Dispatch now includes a dedicated module for **Paper/Bukkit** servers. This module allows you to run tasks safely on the server's primary thread or specific region threads (for Folia compatibility) while maintaining the benefits of coroutine scheduling.
+
+- **Thread Safety**: Automatically handles thread-switching and "joins" tasks, ensuring the scheduler waits for the main thread to finish before proceeding.
+- **Folia Ready**: Includes `BukkitCtx.OfLocation` and `BukkitCtx.OfEntity` for regional scheduling.
+- **Non-Blocking**: The scheduler runs in the background; only your task's action blocks the primary thread.
+
+---
+
+## Installation
+
+Add the following dependency to your `build.gradle.kts`:
+
+```kotlin
+dependencies {
+    // Core module
+    implementation("gg.aquatic.dispatch:dispatch:26.0.1")
+    implementation("gg.aquatic.dispatch:dispatch:26.0.1:bukkit")
+}
+  ```
+---
+
+## Quick Start
+
+To run tasks on the Bukkit Main Thread, provide a dispatcher that uses `BukkitCtx`. This ensures your code can safely access the Bukkit API.
+
+```kotlin
+val syncCtx = BukkitCtx.Global(myPlugin)
+val scheduler = CoroutineScheduler(baseCtx = syncDispatcher)
+
+// This task now runs safely on the Bukkit Main Thread!
+scheduler.runRepeatFixedRate(20 * 50L) {
+    Bukkit.broadcastMessage("Sync Tick!")
+}
+```
+
+---
+
 ## Best Practices
 
 - **Exception Handling**: Tasks should handle their own exceptions. Unhandled exceptions are logged and counted as
