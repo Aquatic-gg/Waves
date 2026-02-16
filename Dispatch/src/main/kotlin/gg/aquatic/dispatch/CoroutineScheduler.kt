@@ -74,17 +74,13 @@ open class CoroutineScheduler(
     }
 
     private val scope = CoroutineScope(scope.coroutineContext + dispatcher)
-
     private val msgChannel = Channel<SchedulerMsg>(capacity = Channel.UNLIMITED)
-
     private val _events = MutableSharedFlow<SchedulerEvent>(
         extraBufferCapacity = 64
     )
     val events: Flow<SchedulerEvent> = _events.asSharedFlow()
-
     private var executions = 0L
     private var failures = 0L
-
     private val _metrics = MutableStateFlow(
         SchedulerMetrics(0, 0, 0, 0, 0)
     )
