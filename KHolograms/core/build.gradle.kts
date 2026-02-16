@@ -14,7 +14,7 @@ dependencies {
         isTransitive = false
     }
     api("gg.aquatic.pakket:API:26.1.10")
-    api("gg.aquatic:Dispatch:26.0.2")
+    api("gg.aquatic:Dispatch:26.0.4")
     testImplementation(kotlin("test"))
 }
 
