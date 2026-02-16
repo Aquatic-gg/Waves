@@ -1,9 +1,5 @@
 package gg.aquatic.dispatch
 
-import java.util.*
-
-typealias TaskId = UUID
-
 data class Task(
     val id: TaskId,
     val type: ScheduleType,
