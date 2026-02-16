@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 
-class BaseCtx(
+open class BaseCtx(
     val check: () -> Boolean,
     val execution: (Runnable) -> Unit,
     val logger: Logger

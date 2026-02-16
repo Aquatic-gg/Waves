@@ -1,33 +1,33 @@
 plugins {
-    kotlin("jvm") version "2.3.0"
-    id("co.uzzu.dotenv.gradle") version "4.0.0"
-    `java-library`
+    kotlin("jvm")
     `maven-publish`
+    `java-library`
 }
 
-group = "gg.aquatic.dispatch"
-version = "26.0.2"
+version = rootProject.version
 
 repositories {
+    maven("https://repo.papermc.io/repository/maven-public/")
     mavenCentral()
 }
 
 dependencies {
-    testImplementation(kotlin("test"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    api("org.slf4j:slf4j-api:2.0.17")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    api(rootProject)
 }
 
 kotlin {
     jvmToolchain(21)
 }
 
-tasks.test {
-    useJUnitPlatform()
-}
-
 val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
 val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
+
+tasks {
+    jar {
+        archiveClassifier.set("bukkit")
+    }
+}
 
 publishing {
     repositories {
