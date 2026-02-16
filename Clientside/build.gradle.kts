@@ -28,7 +28,7 @@ dependencies {
     api("gg.aquatic.execute:Execute:26.0.1")
     api("gg.aquatic:snapshotmap:26.0.2")
     api("gg.aquatic:Pakket:26.1.10")
-    api("gg.aquatic:Dispatch:26.0.2")
+    api("gg.aquatic:Dispatch:26.0.4")
     api("gg.aquatic:KEvent:26.0.5")
     api("gg.aquatic:Blokk:26.0.2")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
