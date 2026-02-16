@@ -1,4 +1,4 @@
-package gg.aquatic.clientside.meg
+package gg.aquatic.clientside.bm
 
 import gg.aquatic.clientside.FakeObject
 import gg.aquatic.common.audience.AquaticAudience
