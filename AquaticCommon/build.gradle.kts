@@ -23,7 +23,8 @@ dependencies {
     compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-dao:$exposedVersion")
     compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    compileOnly("gg.aquatic:Dispatch:26.0.2")
+    compileOnly("gg.aquatic:Dispatch:26.0.4")
+    compileOnly("gg.aquatic:Dispatch-bukkit:26.0.4")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
 }
 
