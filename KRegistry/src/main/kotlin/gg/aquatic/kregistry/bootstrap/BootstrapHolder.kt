@@ -1,4 +1,7 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.bootstrap
+
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryKey
 
 /**
  * Interface representing a holder for bootstrapping registry-related operations.
@@ -7,10 +10,6 @@ package gg.aquatic.kregistry
  * initialization and updates of registry data.
  */
 interface BootstrapHolder {
-    companion object {
-        internal var bootstrap: RegistryBootstrap? = null
-            private set
-    }
     /**
      * Injects the current instance of `BootstrapHolder` into the `RegistryBootstrap` system and sets
      * it as the active bootstrap holder. This method ensures that the `BootstrapHolder` is registered
@@ -24,7 +23,7 @@ interface BootstrapHolder {
      */
     fun inject(): () -> Unit {
         val bootstrap = RegistryBootstrap()
-        Companion.bootstrap = bootstrap
+        BootstrapHolderState.set(this, bootstrap)
 
         return {
             bootstrap.buildRegistries()
@@ -63,6 +62,8 @@ interface BootstrapHolder {
      */
     fun <K, V> registry(key: RegistryKey<K, V>): Registry<K, V> = bootstrapOrThrow().getRegistry(key)
 
+    operator fun <K, V> get(key: RegistryKey<K, V>): Registry<K, V> = registry(key)
+
     private fun bootstrapOrThrow(): RegistryBootstrap =
-        bootstrap ?: error("BootstrapHolder not injected")
+        BootstrapHolderState.get(this)
 }

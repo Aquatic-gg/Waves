@@ -1,6 +1,7 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.bootstrap
 
-import kotlin.collections.iterator
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryKey
 
 class RegistryDefinition<A, B>(
     val id: RegistryKey<A, B>,
@@ -12,7 +13,7 @@ class RegistryDefinition<A, B>(
         val holderData = hashMapOf<RegistryHolder, Map<A, B>>()
         for ((holder, builder) in builders) {
             val builderInst = RegistryContributionBuilder<A, B>()
-            builder(RegistryContributionBuilder())
+            builder(builderInst)
             holderData[holder] = builderInst.data
             data.putAll(builderInst.data)
         }

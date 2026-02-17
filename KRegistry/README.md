@@ -43,7 +43,7 @@ object CoreHolder : RegistryHolder
 
 fun bootstrap() {
     // Register contributions
-    CoreHolder.registryBootstrap {
+    CoreHolder.registryBootstrap(AppBootstrap) {
         registry(SERVICES) {
             add("auth", AuthService())
             add("db", DatabaseService())
@@ -56,7 +56,7 @@ fun bootstrap() {
 }
 
 // Later...
-val services = AppBootstrap.registry(SERVICES)
+val services = AppBootstrap[SERVICES]
 val auth = services.get("auth")
 ```
 
@@ -90,13 +90,27 @@ val builder = RegistryContributionBuilder<Class<out Animal>, List<GenericTyped<o
 builder.addTyped(AnimalEntry(Dog::class.java, Dog()))
 
 val typedCollection: TypedCollectionRegistry<Animal> = Registry(
-    RegistryKey(RegistryId("example", "animals")),
+    RegistryKey.typedCollection<Animal>(RegistryId("example", "animals")),
     builder.data,
     emptyMap()
 )
 
 val dogs = typedCollection.getTypedEntries<Dog>()
 val allAnimals = typedCollection.getAllHierarchicalEntries<Animal>()
+```
+
+### Contribution DSL
+
+You can also pass a `ContributionBuilder.() -> Unit` around and apply it later:
+
+```kotlin
+val ANIMALS = RegistryKey.typedCollection<Animal>(RegistryId("example", "animals"))
+
+val contribution: ContributionBuilder.() -> Unit = {
+    registry(ANIMALS) {
+        addTyped(AnimalEntry(Dog::class.java, Dog()))
+    }
+}
 ```
 
 ## Core Concepts

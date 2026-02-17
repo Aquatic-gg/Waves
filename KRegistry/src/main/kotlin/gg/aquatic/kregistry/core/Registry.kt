@@ -1,4 +1,6 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.core
+
+import gg.aquatic.kregistry.bootstrap.RegistryHolder
 
 class Registry<A, B>(
     val registryKey: RegistryKey<A, B>,

@@ -1,4 +1,4 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.core
 
 
 class RegistryGraph internal constructor(

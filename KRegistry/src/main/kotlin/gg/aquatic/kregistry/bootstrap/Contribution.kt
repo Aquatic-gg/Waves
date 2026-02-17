@@ -1,4 +1,6 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.bootstrap
+
+import gg.aquatic.kregistry.core.RegistryKey
 
 internal class Contribution(
     val holder: RegistryHolder,

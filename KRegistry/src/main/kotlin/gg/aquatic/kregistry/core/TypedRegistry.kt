@@ -1,6 +1,6 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.core
 
-import kotlin.collections.iterator
+import gg.aquatic.kregistry.bootstrap.RegistryContributionBuilder
 
 interface GenericTyped<T : Any> {
     val type: Class<out T>

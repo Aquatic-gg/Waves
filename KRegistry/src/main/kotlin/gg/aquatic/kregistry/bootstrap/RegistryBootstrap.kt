@@ -1,14 +1,15 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.bootstrap
 
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryGraph
+import gg.aquatic.kregistry.core.RegistryKey
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.iterator
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 @OptIn(ExperimentalAtomicApi::class)
 internal class RegistryBootstrap {
-
     private val initialized = AtomicBoolean(false)
     private val definitions = ConcurrentHashMap<RegistryKey<*, *>, RegistryDefinition<*, *>>()
     private val graphRef =

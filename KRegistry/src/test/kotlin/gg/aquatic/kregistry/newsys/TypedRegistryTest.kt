@@ -1,19 +1,18 @@
-package gg.aquatic.kregistry.newsys
+package gg.aquatic.kregistry.core
 
-import gg.aquatic.kregistry.GenericTyped
-import gg.aquatic.kregistry.Registry
-import gg.aquatic.kregistry.RegistryContributionBuilder
-import gg.aquatic.kregistry.RegistryId
-import gg.aquatic.kregistry.RegistryKey
-import gg.aquatic.kregistry.TypedCollectionRegistry
-import gg.aquatic.kregistry.TypedRegistry
-import gg.aquatic.kregistry.addTyped
-import gg.aquatic.kregistry.getAllHierarchical
-import gg.aquatic.kregistry.getAllHierarchicalEntries
-import gg.aquatic.kregistry.getHierarchical
-import gg.aquatic.kregistry.getHierarchicalEntries
-import gg.aquatic.kregistry.getTyped
-import gg.aquatic.kregistry.getTypedEntries
+import gg.aquatic.kregistry.bootstrap.BootstrapHolder
+import gg.aquatic.kregistry.bootstrap.ContributionBuilder
+import gg.aquatic.kregistry.bootstrap.RegistryContributionBuilder
+import gg.aquatic.kregistry.bootstrap.RegistryHolder
+import gg.aquatic.kregistry.core.TypedCollectionRegistry
+import gg.aquatic.kregistry.core.TypedRegistry
+import gg.aquatic.kregistry.core.addTyped
+import gg.aquatic.kregistry.core.getAllHierarchical
+import gg.aquatic.kregistry.core.getAllHierarchicalEntries
+import gg.aquatic.kregistry.core.getHierarchical
+import gg.aquatic.kregistry.core.getHierarchicalEntries
+import gg.aquatic.kregistry.core.getTyped
+import gg.aquatic.kregistry.core.getTypedEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -96,5 +95,28 @@ class TypedRegistryTest {
         assertEquals(2, hierarchicalExplicit.size)
 
         assertNotNull(typedCollection.getHierarchicalEntries<Dog>())
+    }
+
+    @Test
+    fun `contribution builder supports typed collections`() {
+        val dog = Dog("fido")
+        val registryKey = RegistryKey.typedCollection<Animal>(RegistryId("test", "typed-collection"))
+
+        val contributionBuilder: ContributionBuilder.() -> Unit = {
+            registry(registryKey) {
+                addTyped(AnimalEntry(Dog::class.java, dog))
+            }
+        }
+
+        val testBootstrap = object : BootstrapHolder {}
+        val testHolder = object : RegistryHolder {}
+
+        val build = testBootstrap.inject()
+        testHolder.registryBootstrap(testBootstrap, contributionBuilder)
+        build()
+
+        val typedCollection = testBootstrap[registryKey]
+        val dogs = typedCollection.getTypedEntries<Dog>()
+        assertEquals(1, dogs.size)
     }
 }

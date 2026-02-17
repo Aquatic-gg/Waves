@@ -1,4 +1,4 @@
-package gg.aquatic.kregistry
+package gg.aquatic.kregistry.bootstrap
 
 /**
  * Represents an entity capable of holding and configuring registry contributions.
@@ -30,12 +30,11 @@ interface RegistryHolder {
      *                The receiver is an instance of `ContributionBuilder` where
      *                contributions can be configured.
      */
-    fun registryBootstrap(builder: ContributionBuilder.() -> Unit) {
+    fun registryBootstrap(bootstrap: BootstrapHolder, builder: ContributionBuilder.() -> Unit) {
         val contrBuilder = ContributionBuilder()
         contrBuilder.builder()
 
         val contribution = contrBuilder.build(this)
-        val bootstrap = BootstrapHolder.bootstrap ?: error("BootstrapHolder not injected")
-        bootstrap.injectContribution(contribution)
+        BootstrapHolderState.get(bootstrap).injectContribution(contribution)
     }
 }
