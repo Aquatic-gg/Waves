@@ -1,6 +1,16 @@
 package gg.aquatic.kregistry
 
+/**
+ * Interface representing a holder for bootstrapping registry-related operations.
+ * A `BootstrapHolder` is responsible for managing the lifecycle of registries, including
+ * injection into the bootstrap system, rebuilding registries, and ensuring proper
+ * initialization and updates of registry data.
+ */
 interface BootstrapHolder {
+    companion object {
+        internal var bootstrap: RegistryBootstrap? = null
+            private set
+    }
     /**
      * Injects the current instance of `BootstrapHolder` into the `RegistryBootstrap` system and sets
      * it as the active bootstrap holder. This method ensures that the `BootstrapHolder` is registered
@@ -13,10 +23,11 @@ interface BootstrapHolder {
      * @return A lambda function that builds all registries when executed.
      */
     fun inject(): () -> Unit {
-        RegistryBootstrap.injectBootstrapHolder(this)
+        val bootstrap = RegistryBootstrap()
+        Companion.bootstrap = bootstrap
 
         return {
-            RegistryBootstrap.buildRegistries()
+            bootstrap.buildRegistries()
         }
     }
 
@@ -28,7 +39,7 @@ interface BootstrapHolder {
      * @param holder The `RegistryHolder` whose associated registries are to be rebuilt.
      */
     fun rebuildRegistries(holder: RegistryHolder) {
-        RegistryBootstrap.rebuildRegistries(holder)
+        bootstrapOrThrow().rebuildRegistries(holder)
     }
 
     /**
@@ -44,6 +55,14 @@ interface BootstrapHolder {
      *               updates are available.
      */
     fun <A, B> refreshRegistry(registry: Registry<A, B>, holder: RegistryHolder) {
-        RegistryBootstrap.refreshRegistry(registry, holder)
+        bootstrapOrThrow().refreshRegistry(registry, holder)
     }
+
+    /**
+     * Returns a registry by key from the current graph snapshot.
+     */
+    fun <K, V> registry(key: RegistryKey<K, V>): Registry<K, V> = bootstrapOrThrow().getRegistry(key)
+
+    private fun bootstrapOrThrow(): RegistryBootstrap =
+        bootstrap ?: error("BootstrapHolder not injected")
 }

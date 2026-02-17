@@ -1,25 +1,20 @@
 package gg.aquatic.kregistry
 
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.collections.iterator
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 @OptIn(ExperimentalAtomicApi::class)
-object RegistryBootstrap {
+internal class RegistryBootstrap {
 
-    private var bootstrapHolder: BootstrapHolder? = null
     private val initialized = AtomicBoolean(false)
-    private val definitions = HashMap<RegistryKey<*, *>, RegistryDefinition<*, *>>()
+    private val definitions = ConcurrentHashMap<RegistryKey<*, *>, RegistryDefinition<*, *>>()
     private val graphRef =
         AtomicReference(
             RegistryGraph(mapOf())
         )
-
-    internal fun injectBootstrapHolder(holder: BootstrapHolder) {
-        require(bootstrapHolder == null) { "Bootstrap holder already injected" }
-        bootstrapHolder = holder
-    }
 
     internal fun rebuildRegistries(holder: RegistryHolder) {
         require(initialized.compareAndSet(expectedValue = false, newValue = true)) { "Registry bootstrap already initialized" }
@@ -54,6 +49,12 @@ object RegistryBootstrap {
     internal fun buildRegistries() {
         val registries = definitions.map { (_, definition) -> definition.build() }.associateBy { it.registryKey }
         setGraph(RegistryGraph(registries))
+    }
+
+    internal fun graph(): RegistryGraph = graphRef.load()
+
+    internal fun <K, V> getRegistry(key: RegistryKey<K, V>): Registry<K, V> {
+        return graph().getRegistry(key)
     }
 
     private fun setGraph(graph: RegistryGraph) {
