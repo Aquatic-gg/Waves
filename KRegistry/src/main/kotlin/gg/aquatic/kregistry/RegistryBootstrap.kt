@@ -1,5 +1,6 @@
-package gg.aquatic.kregistry.newsys
+package gg.aquatic.kregistry
 
+import kotlin.collections.iterator
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi

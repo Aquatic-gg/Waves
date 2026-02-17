@@ -1,4 +1,4 @@
-package gg.aquatic.kregistry.newsys
+package gg.aquatic.kregistry
 
 interface BootstrapHolder {
     /**

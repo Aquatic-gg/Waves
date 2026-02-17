@@ -1,4 +1,6 @@
-package gg.aquatic.kregistry.newsys
+package gg.aquatic.kregistry
+
+import kotlin.collections.iterator
 
 class RegistryDefinition<A, B>(
     val id: RegistryKey<A, B>,
