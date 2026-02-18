@@ -1,13 +1,11 @@
 package gg.aquatic.stacked
 
-import gg.aquatic.kregistry.FrozenRegistry
-import gg.aquatic.kregistry.Registry
-import gg.aquatic.kregistry.RegistryId
-import gg.aquatic.kregistry.RegistryKey
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryId
+import gg.aquatic.kregistry.core.RegistryKey
 import gg.aquatic.stacked.option.ItemOptionHandle
 import gg.aquatic.stacked.option.ItemOptions
 import gg.aquatic.stacked.serialize.ItemSerializer
-import gg.aquatic.stacked.serialize.ItemSerializerImpl
 import net.kyori.adventure.key.Key
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -35,22 +33,22 @@ interface StackedItem<T : StackedItem<T>> {
     }
 
     companion object {
-        val ITEM_REGISTRY_KEY = RegistryKey<String, StackedItem<*>>(
+        val ITEM_REGISTRY_KEY = RegistryKey.simple<String, StackedItem<*>>(
             RegistryId("aquatic", "items")
         )
 
-        val ITEMS: FrozenRegistry<String, StackedItem<*>>
+        val ITEMS: Registry<String, StackedItem<*>>
             get() {
-                return Registry[ITEM_REGISTRY_KEY]
+                return Stacked.bootstrapHolder[ITEM_REGISTRY_KEY]
             }
 
-        val ITEM_FACTORY_REGISTRY_KEY = RegistryKey<String, ItemFactory>(
+        val ITEM_FACTORY_REGISTRY_KEY = RegistryKey.simple<String, ItemFactory>(
             RegistryId("aquatic", "item_factories")
         )
 
-        val ITEM_FACTORIES: FrozenRegistry<String, ItemFactory>
+        val ITEM_FACTORIES: Registry<String, ItemFactory>
             get() {
-                return Registry[ITEM_FACTORY_REGISTRY_KEY]
+                return Stacked.bootstrapHolder[ITEM_FACTORY_REGISTRY_KEY]
             }
 
         @Suppress("UNCHECKED_CAST")

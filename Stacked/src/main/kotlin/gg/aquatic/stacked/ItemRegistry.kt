@@ -1,31 +1,34 @@
 package gg.aquatic.stacked
 
-import gg.aquatic.kregistry.Registry
+import gg.aquatic.kregistry.bootstrap.RegistryHolder
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import org.bukkit.inventory.ItemStack
 import org.bukkit.persistence.PersistentDataType
 
 fun <T: StackedItem<T>> StackedItem<T>.register(
+    registryHolder: RegistryHolder,
     namespace: String,
     id: String
 ): Boolean {
     return register(
-        namespace, id,
+        registryHolder, namespace, id,
         registerInteraction = false
     )
 }
 
 fun <T: StackedItem<T>> StackedItem<T>.register(
+    registryHolder: RegistryHolder,
     namespace: String,
     id: String,
     interactionHandler: (StackedItemInteractEvent) -> Unit
 ): Boolean {
-    return register(namespace, id, interactionHandler, true)
+    return register(registryHolder, namespace, id, interactionHandler, true)
 }
 
 private fun <T: StackedItem<T>> StackedItem<T>.register(
+    registryHolder: RegistryHolder,
     namespace: String, id: String,
-    interactionHandler: (StackedItemInteractEvent) -> Unit = {}, registerInteraction: Boolean
+    interactionHandler: (StackedItemInteractEvent) -> Unit = {}, registerInteraction: Boolean,
 ): Boolean {
     val registryId = registryId()
     val item = getBaseItem()
@@ -36,11 +39,9 @@ private fun <T: StackedItem<T>> StackedItem<T>.register(
         it.set(ItemHandler.NAMESPACE_KEY, PersistentDataType.STRING, "${handler.id}:$namespace:$id")
     }
 
-    Registry.update {
-        replaceRegistry(
-            StackedItem.ITEM_REGISTRY_KEY
-        ) {
-            register("${handler.id}:$namespace:$id", this@register)
+    registryHolder.registryBootstrap(Stacked.bootstrapHolder) {
+        registry(StackedItem.ITEM_REGISTRY_KEY) {
+            add("${handler.id}:$namespace:$id", this@register)
         }
     }
 
@@ -58,26 +59,6 @@ fun <T: StackedItem<T>> StackedItem<T>.setInteractionHandler(interactionHandler:
 
 fun <T: StackedItem<T>> StackedItem<T>.removeInteractionHandler(): Boolean {
     val registryId = registryId() ?: return false
-    handler.listenInteractions.remove(registryId)
-    return true
-}
-
-fun <T: StackedItem<T>> StackedItem<T>.unregister(): Boolean {
-    val registryId = registryId() ?: return false
-    val item = getBaseItem()
-    item.editPersistentDataContainer {
-        it.remove(ItemHandler.NAMESPACE_KEY)
-    }
-
-    var found = false
-    Registry.update {
-        replaceRegistry(
-            StackedItem.ITEM_REGISTRY_KEY
-        ) {
-            if (unregister(registryId) != null) found = true
-        }
-    }
-    if (!found) return false
     handler.listenInteractions.remove(registryId)
     return true
 }
