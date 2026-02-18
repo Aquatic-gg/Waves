@@ -36,7 +36,7 @@ internal class RegistryBootstrap {
         require(!initialized.load()) { "Registry bootstrap already initialized" }
         for ((key, builder) in contribution.builder) {
             val definition = definitions.getOrPut(key) { RegistryDefinition(key) }
-            definition.builders[contribution.holder] = builder
+            mergeContributionBuilder(definition, contribution.holder, builder)
         }
     }
 
@@ -120,5 +120,25 @@ internal class RegistryBootstrap {
 
         val registry = existing as Registry<Any, Any>
         return registry.withData(mergedData, mergedHolderData)
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun mergeContributionBuilder(
+        definition: RegistryDefinition<*, *>,
+        holder: RegistryHolder,
+        incomingBuilder: RegistryContributionBuilder<*, *>.() -> Unit
+    ) {
+        val typedDefinition = definition as RegistryDefinition<Any?, Any?>
+        val incoming = incomingBuilder as RegistryContributionBuilder<Any?, Any?>.() -> Unit
+        val existing = typedDefinition.builders[holder]
+
+        typedDefinition.builders[holder] = if (existing == null) {
+            incoming
+        } else {
+            {
+                existing(this)
+                incoming(this)
+            }
+        }
     }
 }

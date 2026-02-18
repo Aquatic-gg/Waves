@@ -34,7 +34,33 @@ class TypedRegistryTest {
         build()
 
         val registry = testBootstrap.get(key)
-        assertEquals("world", registry.get("hello"))
+        assertEquals("world", registry["hello"])
+    }
+
+    @Test
+    fun `simple registry merges multiple bootstrap calls from same holder`() {
+        val key = RegistryKey.simple<String, String>(RegistryId("test", "simple-multi"))
+        val testBootstrap = object : BootstrapHolder {}
+        val testHolder = object : RegistryHolder {}
+
+        val build = testBootstrap.inject()
+
+        testHolder.registryBootstrap(testBootstrap) {
+            registry(key) {
+                add("first", "1")
+            }
+        }
+        testHolder.registryBootstrap(testBootstrap) {
+            registry(key) {
+                add("second", "2")
+            }
+        }
+
+        build()
+
+        val registry = testBootstrap.get(key)
+        assertEquals("1", registry["first"])
+        assertEquals("2", registry["second"])
     }
 
     interface Action<out B> : GroupedEntry<B>
