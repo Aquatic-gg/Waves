@@ -1,6 +1,6 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.requirement.ConditionHandle
+import gg.aquatic.execute.condition.ConditionHandle
 import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 

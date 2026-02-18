@@ -2,7 +2,6 @@ package gg.aquatic.execute.action.impl.logical
 
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
-import gg.aquatic.execute.ClassTransform
 import gg.aquatic.execute.ExecutableObjectHandle
 import gg.aquatic.execute.arguments.ActionsArgument
 import gg.aquatic.execute.arguments.ConditionsArgument
@@ -10,8 +9,7 @@ import gg.aquatic.execute.arguments.ConditionsArgument
 @Suppress("UNCHECKED_CAST")
 class ConditionalActionsAction<T : Any>(
     clazz: Class<T>,
-    classTransforms: Collection<ClassTransform<*, *>>,
-) : SmartAction<T>(clazz, classTransforms as Collection<ClassTransform<T, *>>) {
+) : SmartAction<T>(clazz) {
     override suspend fun execute(
         binder: T,
         args: ArgumentContext<T>,
@@ -30,8 +28,8 @@ class ConditionalActionsAction<T : Any>(
     }
 
     override val arguments: List<ObjectArgument<*>> = listOf(
-        ActionsArgument("actions", listOf(), true, clazz, super.classTransforms),
-        ActionsArgument("fail", listOf(), false, clazz, super.classTransforms),
-        ConditionsArgument("conditions", listOf(), true, clazz, super.classTransforms)
+        ActionsArgument("actions", listOf(), true, clazz),
+        ActionsArgument("fail", listOf(), false, clazz),
+        ConditionsArgument("conditions", listOf(), true, clazz)
     )
 }

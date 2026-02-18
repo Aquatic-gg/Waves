@@ -1,7 +1,7 @@
 package gg.aquatic.execute
 
 import gg.aquatic.common.argument.ObjectArguments
-import gg.aquatic.execute.requirement.RequirementHandleWithFailActions
+import gg.aquatic.execute.condition.RequirementHandleWithFailActions
 
 open class ConditionalActionsHandle<A>(
     val executableObjects: Collection<ConditionalActionHandle<A, Unit>>,

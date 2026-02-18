@@ -1,4 +1,4 @@
-package gg.aquatic.execute.requirement
+package gg.aquatic.execute.condition
 
 import gg.aquatic.execute.ConditionalActionsHandle
 

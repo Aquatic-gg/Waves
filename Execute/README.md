@@ -115,7 +115,7 @@ The engine supports a wide array of specialized arguments:
 
 * `gg.aquatic.execute.action.impl.logical`: Advanced execution logic (ConditionalActions, SmartActions).
 * `gg.aquatic.execute.argument.impl`: Implementation of the argument parsing engine.
-* `gg.aquatic.execute.requirement`: Core logic for conditional checks and failure handling.
+* `gg.aquatic.execute.condition`: Core logic for conditional checks and failure handling.
 * `gg.aquatic.execute.coroutine`: Dispatchers for safe Minecraft thread management.
 
 ---

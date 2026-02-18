@@ -1,6 +1,6 @@
 package gg.aquatic.execute
 
-import gg.aquatic.execute.requirement.RequirementHandleWithFailActions
+import gg.aquatic.execute.condition.RequirementHandleWithFailActions
 
 class ConditionalActionHandle<A, B>(
     val configuredObject: ExecutableObjectHandle<A, B>,

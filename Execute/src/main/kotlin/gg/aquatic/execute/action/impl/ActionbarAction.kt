@@ -4,9 +4,10 @@ import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.execute.Action
 import gg.aquatic.execute.Execute
+import gg.aquatic.execute.action.type.PlayerAction
 import org.bukkit.entity.Player
 
-object ActionbarAction : Action<Player> {
+object ActionbarAction : PlayerAction() {
 
     override suspend fun execute(binder: Player, args: ArgumentContext<Player>) {
         val message = args.string("message") ?: return

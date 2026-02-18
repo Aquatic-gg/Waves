@@ -1,25 +1,24 @@
 package gg.aquatic.execute.action.impl.logical
 
 import gg.aquatic.execute.Action
-import gg.aquatic.execute.ClassTransform
-import gg.aquatic.kregistry.FrozenRegistry
-import gg.aquatic.kregistry.Registry
-import gg.aquatic.kregistry.RegistryId
-import gg.aquatic.kregistry.RegistryKey
+import gg.aquatic.execute.Execute
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryId
+import gg.aquatic.kregistry.core.RegistryKey
 
-typealias SmartActionFactory = (clazz: Class<*>, classTransforms: Collection<ClassTransform<*, *>>) -> SmartAction<*>
+typealias SmartActionFactory = (clazz: Class<*>) -> SmartAction<*>
 
 abstract class SmartAction<T: Any>(
-    val clazz: Class<T>,
-    val classTransforms: Collection<ClassTransform<T, *>>
+    override val binder: Class<out T>,
 ): Action<T> {
 
     companion object {
-        val REGISTRY_KEY = RegistryKey<String, SmartActionFactory>(
+        typealias SmartActionRegistry = Registry<String, SmartActionFactory>
+        val REGISTRY_KEY = RegistryKey.simple<String, SmartActionFactory>(
             RegistryId("aquatic", "smart-actions")
         )
 
-        val REGISTRY: FrozenRegistry<String, SmartActionFactory>
-            get() = Registry.get(REGISTRY_KEY)
+        val REGISTRY: SmartActionRegistry
+            get() = Execute.bootstrapHolder.get(REGISTRY_KEY)
     }
 }

@@ -6,6 +6,10 @@ import gg.aquatic.common.argument.ObjectArgument
 class ExecutableObjectBundle<T,U>(
     val objects: List<ExecutableObject<T, U>>
 ): ExecutableObject<T, U> {
+
+    override val binder: Class<out T>
+        get() = TODO("Not yet implemented")
+
     override suspend fun execute(binder: T, args: ArgumentContext<T>): U {
         var value: U? = null
         for (executableObject in objects) {

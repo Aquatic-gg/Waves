@@ -5,81 +5,54 @@ import gg.aquatic.common.initializeCommon
 import gg.aquatic.execute.action.impl.*
 import gg.aquatic.execute.action.impl.logical.ConditionalActionsAction
 import gg.aquatic.execute.action.impl.logical.SmartAction
-import gg.aquatic.execute.action.impl.logical.SmartActionFactory
-import gg.aquatic.execute.action.registerAction
-import gg.aquatic.execute.requirement.impl.PermissionCondition
-import gg.aquatic.execute.requirement.registerCondition
-import gg.aquatic.kregistry.FrozenRegistry
-import gg.aquatic.kregistry.MutableRegistry
-import gg.aquatic.kregistry.MutableRegistryGraph
-import gg.aquatic.kregistry.Registry
+import gg.aquatic.execute.condition.impl.PermissionCondition
+import gg.aquatic.kregistry.bootstrap.BootstrapHolder
+import gg.aquatic.kregistry.bootstrap.ContributionBuilder
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.plugin.java.JavaPlugin
 
 object Execute {
 
     lateinit var miniMessage: MiniMessage
+    lateinit var bootstrapHolder: BootstrapHolder
 
     fun injectExecutables() {
-        Registry.update {
-            injectExecutables(this)
+        ExecuteRegistryHolder.registryBootstrap(bootstrapHolder, injectExecutablesInternal())
+    }
+
+    private fun injectExecutablesInternal(): ContributionBuilder.() -> Unit = {
+        injectActions(this)
+        injectConditions(this)
+        injectSmartActions(this)
+    }
+
+    fun injectActions(builder: ContributionBuilder) {
+        builder.registry(Action.REGISTRY_KEY) {
+            add("actionbar", ActionbarAction)
+            add("close-inventory", CloseInventory)
+            add("command", CommandAction)
+            add("sound", SoundAction)
+            add("stop-sound", SoundStopAction)
+            add("title", TitleAction)
         }
     }
 
-    fun injectExecutables(graph: MutableRegistryGraph) {
-        val actions = MutableRegistry<Class<*>, FrozenRegistry<String, Action<*>>>()
-        val conditions = MutableRegistry<Class<*>, FrozenRegistry<String, Condition<*>>>()
-        val smartActions = MutableRegistry<String, SmartActionFactory>()
-
-        injectActions(actions)
-        injectConditions(conditions)
-        injectSmartActions(smartActions)
-
-        graph.registerRegistry(Action.REGISTRY_KEY, actions.freeze())
-        graph.registerRegistry(Condition.REGISTRY_KEY, conditions.freeze())
-        graph.registerRegistry(SmartAction.REGISTRY_KEY, smartActions.freeze())
-    }
-
-    fun injectActions() {
-        Registry.update {
-            this.replaceRegistry(Action.REGISTRY_KEY) { injectActions(this) }
+    fun injectSmartActions(builder: ContributionBuilder) {
+        builder.registry(SmartAction.REGISTRY_KEY) {
+            add("condition-actions") { clazz -> ConditionalActionsAction(clazz) }
         }
     }
 
-    fun injectActions(registry: MutableRegistry<Class<*>, FrozenRegistry<String, Action<*>>>) {
-        registry.registerAction("actionbar", ActionbarAction)
-        registry.registerAction("close-inventory", CloseInventory)
-        registry.registerAction("command", CommandAction)
-        registry.registerAction("sound", SoundAction)
-        registry.registerAction("stop-sound", SoundStopAction)
-        registry.registerAction("title", TitleAction)
-    }
-
-    fun injectSmartActions() {
-        Registry.update {
-            this.replaceRegistry(SmartAction.REGISTRY_KEY) { injectSmartActions(this) }
+    fun injectConditions(builder: ContributionBuilder) {
+        builder.registry(Condition.REGISTRY_KEY) {
+            add("permission", PermissionCondition)
         }
-    }
-
-    fun injectSmartActions(registry: MutableRegistry<String, SmartActionFactory>) {
-        registry.register(
-            "conditional-actions"
-        ) { clazz, classTransforms -> ConditionalActionsAction(clazz, classTransforms) }
-    }
-
-    fun injectConditions() {
-        Registry.update {
-            this.replaceRegistry(Condition.REGISTRY_KEY) { injectConditions(this) }
-        }
-    }
-
-    fun injectConditions(registry: MutableRegistry<Class<*>, FrozenRegistry<String, Condition<*>>>) {
-        registry.registerCondition("permission", PermissionCondition)
     }
 }
 
-fun initExecute(plugin: JavaPlugin, miniMessage: MiniMessage = MiniMessage.miniMessage()) {
+fun initExecute(plugin: JavaPlugin, bootstrapHolder: BootstrapHolder, miniMessage: MiniMessage = MiniMessage.miniMessage()) {
     Execute.miniMessage = miniMessage
+    Execute.bootstrapHolder = bootstrapHolder
     try {
         val pl = AquaticCommon.plugin
     } catch (_: Exception) {

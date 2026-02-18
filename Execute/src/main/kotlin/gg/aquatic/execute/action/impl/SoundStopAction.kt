@@ -4,9 +4,10 @@ import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
 import gg.aquatic.execute.Action
+import gg.aquatic.execute.action.type.PlayerAction
 import org.bukkit.entity.Player
 
-object SoundStopAction : Action<Player> {
+object SoundStopAction : PlayerAction() {
     override val arguments: List<ObjectArgument<*>> = listOf(
         PrimitiveObjectArgument("sound", "example", true),
     )

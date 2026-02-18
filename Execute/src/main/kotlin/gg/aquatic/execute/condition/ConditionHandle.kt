@@ -1,4 +1,4 @@
-package gg.aquatic.execute.requirement
+package gg.aquatic.execute.condition
 
 import gg.aquatic.common.argument.ObjectArguments
 import gg.aquatic.execute.ExecutableObject

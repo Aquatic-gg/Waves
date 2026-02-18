@@ -3,9 +3,12 @@ package gg.aquatic.execute
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
-import gg.aquatic.kregistry.*
+import gg.aquatic.kregistry.core.RegistryId
+import gg.aquatic.kregistry.core.RegistryKey
+import gg.aquatic.kregistry.grouped.GroupedEntry
+import gg.aquatic.kregistry.grouped.GroupedRegistry
 
-interface ExecutableObject<A, B> {
+interface ExecutableObject<A, B> : GroupedEntry<A> {
 
     suspend fun execute(binder: A, args: ArgumentContext<A>): B
     val arguments: List<ObjectArgument<*>>
@@ -33,29 +36,40 @@ interface ExecutableObject<A, B> {
     }
 }
 
-interface Action<A>: ExecutableObject<A, Unit> {
+interface Action<A : Any> : ExecutableObject<A, Unit> {
     companion object {
-        typealias ActionRegistry = TypedRegistry<String, Action<*>>
-        val REGISTRY_KEY = RegistryKey<Class<*>, FrozenRegistry<String, Action<*>>>(
-            RegistryId("aquatic","actions")
+        typealias ActionRegistry<T> = GroupedRegistry<String, T, Action<out T>>
+        val REGISTRY_KEY = RegistryKey.grouped<String, Any, Action<*>>(
+            RegistryId("aquatic", "actions")
         )
 
-        val REGISTRY: ActionRegistry
+        @Suppress("UNCHECKED_CAST")
+        fun <T : Any> ActionRegistry<*>.getHierarchical(id: String, clazz: Class<T>): Action<T>? {
+            return (this as GroupedRegistry<String, T, Action<T>>).getHierarchicalByClass(id, clazz)
+        }
+
+        val REGISTRY: ActionRegistry<*>
             get() {
-                return Registry[REGISTRY_KEY]
+                return Execute.bootstrapHolder.get(REGISTRY_KEY)
             }
     }
 }
-interface Condition<A>: ExecutableObject<A, Boolean> {
+
+interface Condition<A: Any> : ExecutableObject<A, Boolean> {
     companion object {
-        typealias ConditionRegistry = TypedRegistry<String, Condition<*>>
-        val REGISTRY_KEY = RegistryKey<Class<*>, FrozenRegistry<String, Condition<*>>>(
-            RegistryId("aquatic","conditions")
+        typealias ConditionRegistry<T> = GroupedRegistry<String, T, Condition<out T>>
+        val REGISTRY_KEY = RegistryKey.grouped<String, Any, Condition<*>>(
+            RegistryId("aquatic", "conditions")
         )
 
-        val REGISTRY: ConditionRegistry
+        @Suppress("UNCHECKED_CAST")
+        fun <T : Any> ConditionRegistry<*>.getHierarchical(id: String, clazz: Class<T>): Condition<T>? {
+            return (this as GroupedRegistry<String, T, Condition<T>>).getHierarchicalByClass(id, clazz)
+        }
+
+        val REGISTRY: ConditionRegistry<*>
             get() {
-                return Registry[REGISTRY_KEY]
+                return Execute.bootstrapHolder.get(REGISTRY_KEY)
             }
     }
 }
