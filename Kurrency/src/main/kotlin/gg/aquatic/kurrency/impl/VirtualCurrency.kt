@@ -1,8 +1,6 @@
 package gg.aquatic.kurrency.impl
 
-import gg.aquatic.kregistry.Registry
 import gg.aquatic.kurrency.KurrencyConfig
-import gg.aquatic.kurrency.impl.RegisteredCurrency.Companion.REGISTRY_KEY
 import java.math.BigDecimal
 import java.util.*
 
@@ -11,18 +9,6 @@ class VirtualCurrency(
     val prefix: String = "",
     val suffix: String = ""
 ) {
-
-    fun register(): RegisteredCurrency {
-        val registry = RegisteredCurrency(this)
-
-        Registry.update {
-            replaceRegistry(REGISTRY_KEY) {
-                this.register(id, registry)
-            }
-        }
-
-        return registry
-    }
 
     suspend fun give(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
         KurrencyConfig.currencyHandler.give(uuid, registeredCurrency, amount)

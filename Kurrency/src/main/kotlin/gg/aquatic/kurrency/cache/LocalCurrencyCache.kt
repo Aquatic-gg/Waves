@@ -44,7 +44,7 @@ class LocalCurrencyCache(
     private suspend fun loadFromDb(uuid: UUID): Map<RegisteredCurrency, BigDecimal> {
         return withContext(VirtualsCtx) {
             val allDbBalances = dbHandler.getAllBalances(uuid)
-            val currencies = RegisteredCurrency.REGISTRY.getAll()
+            val currencies = RegisteredCurrency.REGISTRY.all()
             val map = HashMap<RegisteredCurrency, BigDecimal>()
             for ((key, balance) in allDbBalances) {
                 val registered = currencies[key] ?: continue

@@ -1,10 +1,10 @@
 package gg.aquatic.kurrency.impl
 
-import gg.aquatic.kregistry.FrozenRegistry
-import gg.aquatic.kregistry.Registry
-import gg.aquatic.kregistry.RegistryId
-import gg.aquatic.kregistry.RegistryKey
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryId
+import gg.aquatic.kregistry.core.RegistryKey
 import gg.aquatic.kurrency.Currency
+import gg.aquatic.kurrency.KurrencyConfig
 import org.bukkit.entity.Player
 import java.math.BigDecimal
 
@@ -18,10 +18,10 @@ class RegisteredCurrency internal constructor(
         get() = currency.suffix
 
     companion object {
-        val REGISTRY_KEY = RegistryKey<String, RegisteredCurrency>(RegistryId("aquatic", "registered_currency"))
-        val REGISTRY: FrozenRegistry<String, RegisteredCurrency>
+        val REGISTRY_KEY = RegistryKey.simple<String, RegisteredCurrency>(RegistryId("aquatic", "registered_currency"))
+        val REGISTRY: Registry<String, RegisteredCurrency>
             get() {
-                return Registry[REGISTRY_KEY]
+                return KurrencyConfig.bootstrapHolder[REGISTRY_KEY]
             }
     }
 

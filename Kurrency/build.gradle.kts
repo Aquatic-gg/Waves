@@ -24,6 +24,8 @@ dependencies {
     compileOnly("gg.aquatic:KRegistry:25.0.2")
     compileOnly("gg.aquatic:KEvent:26.0.5")
     compileOnly("gg.aquatic:Common:26.0.13")
+    compileOnly("gg.aquatic:Dispatch:26.0.4")
+    compileOnly("gg.aquatic:Dispatch-bukkit:26.0.4")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         exclude(group = "org.bukkit", module = "bukkit")
     }
