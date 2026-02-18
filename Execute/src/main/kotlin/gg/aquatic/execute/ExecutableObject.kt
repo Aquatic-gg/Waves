@@ -50,7 +50,7 @@ interface Action<A : Any> : ExecutableObject<A, Unit> {
 
         val REGISTRY: ActionRegistry<*>
             get() {
-                return Execute.bootstrapHolder.get(REGISTRY_KEY)
+                return Execute.bootstrapHolder[REGISTRY_KEY]
             }
     }
 }
