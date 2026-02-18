@@ -102,7 +102,7 @@ Grouped registries store per-binder registries keyed by a binder class. Use
 
 ## Community & Support
 
-Got questions, need help, or want to showcase what you've built with KRegistry? Join our community!
+Got questions, need help, or want to showcase what you've built with **KRegistry**? Join our community!
 
 [![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
