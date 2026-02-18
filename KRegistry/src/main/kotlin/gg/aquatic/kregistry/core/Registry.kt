@@ -7,7 +7,7 @@ interface Registry<A, B> {
     val data: Map<A, B>
     val holderData: Map<RegistryHolder, Map<A, B>>
 
-    fun get(key: A): B? = data[key]
+    operator fun get(key: A): B? = data[key]
     fun all(): Map<A, B> = data
     fun withData(data: Map<A, B>, holderData: Map<RegistryHolder, Map<A, B>>): Registry<A, B>
 }
