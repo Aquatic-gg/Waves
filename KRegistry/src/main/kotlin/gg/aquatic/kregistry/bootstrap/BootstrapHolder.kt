@@ -72,7 +72,7 @@ interface BootstrapHolder {
     fun <K, V> get(key: SimpleRegistryKey<K, V>): SimpleRegistry<K, V> =
         registry(key) as SimpleRegistry<K, V>
 
-    fun <Id, Group, Value : GroupedEntry<Group>> get(
+    operator fun <Id, Group, Value : GroupedEntry<Group>> get(
         key: GroupedRegistryKey<Id, Group, Value>
     ): GroupedRegistry<Id, Group, Value> =
         registry(key) as GroupedRegistry<Id, Group, Value>
