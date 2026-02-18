@@ -98,8 +98,7 @@ internal class RegistryBootstrap {
             }
         }
 
-        return Registry(
-            registry.registryKey,
+        return registry.withData(
             data,
             registry.holderData + (holder to newHolderData)
         )
@@ -119,10 +118,7 @@ internal class RegistryBootstrap {
         mergedHolderData.putAll(existing.holderData as Map<RegistryHolder, Map<Any, Any>>)
         mergedHolderData.putAll(incoming.holderData as Map<RegistryHolder, Map<Any, Any>>)
 
-        return Registry(
-            existing.registryKey as RegistryKey<Any, Any>,
-            mergedData,
-            mergedHolderData
-        )
+        val registry = existing as Registry<Any, Any>
+        return registry.withData(mergedData, mergedHolderData)
     }
 }

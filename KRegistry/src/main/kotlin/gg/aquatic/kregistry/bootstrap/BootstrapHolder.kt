@@ -2,6 +2,11 @@ package gg.aquatic.kregistry.bootstrap
 
 import gg.aquatic.kregistry.core.Registry
 import gg.aquatic.kregistry.core.RegistryKey
+import gg.aquatic.kregistry.core.SimpleRegistry
+import gg.aquatic.kregistry.core.SimpleRegistryKey
+import gg.aquatic.kregistry.grouped.GroupedEntry
+import gg.aquatic.kregistry.grouped.GroupedRegistry
+import gg.aquatic.kregistry.grouped.GroupedRegistryKey
 
 /**
  * Interface representing a holder for bootstrapping registry-related operations.
@@ -63,6 +68,14 @@ interface BootstrapHolder {
     fun <K, V> registry(key: RegistryKey<K, V>): Registry<K, V> = bootstrapOrThrow().getRegistry(key)
 
     operator fun <K, V> get(key: RegistryKey<K, V>): Registry<K, V> = registry(key)
+
+    fun <K, V> get(key: SimpleRegistryKey<K, V>): SimpleRegistry<K, V> =
+        registry(key) as SimpleRegistry<K, V>
+
+    fun <Id, Group, Value : GroupedEntry<Group>> get(
+        key: GroupedRegistryKey<Id, Group, Value>
+    ): GroupedRegistry<Id, Group, Value> =
+        registry(key) as GroupedRegistry<Id, Group, Value>
 
     private fun bootstrapOrThrow(): RegistryBootstrap =
         BootstrapHolderState.get(this)

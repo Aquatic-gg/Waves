@@ -11,8 +11,7 @@ A lightweight, type-safe registry system for Kotlin. KRegistry provides a bootst
 
 *   **Bootstrap-Driven Registries:** Build a registry graph from contributions with deterministic initialization.
 *   **Atomic Global State:** The registry graph uses compare-and-swap for safe concurrent updates.
-*   **Hierarchical Lookups:** Search by specific implementation class or any inherited interface/parent class.
-*   **Typed Collections:** Group instances by their runtime class using `GenericTyped<T>`.
+*   **Hierarchical Lookups:** Search grouped registries by binder type (including superclasses).
 *   **Zero Boilerplate:** Reified generics for clean, type-safe accessors.
 
 ---
@@ -36,7 +35,7 @@ dependencies {
 ### Bootstrap + Access
 
 ```kotlin
-val SERVICES = RegistryKey<String, Service>(RegistryId("core", "services"))
+val SERVICES = RegistryKey.simple<String, Service>(RegistryId("core", "services"))
 
 object AppBootstrap : BootstrapHolder
 object CoreHolder : RegistryHolder
@@ -60,85 +59,32 @@ val services = AppBootstrap[SERVICES]
 val auth = services.get("auth")
 ```
 
-### Typed & Hierarchical Registries
-
-`TypedRegistry` allows you to group objects by their Class type and perform powerful lookups.
-
-```kotlin
-// Retrieve an object by its exact implementation type
-val provider = myTypedRegistry.getTypedByClass("provider_id", MyImplementation::class.java)
-
-// Retrieve all objects that implement a specific interface
-val allServices = myTypedRegistry.getAllHierarchicalByClass(IService::class.java)
-```
-
-**Exact vs Hierarchical**
-Exact lookups only return entries registered under the exact class key.
-Hierarchical lookups include entries whose class is a subclass/implements the requested type.
-
-### Typed Collections
-
-Use `GenericTyped<T>` to group values by their runtime class and query them hierarchically.
-
-```kotlin
-interface Animal
-class Dog : Animal
-
-// A typed entry binds a value to its runtime type
-data class AnimalEntry(
-    override val value: Animal
-) : ValueTyped<Animal>
-
-val builder = RegistryContributionBuilder<Class<out Animal>, List<GenericTyped<out Animal>>>()
-builder.addTyped(AnimalEntry(Dog()))
-
-val typedCollection: TypedCollectionRegistry<Animal> = Registry(
-    RegistryKey.typedCollection<Animal>(RegistryId("example", "animals")),
-    builder.data,
-    emptyMap()
-)
-
-val dogs = typedCollection.getTypedEntries<Dog>()
-val allAnimals = typedCollection.getAllHierarchicalEntries<Animal>()
-```
-
 ### Grouped Registries (Binder Pattern)
 
 Use a grouped registry when your values are keyed by a binder type (e.g., `Action<Player>`).
+Hierarchical lookups include entries registered for supertypes of the requested binder.
 
 ```kotlin
-interface Action<B>
+interface Action<out B> : GroupedEntry<B>
 class Player
-data class SendMessage(val text: String) : Action<Player>
+data class SendMessage(
+    override val binder: Class<out Player>,
+    val text: String
+) : Action<Player>
 
-val ACTIONS = RegistryKey.grouped<String, Player, Action<Player>>(RegistryId("example", "actions"))
-val PLAYER_ACTIONS = RegistryKey<String, Action<Player>>(RegistryId("example", "player-actions"))
+val ACTIONS = RegistryKey.grouped<String, Player, Action<out Player>>(
+    RegistryId("example", "actions")
+)
 
 val contribution: ContributionBuilder.() -> Unit = {
-    registry(ACTIONS) {
-        addGrouped(Player::class.java, PLAYER_ACTIONS) {
-            add("message", SendMessage("hello"))
-        }
-    }
+registry(ACTIONS) {
+    add("message", SendMessage(Player::class.java, "hello"))
+}
 }
 
 // Later...
-val actions: GroupedRegistry<String, Player, Action<Player>> = AppBootstrap[ACTIONS]
+val actions = AppBootstrap.get(ACTIONS)
 val message = actions.getTypedByClass("message", Player::class.java)
-```
-
-### Contribution DSL
-
-You can also pass a `ContributionBuilder.() -> Unit` around and apply it later:
-
-```kotlin
-val ANIMALS = RegistryKey.typedCollection<Animal>(RegistryId("example", "animals"))
-
-val contribution: ContributionBuilder.() -> Unit = {
-    registry(ANIMALS) {
-        addTyped(AnimalEntry(Dog::class.java, Dog()))
-    }
-}
 ```
 
 ## Core Concepts
@@ -146,9 +92,9 @@ val contribution: ContributionBuilder.() -> Unit = {
 ### The Registry Graph
 The registry graph is managed internally. `BootstrapHolder` exposes helpers to build and access registries.
 
-### The `TypedRegistry`
-The project leverages a specific typealias to manage complex sets of data:
-`typealias TypedRegistry<Id, Type> = Registry<Class<*>, Registry<Id, out Type>>`
+### Grouped Registries
+Grouped registries store per-binder registries keyed by a binder class. Use
+`RegistryKey.grouped(...)` to create the key and `GroupedRegistry` for accessors.
 
 ---
 

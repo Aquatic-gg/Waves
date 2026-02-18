@@ -1,20 +1,20 @@
 package gg.aquatic.kregistry.core
 
-@JvmInline
-value class RegistryKey<K, V>(
+import gg.aquatic.kregistry.grouped.GroupedEntry
+import gg.aquatic.kregistry.grouped.GroupedRegistryKey
+
+interface RegistryKey<K, V> {
     val id: RegistryId
-) {
+
     companion object {
-        inline fun <reified T : Any> typedCollection(id: RegistryId): RegistryKey<Class<out T>, List<GenericTyped<out T>>> {
-            return RegistryKey(id)
-        }
+        fun <K, V> simple(id: RegistryId): SimpleRegistryKey<K, V> = SimpleRegistryKey(id)
 
-        fun <Id, Group, Value> grouped(id: RegistryId): RegistryKey<Class<out Group>, Registry<Id, Value>> {
-            return RegistryKey(id)
-        }
-
-        fun <K, V> fromString(namespacedKey: String): RegistryKey<K, V> {
-            return RegistryKey(RegistryId.fromString(namespacedKey))
-        }
+        fun <Id, Group, Value : GroupedEntry<Group>> grouped(
+            id: RegistryId
+        ): GroupedRegistryKey<Id, Group, Value> = GroupedRegistryKey(id)
     }
 }
+
+data class SimpleRegistryKey<K, V>(
+    override val id: RegistryId
+) : RegistryKey<K, V>
