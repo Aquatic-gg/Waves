@@ -9,6 +9,10 @@ value class RegistryKey<K, V>(
             return RegistryKey(id)
         }
 
+        fun <Id, Group, Value> grouped(id: RegistryId): RegistryKey<Class<out Group>, Registry<Id, Value>> {
+            return RegistryKey(id)
+        }
+
         fun <K, V> fromString(namespacedKey: String): RegistryKey<K, V> {
             return RegistryKey(RegistryId.fromString(namespacedKey))
         }

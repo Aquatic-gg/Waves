@@ -1,6 +1,6 @@
 package gg.aquatic.kregistry.core
 
-class RegistryId(
+data class RegistryId(
     val namespace: String,
     val key: String
 ) {

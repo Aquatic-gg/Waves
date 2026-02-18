@@ -4,8 +4,10 @@ import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 import gg.aquatic.kregistry.bootstrap.ContributionBuilder
 import gg.aquatic.kregistry.bootstrap.RegistryContributionBuilder
 import gg.aquatic.kregistry.bootstrap.RegistryHolder
+import gg.aquatic.kregistry.core.GroupedRegistry
 import gg.aquatic.kregistry.core.TypedCollectionRegistry
 import gg.aquatic.kregistry.core.TypedRegistry
+import gg.aquatic.kregistry.core.addGrouped
 import gg.aquatic.kregistry.core.addTyped
 import gg.aquatic.kregistry.core.getAllHierarchical
 import gg.aquatic.kregistry.core.getAllHierarchicalEntries
@@ -16,6 +18,7 @@ import gg.aquatic.kregistry.core.getTypedEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class TypedRegistryTest {
 
@@ -24,9 +27,8 @@ class TypedRegistryTest {
     class Dog(name: String) : Mammal(name)
 
     data class AnimalEntry<T : Animal>(
-        override val type: Class<out T>,
-        val value: T
-    ) : GenericTyped<T>
+        override val value: T
+    ) : ValueTyped<T>
 
     private fun <K, V> registry(id: String, data: Map<K, V>): Registry<K, V> {
         return Registry(RegistryKey(RegistryId("test", id)), data, emptyMap())
@@ -37,33 +39,127 @@ class TypedRegistryTest {
         val dog = Dog("fido")
         val mammal = Mammal("mammal")
 
-        val dogRegistry: Registry<String, Animal> = registry("dog-reg", mapOf("dog" to dog))
-        val mammalRegistry: Registry<String, Animal> = registry("mammal-reg", mapOf("mammal" to mammal))
+        val typedKey = RegistryKey<Class<out Animal>, Registry<String, Animal>>(RegistryId("test", "typed-reg"))
+        val dogRegistryKey = RegistryKey<String, Animal>(RegistryId("test", "dog-reg"))
+        val mammalRegistryKey = RegistryKey<String, Animal>(RegistryId("test", "mammal-reg"))
+        val contribution: ContributionBuilder.() -> Unit = {
+            registry(typedKey) {
+                addGrouped(Dog::class.java, dogRegistryKey) {
+                    add("dog", dog)
+                }
+                addGrouped(Mammal::class.java, mammalRegistryKey) {
+                    add("mammal", mammal)
+                }
+            }
+        }
+
+        val testBootstrap = object : BootstrapHolder {}
+        val testHolder = object : RegistryHolder {}
+
+        val build = testBootstrap.inject()
+        testHolder.registryBootstrap(testBootstrap, contribution)
+        build()
 
         val typedRegistry: TypedRegistry<String, Animal> =
-            Registry(
-                RegistryKey(RegistryId("test", "typed-reg")),
-                mapOf<Class<*>, Registry<String, Animal>>(
-                    Dog::class.java to dogRegistry,
-                    Mammal::class.java to mammalRegistry
-                ),
-                emptyMap()
-            )
+            testBootstrap[typedKey as RegistryKey<Class<*>, Registry<String, out Animal>>]
 
-        val reified = typedRegistry.getTyped<Dog>("dog")
+        val reified: Dog? = typedRegistry.getTypedByClass("dog", Dog::class.java)
         assertEquals(dog, reified)
 
-        val explicit = typedRegistry.getTyped<String, Dog, Animal>("dog", Dog::class.java)
+        val explicit = typedRegistry.getTypedByClass("dog", Dog::class.java)
         assertEquals(dog, explicit)
 
-        val hierarchicalReified = typedRegistry.getHierarchical<Animal>("dog")
+        val hierarchicalReified: Animal? = typedRegistry.getHierarchicalByClass("dog", Animal::class.java)
         assertEquals(dog, hierarchicalReified)
 
-        val hierarchicalExplicit = typedRegistry.getHierarchical<String, Animal, Animal>("mammal", Animal::class.java)
+        val hierarchicalExplicit = typedRegistry.getHierarchicalByClass("mammal", Animal::class.java)
         assertEquals(mammal, hierarchicalExplicit)
 
-        val allHier = typedRegistry.getAllHierarchical<Animal>()
+        val allHier: Map<String, Animal> = typedRegistry.getAllHierarchicalByClass(Animal::class.java)
         assertEquals(setOf("dog", "mammal"), allHier.keys)
+
+        val exactWrongType: Animal? = typedRegistry.getTypedByClass("mammal", Animal::class.java)
+        assertEquals(null, exactWrongType)
+    }
+
+    interface Action<B>
+    class Player(val name: String)
+    data class SendMessage(val text: String) : Action<Player>
+    data class PlaySound(val sound: String) : Action<Player>
+
+    @Test
+    fun `typed registry supports grouped lookups by binder type`() {
+        val actionsKey = RegistryKey.grouped<String, Player, Action<Player>>(RegistryId("test", "actions"))
+        val playerActionsKey = RegistryKey<String, Action<Player>>(RegistryId("test", "player-actions"))
+        val contribution: ContributionBuilder.() -> Unit = {
+            registry(actionsKey) {
+                addGrouped(Player::class.java, playerActionsKey) {
+                    add("message", SendMessage("hi"))
+                    add("sound", PlaySound("ping"))
+                }
+            }
+        }
+
+        val testBootstrap = object : BootstrapHolder {}
+        val testHolder = object : RegistryHolder {}
+
+        val build = testBootstrap.inject()
+        testHolder.registryBootstrap(testBootstrap, contribution)
+        build()
+
+        val grouped: GroupedRegistry<String, Player, Action<Player>> = testBootstrap[actionsKey]
+
+        val message: Action<Player>? = grouped.getTypedByClass("message", Player::class.java)
+        assertNotNull(message)
+        assertTrue(message is SendMessage)
+    }
+
+    @Test
+    fun `grouped registry merges contributions per binder and rebuilds`() {
+        val actionsKey = RegistryKey.grouped<String, Player, Action<Player>>(RegistryId("test", "actions-merge"))
+        val playerActionsKey = RegistryKey<String, Action<Player>>(RegistryId("test", "player-actions-merge"))
+        val testBootstrap = object : BootstrapHolder {}
+        val holderOne = object : RegistryHolder {}
+        val holderTwo = object : RegistryHolder {}
+
+        val build = testBootstrap.inject()
+
+        holderOne.registryBootstrap(testBootstrap) {
+            registry(actionsKey) {
+                addGrouped(Player::class.java, playerActionsKey) {
+                    add("message", SendMessage("hi"))
+                }
+            }
+        }
+
+        holderTwo.registryBootstrap(testBootstrap) {
+            registry(actionsKey) {
+                addGrouped(Player::class.java, playerActionsKey) {
+                    add("sound", PlaySound("ping"))
+                }
+            }
+        }
+
+        build()
+
+        val grouped: GroupedRegistry<String, Player, Action<Player>> = testBootstrap[actionsKey]
+        assertTrue(grouped.getTypedByClass("message", Player::class.java) is SendMessage)
+        assertTrue(grouped.getTypedByClass("sound", Player::class.java) is PlaySound)
+
+        holderOne.registryBootstrap(testBootstrap) {
+            registry(actionsKey) {
+                addGrouped(Player::class.java, playerActionsKey) {
+                    add("message", SendMessage("hello"))
+                }
+            }
+        }
+
+        testBootstrap.rebuildRegistries(holderOne)
+
+        val rebuilt: GroupedRegistry<String, Player, Action<Player>> = testBootstrap[actionsKey]
+        val updated = rebuilt.getTypedByClass("message", Player::class.java) as? SendMessage
+        assertEquals("hello", updated?.text)
+        assertTrue(rebuilt.getTypedByClass("sound", Player::class.java) is PlaySound)
     }
 
     @Test
@@ -72,8 +168,8 @@ class TypedRegistryTest {
         val mammal = Mammal("mammal")
 
         val builder = RegistryContributionBuilder<Class<out Animal>, List<GenericTyped<out Animal>>>()
-        builder.addTyped(AnimalEntry(Dog::class.java, dog))
-        builder.addTyped(AnimalEntry(Mammal::class.java, mammal))
+        builder.addTyped(AnimalEntry(dog))
+        builder.addTyped(AnimalEntry(mammal))
 
         val typedCollection: TypedCollectionRegistry<Animal> =
             Registry(
@@ -104,7 +200,7 @@ class TypedRegistryTest {
 
         val contributionBuilder: ContributionBuilder.() -> Unit = {
             registry(registryKey) {
-                addTyped(AnimalEntry(Dog::class.java, dog))
+                addTyped(AnimalEntry(dog))
             }
         }
 

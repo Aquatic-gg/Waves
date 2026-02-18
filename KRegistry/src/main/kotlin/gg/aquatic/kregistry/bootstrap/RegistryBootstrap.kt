@@ -69,9 +69,18 @@ internal class RegistryBootstrap {
 
     @Suppress("UNCHECKED_CAST")
     private fun <A, B> rebuildRegistry(registry: Registry<A, B>, holder: RegistryHolder): Registry<A, B> {
-        val data = registry.data.toMutableMap()
-        val holderData = registry.holderData[holder] ?: return registry
-        data -= holderData.keys
+        val data = hashMapOf<A, B>()
+        for ((otherHolder, holderMap) in registry.holderData) {
+            if (otherHolder == holder) continue
+            for ((key, value) in holderMap) {
+                val existing = data[key]
+                if (existing is Registry<*, *> && value is Registry<*, *>) {
+                    data[key] = mergeRegistry(existing, value) as B
+                } else {
+                    data[key] = value
+                }
+            }
+        }
 
         val definitions = definitions[registry.registryKey] as? RegistryDefinition<A, B> ?: return registry
         val holderBuilders = definitions.builders[holder] ?: return registry
@@ -80,12 +89,40 @@ internal class RegistryBootstrap {
         holderBuilders(builder)
 
         val newHolderData = builder.data
-        data += builder.data
+        for ((key, value) in builder.data) {
+            val existing = data[key]
+            if (existing is Registry<*, *> && value is Registry<*, *>) {
+                data[key] = mergeRegistry(existing, value) as B
+            } else {
+                data[key] = value
+            }
+        }
 
         return Registry(
             registry.registryKey,
             data,
             registry.holderData + (holder to newHolderData)
+        )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private fun mergeRegistry(existing: Registry<*, *>, incoming: Registry<*, *>): Registry<*, *> {
+        require(existing.registryKey == incoming.registryKey) {
+            "Cannot merge registries with different keys: ${existing.registryKey.id} vs ${incoming.registryKey.id}"
+        }
+
+        val mergedData = HashMap<Any, Any>()
+        mergedData.putAll(existing.data as Map<Any, Any>)
+        mergedData.putAll(incoming.data as Map<Any, Any>)
+
+        val mergedHolderData = HashMap<RegistryHolder, Map<Any, Any>>()
+        mergedHolderData.putAll(existing.holderData as Map<RegistryHolder, Map<Any, Any>>)
+        mergedHolderData.putAll(incoming.holderData as Map<RegistryHolder, Map<Any, Any>>)
+
+        return Registry(
+            existing.registryKey as RegistryKey<Any, Any>,
+            mergedData,
+            mergedHolderData
         )
     }
 }

@@ -66,11 +66,15 @@ val auth = services.get("auth")
 
 ```kotlin
 // Retrieve an object by its exact implementation type
-val provider = myTypedRegistry.getTyped<MyImplementation>("provider_id")
+val provider = myTypedRegistry.getTypedByClass("provider_id", MyImplementation::class.java)
 
 // Retrieve all objects that implement a specific interface
-val allServices = myTypedRegistry.getAllHierarchical<IService>()
+val allServices = myTypedRegistry.getAllHierarchicalByClass(IService::class.java)
 ```
+
+**Exact vs Hierarchical**
+Exact lookups only return entries registered under the exact class key.
+Hierarchical lookups include entries whose class is a subclass/implements the requested type.
 
 ### Typed Collections
 
@@ -82,12 +86,11 @@ class Dog : Animal
 
 // A typed entry binds a value to its runtime type
 data class AnimalEntry(
-    override val type: Class<out Animal>,
-    val value: Animal
-) : GenericTyped<Animal>
+    override val value: Animal
+) : ValueTyped<Animal>
 
 val builder = RegistryContributionBuilder<Class<out Animal>, List<GenericTyped<out Animal>>>()
-builder.addTyped(AnimalEntry(Dog::class.java, Dog()))
+builder.addTyped(AnimalEntry(Dog()))
 
 val typedCollection: TypedCollectionRegistry<Animal> = Registry(
     RegistryKey.typedCollection<Animal>(RegistryId("example", "animals")),
@@ -97,6 +100,31 @@ val typedCollection: TypedCollectionRegistry<Animal> = Registry(
 
 val dogs = typedCollection.getTypedEntries<Dog>()
 val allAnimals = typedCollection.getAllHierarchicalEntries<Animal>()
+```
+
+### Grouped Registries (Binder Pattern)
+
+Use a grouped registry when your values are keyed by a binder type (e.g., `Action<Player>`).
+
+```kotlin
+interface Action<B>
+class Player
+data class SendMessage(val text: String) : Action<Player>
+
+val ACTIONS = RegistryKey.grouped<String, Player, Action<Player>>(RegistryId("example", "actions"))
+val PLAYER_ACTIONS = RegistryKey<String, Action<Player>>(RegistryId("example", "player-actions"))
+
+val contribution: ContributionBuilder.() -> Unit = {
+    registry(ACTIONS) {
+        addGrouped(Player::class.java, PLAYER_ACTIONS) {
+            add("message", SendMessage("hello"))
+        }
+    }
+}
+
+// Later...
+val actions: GroupedRegistry<String, Player, Action<Player>> = AppBootstrap[ACTIONS]
+val message = actions.getTypedByClass("message", Player::class.java)
 ```
 
 ### Contribution DSL
