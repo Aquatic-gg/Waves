@@ -8,6 +8,8 @@ import org.bukkit.entity.Player
 import org.bukkit.event.block.BlockBreakEvent
 
 object BlockBreakStatistic: ListenerStatisticType<Player>() {
+    override val binder: Class<out Player> = Player::class.java
+
     override val arguments: Collection<ObjectArgument<*>> = listOf(
         PrimitiveObjectArgument("types", ArrayList<String>(), true)
     )

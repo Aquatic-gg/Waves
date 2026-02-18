@@ -2,9 +2,12 @@ package gg.aquatic.statistik
 
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.ObjectArguments
-import gg.aquatic.kregistry.*
+import gg.aquatic.kregistry.core.RegistryId
+import gg.aquatic.kregistry.core.RegistryKey
+import gg.aquatic.kregistry.grouped.GroupedEntry
+import gg.aquatic.kregistry.grouped.GroupedRegistry
 
-abstract class StatisticType<T> {
+abstract class StatisticType<T: Any>: GroupedEntry<T> {
 
     abstract val arguments: Collection<ObjectArgument<*>>
 
@@ -34,15 +37,29 @@ abstract class StatisticType<T> {
     open fun onUnregister(handle: StatisticHandle<T>) {}
 
     companion object {
-        val REGISTRY_KEY = RegistryKey<Class<*>, FrozenRegistry<String, StatisticType<*>>>(RegistryId("aquatic", "statistic_types"))
-        val REGISTRY: TypedRegistry<String, StatisticType<*>>
+
+        typealias StatisticTypeRegistry<T> = GroupedRegistry<String, T, StatisticType<T>>
+
+        val REGISTRY_KEY = RegistryKey.grouped<String, Any, StatisticType<*>>(
+            RegistryId(
+                "aquatic",
+                "statistic_types"
+            )
+        )
+
+        @Suppress("UNCHECKED_CAST")
+        fun <T : Any> StatisticTypeRegistry<*>.getHierarchical(id: String, clazz: Class<T>): StatisticType<T>? {
+            return (this as GroupedRegistry<String, T, StatisticType<T>>).getHierarchicalByClass(id, clazz)
+        }
+
+        val REGISTRY: StatisticTypeRegistry<*>
             get() {
-                return Registry[REGISTRY_KEY]
+                return bootstrapHolder[REGISTRY_KEY]
             }
     }
 }
 
-class StatisticHandle<T>(
+class StatisticHandle<T: Any>(
     val statistic: StatisticType<T>,
     val args: ObjectArguments,
     val consumer: (StatisticAddEvent<T>) -> Unit
@@ -58,4 +75,4 @@ class StatisticHandle<T>(
 
 }
 
-class StatisticAddEvent<T>(val statistic: StatisticType<T>, val increasedAmount: Number, val binder: T)
+class StatisticAddEvent<T: Any>(val statistic: StatisticType<T>, val increasedAmount: Number, val binder: T)

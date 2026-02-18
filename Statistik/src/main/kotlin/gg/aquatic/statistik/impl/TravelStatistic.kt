@@ -10,6 +10,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerMoveEvent
 
 object TravelStatistic: ListenerStatisticType<Player>() {
+    override val binder: Class<out Player> = Player::class.java
     override val arguments: Collection<ObjectArgument<*>> = listOf(
         PrimitiveObjectArgument("count-swimming", true, required = true),
         PrimitiveObjectArgument("count-flying", true, required = true),

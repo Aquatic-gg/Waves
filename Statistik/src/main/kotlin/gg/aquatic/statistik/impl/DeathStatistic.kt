@@ -7,6 +7,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.PlayerDeathEvent
 
 object DeathStatistic: ListenerStatisticType<Player>() {
+    override val binder: Class<out Player> = Player::class.java
     override val arguments: Collection<ObjectArgument<*>> = listOf()
 
     override fun createListener() = listen<PlayerDeathEvent> {

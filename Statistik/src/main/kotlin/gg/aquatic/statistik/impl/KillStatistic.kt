@@ -9,6 +9,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 
 object KillStatistic : ListenerStatisticType<Player>() {
+    override val binder: Class<out Player> = Player::class.java
     override val arguments: Collection<ObjectArgument<*>> = listOf(
         PrimitiveObjectArgument("types", ArrayList<String>(), true)
     )

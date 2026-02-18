@@ -2,6 +2,7 @@ package gg.aquatic.statistik
 
 import gg.aquatic.common.argument.ArgumentSerializer
 import gg.aquatic.common.argument.ObjectArguments
+import gg.aquatic.statistik.StatisticType.Companion.getHierarchical
 import org.bukkit.configuration.ConfigurationSection
 
 object StatistikSerializer {
@@ -12,7 +13,7 @@ object StatistikSerializer {
         noinline consumer: (StatisticAddEvent<T>) -> Unit
     ): StatisticHandle<T>? {
         val typeId = configurationSection.getString("type") ?: return null
-        val type = StatisticType.Companion.REGISTRY.getHierarchical(typeId, T::class.java) ?: return null
+        val type = StatisticType.REGISTRY.getHierarchical(typeId, T::class.java) ?: return null
         val loadedArgs = ArgumentSerializer.load(configurationSection, type.arguments)
         val args = ObjectArguments(loadedArgs)
 

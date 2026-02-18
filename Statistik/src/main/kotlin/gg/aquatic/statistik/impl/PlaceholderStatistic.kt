@@ -13,6 +13,7 @@ import org.bukkit.scheduler.BukkitRunnable
 import java.util.*
 
 object PlaceholderStatistic : StatisticType<Player>() {
+    override val binder: Class<out Player> = Player::class.java
     override val arguments: Collection<ObjectArgument<*>> = listOf(
         PrimitiveObjectArgument("placeholder", "", true),
         PrimitiveObjectArgument("update", 20, false)
