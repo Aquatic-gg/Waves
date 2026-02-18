@@ -41,6 +41,9 @@ object AppBootstrap : BootstrapHolder
 object CoreHolder : RegistryHolder
 
 fun bootstrap() {
+    // Build registries
+    val build = AppBootstrap.inject()
+    
     // Register contributions
     CoreHolder.registryBootstrap(AppBootstrap) {
         registry(SERVICES) {
@@ -49,8 +52,7 @@ fun bootstrap() {
         }
     }
 
-    // Build registries
-    val build = AppBootstrap.inject()
+    // Finalize registries
     build()
 }
 
@@ -77,9 +79,9 @@ val ACTIONS = RegistryKey.grouped<String, Player, Action<out Player>>(
 )
 
 val contribution: ContributionBuilder.() -> Unit = {
-registry(ACTIONS) {
-    add("message", SendMessage(Player::class.java, "hello"))
-}
+    registry(ACTIONS) {
+        add("message", SendMessage(Player::class.java, "hello"))
+    }
 }
 
 // Later...
