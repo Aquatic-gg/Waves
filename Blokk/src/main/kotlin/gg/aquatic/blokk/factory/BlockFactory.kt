@@ -1,10 +1,10 @@
 package gg.aquatic.blokk.factory
 
 import gg.aquatic.blokk.Blokk
-import gg.aquatic.kregistry.FrozenRegistry
-import gg.aquatic.kregistry.Registry
-import gg.aquatic.kregistry.RegistryId
-import gg.aquatic.kregistry.RegistryKey
+import gg.aquatic.blokk.bootstrapHolder
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryId
+import gg.aquatic.kregistry.core.RegistryKey
 import org.bukkit.configuration.ConfigurationSection
 
 interface BlockFactory {
@@ -12,10 +12,11 @@ interface BlockFactory {
     fun load(section: ConfigurationSection, material: String): Blokk?
 
     companion object {
-        val REGISTRY_KEY = RegistryKey<String, BlockFactory>(RegistryId("aquatic","block_factory"))
-        val REGISTRY: FrozenRegistry<String, BlockFactory>
+        val REGISTRY_KEY =
+            RegistryKey.simple<String, BlockFactory>(RegistryId("aquatic", "block_factory"))
+        val REGISTRY: Registry<String, BlockFactory>
             get() {
-                return Registry[REGISTRY_KEY]
+                return bootstrapHolder[REGISTRY_KEY]
             }
     }
 }

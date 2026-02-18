@@ -34,7 +34,7 @@ object BlokkSerializer {
     fun load(section: ConfigurationSection): Blokk {
         val material = section.getString("material", "STONE")!!.uppercase()
 
-        for ((id, factory) in BlockFactory.REGISTRY.getAll()) {
+        for ((id, factory) in BlockFactory.REGISTRY.all()) {
             if (material.startsWith("$id:")) {
                 val block = factory.load(section, material.substringAfter("$id:"))
                 if (block == null) {

@@ -1,8 +1,7 @@
 package gg.aquatic.blokk
 
 import gg.aquatic.blokk.factory.BlockFactory
-import gg.aquatic.kregistry.MutableRegistry
-import gg.aquatic.kregistry.Registry
+import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
 
@@ -13,10 +12,15 @@ abstract class Blokk {
 
 }
 
-fun initializeBlokk(factories: Map<String, BlockFactory>) {
-    val registry = MutableRegistry<String, BlockFactory>()
-    factories.forEach { (key, factory) -> registry.register(key, factory) }
-    Registry.update {
-        registerRegistry(BlockFactory.REGISTRY_KEY, registry.freeze())
+internal lateinit var bootstrapHolder: BootstrapHolder
+
+fun initializeBlokk(bootstrapHolder: BootstrapHolder, factories: Map<String, BlockFactory>) {
+    gg.aquatic.blokk.bootstrapHolder = bootstrapHolder
+    BlokkRegistryHolder.registryBootstrap(bootstrapHolder) {
+        registry(BlockFactory.REGISTRY_KEY) {
+            for ((key, factory) in factories) {
+                add(key, factory)
+            }
+        }
     }
 }
