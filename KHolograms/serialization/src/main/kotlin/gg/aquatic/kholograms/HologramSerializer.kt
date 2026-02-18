@@ -9,7 +9,7 @@ import gg.aquatic.common.toMMComponent
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.common.location.LazyLocation
 import gg.aquatic.common.location.toLazyLocation
-import gg.aquatic.execute.requirement.ConditionSerializer
+import gg.aquatic.execute.condition.ConditionSerializer
 import gg.aquatic.kholograms.line.AnimatedHologramLine
 import gg.aquatic.kholograms.line.TextHologramLine
 import gg.aquatic.kholograms.serialize.LineFactory
