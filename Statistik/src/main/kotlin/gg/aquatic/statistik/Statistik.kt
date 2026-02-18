@@ -4,7 +4,7 @@ import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 
 internal lateinit var bootstrapHolder: BootstrapHolder
 
-fun initializeStatistik(bootstrapHolder: BootstrapHolder, statistics: HashMap<String, StatisticType<*>>) {
+fun initializeStatistik(bootstrapHolder: BootstrapHolder, statistics: Map<String, StatisticType<*>>) {
     gg.aquatic.statistik.bootstrapHolder = bootstrapHolder
 
     StatistikRegistryHolder.registryBootstrap(bootstrapHolder) {
