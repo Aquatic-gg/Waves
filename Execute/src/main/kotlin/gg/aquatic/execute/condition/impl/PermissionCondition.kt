@@ -3,7 +3,6 @@ package gg.aquatic.execute.condition.impl
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
-import gg.aquatic.execute.Condition
 import gg.aquatic.execute.condition.type.PlayerCondition
 import org.bukkit.entity.Player
 

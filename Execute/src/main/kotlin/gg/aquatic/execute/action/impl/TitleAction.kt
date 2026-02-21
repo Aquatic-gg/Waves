@@ -3,7 +3,6 @@ package gg.aquatic.execute.action.impl
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
-import gg.aquatic.execute.Action
 import gg.aquatic.execute.Execute
 import gg.aquatic.execute.action.type.PlayerAction
 import net.kyori.adventure.title.Title
