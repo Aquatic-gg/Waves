@@ -4,7 +4,7 @@ import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.MenuComponent
 import org.bukkit.inventory.ItemStack
-import java.util.TreeMap
+import java.util.*
 
 /** A button that cycles through frame components over time. */
 class AnimatedButton(

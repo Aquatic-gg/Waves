@@ -1,10 +1,6 @@
 package gg.aquatic.kmenu.coroutine
 
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 fun <T> CompletableDeferred<T>.complete(block: () -> T): CompletableDeferred<T> = this.apply { complete(block()) }
 

@@ -1,7 +1,7 @@
 package gg.aquatic.kmenu.menu.util
 
-import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.inventory.ButtonType
+import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.kmenu.menu.component.Button
