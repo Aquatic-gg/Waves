@@ -18,8 +18,7 @@ import org.bukkit.inventory.ItemStack
 import org.bukkit.util.Vector
 import org.joml.Quaternionf
 import org.joml.Vector3f
-import java.util.Optional
-import java.util.OptionalInt
+import java.util.*
 
 object NmsMappings {
 

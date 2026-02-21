@@ -6,9 +6,9 @@ import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.profile.GameEventAction
 import gg.aquatic.pakket.api.nms.profile.ProfileEntry
 import gg.aquatic.pakket.api.nms.scoreboard.Team
-import net.kyori.adventure.text.Component
 import io.netty.channel.Channel
 import io.netty.channel.ChannelHandler
+import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
@@ -20,8 +20,6 @@ import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.MenuType
 import org.bukkit.inventory.Recipe
-import org.bukkit.inventory.ShapedRecipe
-import org.bukkit.inventory.ShapelessRecipe
 import org.bukkit.util.Vector
 import org.joml.Vector3d
 import java.util.*
