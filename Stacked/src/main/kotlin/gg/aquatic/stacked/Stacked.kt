@@ -14,16 +14,15 @@ object Stacked {
     lateinit var bootstrapHolder: BootstrapHolder
 }
 
-fun initializeStacked(
+fun BootstrapHolder.initializeStacked(
     plugin: JavaPlugin,
-    bootstrapHolder: BootstrapHolder,
     scope: CoroutineScope,
     miniMessage: MiniMessage = MiniMessage.miniMessage(),
     factories: Map<String, ItemFactory> = emptyMap()
 ) {
     Stacked.scope = scope
     Stacked.miniMessage = miniMessage
-    Stacked.bootstrapHolder = bootstrapHolder
+    Stacked.bootstrapHolder = this
 
     try {
         val pl = AquaticCommon.plugin
@@ -31,7 +30,7 @@ fun initializeStacked(
         initializeCommon(plugin)
     }
 
-    StackedRegistryHolder.registryBootstrap(bootstrapHolder) {
+    StackedRegistryHolder.registryBootstrap(this) {
         registry(ItemHandler.REGISTRY_KEY) {
             add("aquatic", ItemHandler.Impl)
         }
@@ -44,6 +43,6 @@ fun initializeStacked(
             }
         }
     }
+
     ItemManager.initialize()
 }
-
