@@ -3,7 +3,6 @@ package gg.aquatic.kevent
 import gg.aquatic.kevent.subscription.Subscription
 import gg.aquatic.kevent.subscription.SuspendingSubscription
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import java.util.concurrent.CompletableFuture
 
 interface EventBus {

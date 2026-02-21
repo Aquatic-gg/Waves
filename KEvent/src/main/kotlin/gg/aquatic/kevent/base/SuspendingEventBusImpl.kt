@@ -4,12 +4,8 @@ import gg.aquatic.kevent.*
 import gg.aquatic.kevent.subscription.SuspendingStrongSubscription
 import gg.aquatic.kevent.subscription.SuspendingSubscription
 import gg.aquatic.kevent.subscription.SuspendingWeakSubscription
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
+import kotlinx.coroutines.*
 import kotlinx.coroutines.future.asCompletableFuture
-import kotlinx.coroutines.withContext
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
