@@ -1,12 +1,12 @@
 package gg.aquatic.kregistry.bootstrap
 
-import gg.aquatic.kregistry.grouped.GroupedEntry
-import gg.aquatic.kregistry.grouped.GroupedRegistry
-import gg.aquatic.kregistry.grouped.GroupedRegistryKey
 import gg.aquatic.kregistry.core.Registry
 import gg.aquatic.kregistry.core.RegistryKey
 import gg.aquatic.kregistry.core.SimpleRegistry
 import gg.aquatic.kregistry.core.SimpleRegistryKey
+import gg.aquatic.kregistry.grouped.GroupedEntry
+import gg.aquatic.kregistry.grouped.GroupedRegistry
+import gg.aquatic.kregistry.grouped.GroupedRegistryKey
 
 class RegistryDefinition<A, B>(
     val id: RegistryKey<A, B>,

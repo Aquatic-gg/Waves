@@ -1,11 +1,11 @@
 package gg.aquatic.kregistry.bootstrap
 
 import gg.aquatic.kregistry.core.Registry
-import gg.aquatic.kregistry.grouped.GroupedEntry
-import gg.aquatic.kregistry.grouped.GroupedRegistryKey
 import gg.aquatic.kregistry.core.RegistryKey
 import gg.aquatic.kregistry.core.SimpleRegistry
 import gg.aquatic.kregistry.core.SimpleRegistryKey
+import gg.aquatic.kregistry.grouped.GroupedEntry
+import gg.aquatic.kregistry.grouped.GroupedRegistryKey
 
 internal class Contribution(
     val holder: RegistryHolder,
