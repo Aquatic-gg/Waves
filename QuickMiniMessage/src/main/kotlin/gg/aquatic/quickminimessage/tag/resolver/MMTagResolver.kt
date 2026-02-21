@@ -2,7 +2,7 @@ package gg.aquatic.quickminimessage.tag.resolver
 
 import gg.aquatic.quickminimessage.tag.MMTag
 import gg.aquatic.quickminimessage.tag.MMTagContext
-import java.util.Locale
+import java.util.*
 
 fun interface MMTagResolver {
     fun resolve(name: String, args: List<String>, context: MMTagContext): MMTag?

@@ -2,11 +2,7 @@ package gg.aquatic.quickminimessage.benchmark
 
 import gg.aquatic.quickminimessage.MMParser
 import net.kyori.adventure.text.minimessage.MiniMessage
-import org.openjdk.jmh.annotations.Benchmark
-import org.openjdk.jmh.annotations.Param
-import org.openjdk.jmh.annotations.Scope
-import org.openjdk.jmh.annotations.Setup
-import org.openjdk.jmh.annotations.State
+import org.openjdk.jmh.annotations.*
 import org.openjdk.jmh.infra.Blackhole
 
 @State(Scope.Thread)

@@ -1,12 +1,12 @@
 package gg.aquatic.quickminimessage.tag
 
-import gg.aquatic.quickminimessage.tag.resolver.MMDataComponentResolver
 import gg.aquatic.quickminimessage.MMParser
+import gg.aquatic.quickminimessage.tag.resolver.MMDataComponentResolver
 import gg.aquatic.quickminimessage.tag.resolver.MMTagResolver
 import net.kyori.adventure.identity.Identity
 import net.kyori.adventure.pointer.Pointered
 import net.kyori.adventure.text.Component
-import java.util.Locale
+import java.util.*
 
 class MMTagContext internal constructor(
     private val resolver: MMTagResolver,

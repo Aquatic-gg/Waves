@@ -2,19 +2,15 @@ package gg.aquatic.quickminimessage.translator
 
 import gg.aquatic.quickminimessage.MMLocalePointered
 import gg.aquatic.quickminimessage.MMParser
-import gg.aquatic.quickminimessage.tag.resolver.MMArgumentTagResolver
 import gg.aquatic.quickminimessage.argument.MMTranslatorArgument
 import gg.aquatic.quickminimessage.tag.MMTag
+import gg.aquatic.quickminimessage.tag.resolver.MMArgumentTagResolver
 import gg.aquatic.quickminimessage.tag.resolver.MMTagResolver
 import net.kyori.adventure.pointer.Pointered
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TranslationArgument
-import net.kyori.adventure.text.TranslatableComponent
-import net.kyori.adventure.text.TranslationArgumentLike
-import net.kyori.adventure.text.VirtualComponent
+import net.kyori.adventure.text.*
 import net.kyori.adventure.translation.Translator
 import java.text.MessageFormat
-import java.util.Locale
+import java.util.*
 
 @Suppress("unused")
 abstract class MMTranslator(

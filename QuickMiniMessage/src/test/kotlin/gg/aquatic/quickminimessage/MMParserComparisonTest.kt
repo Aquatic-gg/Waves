@@ -1,9 +1,9 @@
 package gg.aquatic.quickminimessage
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class MMParserComparisonTest {
     private val gson = GsonComponentSerializer.gson()

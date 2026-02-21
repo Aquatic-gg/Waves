@@ -7,7 +7,8 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextColor
 import net.kyori.adventure.text.format.TextDecoration
-import java.util.Locale
+import java.util.*
+
 internal fun transitionColor(colors: Array<TextColor>, phase: Double): TextColor {
     var adjustedPhase = phase.toFloat()
     var reversed = false

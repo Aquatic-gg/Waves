@@ -1,7 +1,5 @@
 package gg.aquatic.quickminimessage
 
-import kotlin.test.Test
-import kotlin.test.assertEquals
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -9,6 +7,8 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class MMParserResolverComparisonTest {
     private val gson = GsonComponentSerializer.gson()

@@ -2,7 +2,6 @@ package gg.aquatic.quickminimessage.argument
 
 import net.kyori.adventure.text.ComponentLike
 import net.kyori.adventure.text.VirtualComponentRenderer
-import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator
 
 class MMTranslatorArgument<T> internal constructor(
     val name: String,
