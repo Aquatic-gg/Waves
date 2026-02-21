@@ -1,5 +1,3 @@
-import org.gradle.api.publish.PublishingExtension
-
 plugins {
     kotlin("jvm") version "2.3.10" apply false
     id("co.uzzu.dotenv.gradle") version "4.0.0"
