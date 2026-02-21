@@ -4,12 +4,12 @@ import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 
 internal lateinit var bootstrapHolder: BootstrapHolder
 
-fun initializeStatistik(bootstrapHolder: BootstrapHolder, statistics: Map<String, StatisticType<*>>) {
-    gg.aquatic.statistik.bootstrapHolder = bootstrapHolder
+fun BootstrapHolder.initializeStatistik(statistics: Map<String, StatisticType<*>>) {
+    bootstrapHolder = this
 
-    StatistikRegistryHolder.registryBootstrap(bootstrapHolder) {
+    StatistikRegistryHolder.registryBootstrap(this) {
         registry(StatisticType.REGISTRY_KEY) {
-            statistics.forEach { add(it.key, it.value) }
+            statistics.forEach { (key, value) -> add(key, value) }
         }
     }
 }
