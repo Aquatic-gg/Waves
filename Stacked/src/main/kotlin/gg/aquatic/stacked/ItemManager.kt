@@ -1,7 +1,6 @@
 package gg.aquatic.stacked
 
 import gg.aquatic.common.event
-import gg.aquatic.stacked.ItemHandler.Companion.REGISTRY_KEY
 import gg.aquatic.stacked.event.StackedItemInteractEvent
 import gg.aquatic.stacked.serialize.ItemSerializer
 import org.bukkit.entity.Player

@@ -1,7 +1,6 @@
 package gg.aquatic.stacked.factory
 
 import gg.aquatic.stacked.ItemFactory
-import gg.aquatic.stacked.ItemHandler
 import io.lumine.mythic.api.MythicProvider
 import io.lumine.mythic.bukkit.adapters.BukkitItemStack
 import org.bukkit.inventory.ItemStack

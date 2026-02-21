@@ -1,7 +1,6 @@
 package gg.aquatic.stacked.factory
 
 import gg.aquatic.stacked.ItemFactory
-import gg.aquatic.stacked.ItemHandler
 import io.th0rgal.oraxen.api.OraxenItems
 import org.bukkit.inventory.ItemStack
 

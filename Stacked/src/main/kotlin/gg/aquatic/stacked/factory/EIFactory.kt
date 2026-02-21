@@ -3,7 +3,6 @@ package gg.aquatic.stacked.factory
 import com.ssomar.score.api.executableitems.ExecutableItemsAPI
 import com.ssomar.score.sobject.InternalData
 import gg.aquatic.stacked.ItemFactory
-import gg.aquatic.stacked.ItemHandler
 import org.bukkit.inventory.ItemStack
 import kotlin.jvm.optionals.getOrNull
 
