@@ -6,7 +6,7 @@ import gg.aquatic.execute.ConditionalActionsHandle
 import gg.aquatic.execute.action.ActionSerializer
 import gg.aquatic.execute.checkConditions
 import gg.aquatic.execute.condition.ConditionSerializer
-import gg.aquatic.execute.condition.RequirementHandleWithFailActions
+import gg.aquatic.execute.condition.ConditionHandleWithFailActions
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.settings.*
@@ -128,7 +128,7 @@ object MenuSerializer {
 
     fun loadActionWithCondition(section: ConfigurationSection): ConditionalActionHandle<Player,Unit>? {
         val action = ActionSerializer.fromSection<Player>(section) ?: return null
-        val conditions = ArrayList<RequirementHandleWithFailActions<Player,Unit>>()
+        val conditions = ArrayList<ConditionHandleWithFailActions<Player>>()
         for (configurationSection in section.getSectionList("conditions")) {
             conditions += loadConditionWithFailActions(configurationSection) ?: continue
         }
@@ -138,12 +138,12 @@ object MenuSerializer {
         return ConditionalActionHandle(action, conditions, failActions)
     }
 
-    fun loadConditionWithFailActions(section: ConfigurationSection): RequirementHandleWithFailActions<Player,Unit>? {
+    fun loadConditionWithFailActions(section: ConfigurationSection): ConditionHandleWithFailActions<Player>? {
         val condition = ConditionSerializer.fromSection<Player>(section) ?: return null
         val failActions = if (section.isConfigurationSection("fail")) {
             loadActionsWithConditions(section.getConfigurationSection("fail")!!)
         } else null
-        return RequirementHandleWithFailActions(condition, failActions)
+        return ConditionHandleWithFailActions(condition, failActions)
     }
 
 }
