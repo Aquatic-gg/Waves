@@ -1,11 +1,11 @@
 package gg.aquatic.execute
 
 import gg.aquatic.common.argument.ObjectArguments
-import gg.aquatic.execute.condition.RequirementHandleWithFailActions
+import gg.aquatic.execute.condition.ConditionHandleWithFailActions
 
 open class ConditionalActionsHandle<A>(
     val executableObjects: Collection<ConditionalActionHandle<A, Unit>>,
-    val conditions: Collection<RequirementHandleWithFailActions<A, Unit>>,
+    val conditions: Collection<ConditionHandleWithFailActions<A>>,
     val failExecutableObjects: ConditionalActionsHandle<A>?,
 ): ExecutableObjectHandle<A, Unit>(
     ExecutableObjectBundle(executableObjects.map { it.configuredObject.executableObject }),

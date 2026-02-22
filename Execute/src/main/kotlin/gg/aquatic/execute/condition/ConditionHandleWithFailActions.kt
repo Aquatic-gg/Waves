@@ -2,7 +2,7 @@ package gg.aquatic.execute.condition
 
 import gg.aquatic.execute.ConditionalActionsHandle
 
-class RequirementHandleWithFailActions<A,B>(
+class ConditionHandleWithFailActions<A>(
     val condition: ConditionHandle<A>,
     val failActions: ConditionalActionsHandle<A>?
 ) {
