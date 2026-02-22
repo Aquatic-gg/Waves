@@ -6,6 +6,7 @@ import gg.aquatic.clientside.meg.MEGInteractableHandler
 import gg.aquatic.common.ChunkId
 import gg.aquatic.common.event
 import gg.aquatic.common.ticker.GlobalTicker
+import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 import gg.aquatic.pakket.api.event.packet.PacketBlockChangeEvent
 import gg.aquatic.pakket.api.event.packet.PacketChunkLoadEvent
 import gg.aquatic.pakket.api.event.packet.PacketInteractEvent
@@ -33,6 +34,7 @@ object FakeObjectHandler {
     private val chunkCache = ConcurrentHashMap<String, MutableMap<ChunkId, ChunkBundle>>()
 
     private var tickCycle = 0
+    internal lateinit var bootstrapHolder: BootstrapHolder
 
     fun initialize() {
         setupTicker()
