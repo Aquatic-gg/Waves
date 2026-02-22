@@ -18,4 +18,6 @@ fun BootstrapHolder.initializeClientside() {
             add("multiblock", ClientsideMultiBlockSettings.Companion)
         }
     }
+
+    FakeObjectHandler.initialize()
 }
