@@ -5,7 +5,7 @@ import java.util.logging.Logger
 import kotlin.coroutines.CoroutineContext
 
 open class BaseCtx(
-    val check: () -> Boolean,
+    val checkDispatchNeeded: () -> Boolean,
     val execution: (Runnable) -> Unit,
     val logger: Logger
 ) : CoroutineDispatcher() {
@@ -18,7 +18,7 @@ open class BaseCtx(
     )
 
     override fun isDispatchNeeded(context: CoroutineContext): Boolean {
-        return !check()
+        return checkDispatchNeeded()
     }
 
     override fun dispatch(context: CoroutineContext, block: Runnable) {

@@ -8,11 +8,11 @@ import org.bukkit.plugin.Plugin
 import java.util.concurrent.CompletableFuture
 
 sealed class BukkitCtx(
-    val plugin: Plugin,
+    plugin: Plugin,
     check: () -> Boolean,
     execution: (Runnable) -> Unit
 ) : BaseCtx(
-    check = {
+    checkDispatchNeeded = {
         plugin.isEnabled && check()
     },
     execution = { runnable ->
