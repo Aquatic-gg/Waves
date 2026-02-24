@@ -27,8 +27,7 @@ object KurrencyConfig {
     }
 }
 
-fun initializeKurrency(
-    bootstrapHolder: BootstrapHolder,
+fun BootstrapHolder.initializeKurrency(
     dbUrl: String, dbDriver: String, dbUser: String, dbPass: String,
     cache: CurrencyCache,
     currencies: List<Currency> = emptyList(),
@@ -36,11 +35,11 @@ fun initializeKurrency(
 ) {
     val database = HikariDBFactory.init(dbUrl, dbDriver, dbUser, dbPass, BalancesTable)
 
-    KurrencyConfig.bootstrapHolder = bootstrapHolder
+    KurrencyConfig.bootstrapHolder = this
     KurrencyConfig.database = database
     KurrencyConfig.currencyHandler = CurrencyHandler(cache)
 
-    KurrencyRegistryHolder.registryBootstrap(bootstrapHolder) {
+    KurrencyRegistryHolder.registryBootstrap(this) {
         registry(KurrencyConfig.REGISTRY_KEY) {
             currencies.forEach { add(it.id, it) }
         }
