@@ -16,7 +16,7 @@ object Execute {
     lateinit var miniMessage: MiniMessage
     lateinit var bootstrapHolder: BootstrapHolder
 
-    fun injectExecutables() {
+    internal fun injectExecutables() {
         ExecuteRegistryHolder.registryBootstrap(bootstrapHolder, injectExecutablesInternal())
     }
 
@@ -50,12 +50,15 @@ object Execute {
     }
 }
 
-fun BootstrapHolder.initExecute(plugin: JavaPlugin, miniMessage: MiniMessage = MiniMessage.miniMessage()) {
+fun BootstrapHolder.initializeExecute(plugin: JavaPlugin, miniMessage: MiniMessage = MiniMessage.miniMessage(), injectDefaults: Boolean = true) {
     Execute.miniMessage = miniMessage
     Execute.bootstrapHolder = this
     try {
         val pl = AquaticCommon.plugin
     } catch (_: Exception) {
         initializeCommon(plugin)
+    }
+    if (injectDefaults) {
+        Execute.injectExecutables()
     }
 }
