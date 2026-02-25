@@ -12,13 +12,22 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 internal class RegistryBootstrap {
     private val initialized = AtomicBoolean(false)
     private val definitions = ConcurrentHashMap<RegistryKey<*, *>, RegistryDefinition<*, *>>()
+    private val pendingContributions = java.util.concurrent.ConcurrentLinkedQueue<Contribution>()
     private val graphRef =
         AtomicReference(
             RegistryGraph(mapOf())
         )
 
     internal fun rebuildRegistries(holder: RegistryHolder) {
-        require(initialized.compareAndSet(expectedValue = false, newValue = true)) { "Registry bootstrap already initialized" }
+        require(initialized.load()) { "Registry bootstrap not initialized" }
+        val pending = drainPendingContributions()
+        if (pending.isNotEmpty()) {
+            applyContributions(pending)
+            rebuildGraph()
+            runPostHooks(pending)
+            return
+        }
+
         val graph = graphRef.load()
 
         val registries = graph.registries.toMutableMap()
@@ -33,14 +42,25 @@ internal class RegistryBootstrap {
     }
 
     internal fun injectContribution(contribution: Contribution) {
-        require(!initialized.load()) { "Registry bootstrap already initialized" }
-        for ((key, builder) in contribution.builder) {
-            val definition = definitions.getOrPut(key) { RegistryDefinition(key) }
-            mergeContributionBuilder(definition, contribution.holder, builder)
+        pendingContributions += contribution
+        if (initialized.load()) {
+            val pending = drainPendingContributions()
+            if (pending.isEmpty()) return
+            applyContributions(pending)
+            rebuildGraph()
+            runPostHooks(pending)
         }
     }
 
     internal fun <A, B> refreshRegistry(registry: Registry<A, B>, holder: RegistryHolder) {
+        val pending = drainPendingContributions()
+        if (pending.isNotEmpty()) {
+            applyContributions(pending)
+            rebuildGraph()
+            runPostHooks(pending)
+            return
+        }
+
         val registry = rebuildRegistry(registry, holder)
         val current = graphRef.load()
         val graphSnapshot = current.rebuild(registry)
@@ -48,8 +68,11 @@ internal class RegistryBootstrap {
     }
 
     internal fun buildRegistries() {
-        val registries = definitions.map { (_, definition) -> definition.build() }.associateBy { it.registryKey }
-        setGraph(RegistryGraph(registries))
+        require(initialized.compareAndSet(expectedValue = false, newValue = true)) { "Registry bootstrap already initialized" }
+        val pending = drainPendingContributions()
+        applyContributions(pending)
+        rebuildGraph()
+        runPostHooks(pending)
     }
 
     internal fun graph(): RegistryGraph = graphRef.load()
@@ -138,6 +161,40 @@ internal class RegistryBootstrap {
             {
                 existing(this)
                 incoming(this)
+            }
+        }
+    }
+
+    private fun rebuildGraph() {
+        val registries = definitions.map { (_, definition) -> definition.build() }.associateBy { it.registryKey }
+        setGraph(RegistryGraph(registries))
+    }
+
+    private fun drainPendingContributions(): List<Contribution> {
+        val pending = ArrayList<Contribution>()
+        while (true) {
+            val contribution = pendingContributions.poll() ?: break
+            pending += contribution
+        }
+        return pending
+    }
+
+    private fun applyContributions(contributions: List<Contribution>) {
+        for (contribution in contributions) {
+            for (hook in contribution.pre) {
+                hook()
+            }
+            for ((key, builder) in contribution.builder) {
+                val definition = definitions.getOrPut(key) { RegistryDefinition(key) }
+                mergeContributionBuilder(definition, contribution.holder, builder)
+            }
+        }
+    }
+
+    private fun runPostHooks(contributions: List<Contribution>) {
+        for (contribution in contributions) {
+            for (hook in contribution.post) {
+                hook()
             }
         }
     }

@@ -33,7 +33,6 @@ interface RegistryHolder {
     fun registryBootstrap(bootstrap: BootstrapHolder, builder: ContributionBuilder.() -> Unit) {
         val contrBuilder = ContributionBuilder()
         contrBuilder.builder()
-
         val contribution = contrBuilder.build(this)
         BootstrapHolderState.get(bootstrap).injectContribution(contribution)
     }

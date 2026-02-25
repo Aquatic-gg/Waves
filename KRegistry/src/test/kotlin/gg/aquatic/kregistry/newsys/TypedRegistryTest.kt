@@ -63,6 +63,36 @@ class TypedRegistryTest {
         assertEquals("2", registry["second"])
     }
 
+    @Test
+    fun `pre post hooks are deferred while contribution config is immediate`() {
+        val key = RegistryKey.simple<String, String>(RegistryId("test", "deferred-pre-post"))
+        val testBootstrap = object : BootstrapHolder {}
+        val testHolder = object : RegistryHolder {}
+        val build = testBootstrap.inject()
+
+        var configured = false
+        var value = "before"
+
+        testHolder.registryBootstrap(testBootstrap) {
+            configured = true
+            pre { value = "from-pre" }
+            registry(key) {
+                add("hello", value)
+            }
+            post { value = "from-post" }
+        }
+
+        assertEquals(true, configured)
+        assertEquals("before", value)
+
+        build()
+
+        val registry = testBootstrap.get(key)
+        assertEquals(true, configured)
+        assertEquals("from-pre", registry["hello"])
+        assertEquals("from-post", value)
+    }
+
     interface Action<out B> : GroupedEntry<B>
     open class Entity(val name: String)
     class Player(name: String) : Entity(name)

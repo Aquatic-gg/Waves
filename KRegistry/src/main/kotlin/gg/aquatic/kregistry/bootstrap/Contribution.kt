@@ -9,11 +9,15 @@ import gg.aquatic.kregistry.grouped.GroupedRegistryKey
 
 internal class Contribution(
     val holder: RegistryHolder,
-    val builder: Map<RegistryKey<*, *>, RegistryContributionBuilder<*, *>.() -> Unit>
+    val builder: Map<RegistryKey<*, *>, RegistryContributionBuilder<*, *>.() -> Unit>,
+    val pre: List<() -> Unit>,
+    val post: List<() -> Unit>
 )
 
 class ContributionBuilder {
     private val data = HashMap<RegistryKey<*, *>, RegistryContributionBuilder<*, *>.() -> Unit>()
+    private val preHooks = ArrayList<() -> Unit>()
+    private val postHooks = ArrayList<() -> Unit>()
 
     @Suppress("UNCHECKED_CAST")
     fun <A, B> registry(key: SimpleRegistryKey<A, B>, builder: RegistryContributionBuilder<A, B>.() -> Unit) {
@@ -34,8 +38,16 @@ class ContributionBuilder {
         data[key] = adapter
     }
 
+    fun pre(block: () -> Unit) {
+        preHooks += block
+    }
+
+    fun post(block: () -> Unit) {
+        postHooks += block
+    }
+
     internal fun build(holder: RegistryHolder): Contribution {
-        return Contribution(holder, data)
+        return Contribution(holder, data.toMap(), preHooks.toList(), postHooks.toList())
     }
 }
 
