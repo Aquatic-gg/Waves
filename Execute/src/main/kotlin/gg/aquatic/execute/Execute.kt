@@ -1,6 +1,7 @@
 package gg.aquatic.execute
 
 import gg.aquatic.common.AquaticCommon
+import gg.aquatic.common.MiniMessageResolver
 import gg.aquatic.common.initializeCommon
 import gg.aquatic.execute.action.impl.*
 import gg.aquatic.execute.action.impl.logical.ConditionalActionsAction
@@ -13,7 +14,6 @@ import org.bukkit.plugin.java.JavaPlugin
 
 object Execute {
 
-    lateinit var miniMessage: MiniMessage
     lateinit var bootstrapHolder: BootstrapHolder
 
     internal fun injectExecutables() {
@@ -50,13 +50,12 @@ object Execute {
     }
 }
 
-fun BootstrapHolder.initializeExecute(plugin: JavaPlugin, miniMessage: MiniMessage = MiniMessage.miniMessage(), injectDefaults: Boolean = true) {
-    Execute.miniMessage = miniMessage
+fun BootstrapHolder.initializeExecute(plugin: JavaPlugin, miniMessage: MiniMessageResolver, injectDefaults: Boolean = true) {
     Execute.bootstrapHolder = this
     try {
         val pl = AquaticCommon.plugin
     } catch (_: Exception) {
-        initializeCommon(plugin)
+        initializeCommon(plugin, miniMessage)
     }
     if (injectDefaults) {
         Execute.injectExecutables()
