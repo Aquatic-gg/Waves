@@ -13,12 +13,18 @@ repositories {
         name = "papermc"
         url = uri("https://repo.papermc.io/repository/maven-public/")
     }
+    maven {
+        name = "aquatic-releases"
+        url = uri("https://repo.nekroplex.com/releases")
+    }
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":Common"))
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    api("gg.aquatic:Common:26.0.13")
+
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
 
     jmh("org.openjdk.jmh:jmh-core:1.37")
