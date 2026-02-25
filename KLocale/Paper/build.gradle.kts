@@ -3,6 +3,7 @@ import me.champeau.jmh.JmhBytecodeGeneratorTask
 plugins {
     id("me.champeau.jmh") version "0.7.3"
     id("io.morethan.jmhreport") version "0.9.6"
+    `java-library`
 }
 
 group = "gg.aquatic.klocale"
