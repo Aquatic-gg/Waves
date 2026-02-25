@@ -21,6 +21,8 @@ abstract class FakeObject(
     var registered: Boolean = false
         protected set
 
+    abstract fun register()
+
     private var _audience: AquaticAudience = initialAudience
     open val audience: AquaticAudience get() = _audience
 
