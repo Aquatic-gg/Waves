@@ -5,8 +5,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 
 fun String.toMMComponent(): Component {
-    return MiniMessage.builder()
-        .build().deserialize(
+    return AquaticCommon.miniMessage.parse(
             this
                 .replace("§", "&")
                 .replace("&a", "<green>")
