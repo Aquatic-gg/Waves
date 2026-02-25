@@ -6,6 +6,7 @@ import gg.aquatic.clientside.FakeObjectHandler
 import gg.aquatic.clientside.ObjectInteractEvent
 import gg.aquatic.common.audience.AquaticAudience
 import gg.aquatic.pakket.Pakket
+import gg.aquatic.pakket.api.nms.toBlockPos
 import gg.aquatic.pakket.sendPacket
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -20,7 +21,7 @@ class FakeBlock(
     var onTick: suspend () -> Unit = {}
 ) : FakeObject(viewRange, audience) {
 
-    override val location: Location = location.toBlockLocation().apply { yaw = location.yaw }
+    override val location: Location = location.toBlockLocation() //.apply { yaw = location.yaw }
     var block: Blokk = block
         private set
 
@@ -60,17 +61,17 @@ class FakeBlock(
         }
     }
 
-    fun register() {
+    override fun register() {
         if (registered) return
         registered = true
 
-        FakeObjectHandler.locationToBlocks.getOrPut(this.location) { ConcurrentHashMap.newKeySet() } += this
         FakeObjectHandler.tickableObjects += this
 
         val chunkX = Math.floorDiv(location.blockX, 16)
         val chunkZ = Math.floorDiv(location.blockZ, 16)
         val bundle = FakeObjectHandler.getOrCreateChunkCacheBundle(chunkX, chunkZ, location.world)
-        bundle.blocks += this
+        val set = bundle.blocks.computeIfAbsent(location.toBlockPos()) { ConcurrentHashMap.newKeySet() }
+        set += this
     }
 
     fun unregister() {
@@ -79,7 +80,7 @@ class FakeBlock(
         val chunkX = Math.floorDiv(location.blockX, 16)
         val chunkZ = Math.floorDiv(location.blockZ, 16)
         val bundle = FakeObjectHandler.getChunkCacheBundle(chunkX, chunkZ, location.world) ?: return
-        bundle.blocks -= this
+        bundle.blocks[location.toBlockPos()]?.remove(this)
     }
 
     override fun destroy() {
@@ -87,7 +88,6 @@ class FakeBlock(
         isViewing.forEach { hide(it) }
         FakeObjectHandler.tickableObjects -= this
         unregister()
-        FakeObjectHandler.locationToBlocks[location]?.remove(this)
     }
 
     override suspend fun tick() {

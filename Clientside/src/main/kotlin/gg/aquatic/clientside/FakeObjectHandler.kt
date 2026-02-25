@@ -10,6 +10,8 @@ import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 import gg.aquatic.pakket.api.event.packet.PacketBlockChangeEvent
 import gg.aquatic.pakket.api.event.packet.PacketChunkLoadEvent
 import gg.aquatic.pakket.api.event.packet.PacketInteractEvent
+import gg.aquatic.pakket.api.nms.BlockPos
+import gg.aquatic.pakket.api.nms.toBlockPos
 import gg.aquatic.pakket.isChunkTracked
 import gg.aquatic.pakket.packetEvent
 import io.papermc.paper.event.packet.PlayerChunkUnloadEvent
@@ -28,7 +30,7 @@ object FakeObjectHandler {
 
     internal val tickableObjects = ConcurrentHashMap.newKeySet<FakeObject>()
     internal val idToEntity = ConcurrentHashMap<Int, FakeEntity>()
-    internal val locationToBlocks = ConcurrentHashMap<Location, MutableSet<FakeBlock>>()
+    //internal val locationToBlocks = ConcurrentHashMap<Location, MutableSet<FakeBlock>>()
     private val objectRemovalQueue: MutableSet<FakeObject> = ConcurrentHashMap.newKeySet()
 
     private val chunkCache = ConcurrentHashMap<String, MutableMap<ChunkId, ChunkBundle>>()
@@ -73,13 +75,13 @@ object FakeObjectHandler {
         packetEvent<PacketChunkLoadEvent> {
             val bundle = getChunkCacheBundle(it.x, it.z, it.player.world) ?: return@packetEvent
             it.then {
-                updateVisibilityBatch(it.player, bundle.blocks)
+                updateVisibilityBatch(it.player, bundle.blocks.values.flatten())
                 for (entity in bundle.entities) entity.updateVisibility(it.player)
             }
         }
         event<PlayerChunkUnloadEvent> {
             val bundle = getChunkCacheBundle(it.chunk.x, it.chunk.z, it.world) ?: return@event
-            for (block in bundle.blocks) block.updateVisibility(it.player)
+            for (block in bundle.blocks.values.flatten()) block.updateVisibility(it.player)
             for (entity in bundle.entities) entity.updateVisibility(it.player)
         }
     }
@@ -89,27 +91,27 @@ object FakeObjectHandler {
      * Combines hiding old blocks and showing new blocks into one multi-block change.
      */
     fun updateVisibilityBatch(player: Player, blocks: Collection<FakeBlock>) {
-        // Group by chunk so we can send one packet per chunk
-        blocks.groupBy { it.location.chunk }.filter { player.isChunkTracked(it.key) }.forEach { (_, chunkBlocks) ->
-            val updateMap = mutableMapOf<Location, org.bukkit.block.data.BlockData>()
+        val updatesByChunk = HashMap<org.bukkit.Chunk, MutableMap<Location, org.bukkit.block.data.BlockData>>()
 
-            for (block in chunkBlocks) {
-                val shouldSee = block.shouldSee(player)
-                val isViewing = block.isViewing.contains(player)
+        for (block in blocks) {
+            val chunk = block.location.chunk
+            if (!player.isChunkTracked(chunk)) continue
 
-                if (shouldSee && !isViewing) {
-                    // Needs to be shown
-                    updateMap[block.location] = block.block.blockData
-                    block.injectViewer(player)
-                } else if (!shouldSee && isViewing) {
-                    if (!updateMap.containsKey(block.location)) {
-                        updateMap[block.location] = block.location.block.blockData
-                    }
-                    block.ejectViewer(player)
-                }
+            val shouldSee = block.shouldSee(player)
+            val isViewing = block.isViewing.contains(player)
+
+            if (shouldSee && !isViewing) {
+                val updateMap = updatesByChunk.getOrPut(chunk) { HashMap() }
+                updateMap[block.location] = block.block.blockData
+                block.injectViewer(player)
+            } else if (!shouldSee && isViewing) {
+                val updateMap = updatesByChunk.getOrPut(chunk) { HashMap() }
+                updateMap.putIfAbsent(block.location, block.location.block.blockData)
+                block.ejectViewer(player)
             }
+        }
 
-            // Only send if there's actually something to change in this chunk
+        for (updateMap in updatesByChunk.values) {
             if (updateMap.isNotEmpty()) {
                 player.sendMultiBlockChange(updateMap)
             }
@@ -137,12 +139,14 @@ object FakeObjectHandler {
 
     private fun handlePacketBlockChange(event: PacketBlockChangeEvent) {
         val player = event.player
-        val blocks = locationToBlocks[Location(
-            player.world,
-            event.x.toDouble(),
-            event.y.toDouble(),
-            event.z.toDouble()
-        ).toBlockLocation()] ?: return
+        val chunkX = Math.floorDiv(event.x, 16)
+        val chunkZ = Math.floorDiv(event.z, 16)
+        val bundle = getChunkCacheBundle(chunkX, chunkZ, player.world) ?: return
+        val blockPos = Location(player.world, event.x.toDouble(), event.y.toDouble(), event.z.toDouble()).toBlockPos()
+        val blocks = bundle.blocks[blockPos]
+        if (blocks.isNullOrEmpty()) {
+            return
+        }
 
         for (block in blocks) {
             if (block.isAudienceMember(player) && !block.destroyed) {
@@ -154,7 +158,15 @@ object FakeObjectHandler {
 
     private fun handlePlayerInteract(event: PlayerInteractEvent) {
         if (event.hand == EquipmentSlot.OFF_HAND) return
-        val blocks = locationToBlocks[event.clickedBlock?.location ?: return] ?: return
+
+        val clickedLocation = event.clickedBlock?.location ?: return
+
+        val chunkX = clickedLocation.blockX shr 4
+        val chunkZ = clickedLocation.blockZ shr 4
+
+        val bundle = getChunkCacheBundle(chunkX, chunkZ, event.player.world) ?: return
+
+        val blocks = bundle.blocks[clickedLocation.toBlockPos()] ?: return
         for (block in blocks) {
             if (block.destroyed) continue
             if (block.isAudienceMember(event.player)) {
@@ -201,7 +213,7 @@ object FakeObjectHandler {
     }
 
     class ChunkBundle {
-        val blocks = mutableListOf<FakeBlock>()
+        val blocks = ConcurrentHashMap<BlockPos, MutableCollection<FakeBlock>>()
         val entities = mutableListOf<FakeEntity>()
     }
 }
