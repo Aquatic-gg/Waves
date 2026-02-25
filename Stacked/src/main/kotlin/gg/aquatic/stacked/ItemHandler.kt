@@ -15,8 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 abstract class ItemHandler<T : StackedItem<T>, S: ItemSerializer<T>> {
 
-    lateinit var id: String
-        internal set
+    abstract val id: String
 
     companion object {
         val NAMESPACE_KEY by lazy {
@@ -48,6 +47,8 @@ abstract class ItemHandler<T : StackedItem<T>, S: ItemSerializer<T>> {
         ): StackedItemImpl {
             return StackedItemImpl(item, options, this)
         }
+
+        override val id: String = "aquatic"
 
         override val serializer: ItemSerializerImpl = ItemSerializerImpl
     }
