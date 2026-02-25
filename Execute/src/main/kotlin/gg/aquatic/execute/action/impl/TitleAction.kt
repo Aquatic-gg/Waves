@@ -1,5 +1,6 @@
 package gg.aquatic.execute.action.impl
 
+import gg.aquatic.common.AquaticCommon
 import gg.aquatic.common.argument.ArgumentContext
 import gg.aquatic.common.argument.ObjectArgument
 import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
@@ -20,8 +21,8 @@ object TitleAction : PlayerAction() {
 
         binder.showTitle(
             Title.title(
-                Execute.miniMessage.deserialize(title),
-                Execute.miniMessage.deserialize(subtitle),
+                AquaticCommon.miniMessage.parse(title),
+                AquaticCommon.miniMessage.parse(subtitle),
                 Title.Times.times(
                     Duration.ofMillis((fadeIn * 50).toLong()),
                     Duration.ofMillis((stay * 50).toLong()),
