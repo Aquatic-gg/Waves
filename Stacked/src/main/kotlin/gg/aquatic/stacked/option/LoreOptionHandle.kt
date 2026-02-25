@@ -1,5 +1,6 @@
 package gg.aquatic.stacked.option
 
+import gg.aquatic.common.AquaticCommon
 import gg.aquatic.stacked.Stacked
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
@@ -21,7 +22,7 @@ class LoreOptionHandle(
         override fun load(section: ConfigurationSection): ItemOptionHandle? {
             if (!section.contains("lore")) return null
             val lore = section.getStringList("lore").map {
-                Stacked.miniMessage.deserialize(it).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
+                AquaticCommon.miniMessage.parse(it).decoration(TextDecoration.ITALIC, TextDecoration.State.FALSE)
             }
             if (lore.isEmpty()) return null
             return LoreOptionHandle(lore)

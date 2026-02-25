@@ -1,5 +1,6 @@
 package gg.aquatic.stacked.option
 
+import gg.aquatic.common.AquaticCommon
 import gg.aquatic.stacked.Stacked
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
@@ -22,7 +23,7 @@ class DisplayNameOptionHandle(
         override val key = Key.key("itemoption:display-name")
         override fun load(section: ConfigurationSection): ItemOptionHandle? {
             val displayName = section.getString("display-name") ?: return null
-            return DisplayNameOptionHandle(Stacked.miniMessage.deserialize(displayName))
+            return DisplayNameOptionHandle(AquaticCommon.miniMessage.parse(displayName))
         }
     }
 }
