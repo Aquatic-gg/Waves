@@ -25,6 +25,10 @@ class FakeBM(
         }
     }
 
+    override fun register() {
+
+    }
+
     override fun onShow(player: Player) {}
     override fun onHide(player: Player) {}
 

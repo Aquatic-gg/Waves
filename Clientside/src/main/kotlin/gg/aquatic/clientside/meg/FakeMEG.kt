@@ -32,6 +32,10 @@ class FakeMEG(
         yBodyRot = rot.yaw
     }
 
+    override fun register() {
+
+    }
+
     val modeledEntity: ModeledEntity? get() = ModelEngineAPI.getModeledEntity(dummy.uuid)
     val activeModel: ActiveModel? get() = modeledEntity?.getModel(modelId)?.orElse(null)
 
