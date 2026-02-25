@@ -95,9 +95,9 @@ abstract class FakeObject(
 
     fun updateVisibility(player: Player) {
         if (shouldSee(player)) {
-            if (!_isViewing.contains(player.uniqueId)) show(player)
+            show(player)
         } else {
-            if (_isViewing.contains(player.uniqueId)) hide(player)
+            hide(player)
         }
     }
 
