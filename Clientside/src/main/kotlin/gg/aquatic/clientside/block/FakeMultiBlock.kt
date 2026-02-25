@@ -31,7 +31,7 @@ class FakeMultiBlock(
         }
     }
 
-    fun register() {
+    override fun register() {
         blocks.forEach { it.register() }
     }
 

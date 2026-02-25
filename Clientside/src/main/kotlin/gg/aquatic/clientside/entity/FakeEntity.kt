@@ -107,7 +107,7 @@ class FakeEntity(
         isViewing.forEach { it.sendPacket(packet, false) }
     }
 
-    fun register() {
+    override fun register() {
         if (registered) return
         registered = true
         FakeObjectHandler.tickableObjects += this
