@@ -94,6 +94,7 @@ abstract class ListMenu<T>(
     override suspend fun open(player: Player) {
         refreshEntries()
         refreshButtons()
+        super.open(player)
     }
 
 

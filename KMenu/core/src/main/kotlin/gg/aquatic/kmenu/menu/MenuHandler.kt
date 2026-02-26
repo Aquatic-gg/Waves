@@ -1,14 +1,12 @@
 package gg.aquatic.kmenu.menu
 
 import gg.aquatic.common.event
-import gg.aquatic.common.ticker.GlobalTicker
+import gg.aquatic.dispatch.CoroutineScheduler
 import gg.aquatic.kevent.subscribe
 import gg.aquatic.kmenu.KMenu
 import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.packetInventory
-import kotlinx.coroutines.withContext
-import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
@@ -16,8 +14,12 @@ import org.bukkit.event.inventory.InventoryInteractEvent
 import org.bukkit.event.player.PlayerDropItemEvent
 
 internal object MenuHandler {
+    private val scheduler by lazy {
+        CoroutineScheduler(KMenu.scope)
+    }
+
     fun initialize() {
-        GlobalTicker.runRepeatFixedDelay(20L) {
+        scheduler.runRepeatFixedDelay(20L) {
             tickInventories()
         }
 
@@ -46,13 +48,13 @@ internal object MenuHandler {
         }
     }
 
-    private suspend fun tickInventories() = withContext(KMenu.context) {
+    private suspend fun tickInventories() {
         val ticked = hashSetOf<Menu>()
 
-        for (player in Bukkit.getOnlinePlayers()) {
-            val openedInventory = player.packetInventory() as? Menu ?: continue
-            if (ticked.add(openedInventory)) {
-                openedInventory.tick()
+        KMenu.packetInventories.forEachSuspended { player, inventory ->
+            val menu = inventory as? Menu ?: return@forEachSuspended
+            if (ticked.add(menu)) {
+                menu.tick()
             }
         }
     }
