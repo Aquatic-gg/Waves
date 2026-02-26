@@ -252,4 +252,62 @@ class BrigadierDSLTest {
         assertEquals(2, helpCalls, "Help should have fired again (inherited)")
         assertEquals(1, balanceCalls, "Balance should have fired once")
     }
+
+    @Test
+    fun `test trailing execute works for nested optional arguments`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+        val mockSource = mockk<CommandSourceStack>()
+        every { mockSource.sender } returns mockk<Player>(relaxed = true)
+
+        var capturedCrate: String? = null
+        var capturedPlayer: String? = null
+        var capturedAmount: Int? = null
+
+        dispatcher.command("aqcrates") {
+            "key" {
+                "give" {
+                    listArgument("crate", values = listOf("test")) {
+                        // We intentionally don't place execute blocks on child nodes.
+                        stringArgument("player") {
+                            intArgument("amount")
+                        }
+
+                        execute<Player> {
+                            capturedCrate = get<String>("crate")
+                            capturedPlayer = getOrNull("player")
+                            capturedAmount = getOrNull<Int>("amount") ?: 1
+                            true
+                        }
+                    }
+                }
+            }
+        }
+
+        val playerNode = dispatcher.root
+            .getChild("aqcrates")
+            .getChild("key")
+            .getChild("give")
+            .getChild("crate")
+            .getChild("player")
+        assertNotNull(playerNode.command, "Player node should be executable through inherited execute")
+        assertNotNull(
+            playerNode.getChild("amount").command,
+            "Amount node should be executable through inherited execute"
+        )
+
+        dispatcher.execute("aqcrates key give test", mockSource)
+        assertEquals("test", capturedCrate)
+        assertEquals(null, capturedPlayer)
+        assertEquals(1, capturedAmount)
+
+        dispatcher.execute("aqcrates key give test MrLarkyy_", mockSource)
+        assertEquals("test", capturedCrate)
+        assertEquals("MrLarkyy_", capturedPlayer)
+        assertEquals(1, capturedAmount)
+
+        dispatcher.execute("aqcrates key give test MrLarkyy_ 1", mockSource)
+        assertEquals("test", capturedCrate)
+        assertEquals("MrLarkyy_", capturedPlayer)
+        assertEquals(1, capturedAmount)
+    }
 }

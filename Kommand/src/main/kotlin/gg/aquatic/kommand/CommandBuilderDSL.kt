@@ -40,21 +40,20 @@ enum class StringArgumentFormat {
 class CommandBuilder<S : CommandSourceStack>(
     val builder: ArgumentBuilder<S, *>,
     val inheritedRunnables: MutableList<ExecutionContext<S, *>.() -> Boolean> = mutableListOf(),
-    private val argumentMappers: MutableMap<String, (CommandContext<S>) -> Any?> = mutableMapOf()
+    private val argumentMappers: MutableMap<String, (CommandContext<S>) -> Any?> = mutableMapOf(),
+    private var inheritedRunnableCount: Int = inheritedRunnables.size,
+    private val childBuilders: MutableList<CommandBuilder<S>> = mutableListOf(),
+    private val reattachToParent: (() -> Unit)? = null
 ) {
 
     operator fun String.invoke(block: CommandBuilder<S>.() -> Unit) {
         val literal = LiteralArgumentBuilder.literal<S>(this)
-        val subBuilder = CommandBuilder(literal, inheritedRunnables.toMutableList(), argumentMappers.toMutableMap())
-        subBuilder.block()
-        builder.then(literal)
+        attachChildBuilder(literal, block)
     }
 
     fun <T> argument(name: String, type: ArgumentType<T>, block: CommandBuilder<S>.() -> Unit = {}) {
         val arg = RequiredArgumentBuilder.argument<S, T>(name, type)
-        val subBuilder = CommandBuilder(arg, inheritedRunnables.toMutableList(), argumentMappers.toMutableMap())
-        subBuilder.block()
-        builder.then(arg)
+        attachChildBuilder(arg, block)
     }
 
     /**
@@ -268,6 +267,15 @@ class CommandBuilder<S : CommandSourceStack>(
         }
     }
 
+    fun listArgument(
+        id: String,
+        values: (CommandContext<S>) -> Iterable<String>,
+        format: StringArgumentFormat = StringArgumentFormat.WORD,
+        block: CommandBuilder<S>.() -> Unit = {}
+    ) {
+        listArgument(id, values, { it }, format, block)
+    }
+
     fun <T : Any> listArgument(
         id: String,
         values: (CommandContext<S>) -> Iterable<T>,
@@ -303,9 +311,7 @@ class CommandBuilder<S : CommandSourceStack>(
             builder.buildFuture()
         }
 
-        val subBuilder = CommandBuilder(arg, inheritedRunnables.toMutableList(), argumentMappers.toMutableMap())
-        subBuilder.block()
-        builder.then(arg)
+        attachChildBuilder(arg, block)
     }
 
     inline fun <reified T : CommandSender> execute(crossinline block: ExecutionContext<S, T>.() -> Boolean) {
@@ -315,6 +321,7 @@ class CommandBuilder<S : CommandSourceStack>(
         }
 
         inheritedRunnables.add(wrappedBlock)
+        propagateRunnableToChildren(wrappedBlock)
         rebindExecution()
     }
 
@@ -340,6 +347,7 @@ class CommandBuilder<S : CommandSourceStack>(
             }
             Command.SINGLE_SUCCESS
         }
+        reattachToParent?.invoke()
     }
 
     fun listArgument(
@@ -349,6 +357,39 @@ class CommandBuilder<S : CommandSourceStack>(
         block: CommandBuilder<S>.() -> Unit = {}
     ) {
         listArgument(id, { values }, { it }, format, block)
+    }
+
+    private fun attachChildBuilder(
+        childBuilder: ArgumentBuilder<S, *>,
+        block: CommandBuilder<S>.() -> Unit
+    ) {
+        val subBuilder = CommandBuilder(
+            builder = childBuilder,
+            inheritedRunnables = inheritedRunnables.toMutableList(),
+            argumentMappers = argumentMappers.toMutableMap(),
+            inheritedRunnableCount = inheritedRunnables.size,
+            reattachToParent = {
+                builder.then(childBuilder)
+                reattachToParent?.invoke()
+            }
+        )
+        childBuilders.add(subBuilder)
+        subBuilder.block()
+        builder.then(childBuilder)
+        reattachToParent?.invoke()
+    }
+
+    @PublishedApi
+    internal fun propagateRunnableToChildren(runnable: ExecutionContext<S, *>.() -> Boolean) {
+        childBuilders.forEach { it.inheritRunnableFromAncestor(runnable) }
+    }
+
+    private fun inheritRunnableFromAncestor(runnable: ExecutionContext<S, *>.() -> Boolean) {
+        // Keep inherited logic ahead of child-local logic regardless of declaration order.
+        inheritedRunnables.add(inheritedRunnableCount, runnable)
+        inheritedRunnableCount++
+        rebindExecution()
+        childBuilders.forEach { it.inheritRunnableFromAncestor(runnable) }
     }
 }
 
