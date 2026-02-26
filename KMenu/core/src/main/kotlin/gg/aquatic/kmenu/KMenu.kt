@@ -22,8 +22,6 @@ import kotlin.coroutines.CoroutineContext
  */
 object KMenu {
     val packetInventories = ConcurrentHashMap<Player, PacketInventory>()
-    lateinit var plugin: Plugin
-        private set
 
     lateinit var scope: CoroutineScope
         private set
@@ -32,15 +30,14 @@ object KMenu {
         get() = scope.coroutineContext.minusKey(Job)
 
     /** Initialize with an existing [CoroutineScope]. */
-    fun initialize(plugin: Plugin, scope: CoroutineScope) {
-        this.plugin = plugin
+    fun initialize(scope: CoroutineScope) {
         this.scope = scope
-        InventoryHandler.initialize(plugin)
+        InventoryHandler.initialize()
     }
 
     /** Initialize with a raw [CoroutineContext]. */
-    fun initialize(plugin: Plugin, context: CoroutineContext) {
-        initialize(plugin, CoroutineScope(context + SupervisorJob()))
+    fun initialize(context: CoroutineContext) {
+        initialize(CoroutineScope(context + SupervisorJob()))
     }
 }
 
@@ -50,13 +47,13 @@ fun Player.packetInventory(): PacketInventory? {
 }
 
 /** Initialize KMenu using an existing [CoroutineScope]. */
-fun initializeKMenu(plugin: Plugin, scope: CoroutineScope) {
-    initialize(plugin, scope)
+fun initializeKMenu(scope: CoroutineScope) {
+    initialize(scope)
 }
 
 /** Initialize KMenu using a raw [CoroutineContext]. */
-fun initializeKMenu(plugin: Plugin, context: CoroutineContext) {
-    initialize(plugin, context)
+fun initializeKMenu(context: CoroutineContext) {
+    initialize(context)
 }
 
 /** Placeholder context scoped to a private menu's player. */

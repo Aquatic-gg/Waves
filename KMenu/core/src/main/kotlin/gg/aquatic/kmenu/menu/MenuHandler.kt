@@ -1,9 +1,9 @@
 package gg.aquatic.kmenu.menu
 
+import gg.aquatic.common.event
 import gg.aquatic.common.ticker.GlobalTicker
 import gg.aquatic.kevent.subscribe
 import gg.aquatic.kmenu.KMenu
-import gg.aquatic.kmenu.bukkit.registerBukkitEvent
 import gg.aquatic.kmenu.inventory.InventoryHandler
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.packetInventory
@@ -14,10 +14,9 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.event.inventory.InventoryInteractEvent
 import org.bukkit.event.player.PlayerDropItemEvent
-import org.bukkit.plugin.Plugin
 
 internal object MenuHandler {
-    fun initialize(plugin: Plugin) {
+    fun initialize() {
         GlobalTicker.runRepeatFixedDelay(20L) {
             tickInventories()
         }
@@ -27,16 +26,15 @@ internal object MenuHandler {
             if (inv !is Menu) return@subscribe
             inv.onInteract(it)
         }
-
-        initializeBukkitEvents(plugin)
+        initializeBukkitEvents()
     }
 
-    private fun initializeBukkitEvents(plugin: Plugin) {
-        registerBukkitEvent<InventoryClickEvent>(plugin) { handleBukkitInteraction(it) }
-        registerBukkitEvent<InventoryInteractEvent>(plugin) { handleBukkitInteraction(it) }
-        registerBukkitEvent<InventoryDragEvent>(plugin) { handleBukkitInteraction(it) }
-        registerBukkitEvent<PlayerDropItemEvent>(plugin) {
-            val inv = it.player.packetInventory() as? Menu ?: return@registerBukkitEvent
+    private fun initializeBukkitEvents() {
+        event<InventoryClickEvent> { handleBukkitInteraction(it) }
+        event<InventoryInteractEvent> { handleBukkitInteraction(it) }
+        event<InventoryDragEvent> { handleBukkitInteraction(it) }
+        event<PlayerDropItemEvent> {
+            val inv = it.player.packetInventory() as? Menu ?: return@event
             if (inv.cancelBukkitInteractions) it.isCancelled = true
         }
     }

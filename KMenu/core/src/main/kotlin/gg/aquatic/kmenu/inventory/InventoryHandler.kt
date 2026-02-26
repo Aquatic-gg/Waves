@@ -1,9 +1,9 @@
 package gg.aquatic.kmenu.inventory
 
+import gg.aquatic.common.coroutine.BukkitCtx
+import gg.aquatic.common.event
 import gg.aquatic.kevent.suspendingEventBusBuilder
 import gg.aquatic.kmenu.KMenu
-import gg.aquatic.kmenu.bukkit.registerBukkitEvent
-import gg.aquatic.kmenu.bukkit.runOnMainThread
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryCloseEvent
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
 import gg.aquatic.kmenu.menu.MenuHandler
@@ -18,7 +18,6 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.player.PlayerQuitEvent
 import org.bukkit.inventory.ItemStack
-import org.bukkit.plugin.Plugin
 
 internal object InventoryHandler {
 
@@ -29,17 +28,17 @@ internal object InventoryHandler {
         }
     }
 
-    fun initialize(plugin: Plugin) {
-        registerBukkitEvents(plugin)
+    fun initialize() {
+        registerBukkitEvents()
         registerPacketEvents()
-        MenuHandler.initialize(plugin)
+        MenuHandler.initialize()
     }
 
-    private fun registerBukkitEvents(plugin: Plugin) {
-        registerBukkitEvent<InventoryCloseEvent>(plugin) {
-            onCloseMenu(it.player as? Player ?: return@registerBukkitEvent, true)
+    private fun registerBukkitEvents() {
+        event<InventoryCloseEvent> {
+            onCloseMenu(it.player as? Player ?: return@event, true)
         }
-        registerBukkitEvent<PlayerQuitEvent>(plugin) {
+        event<PlayerQuitEvent> {
             onCloseMenu(it.player, false)
         }
     }
@@ -190,7 +189,7 @@ internal object InventoryHandler {
 
         eventBus.post(AsyncPacketInventoryCloseEvent(player, removed))
 
-        runOnMainThread(KMenu.plugin) {
+        BukkitCtx.ofEntity(player).launch {
             player.updateInventory()
         }
     }

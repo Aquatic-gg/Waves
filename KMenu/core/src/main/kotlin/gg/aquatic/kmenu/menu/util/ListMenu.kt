@@ -1,6 +1,7 @@
 package gg.aquatic.kmenu.menu.util
 
 import gg.aquatic.kmenu.KMenu
+import gg.aquatic.kmenu.PaginatedMenu
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
@@ -32,7 +33,7 @@ abstract class ListMenu<T>(
     PrivateMenu(
         title, type, player,
         true
-    ) {
+    ), PaginatedMenu {
 
     val placeholderContext = PlaceholderContext.privateMenu()
 
@@ -95,15 +96,27 @@ abstract class ListMenu<T>(
         refreshButtons()
     }
 
+
+    override suspend fun handleNextPage() {
+        if ((page + 1) * entrySlots.size > filteredEntries.size) return
+        page++
+        onPageChange(page - 1, page)
+        refreshButtons()
+    }
+
+    override suspend fun handlePreviousPage() {
+        if (page == 0) {
+            return
+        }
+        page--
+        onPageChange(page + 1, page)
+        refreshButtons()
+    }
+
     suspend fun injectPreviousButton(settings: IButtonSettings) {
         previousPageButton = settings.create(placeholderContext) { e ->
             if (e.buttonType != ButtonType.LEFT) return@create
-            if (page == 0) {
-                return@create
-            }
-            page--
-            onPageChange(page + 1, page)
-            refreshButtons()
+            handlePreviousPage()
         }
         refreshPageButtons()
     }
@@ -111,10 +124,7 @@ abstract class ListMenu<T>(
     suspend fun injectNextButton(settings: IButtonSettings) {
         nextPageButton = settings.create(placeholderContext) { e ->
             if (e.buttonType != ButtonType.LEFT) return@create
-            if ((page + 1) * entrySlots.size > filteredEntries.size) return@create
-            page++
-            onPageChange(page - 1, page)
-            refreshButtons()
+            handleNextPage()
         }
         refreshPageButtons()
     }
