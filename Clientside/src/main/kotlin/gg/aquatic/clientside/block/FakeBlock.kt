@@ -39,7 +39,7 @@ class FakeBlock(
         this._isViewing += player.uniqueId
     }
     internal fun ejectViewer(player: Player) {
-        this._isViewing += player.uniqueId
+        this._isViewing -= player.uniqueId
     }
 
     override fun onShow(player: Player) {

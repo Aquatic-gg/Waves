@@ -98,7 +98,7 @@ object FakeObjectHandler {
             if (!player.isChunkTracked(chunk)) continue
 
             val shouldSee = block.shouldSee(player)
-            val isViewing = block.isViewing.contains(player)
+            val isViewing = block.isPacketViewer(player)
 
             if (shouldSee && !isViewing) {
                 val updateMap = updatesByChunk.getOrPut(chunk) { HashMap() }

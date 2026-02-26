@@ -23,6 +23,8 @@ abstract class FakeObject(
 
     abstract fun register()
 
+    private val viewRangeSquared = viewRange * viewRange
+
     private var _audience: AquaticAudience = initialAudience
     open val audience: AquaticAudience get() = _audience
 
@@ -103,13 +105,15 @@ abstract class FakeObject(
 
     fun shouldSee(player: Player): Boolean {
         if (destroyed || !player.isOnline) return false
-        if (player.world != location.world) return false
+        val objectLocation = location
+        val objectWorld = objectLocation.world ?: return false
+        if (player.world.name != objectWorld.name) return false
         if (!audience.canBeApplied(player)) return false
 
-        val distSq = player.location.distanceSquared(location)
-        if (distSq > viewRange * viewRange) return false
+        if (!player.isChunkTracked(objectLocation.chunk)) return false
 
-        return player.isChunkTracked(location.chunk)
+        val distSq = player.location.distanceSquared(objectLocation)
+        return distSq <= viewRangeSquared.toDouble()
     }
 
     abstract fun handleInteract(player: Player, isLeftClick: Boolean)
