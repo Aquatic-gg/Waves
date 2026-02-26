@@ -7,17 +7,15 @@ import kotlinx.coroutines.selects.onTimeout
 import kotlinx.coroutines.selects.select
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.concurrent.Executors
 import kotlin.math.max
 
 /**
  * CoroutineScheduler handles task scheduling and execution with support for adjustable scheduling
- * strategies and lifecycle management. Task scheduling is managed using coroutines and configurable
- * dispatchers, allowing precise control over task execution timing and concurrency.
+ * strategies and lifecycle management. Task scheduling is managed using coroutines on the provided
+ * scope context, allowing precise control over task execution timing and concurrency.
  *
- * @constructor Creates a CoroutineScheduler with a specified scope and dispatcher.
+ * @constructor Creates a CoroutineScheduler with a specified scope.
  * @param scope The CoroutineScope used to launch the main scheduler coroutine. Defaults to a SupervisorJob-based scope.
- * @param dispatcher The CoroutineDispatcher for executing scheduler-related tasks. Defaults to a single-threaded dispatcher.
  *
  * @property events A read-only [Flow] that emits scheduler events such as task started, completed, or failed.
  * @property metrics A read-only [StateFlow] that provides real-time metrics about the scheduler's state, such as active tasks,
@@ -54,12 +52,9 @@ import kotlin.math.max
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("unused")
 open class CoroutineScheduler(
-    scope: CoroutineScope = CoroutineScope(SupervisorJob()),
-    val dispatcher: CoroutineDispatcher = Executors.newSingleThreadExecutor { r ->
-        Thread(r, "SchedulerThread").apply { isDaemon = true }
-    }.asCoroutineDispatcher()
+    scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 ) {
-    constructor(baseCtx: BaseCtx) : this(dispatcher = baseCtx, scope = baseCtx.scope)
+    constructor(baseCtx: BaseCtx) : this(scope = baseCtx.scope)
 
     private val logger = LoggerFactory.getLogger(CoroutineScheduler::class.java)
 
@@ -75,7 +70,9 @@ open class CoroutineScheduler(
         object Shutdown : SchedulerMsg()
     }
 
-    private val scope = CoroutineScope(scope.coroutineContext + dispatcher)
+    private val scope = CoroutineScope(
+        scope.coroutineContext + SupervisorJob(scope.coroutineContext[Job])
+    )
     private val msgChannel = Channel<SchedulerMsg>(capacity = Channel.UNLIMITED)
     private val _events = MutableSharedFlow<SchedulerEvent>(
         extraBufferCapacity = 64
@@ -246,8 +243,5 @@ open class CoroutineScheduler(
     fun shutdown() {
         msgChannel.trySend(SchedulerMsg.Shutdown)
         scope.cancel()
-        if (dispatcher is CloseableCoroutineDispatcher) {
-            dispatcher.close()
-        }
     }
 }
