@@ -24,6 +24,7 @@ class SingleThreadedContext(name: String) : SingleThreadCtx() {
             }
             .factory()
     )
+    private val inContextThread = ThreadLocal.withInitial { false }
 
     override val scope = CoroutineScope(
         this + SupervisorJob() + CoroutineExceptionHandler { _, e ->
@@ -32,16 +33,34 @@ class SingleThreadedContext(name: String) : SingleThreadCtx() {
         }
     )
 
-    override fun isDispatchNeeded(context: CoroutineContext): Boolean = true
+    override fun isDispatchNeeded(context: CoroutineContext): Boolean = !inContextThread.get()
 
     override fun dispatch(context: CoroutineContext, block: Runnable) {
-        executor.execute(block)
+        if (!isDispatchNeeded(context)) {
+            block.run()
+            return
+        }
+        executor.execute {
+            inContextThread.set(true)
+            try {
+                block.run()
+            } finally {
+                inContextThread.set(false)
+            }
+        }
     }
 
     override fun launch(block: suspend CoroutineScope.() -> Unit) = scope.launch(block = block)
 
     fun post(task: () -> Unit) {
-        executor.execute(task)
+        executor.execute {
+            inContextThread.set(true)
+            try {
+                task()
+            } finally {
+                inContextThread.set(false)
+            }
+        }
     }
 
     fun shutdown() {
