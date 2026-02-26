@@ -51,7 +51,7 @@ internal object MenuHandler {
     private suspend fun tickInventories() {
         val ticked = hashSetOf<Menu>()
 
-        KMenu.packetInventories.forEachSuspended { player, inventory ->
+        KMenu.packetInventories.forEachSuspended { _, inventory ->
             val menu = inventory as? Menu ?: return@forEachSuspended
             if (ticked.add(menu)) {
                 menu.tick()
