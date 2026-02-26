@@ -7,12 +7,11 @@ import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.PrivateMenu
 import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.replace.Placeholders
+import gg.aquatic.snapshotmap.SuspendingSnapshotMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import org.bukkit.entity.Player
-import org.bukkit.plugin.Plugin
-import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -21,7 +20,7 @@ import kotlin.coroutines.CoroutineContext
  * Call [initialize] once during plugin startup.
  */
 object KMenu {
-    val packetInventories = ConcurrentHashMap<Player, PacketInventory>()
+    val packetInventories = SuspendingSnapshotMap<Player, PacketInventory>()
 
     lateinit var scope: CoroutineScope
         private set
