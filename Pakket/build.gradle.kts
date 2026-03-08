@@ -23,7 +23,7 @@ dependencies {
     api(project(":API"))
     api(project(":NMS_1_21_9"))
     api("gg.aquatic:KEvent:26.0.5")
-    api("gg.aquatic:Common:26.0.13")
+    api("gg.aquatic:Common:26.0.14")
 }
 
 kotlin {
