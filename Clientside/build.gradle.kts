@@ -33,7 +33,7 @@ dependencies {
     api("gg.aquatic:Blokk:26.0.2")
     api("gg.aquatic:KRegistry:25.0.2")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
-    compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.1.0")
+    compileOnly("io.github.toxicity188:bettermodel-bukkit-api:2.2.0")
     testImplementation(kotlin("test"))
 }
 
