@@ -41,7 +41,7 @@ dependencies {
     compileOnly("io.lumine:MythicLib-dist:1.6.2-SNAPSHOT")
     compileOnly("net.Indyuce:MMOItems-API:6.9.5-SNAPSHOT")
     compileOnly("com.arcaniax:HeadDatabase-API:1.3.2")
-    compileOnly("com.willfp:eco:6.77.3")
+    compileOnly("com.willfp:eco:6.77.6")
     compileOnly("net.momirealms:craft-engine-core:0.0.67")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.67")
     compileOnly("com.nexomc:nexo:1.19.1")
