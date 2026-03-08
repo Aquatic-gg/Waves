@@ -44,7 +44,7 @@ dependencies {
     compileOnly("com.willfp:eco:6.77.3")
     compileOnly("net.momirealms:craft-engine-core:0.0.67")
     compileOnly("net.momirealms:craft-engine-bukkit:0.0.67")
-    compileOnly("com.nexomc:nexo:1.19.1")
+    compileOnly("com.nexomc:nexo:1.20.1")
     compileOnly("com.github.Ssomar-Developement:SCore:5.25.3.9")
 
     testImplementation(kotlin("test"))
