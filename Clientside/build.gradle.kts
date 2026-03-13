@@ -22,7 +22,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    api("gg.aquatic:Common:26.0.14") {
+    api("gg.aquatic:Common:26.0.16") {
         isChanging = true
     }
     api("gg.aquatic.execute:Execute:26.0.1")
