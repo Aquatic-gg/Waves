@@ -2,10 +2,11 @@ plugins {
     kotlin("jvm") version "2.3.10"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     `maven-publish`
+    `java-library`
 }
 
 group = "gg.aquatic"
-version = "26.0.1"
+version = "26.0.2"
 
 repositories {
     maven("https://repo.nekroplex.com/releases")
@@ -20,23 +21,23 @@ repositories {
 val exposedVersion = "1.1.1"
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("gg.aquatic:KRegistry:25.0.2")
-    compileOnly("gg.aquatic:KEvent:26.0.5")
-    compileOnly("gg.aquatic:Common:26.0.14")
-    compileOnly("gg.aquatic:Dispatch:26.0.4")
-    compileOnly("gg.aquatic:Dispatch-bukkit:26.0.4")
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    api("gg.aquatic:KRegistry:25.0.3")
+    api("gg.aquatic:KEvent:26.0.5")
+    api("gg.aquatic:Common:26.0.16")
+    api("gg.aquatic:Dispatch:26.0.4")
+    api("gg.aquatic:Dispatch-bukkit:26.0.4")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
         exclude(group = "org.bukkit", module = "bukkit")
     }
     testImplementation(kotlin("test"))
 
-    compileOnly("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    compileOnly("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    compileOnly("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    compileOnly("com.github.ben-manes.caffeine:caffeine:3.2.3")
-    compileOnly("redis.clients:jedis:7.3.0")
-    compileOnly("com.zaxxer:HikariCP:7.0.2")
+    api("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    api("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    api("com.github.ben-manes.caffeine:caffeine:3.2.3")
+    api("redis.clients:jedis:7.3.0")
+    api("com.zaxxer:HikariCP:7.0.2")
 }
 
 kotlin {
