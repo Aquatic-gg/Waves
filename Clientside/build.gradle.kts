@@ -25,7 +25,7 @@ dependencies {
     api("gg.aquatic:Common:26.0.14") {
         isChanging = true
     }
-    api("gg.aquatic.execute:Execute:26.0.1")
+    api("gg.aquatic.execute:Execute:26.0.2")
     api("gg.aquatic:snapshotmap:26.0.2")
     api("gg.aquatic:Pakket:26.1.10")
     api("gg.aquatic:Dispatch:26.0.4")
