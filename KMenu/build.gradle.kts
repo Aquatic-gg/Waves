@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "gg.aquatic.kmenu"
-version = "26.0.3"
+version = "26.0.4"
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
