@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "gg.aquatic.kregistry"
-version = "25.0.2"
+version = "25.0.3"
 
 repositories {
     mavenCentral()
