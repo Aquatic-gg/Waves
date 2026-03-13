@@ -1,5 +1,6 @@
 package gg.aquatic.common
 
+import gg.aquatic.common.location.world.AwaitingWorlds
 import org.bukkit.plugin.java.JavaPlugin
 
 object AquaticCommon {
@@ -12,4 +13,6 @@ object AquaticCommon {
 fun initializeCommon(plugin: JavaPlugin, miniMessageResolver: MiniMessageResolver) {
     AquaticCommon.plugin = plugin
     AquaticCommon.miniMessage = miniMessageResolver
+
+    AwaitingWorlds.initialize()
 }

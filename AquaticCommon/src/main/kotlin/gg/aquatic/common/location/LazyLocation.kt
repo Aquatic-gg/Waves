@@ -1,5 +1,6 @@
 package gg.aquatic.common.location
 
+import gg.aquatic.common.location.world.AwaitingWorld
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import kotlin.math.atan2
@@ -17,6 +18,12 @@ class LazyLocation(
     fun toLocation(): Location? {
         val world = Bukkit.getWorld(world) ?: return null
         return Location(world, x, y, z, yaw, pitch)
+    }
+
+    fun await(block: (Location) -> Unit) {
+        AwaitingWorld.create(this.world) {
+            block(Location(it, this.x, this.y, this.z))
+        }
     }
 
 }
