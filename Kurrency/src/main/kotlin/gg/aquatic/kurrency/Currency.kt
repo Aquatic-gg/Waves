@@ -1,9 +1,21 @@
 package gg.aquatic.kurrency
 
+import gg.aquatic.kregistry.core.Registry
+import gg.aquatic.kregistry.core.RegistryId
+import gg.aquatic.kregistry.core.RegistryKey
+import gg.aquatic.kurrency.Kurrency.bootstrapHolder
 import org.bukkit.entity.Player
 import java.math.BigDecimal
 
 interface Currency {
+
+    companion object {
+        val REGISTRY_KEY = RegistryKey.simple<String, Currency>(RegistryId("aquatic", "currency"))
+        val REGISTRY: Registry<String, Currency>
+            get() {
+                return bootstrapHolder[REGISTRY_KEY]
+            }
+    }
 
     val id: String
     val prefix: String

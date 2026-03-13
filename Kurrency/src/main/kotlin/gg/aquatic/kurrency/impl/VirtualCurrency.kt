@@ -1,6 +1,6 @@
 package gg.aquatic.kurrency.impl
 
-import gg.aquatic.kurrency.KurrencyConfig
+import gg.aquatic.kurrency.Kurrency
 import java.math.BigDecimal
 import java.util.*
 
@@ -11,22 +11,22 @@ class VirtualCurrency(
 ) {
 
     suspend fun give(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        KurrencyConfig.currencyHandler.give(uuid, registeredCurrency, amount)
+        Kurrency.currencyHandler.give(uuid, registeredCurrency, amount)
     }
 
     suspend fun take(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        KurrencyConfig.currencyHandler.give(uuid, registeredCurrency, amount.abs().negate())
+        Kurrency.currencyHandler.give(uuid, registeredCurrency, amount.abs().negate())
     }
 
     suspend fun set(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        KurrencyConfig.currencyHandler.set(uuid, registeredCurrency, amount)
+        Kurrency.currencyHandler.set(uuid, registeredCurrency, amount)
     }
 
     suspend fun getBalance(uuid: UUID, registeredCurrency: RegisteredCurrency): BigDecimal {
-        return KurrencyConfig.currencyHandler.getBalance(uuid, registeredCurrency)
+        return Kurrency.currencyHandler.getBalance(uuid, registeredCurrency)
     }
 
     suspend fun tryTake(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency): Boolean {
-        return KurrencyConfig.currencyHandler.tryTake(uuid, registeredCurrency, amount)
+        return Kurrency.currencyHandler.tryTake(uuid, registeredCurrency, amount)
     }
 }

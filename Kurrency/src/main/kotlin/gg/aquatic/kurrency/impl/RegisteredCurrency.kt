@@ -4,7 +4,7 @@ import gg.aquatic.kregistry.core.Registry
 import gg.aquatic.kregistry.core.RegistryId
 import gg.aquatic.kregistry.core.RegistryKey
 import gg.aquatic.kurrency.Currency
-import gg.aquatic.kurrency.KurrencyConfig
+import gg.aquatic.kurrency.Kurrency
 import org.bukkit.entity.Player
 import java.math.BigDecimal
 
@@ -21,7 +21,7 @@ class RegisteredCurrency internal constructor(
         val REGISTRY_KEY = RegistryKey.simple<String, RegisteredCurrency>(RegistryId("aquatic", "registered_currency"))
         val REGISTRY: Registry<String, RegisteredCurrency>
             get() {
-                return KurrencyConfig.bootstrapHolder[REGISTRY_KEY]
+                return Kurrency.bootstrapHolder[REGISTRY_KEY]
             }
     }
 
