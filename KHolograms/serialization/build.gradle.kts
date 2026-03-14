@@ -8,7 +8,7 @@ dependencies {
     api("gg.aquatic:Common:26.0.16") {
         isChanging = true
     }
-    api("gg.aquatic:KRegistry:25.0.2")
+    api("gg.aquatic:KRegistry:25.0.3")
     api("gg.aquatic.execute:Execute:26.0.2")
     api("gg.aquatic:Stacked:26.0.4")
     testImplementation(kotlin("test"))
