@@ -4,7 +4,11 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -71,6 +75,7 @@ public class DependencyManager {
      */
     public void process(InputStream manifestStream, Consumer<Path> jarConsumer) throws Exception {
         String manifest = new String(manifestStream.readAllBytes(), StandardCharsets.UTF_8);
+        String manifestFingerprint = sha256(manifest).substring(0, 16);
 
         String asmVersion = resolveAsmVersion();
         Path asm = resolver.downloadTool("org.ow2.asm", "asm", asmVersion);
@@ -85,13 +90,19 @@ public class DependencyManager {
 
         List<Path> downloaded = resolver.resolve(manifest);
         relocator.prepareClassMappings(downloaded);
+        Set<Path> expectedOutputs = new HashSet<>();
 
         for (Path jar : downloaded) {
-            Path output = relocatedDir.resolve("relocated-" + jar.getFileName());
-            Files.deleteIfExists(output);
-            relocator.relocate(jar, output);
+            Path output = relocatedDir.resolve("relocated-" + manifestFingerprint + "-" + jar.getFileName());
+            expectedOutputs.add(output);
+
+            if (!Files.exists(output)) {
+                relocator.relocate(jar, output);
+            }
             jarConsumer.accept(output);
         }
+
+        cleanupStaleRelocatedOutputs(expectedOutputs);
     }
 
     private String resolveAsmVersion() {
@@ -106,5 +117,32 @@ public class DependencyManager {
         }
 
         return DEFAULT_ASM_VERSION;
+    }
+
+    private void cleanupStaleRelocatedOutputs(Set<Path> expectedOutputs) throws Exception {
+        if (!Files.exists(relocatedDir)) {
+            return;
+        }
+
+        List<Path> stale = new ArrayList<>();
+        try (var stream = Files.list(relocatedDir)) {
+            stream.filter(Files::isRegularFile)
+                    .filter(path -> !expectedOutputs.contains(path))
+                    .forEach(stale::add);
+        }
+
+        for (Path path : stale) {
+            Files.deleteIfExists(path);
+        }
+    }
+
+    private String sha256(String input) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
+        StringBuilder hex = new StringBuilder();
+        for (byte b : hash) {
+            hex.append(String.format("%02x", b));
+        }
+        return hex.toString();
     }
 }

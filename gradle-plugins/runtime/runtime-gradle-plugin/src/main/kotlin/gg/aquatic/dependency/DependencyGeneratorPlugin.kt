@@ -1,5 +1,6 @@
 package gg.aquatic.dependency
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.json.JsonOutput
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
@@ -145,12 +146,10 @@ class DependencyGeneratorPlugin : Plugin<Project> {
 
             if (relocations.isNotEmpty()) {
                 if (project.plugins.hasPlugin("com.gradleup.shadow") || project.plugins.hasPlugin("com.github.johnrengelman.shadow")) {
-                    project.tasks.matching { it.name == "shadowJar" }.configureEach {
-                        val task = this
+                    project.tasks.withType(ShadowJar::class.java).configureEach {
                         extension.relocations.get().forEach { (from, to) ->
                             try {
-                                val relocateMethod = task.javaClass.getMethod("relocate", String::class.java, String::class.java)
-                                relocateMethod.invoke(task, from, to)
+                                relocate(from, to)
                             } catch (e: Exception) {
                                 project.logger.warn("Failed to apply relocation '$from' to 'shadowJar' task dynamically.")
                             }
@@ -158,6 +157,18 @@ class DependencyGeneratorPlugin : Plugin<Project> {
                     }
                 } else {
                     project.logger.warn("Relocations were specified, but no Shadow plugin ('com.gradleup.shadow' or 'com.github.johnrengelman.shadow') was found.")
+                }
+            }
+
+            if (project.plugins.hasPlugin("com.gradleup.shadow") || project.plugins.hasPlugin("com.github.johnrengelman.shadow")) {
+                val runtimeFiles = project.provider { runtimeDownload.resolve().toSet() }
+
+                project.tasks.withType(ShadowJar::class.java).configureEach {
+                    includedDependencies.setFrom(project.provider {
+                        dependencyFilter.get()
+                            .resolve(configurations.get())
+                            .filter { it !in runtimeFiles.get() }
+                    })
                 }
             }
         }
