@@ -7,10 +7,12 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
@@ -74,6 +76,12 @@ abstract class GenerateManifestTask : DefaultTask() {
     @get:Input
     abstract val relocations: MapProperty<String, String>
 
+    @get:Input
+    abstract val dependencyCoordinates: ListProperty<String>
+
+    @get:Classpath
+    abstract val dependencyFiles: ConfigurableFileCollection
+
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
@@ -136,6 +144,15 @@ class DependencyGeneratorPlugin : Plugin<Project> {
         val genTask = project.tasks.register<GenerateManifestTask>("generateManifest") {
             repositories.set(extension.repositories)
             relocations.set(extension.relocations)
+            dependencyCoordinates.set(project.provider {
+                runtimeDownload.resolvedConfiguration.resolvedArtifacts
+                    .map { artifact ->
+                        val id = artifact.moduleVersion.id
+                        "${id.group}:${id.name}:${id.version}"
+                    }
+                    .sorted()
+            })
+            dependencyFiles.setFrom(runtimeDownload)
             libraryConfiguration = runtimeDownload
             outputFile.set(project.layout.buildDirectory.file("generated/resources/runtime/dependencies.json"))
         }
