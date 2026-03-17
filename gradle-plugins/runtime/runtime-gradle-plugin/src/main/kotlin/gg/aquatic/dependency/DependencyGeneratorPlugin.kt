@@ -6,6 +6,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ExternalDependency
+import org.gradle.api.artifacts.ResolvedArtifact
+import org.gradle.api.artifacts.ResolvedDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.model.ObjectFactory
@@ -21,6 +24,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
+import org.gradle.work.DisableCachingByDefault
 import java.io.File
 import java.security.MessageDigest
 import javax.inject.Inject
@@ -69,6 +73,7 @@ abstract class RuntimeRepository @Inject constructor() {
     }
 }
 
+@DisableCachingByDefault(because = "Manifest generation depends on resolved dependency metadata and explicit task inputs handle up-to-date checks.")
 abstract class GenerateManifestTask : DefaultTask() {
     @get:Nested
     abstract val repositories: ListProperty<RuntimeRepository>
@@ -178,13 +183,25 @@ class DependencyGeneratorPlugin : Plugin<Project> {
             }
 
             if (project.plugins.hasPlugin("com.gradleup.shadow") || project.plugins.hasPlugin("com.github.johnrengelman.shadow")) {
-                val runtimeFiles = project.provider { runtimeDownload.resolve().toSet() }
+                val runtimeDependencyRoots = project.provider {
+                    runtimeDownload.dependencies
+                        .filterIsInstance<ExternalDependency>()
+                        .mapNotNull { dependency ->
+                            val group = dependency.group ?: return@mapNotNull null
+                            "$group:${dependency.name}"
+                        }
+                        .toSet()
+                }
 
                 project.tasks.withType(ShadowJar::class.java).configureEach {
                     includedDependencies.setFrom(project.provider {
-                        dependencyFilter.get()
+                        val shadowIncludedFiles = dependencyFilter.get()
                             .resolve(configurations.get())
-                            .filter { it !in runtimeFiles.get() }
+                            .files
+                            .associateBy { it.absoluteFile.normalize().path }
+                        val excludedModules = collectExcludedModules(configurations.get(), runtimeDependencyRoots.get())
+                        collectIncludedFiles(configurations.get(), excludedModules)
+                            .mapNotNull { file -> shadowIncludedFiles[file.absoluteFile.normalize().path] }
                     })
                 }
             }
@@ -222,3 +239,52 @@ class DependencyGeneratorPlugin : Plugin<Project> {
 }
 
 fun DependencyHandler.runtimeDownload(dependencyNotation: Any) = add("runtimeDownload", dependencyNotation)
+
+private fun collectExcludedModules(
+    configurations: Set<Configuration>,
+    runtimeDependencyRoots: Set<String>
+): Set<String> {
+    val excludedModules = linkedSetOf<String>()
+    configurations.forEach { configuration ->
+        configuration.resolvedConfiguration.firstLevelModuleDependencies.forEach { dependency ->
+            collectExcludedModules(dependency, runtimeDependencyRoots, false, excludedModules)
+        }
+    }
+    return excludedModules
+}
+
+private fun collectIncludedFiles(
+    configurations: Set<Configuration>,
+    excludedModules: Set<String>
+): Set<File> {
+    val includedFiles = linkedSetOf<File>()
+    configurations.forEach { configuration ->
+        configuration.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
+            if (artifact.coordinate() !in excludedModules) {
+                includedFiles += artifact.file.absoluteFile.normalize()
+            }
+        }
+    }
+    return includedFiles
+}
+
+private fun collectExcludedModules(
+    dependency: ResolvedDependency,
+    runtimeDependencyRoots: Set<String>,
+    inheritedExclusion: Boolean,
+    excludedModules: MutableSet<String>
+) {
+    val currentExcluded = inheritedExclusion || runtimeDependencyRoots.contains("${dependency.moduleGroup}:${dependency.moduleName}")
+    if (currentExcluded) {
+        excludedModules += "${dependency.moduleGroup}:${dependency.moduleName}:${dependency.moduleVersion}"
+    }
+
+    dependency.children.forEach { child ->
+        collectExcludedModules(child, runtimeDependencyRoots, currentExcluded, excludedModules)
+    }
+}
+
+private fun ResolvedArtifact.coordinate(): String {
+    val id = moduleVersion.id
+    return "${id.group}:${id.name}:${id.version}"
+}
