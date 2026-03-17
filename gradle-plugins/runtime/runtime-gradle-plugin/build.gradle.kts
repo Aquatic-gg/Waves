@@ -2,7 +2,7 @@ plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
-    id("com.gradle.plugin-publish") version "2.0.0"
+    id("com.gradle.plugin-publish") version "2.1.0"
 }
 
 description = "Gradle plugin that generates runtime dependency manifests and syncs Shadow relocations."
