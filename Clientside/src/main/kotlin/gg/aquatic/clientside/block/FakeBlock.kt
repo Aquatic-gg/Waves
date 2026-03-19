@@ -21,7 +21,11 @@ class FakeBlock(
     var onTick: suspend () -> Unit = {}
 ) : FakeObject(viewRange, audience) {
 
-    override val location: Location = location.toBlockLocation() //.apply { yaw = location.yaw }
+    override val location: Location = location.toBlockLocation()
+    private val dataLocation = location.toBlockLocation().apply {
+        yaw = location.yaw
+        pitch = location.pitch
+    }
     var block: Blokk = block
         private set
 
@@ -42,8 +46,10 @@ class FakeBlock(
         this._isViewing -= player.uniqueId
     }
 
+    internal fun renderedBlockData() = block.blockDataAt(dataLocation)
+
     override fun onShow(player: Player) {
-        val packet = Pakket.handler.createBlockChangePacket(location, block.blockData)
+        val packet = Pakket.handler.createBlockChangePacket(location, renderedBlockData())
         player.sendPacket(packet, true)
     }
 

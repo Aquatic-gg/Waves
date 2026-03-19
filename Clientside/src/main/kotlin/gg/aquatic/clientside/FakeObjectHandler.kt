@@ -102,7 +102,7 @@ object FakeObjectHandler {
 
             if (shouldSee && !isViewing) {
                 val updateMap = updatesByChunk.getOrPut(chunk) { HashMap() }
-                updateMap[block.location] = block.block.blockData
+                updateMap[block.location] = block.renderedBlockData()
                 block.injectViewer(player)
             } else if (!shouldSee && isViewing) {
                 val updateMap = updatesByChunk.getOrPut(chunk) { HashMap() }
@@ -150,7 +150,7 @@ object FakeObjectHandler {
 
         for (block in blocks) {
             if (block.isAudienceMember(player) && !block.destroyed) {
-                event.blockData = block.block.blockData
+                event.blockData = block.renderedBlockData()
                 break
             }
         }
