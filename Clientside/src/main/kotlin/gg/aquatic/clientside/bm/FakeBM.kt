@@ -58,7 +58,7 @@ class FakeBM(
     }
 
     override fun destroy() {
-        destroyed = true
+        if (!markDestroyed()) return
         model.close()
         _viewers.clear()
     }

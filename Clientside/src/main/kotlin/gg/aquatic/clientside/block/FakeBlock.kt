@@ -55,9 +55,8 @@ class FakeBlock(
 
     override fun onHide(player: Player) {
         val packet = Pakket.handler.createBlockChangePacket(location, location.block.blockData)
-        player.sendPacket(packet, false)
+        player.sendPacket(packet, true)
     }
-
 
     override fun handleInteract(player: Player, isLeftClick: Boolean) {
         onInteract.onInteract(this, player, isLeftClick)
@@ -90,7 +89,7 @@ class FakeBlock(
     }
 
     override fun destroy() {
-        destroyed = true
+        if (!markDestroyed()) return
         isViewing.forEach { hide(it) }
         FakeObjectHandler.tickableObjects -= this
         unregister()

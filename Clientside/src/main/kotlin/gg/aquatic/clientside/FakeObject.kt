@@ -6,6 +6,7 @@ import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.*
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class FakeObject(
@@ -15,8 +16,9 @@ abstract class FakeObject(
 
     abstract val location: Location
 
-    var destroyed: Boolean = false
-        protected set
+    private val destroyedState = AtomicBoolean(false)
+    val destroyed: Boolean
+        get() = destroyedState.get()
 
     var registered: Boolean = false
         protected set
@@ -29,7 +31,7 @@ abstract class FakeObject(
     open val audience: AquaticAudience get() = _audience
 
     // List of players that can see the object
-    protected val _viewers = ConcurrentHashMap.newKeySet<UUID>()
+    protected val _viewers: MutableSet<UUID> = ConcurrentHashMap.newKeySet<UUID>()
     val viewers: Set<Player> get() = buildSet {
         for (uUID in _viewers) {
             add(Bukkit.getPlayer(uUID) ?: continue)
@@ -37,7 +39,7 @@ abstract class FakeObject(
     }
 
     // List of players that are currently viewing the object
-    protected val _isViewing = ConcurrentHashMap.newKeySet<UUID>()
+    protected val _isViewing: MutableSet<UUID> = ConcurrentHashMap.newKeySet<UUID>()
     val isViewing: Set<Player> get() = buildSet {
         for (uUID in _isViewing) {
             add(Bukkit.getPlayer(uUID) ?: continue)
@@ -120,6 +122,7 @@ abstract class FakeObject(
 
     open suspend fun tick() {}
     abstract fun destroy()
+    protected fun markDestroyed(): Boolean = destroyedState.compareAndSet(false, true)
 
     private val myCycleSlot = this.hashCode().let { if (it < 0) -it else it } % 4
     internal suspend fun handleTick(tickCount: Int) {

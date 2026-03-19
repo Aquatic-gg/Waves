@@ -57,7 +57,7 @@ class FakeMultiBlock(
     }
 
     override fun destroy() {
-        destroyed = true
+        if (!markDestroyed()) return
         blocks.forEach { it.destroy() }
         blocks.clear()
     }

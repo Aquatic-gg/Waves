@@ -73,7 +73,7 @@ class FakeMEG(
     }
 
     override fun destroy() {
-        destroyed = true
+        if (!markDestroyed()) return
         activeModel?.let {
             it.destroy()
             it.isRemoved = true

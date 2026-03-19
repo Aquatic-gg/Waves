@@ -133,7 +133,7 @@ class FakeEntity(
     }
 
     override fun destroy() {
-        destroyed = true
+        if (!markDestroyed()) return
         isViewing.forEach { hide(it) }
         FakeObjectHandler.tickableObjects -= this
         FakeObjectHandler.idToEntity -= entityId

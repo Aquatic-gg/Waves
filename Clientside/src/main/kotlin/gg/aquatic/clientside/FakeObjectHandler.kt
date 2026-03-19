@@ -170,9 +170,12 @@ object FakeObjectHandler {
         for (block in blocks) {
             if (block.destroyed) continue
             if (block.isAudienceMember(event.player)) {
-                event.isCancelled = true
                 val isLeft = event.action == Action.LEFT_CLICK_BLOCK || event.action == Action.LEFT_CLICK_AIR
                 block.handleInteract(event.player, isLeft)
+                if (block.destroyed) {
+                    break
+                }
+                event.isCancelled = true
                 break
             }
         }
