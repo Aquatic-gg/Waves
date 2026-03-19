@@ -7,4 +7,6 @@ object BalancesTable: Table("currency_balances") {
     val playerUUID = javaUUID("player_uuid")
     val currencyId = varchar("currency_id", 36)
     val balance = decimal("balance", precision = 32, scale = 2)
+
+    override val primaryKey = PrimaryKey(playerUUID, currencyId, name = "PK_currency_balances")
 }
