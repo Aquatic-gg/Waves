@@ -15,7 +15,7 @@ class VirtualCurrency(
     }
 
     suspend fun take(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        Kurrency.currencyHandler.give(uuid, registeredCurrency, amount.abs().negate())
+        Kurrency.currencyHandler.take(uuid, registeredCurrency, amount)
     }
 
     suspend fun set(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
