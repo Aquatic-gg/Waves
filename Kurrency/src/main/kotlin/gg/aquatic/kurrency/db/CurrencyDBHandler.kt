@@ -3,25 +3,40 @@ package gg.aquatic.kurrency.db
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.withContext
-import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.Database
+import org.jetbrains.exposed.v1.jdbc.JdbcTransaction
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.suspendTransaction
 import org.jetbrains.exposed.v1.jdbc.upsert
+import org.jetbrains.exposed.v1.core.*
 import java.math.BigDecimal
 import java.util.*
 
 class CurrencyDBHandler(val database: Database) {
 
-    private suspend fun <T> dbQuery(block: suspend Transaction.() -> T): T =
+    private suspend fun <T> dbQuery(block: suspend JdbcTransaction.() -> T): T =
         suspendTransaction(db = database) { block() }
 
-    suspend fun getBalance(uuid: UUID, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
-        dbQuery {
-            BalancesTable.select(BalancesTable.balance)
-                .where { (BalancesTable.playerUUID eq uuid) and (BalancesTable.currencyId eq currency.id) }
-                .singleOrNull()?.get(BalancesTable.balance) ?: BigDecimal.ZERO
+    private fun JdbcTransaction.getBalanceInternal(uuid: UUID, currency: RegisteredCurrency): BigDecimal {
+        return BalancesTable.select(BalancesTable.balance)
+            .where { (BalancesTable.playerUUID eq uuid) and (BalancesTable.currencyId eq currency.id) }
+            .singleOrNull()?.get(BalancesTable.balance) ?: BigDecimal.ZERO
+    }
+
+    private fun JdbcTransaction.storeBalance(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) {
+        val result = BalancesTable.upsert {
+            it[BalancesTable.playerUUID] = uuid
+            it[BalancesTable.currencyId] = currency.id
+            it[BalancesTable.balance] = amount
         }
+
+        if (result.insertedCount == 0) {
+            throw IllegalStateException("Database set failed for $uuid")
+        }
+    }
+
+    suspend fun getBalance(uuid: UUID, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
+        dbQuery { getBalanceInternal(uuid, currency) }
     }
 
     suspend fun getAllBalances(uuid: UUID): Map<String, BigDecimal> = withContext(VirtualsCtx) {
@@ -40,35 +55,35 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun give(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) = withContext(VirtualsCtx) {
+    suspend fun changeBy(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
         dbQuery {
-            val result = BalancesTable.upsert(
-                onUpdate = {
-                    it[BalancesTable.balance] = BalancesTable.balance + amount
-                }
-            ) {
-                it[BalancesTable.playerUUID] = uuid
-                it[BalancesTable.currencyId] = currency.id
-                it[BalancesTable.balance] = amount
-            }
-
-            if (result.insertedCount == 0) {
-                throw IllegalStateException("Database update failed for $uuid (Zero rows affected)")
-            }
+            val newBalance = getBalanceInternal(uuid, currency).add(amount)
+            storeBalance(uuid, newBalance, currency)
+            newBalance
         }
     }
 
-    suspend fun set(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) = withContext(VirtualsCtx) {
+    suspend fun setAndGet(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
         dbQuery {
-            val result = BalancesTable.upsert {
-                it[BalancesTable.playerUUID] = uuid
-                it[BalancesTable.currencyId] = currency.id
-                it[BalancesTable.balance] = amount
+            storeBalance(uuid, amount, currency)
+            amount
+        }
+    }
+
+    suspend fun tryTake(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency): BigDecimal? = withContext(VirtualsCtx) {
+        dbQuery {
+            val current = getBalanceInternal(uuid, currency)
+            if (current < amount) {
+                return@dbQuery null
             }
 
-            if (result.insertedCount == 0) {
-                throw IllegalStateException("Database set failed for $uuid")
+            val newBalance = current.subtract(amount)
+            if (newBalance < BigDecimal.ZERO) {
+                return@dbQuery null
             }
+
+            storeBalance(uuid, newBalance, currency)
+            newBalance
         }
     }
 
