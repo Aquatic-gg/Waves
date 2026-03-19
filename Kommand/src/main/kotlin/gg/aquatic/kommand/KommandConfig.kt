@@ -17,19 +17,11 @@ object KommandConfig {
         getServer.isAccessible = true
 
         val server = getServer.invoke(bukkitServer)
-        val resourcesField = server.javaClass.getDeclaredField("resources")
-        resourcesField.isAccessible = true
+        val getCommands = server.javaClass.getMethod("getCommands")
+        getCommands.isAccessible = true
 
-        val resources = resourcesField.get(server)
-        val getManagers = resources.javaClass.getDeclaredMethod("managers")
-        getManagers.isAccessible = true
-
-        val managers = getManagers.invoke(resources)
-        val commandsField = managers.javaClass.getDeclaredField("commands")
-        commandsField.isAccessible = true
-
-        val commands = commandsField.get(managers)
-        val getDispatcher = commands.javaClass.getDeclaredMethod("getDispatcher")
+        val commands = getCommands.invoke(server)
+        val getDispatcher = commands.javaClass.getMethod("getDispatcher")
         getDispatcher.isAccessible = true
 
         getDispatcher.invoke(commands) as CommandDispatcher<CommandSourceStack>
