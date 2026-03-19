@@ -20,7 +20,7 @@ object Kurrency {
 
 fun BootstrapHolder.initializeKurrency(
     dbUrl: String, dbDriver: String, dbUser: String, dbPass: String,
-    cache: CurrencyCache,
+    cache: (Database) -> CurrencyCache,
     currencies: List<Currency> = emptyList(),
     dbCurrencies: List<VirtualCurrency> = emptyList(),
 ) {
@@ -28,7 +28,7 @@ fun BootstrapHolder.initializeKurrency(
 
     Kurrency.bootstrapHolder = this
     Kurrency.database = database
-    Kurrency.currencyHandler = CurrencyHandler(cache)
+    Kurrency.currencyHandler = CurrencyHandler(cache(database))
 
     KurrencyRegistryHolder.registryBootstrap(this) {
         registry(Currency.REGISTRY_KEY) {
