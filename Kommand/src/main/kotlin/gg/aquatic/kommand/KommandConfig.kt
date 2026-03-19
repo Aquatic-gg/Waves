@@ -2,6 +2,7 @@ package gg.aquatic.kommand
 
 import com.mojang.brigadier.CommandDispatcher
 import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.command.brigadier.Commands
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import org.bukkit.Bukkit
@@ -9,6 +10,8 @@ import org.bukkit.Bukkit
 object KommandConfig {
 
     var commandScope = CoroutineScope(Dispatchers.Default)
+
+    var commands: Commands? = null
 
     @Suppress("UNCHECKED_CAST")
     val commandDispatcher by lazy {
