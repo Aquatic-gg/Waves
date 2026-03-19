@@ -18,7 +18,7 @@ class MultiBlokk(
                 val block = shape.blocks[char]
                 if (block != null) {
                     block.place(newLoc)
-                    locations += newLoc to block.blockData
+                    locations += newLoc to block.blockDataAt(newLoc)
                 }
             }
         }

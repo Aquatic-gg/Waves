@@ -9,6 +9,7 @@ abstract class Blokk {
 
     abstract fun place(location: Location)
     abstract val blockData: BlockData
+    open fun blockDataAt(location: Location): BlockData = blockData
 
 }
 

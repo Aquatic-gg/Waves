@@ -11,7 +11,13 @@ class VanillaBlock(
     override val blockData: BlockData,
 ): Blokk() {
     override fun place(location: Location) {
+        val rotatedData = blockDataAt(location)
 
+        location.block.type = rotatedData.material
+        location.block.blockData = rotatedData
+    }
+
+    override fun blockDataAt(location: Location): BlockData {
         val cardinal = location.yaw.toBlockCardinal()
         val rotation = when (cardinal) {
             BlockFace.NORTH -> StructureRotation.NONE
@@ -21,9 +27,6 @@ class VanillaBlock(
             else -> StructureRotation.NONE
         }
 
-        val rotatedData = blockData.clone().apply { rotate(rotation) }
-
-        location.block.type = rotatedData.material
-        location.block.blockData = rotatedData
+        return blockData.clone().apply { rotate(rotation) }
     }
 }
