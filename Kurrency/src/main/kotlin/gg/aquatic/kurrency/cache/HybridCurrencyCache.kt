@@ -53,26 +53,36 @@ class HybridCurrencyCache(
         return balance
     }
 
-    override suspend fun set(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
+    override suspend fun put(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
         val scaled = amount.setScale(2, RoundingMode.HALF_DOWN)
-        parent.set(uuid, scaled, registeredCurrency)
-        localCache.getIfPresent(uuid)?.put(registeredCurrency, scaled)
-    }
-
-    override suspend fun update(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        // Logic: Update parent, then refresh local
-        parent.update(uuid, amount, registeredCurrency)
-
-        val map = localCache.getIfPresent(uuid)
-        if (map != null) {
-            val current = map[registeredCurrency] ?: parent.get(uuid, registeredCurrency)
-            map[registeredCurrency] = current.add(amount).setScale(2, RoundingMode.HALF_DOWN)
-        }
+        parent.put(uuid, scaled, registeredCurrency)
+        localCache.get(uuid) { HashMap() }[registeredCurrency] = scaled
     }
 
     override suspend fun getMultiple(uuids: Collection<UUID>, registeredCurrency: RegisteredCurrency): Map<UUID, BigDecimal> {
         return parent.getMultiple(uuids, registeredCurrency).onEach { (uuid, balance) ->
             localCache.get(uuid) { HashMap() }[registeredCurrency] = balance
         }
+    }
+
+    override suspend fun invalidate(uuid: UUID, registeredCurrency: RegisteredCurrency?) {
+        if (registeredCurrency == null) {
+            localCache.invalidate(uuid)
+            parent.invalidate(uuid, null)
+            return
+        }
+
+        val current = localCache.getIfPresent(uuid)
+        if (current != null) {
+            val newMap = current.toMutableMap()
+            newMap.remove(registeredCurrency)
+            if (newMap.isEmpty()) {
+                localCache.invalidate(uuid)
+            } else {
+                localCache.put(uuid, newMap)
+            }
+        }
+
+        parent.invalidate(uuid, registeredCurrency)
     }
 }

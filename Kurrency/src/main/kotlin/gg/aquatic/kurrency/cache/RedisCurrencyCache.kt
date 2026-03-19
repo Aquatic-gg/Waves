@@ -69,22 +69,20 @@ class RedisCurrencyCache(
         results
     }
 
-    override suspend fun update(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
+    override suspend fun put(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
         withContext(VirtualsCtx) {
             val key = playerKey(uuid, registeredCurrency)
-            dbHandler.give(uuid, amount, registeredCurrency)
-
-            val current = get(uuid, registeredCurrency)
-            val newBalance = current.add(amount)
-            jedis.set(key, newBalance.toPlainString(), SetParams().ex(ttlSeconds))
+            val scaled = amount.setScale(2, RoundingMode.HALF_DOWN)
+            jedis.set(key, scaled.toPlainString(), SetParams().ex(ttlSeconds))
         }
     }
 
-    override suspend fun set(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
+    override suspend fun invalidate(uuid: UUID, registeredCurrency: RegisteredCurrency?) {
         withContext(VirtualsCtx) {
-            val key = playerKey(uuid, registeredCurrency)
-            dbHandler.set(uuid, amount, registeredCurrency)
-            jedis.set(key, amount.toPlainString(), SetParams().ex(ttlSeconds))
+            if (registeredCurrency == null) {
+                return@withContext
+            }
+            jedis.del(playerKey(uuid, registeredCurrency))
         }
     }
 }

@@ -55,26 +55,9 @@ class LocalCurrencyCache(
         }
     }
 
-    override suspend fun update(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
-        withContext(VirtualsCtx) {
-            dbHandler.give(uuid, amount, registeredCurrency)
-        }
-
-        val oldMap = cache.getIfPresent(uuid) ?: loadFromDb(uuid)
-        val newMap = oldMap.toMutableMap()
-        val current = newMap[registeredCurrency] ?: BigDecimal.ZERO
-        newMap[registeredCurrency] = current.add(amount).setScale(2, RoundingMode.HALF_DOWN)
-        cache.put(uuid, newMap)
-    }
-
-    override suspend fun set(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
+    override suspend fun put(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
         val scaledAmount = amount.setScale(2, RoundingMode.HALF_DOWN)
-
-        withContext(VirtualsCtx) {
-            dbHandler.set(uuid, scaledAmount, registeredCurrency)
-        }
-
-        val oldMap = cache.getIfPresent(uuid) ?: loadFromDb(uuid)
+        val oldMap = cache.getIfPresent(uuid) ?: emptyMap()
         val newMap = oldMap.toMutableMap()
         newMap[registeredCurrency] = scaledAmount
         cache.put(uuid, newMap)
@@ -89,8 +72,20 @@ class LocalCurrencyCache(
 
 
 
-    fun invalidate(uuid: UUID) {
-        cache.invalidate(uuid)
+    override suspend fun invalidate(uuid: UUID, registeredCurrency: RegisteredCurrency?) {
+        if (registeredCurrency == null) {
+            cache.invalidate(uuid)
+            return
+        }
+
+        val currentMap = cache.getIfPresent(uuid) ?: return
+        val newMap = currentMap.toMutableMap()
+        newMap.remove(registeredCurrency)
+        if (newMap.isEmpty()) {
+            cache.invalidate(uuid)
+        } else {
+            cache.put(uuid, newMap)
+        }
     }
 
     fun setLocalOnly(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
