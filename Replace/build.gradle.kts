@@ -1,7 +1,6 @@
 plugins {
     kotlin("jvm") version "2.3.10"
     id("com.gradleup.shadow") version "9.4.0"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     `maven-publish`
     java
@@ -25,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.10-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.12.2")
 
     // Testing
