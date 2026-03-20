@@ -17,7 +17,7 @@ import java.util.function.Predicate
 class FakeMEG(
     override val location: Location,
     val modelId: String,
-    override val viewRange: Int,
+    viewRange: Int,
     initialAudience: AquaticAudience,
     var onInteract: ObjectInteractEvent<FakeMEG> = {}
 ) : FakeObject(viewRange, initialAudience) {

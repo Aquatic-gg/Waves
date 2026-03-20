@@ -20,7 +20,7 @@ import org.bukkit.entity.Player
 class FakeBM(
     override val location: Location,
     val modelId: String,
-    override val viewRange: Int,
+    viewRange: Int,
     initialAudience: AquaticAudience,
     var onInteract: ObjectInteractEvent<FakeBM> = { _, _, _ -> },
 ) : FakeObject(viewRange, initialAudience) {

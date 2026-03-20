@@ -7,6 +7,7 @@ import gg.aquatic.clientside.ObjectInteractEvent
 import gg.aquatic.common.audience.AquaticAudience
 import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.api.nms.toBlockPos
+import gg.aquatic.pakket.isChunkTracked
 import gg.aquatic.pakket.sendPacket
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -15,7 +16,7 @@ import java.util.concurrent.ConcurrentHashMap
 class FakeBlock(
     block: Blokk,
     location: Location,
-    override val viewRange: Int,
+    viewRange: Int,
     audience: AquaticAudience,
     var onInteract: ObjectInteractEvent<FakeBlock> = {},
     var onTick: suspend () -> Unit = {}
@@ -55,7 +56,7 @@ class FakeBlock(
 
     override fun onHide(player: Player) {
         val packet = Pakket.handler.createBlockChangePacket(location, location.block.blockData)
-        player.sendPacket(packet, true)
+        player.sendPacket(packet, false)
     }
 
     override fun handleInteract(player: Player, isLeftClick: Boolean) {
@@ -90,7 +91,18 @@ class FakeBlock(
 
     override fun destroy() {
         if (!markDestroyed()) return
-        isViewing.forEach { hide(it) }
+        val correctionTargets = buildSet {
+            addAll(viewers)
+            addAll(isViewing)
+        }.filter { player ->
+            player.world.name == location.world?.name && player.isChunkTracked(location.chunk)
+        }
+
+        _isViewing.clear()
+        _viewers.clear()
+
+        correctionTargets.forEach(::onHide)
+
         FakeObjectHandler.tickableObjects -= this
         unregister()
     }

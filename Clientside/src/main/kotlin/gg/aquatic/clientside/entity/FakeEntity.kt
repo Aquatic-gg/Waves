@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap
 class FakeEntity(
     val type: EntityType,
     location: Location,
-    override val viewRange: Int,
+    viewRange: Int,
     audience: AquaticAudience,
     consumer: FakeEntity.() -> Unit = {},
     var onInteract: ObjectInteractEvent<FakeEntity> = { _, _, _ -> },

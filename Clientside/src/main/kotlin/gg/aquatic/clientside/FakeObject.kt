@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class FakeObject(
-    open val viewRange: Int,
+    val viewRange: Int,
     initialAudience: AquaticAudience
 ) {
 

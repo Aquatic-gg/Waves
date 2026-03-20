@@ -11,7 +11,7 @@ import java.util.concurrent.ConcurrentHashMap
 class FakeMultiBlock(
     val multiBlokk: MultiBlokk,
     override val location: Location,
-    override val viewRange: Int,
+    viewRange: Int,
     initialAudience: AquaticAudience,
     var onInteract: ObjectInteractEvent<FakeMultiBlock> = {},
     val onTick: suspend () -> Unit = {}
