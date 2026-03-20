@@ -1,8 +1,7 @@
 package gg.aquatic.common.location.world
 
-import gg.aquatic.common.location.LazyLocation
+import gg.aquatic.common.coroutine.BukkitCtx
 import org.bukkit.Bukkit
-import org.bukkit.Location
 import org.bukkit.World
 
 class AwaitingWorld private constructor(
@@ -12,11 +11,19 @@ class AwaitingWorld private constructor(
 
     companion object {
         fun create(id: String, then: (World) -> Unit) {
-            val awaiting = AwaitingWorlds.awaiting[id]
-            if (awaiting != null) {
-                awaiting.thens.add(then)
-            } else {
-                AwaitingWorld(id, mutableListOf(then))
+            BukkitCtx.GLOBAL {
+                val world = Bukkit.getWorld(id)
+                if (world != null) {
+                    then(world)
+                    return@GLOBAL
+                }
+
+                val awaiting = AwaitingWorlds.awaiting[id]
+                if (awaiting != null) {
+                    awaiting.thens.add(then)
+                } else {
+                    AwaitingWorld(id, mutableListOf(then))
+                }
             }
         }
     }

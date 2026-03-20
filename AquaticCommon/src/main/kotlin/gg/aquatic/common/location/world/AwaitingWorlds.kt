@@ -9,7 +9,8 @@ object AwaitingWorlds {
 
     fun initialize() {
         event<WorldLoadEvent> {
-            awaiting[it.world.name]?.thens?.forEach { then -> then(it.world) }
+            val awaitingWorld = awaiting.remove(it.world.name) ?: return@event
+            awaitingWorld.thens.forEach { then -> then(it.world) }
         }
     }
 }
