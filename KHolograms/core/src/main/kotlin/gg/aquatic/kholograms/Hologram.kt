@@ -14,6 +14,8 @@ import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class Hologram(
     location: Location,
@@ -115,65 +117,64 @@ class Hologram(
     suspend fun showOrUpdate(player: Player) {
         val viewer = viewers.getOrPut(player) { HologramViewer(player, placeholderContext(), mutableListOf()) }
         val spawnedLines = viewer.lines
-
-        val visibleLines = ArrayList<HologramLine>(this.lines.size)
-        for (line in this.lines) {
-            var current: HologramLine? = line
-            while (current != null) {
-                if (current.filter(player)) {
-                    visibleLines.add(current)
-                    break
+        viewer.mutex.withLock {
+            val visibleLines = ArrayList<HologramLine>(this.lines.size)
+            for (line in this.lines) {
+                var current: HologramLine? = line
+                while (current != null) {
+                    if (current.filter(player)) {
+                        visibleLines.add(current)
+                        break
+                    }
+                    current = current.failLine
                 }
-                current = current.failLine
             }
-        }
 
-        // Remove spawned lines that are no longer visible
-        val iterator = spawnedLines.iterator()
-        while (iterator.hasNext()) {
-            val spawned = iterator.next()
-            if (spawned.line !in visibleLines) {
-                spawned.destroy()
-                iterator.remove()
-            }
-        }
-
-        var height = 0.0
-        var changed = false
-        val currentEntityIds = IntArray(visibleLines.size)
-
-        for ((index, line) in visibleLines.withIndex()) {
-            val halfHeight = line.height / 2.0
-            height += halfHeight
-            val targetLocation = this.location.clone().add(0.0, height, 0.0)
-
-            val existing = spawnedLines.find { it.line == line }
-            val packetEntity = if (existing == null) {
-                val entity = line.spawn(targetLocation, player, viewer.context)
-                val newLine = HologramLineHandle(this, player, line, targetLocation, viewer.context, entity)
-                spawnedLines.add(newLine)
-                changed = true
-                entity
-            } else {
-                existing.tick()
-                if (existing.currentLocation != targetLocation) {
-                    existing.move(targetLocation)
+            val iterator = spawnedLines.iterator()
+            while (iterator.hasNext()) {
+                val spawned = iterator.next()
+                if (spawned.line !in visibleLines) {
+                    spawned.destroy()
+                    iterator.remove()
                 }
-                existing.packetEntity
             }
 
-            currentEntityIds[index] = packetEntity.entityId
-            height += halfHeight
-        }
+            var height = 0.0
+            var changed = false
+            val currentEntityIds = IntArray(visibleLines.size)
 
-        // Ensure the internal list order matches the visual order for the next tick
-        if (changed) {
-            spawnedLines.sortBy { spawned -> visibleLines.indexOf(spawned.line) }
-        }
+            for ((index, line) in visibleLines.withIndex()) {
+                val halfHeight = line.height / 2.0
+                height += halfHeight
+                val targetLocation = this.location.clone().add(0.0, height, 0.0)
 
-        if ((changed || seat != null) && seat != null) {
-            val passengerPacket = Pakket.handler.createPassengersPacket(seat!!, currentEntityIds)
-            player.sendPacket(passengerPacket, false)
+                val existing = spawnedLines.find { it.line == line }
+                val packetEntity = if (existing == null) {
+                    val entity = line.spawn(targetLocation, player, viewer.context)
+                    val newLine = HologramLineHandle(this, player, line, targetLocation, viewer.context, entity)
+                    spawnedLines.add(newLine)
+                    changed = true
+                    entity
+                } else {
+                    existing.tick()
+                    if (existing.currentLocation != targetLocation) {
+                        existing.move(targetLocation)
+                    }
+                    existing.packetEntity
+                }
+
+                currentEntityIds[index] = packetEntity.entityId
+                height += halfHeight
+            }
+
+            if (changed) {
+                spawnedLines.sortBy { spawned -> visibleLines.indexOf(spawned.line) }
+            }
+
+            if ((changed || seat != null) && seat != null) {
+                val passengerPacket = Pakket.handler.createPassengersPacket(seat!!, currentEntityIds)
+                player.sendPacket(passengerPacket, false)
+            }
         }
     }
 
@@ -256,6 +257,7 @@ class Hologram(
     class HologramViewer(
         val player: Player,
         val context: PlaceholderContext<Player>,
-        val lines: MutableList<HologramLineHandle>
+        val lines: MutableList<HologramLineHandle>,
+        val mutex: Mutex = Mutex()
     )
 }
