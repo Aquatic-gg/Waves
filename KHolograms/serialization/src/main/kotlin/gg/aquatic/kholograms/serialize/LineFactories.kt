@@ -10,6 +10,7 @@ import gg.aquatic.kholograms.line.AnimatedHologramLine
 import gg.aquatic.kholograms.line.ItemHologramLine
 import gg.aquatic.kholograms.line.TextHologramLine
 import gg.aquatic.stacked.StackedItem
+import gg.aquatic.stacked.impl.StackedItemImpl
 import org.bukkit.Color
 import org.bukkit.configuration.ConfigurationSection
 import org.bukkit.entity.Display.Billboard
@@ -72,7 +73,7 @@ object TextHologramLineFactory : LineFactory {
 
 object ItemHologramLineFactory : LineFactory {
     override fun load(section: ConfigurationSection, commonOptions: CommonHologramLineSettings): LineSettings? {
-        val item = StackedItem.loadFromYml(section.getConfigurationSection("item")) ?: return null
+        val item = StackedItemImpl.loadFromYml(section.getConfigurationSection("item")) ?: return null
         val height = section.getDouble("height", commonOptions.height)
         val scale = section.getDouble("scale", commonOptions.scale.toDouble()).toFloat()
         val billboard = section.getString("billboard")?.let {
