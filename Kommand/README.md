@@ -1,7 +1,7 @@
 # Kommand
 
 [![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/kommand/badge)](https://www.codefactor.io/repository/github/mrlarkyy/kommand)
-[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/Kommand?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/Kommand)
+[![Core](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/kommand-core?color=40c14a&name=Reposilite&filter=2)](https://repo.nekroplex.com/#/releases/gg/aquatic.kommand/kommand-core)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
@@ -158,7 +158,7 @@ command("kit") {
 ### Flags and Named Arguments
 ```kotlin
 command("broadcast") {
-    greedyStringArgument("message") {
+    stringArgument("message", format = StringArgumentFormat.GREEDY_STRING) {
         flagsArgument("opts", listOf("-s", "--silent")) {
             execute<Player> {
                 val msg = string("message")

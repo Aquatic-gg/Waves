@@ -16,6 +16,9 @@ val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNA
 val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 
 allprojects {
+    group = rootProject.group
+    version = rootProject.version
+
     repositories {
         mavenCentral()
         maven {
@@ -63,7 +66,7 @@ subprojects {
             create<MavenPublication>("maven") {
                 groupId = "gg.aquatic"
                 artifactId = project.name
-                version = "${project.version}"
+                version = rootProject.version.toString()
                 from(components["java"])
             }
         }
