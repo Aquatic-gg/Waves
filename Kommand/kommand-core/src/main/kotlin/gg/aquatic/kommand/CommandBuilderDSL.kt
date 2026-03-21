@@ -8,7 +8,6 @@ import com.mojang.brigadier.arguments.BoolArgumentType
 import com.mojang.brigadier.arguments.DoubleArgumentType
 import com.mojang.brigadier.arguments.FloatArgumentType
 import com.mojang.brigadier.arguments.IntegerArgumentType
-import com.mojang.brigadier.arguments.LongArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import com.mojang.brigadier.builder.ArgumentBuilder
 import com.mojang.brigadier.builder.LiteralArgumentBuilder
@@ -16,18 +15,15 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import com.mojang.brigadier.suggestion.Suggestions
 import com.mojang.brigadier.suggestion.SuggestionsBuilder
-import io.papermc.paper.command.brigadier.CommandSourceStack
-import io.papermc.paper.command.brigadier.Commands
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.launch
-import org.bukkit.Bukkit
-import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CompletableFuture
 import java.util.regex.Pattern
 
@@ -35,113 +31,126 @@ import java.util.regex.Pattern
 annotation class BrigadierDsl
 
 enum class StringArgumentFormat {
+    /**
+     * Matches a single unquoted token without spaces.
+     *
+     * In-game format:
+     * `/command value`
+     */
     WORD,
+
+    /**
+     * Matches a single string argument and supports quoted text.
+     *
+     * Use this when the argument may contain spaces, but should still stay within one logical value.
+     *
+     * In-game format:
+     * `/command value`
+     * `/command "value with spaces"`
+     */
     STRING,
+
+    /**
+     * Matches the rest of the command input as one value.
+     *
+     * Use this for free-form text such as reasons, messages, or notes.
+     *
+     * In-game format:
+     * `/command value`
+     * `/command value with spaces`
+     */
     GREEDY_STRING,
 }
 
+data class SuggestionContext<S>(
+    val context: CommandContext<S>,
+    val input: String,
+    val builder: SuggestionsBuilder
+)
+
+data class RequirementContext<S, SenderT : Any>(
+    val source: S,
+    val sender: SenderT
+)
+
 @BrigadierDsl
-class CommandBuilder<S : CommandSourceStack>(
+class CommandBuilder<S, SenderT : Any>(
     val builder: ArgumentBuilder<S, *>,
+    private val senderResolver: (S) -> SenderT,
     val inheritedRunnables: MutableList<ExecutionContext<S, *>.() -> Boolean> = mutableListOf(),
     private val argumentMappers: MutableMap<String, (CommandContext<S>) -> Any?> = mutableMapOf(),
-    private val invalidArgumentHandlers: MutableMap<String, ExecutionContext<S, CommandSender>.() -> Unit> = mutableMapOf(),
+    private val invalidArgumentHandlers: MutableMap<String, ExecutionContext<S, SenderT>.() -> Unit> = mutableMapOf(),
     private var inheritedRunnableCount: Int = inheritedRunnables.size,
-    private val childBuilders: MutableList<CommandBuilder<S>> = mutableListOf(),
+    private val childBuilders: MutableList<CommandBuilder<S, SenderT>> = mutableListOf(),
     private val reattachToParent: (() -> Unit)? = null
 ) {
 
-    operator fun String.invoke(block: CommandBuilder<S>.() -> Unit) {
+    operator fun String.invoke(block: CommandBuilder<S, SenderT>.() -> Unit) {
         val literal = LiteralArgumentBuilder.literal<S>(this)
         attachChildBuilder(literal, block)
     }
 
-    fun <T> argument(name: String, type: ArgumentType<T>, block: CommandBuilder<S>.() -> Unit = {}) {
+    fun <T> argument(name: String, type: ArgumentType<T>, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
         val arg = RequiredArgumentBuilder.argument<S, T>(name, type)
         attachChildBuilder(arg, block)
     }
 
-    fun onInvalidArgument(id: String, handler: ExecutionContext<S, CommandSender>.() -> Unit) {
+    fun onInvalidArgument(id: String, handler: ExecutionContext<S, SenderT>.() -> Unit) {
         invalidArgumentHandlers[id] = handler
     }
 
-    fun playerArgument(
-        id: String,
-        includeSelf: Boolean,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
-    ) {
-        if (onInvalid != null) {
-            invalidArgumentHandlers[id] = onInvalid
+    fun requires(condition: RequirementContext<S, SenderT>.() -> Boolean) {
+        builder.requires { source ->
+            RequirementContext(
+                source = source,
+                sender = senderResolver(source)
+            ).condition()
         }
-        playerArgumentInternal(id, { ctx, player ->
-            if (!includeSelf) (ctx.source.sender as? Player)?.uniqueId != player.uniqueId else true
-        }, block)
-    }
-
-    fun playerArgument(
-        id: String,
-        filter: (CommandContext<S>, Player) -> Boolean,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
-    ) {
-        if (onInvalid != null) {
-            invalidArgumentHandlers[id] = onInvalid
-        }
-        playerArgumentInternal(id, filter, block)
-    }
-
-    fun playerArgument(
-        id: String,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
-    ) {
-        if (onInvalid != null) {
-            invalidArgumentHandlers[id] = onInvalid
-        }
-        playerArgumentInternal(id, { _, _ -> true }, block)
-    }
-
-    private fun playerArgumentInternal(
-        id: String,
-        finalFilter: (CommandContext<S>, Player) -> Boolean,
-        block: CommandBuilder<S>.() -> Unit
-    ) {
-        argumentMappers[id] = { ctx ->
-            val name = try {
-                StringArgumentType.getString(ctx, id)
-            } catch (_: Exception) {
-                null
-            }
-            name?.let(Bukkit::getPlayerExact)?.takeIf { finalFilter(ctx, it) }
-        }
-
-        argument(id, StringArgumentType.word()) {
-            suggests { ctx, builder ->
-                val remaining = builder.remaining.lowercase()
-                Bukkit.getOnlinePlayers().forEach { player ->
-                    if (finalFilter(ctx, player) && player.name.lowercase().startsWith(remaining)) {
-                        builder.suggest(player.name)
-                    }
-                }
-                builder.buildFuture()
-            }
-            block()
-        }
-    }
-
-    fun requires(condition: (S) -> Boolean) {
-        builder.requires(condition)
-    }
-
-    fun hasPermission(permission: String) {
-        requires { it.sender.hasPermission(permission) }
     }
 
     fun suggests(block: (context: CommandContext<S>, builder: SuggestionsBuilder) -> CompletableFuture<Suggestions>) {
         if (builder is RequiredArgumentBuilder<S, *>) {
             builder.suggests(block)
         }
+    }
+
+    fun suggest(
+        suggestions: (SuggestionContext<S>) -> Iterable<String>,
+        condition: (SuggestionContext<S>) -> Boolean = { true }
+    ) {
+        suggests { context, builder ->
+            val suggestionContext = SuggestionContext(
+                context = context,
+                input = builder.remaining,
+                builder = builder
+            )
+
+            if (condition(suggestionContext)) {
+                val remaining = suggestionContext.input.lowercase()
+                suggestions(suggestionContext).forEach { suggestion ->
+                    if (suggestion.lowercase().startsWith(remaining)) {
+                        builder.suggest(suggestion)
+                    }
+                }
+            }
+
+            builder.buildFuture()
+        }
+    }
+
+    fun suggest(vararg suggestions: String) {
+        suggest({ suggestions.asIterable() })
+    }
+
+    fun suggest(suggestions: Iterable<String>) {
+        suggest({ suggestions })
+    }
+
+    fun suggest(
+        suggestions: Iterable<String>,
+        condition: (SuggestionContext<S>) -> Boolean
+    ) {
+        suggest({ suggestions }, condition)
     }
 
     fun suggestsAsync(
@@ -155,35 +164,80 @@ class CommandBuilder<S : CommandSourceStack>(
         }
     }
 
-    fun stringArgument(id: String, block: CommandBuilder<S>.() -> Unit = {}) {
-        argument(id, StringArgumentType.word(), block)
-    }
-
-    fun greedyStringArgument(id: String, block: CommandBuilder<S>.() -> Unit = {}) {
-        argument(id, StringArgumentType.greedyString(), block)
-    }
-
-    private fun <T : Any> mappedWordArgument(
+    fun stringArgument(
         id: String,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)?,
+        format: StringArgumentFormat = StringArgumentFormat.WORD,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
+    ) {
+        argument(id, stringArgumentType(format), block)
+    }
+
+    inline fun <reified T : Enum<T>> enumArgument(
+        id: String,
+        ignoreCase: Boolean = true,
+        noinline onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        noinline block: CommandBuilder<S, SenderT>.() -> Unit = {}
+    ) {
+        val values = enumValues<T>()
+        mappedStringArgument(
+            id = id,
+            format = StringArgumentFormat.WORD,
+            onInvalid = onInvalid,
+            parser = { _, raw ->
+                values.firstOrNull {
+                    if (ignoreCase) it.name.equals(raw, ignoreCase = true) else it.name == raw
+                }
+            }
+        ) {
+            suggest(
+                suggestions = { values.map { enumValue -> enumValue.name.lowercase() } },
+                condition = { true }
+            )
+            block()
+        }
+    }
+
+    fun <T : Any> mappedWordArgument(
+        id: String,
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
         parser: (String) -> T?,
-        block: CommandBuilder<S>.() -> Unit = {}
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
+    ) {
+        mappedStringArgument(
+            id = id,
+            format = StringArgumentFormat.WORD,
+            onInvalid = onInvalid,
+            parser = { _, raw -> parser(raw) },
+            block = block
+        )
+    }
+
+    fun <T : Any> mappedStringArgument(
+        id: String,
+        format: StringArgumentFormat = StringArgumentFormat.WORD,
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        parser: (CommandContext<S>, String) -> T?,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         if (onInvalid != null) {
             invalidArgumentHandlers[id] = onInvalid
         }
+
         argumentMappers[id] = { ctx ->
             val raw = try {
                 StringArgumentType.getString(ctx, id)
             } catch (_: Exception) {
                 null
             }
-            raw?.let(parser)
+
+            raw?.let { parser(ctx, it) }
         }
-        argument(id, StringArgumentType.word(), block)
+
+        val arg = RequiredArgumentBuilder.argument<S, String>(id, stringArgumentType(format))
+        attachChildBuilder(arg, block)
     }
 
-    fun byteArgument(id: String, min: Byte = Byte.MIN_VALUE, max: Byte = Byte.MAX_VALUE, block: CommandBuilder<S>.() -> Unit = {}) {
+    fun byteArgument(id: String, min: Byte = Byte.MIN_VALUE, max: Byte = Byte.MAX_VALUE, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
         intArgument(id, min.toInt(), max.toInt(), block)
     }
 
@@ -191,13 +245,13 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: Byte = Byte.MIN_VALUE,
         max: Byte = Byte.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw -> raw.toByteOrNull()?.takeIf { it in min..max } }, block)
     }
 
-    fun shortArgument(id: String, min: Short = Short.MIN_VALUE, max: Short = Short.MAX_VALUE, block: CommandBuilder<S>.() -> Unit = {}) {
+    fun shortArgument(id: String, min: Short = Short.MIN_VALUE, max: Short = Short.MAX_VALUE, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
         intArgument(id, min.toInt(), max.toInt(), block)
     }
 
@@ -205,13 +259,13 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: Short = Short.MIN_VALUE,
         max: Short = Short.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw -> raw.toShortOrNull()?.takeIf { it in min..max } }, block)
     }
 
-    fun intArgument(id: String, min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE, block: CommandBuilder<S>.() -> Unit = {}) {
+    fun intArgument(id: String, min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
         argument(id, IntegerArgumentType.integer(min, max), block)
     }
 
@@ -219,8 +273,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: Int = Int.MIN_VALUE,
         max: Int = Int.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         if (onInvalid == null) {
             intArgument(id, min, max, block)
@@ -230,16 +284,16 @@ class CommandBuilder<S : CommandSourceStack>(
         mappedWordArgument(id, onInvalid, { raw -> raw.toIntOrNull()?.takeIf { it in min..max } }, block)
     }
 
-    fun longArgument(id: String, min: Long = Long.MIN_VALUE, max: Long = Long.MAX_VALUE, block: CommandBuilder<S>.() -> Unit = {}) {
-        argument(id, LongArgumentType.longArg(min, max), block)
+    fun longArgument(id: String, min: Long = Long.MIN_VALUE, max: Long = Long.MAX_VALUE, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
+        mappedWordArgument(id, parser = { raw -> raw.toLongOrNull()?.takeIf { it in min..max } }, block = block)
     }
 
     fun longArgument(
         id: String,
         min: Long = Long.MIN_VALUE,
         max: Long = Long.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         if (onInvalid == null) {
             longArgument(id, min, max, block)
@@ -249,7 +303,7 @@ class CommandBuilder<S : CommandSourceStack>(
         mappedWordArgument(id, onInvalid, { raw -> raw.toLongOrNull()?.takeIf { it in min..max } }, block)
     }
 
-    fun floatArgument(id: String, min: Float = -Float.MAX_VALUE, max: Float = Float.MAX_VALUE, block: CommandBuilder<S>.() -> Unit = {}) {
+    fun floatArgument(id: String, min: Float = -Float.MAX_VALUE, max: Float = Float.MAX_VALUE, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
         argument(id, FloatArgumentType.floatArg(min, max), block)
     }
 
@@ -257,8 +311,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: Float = -Float.MAX_VALUE,
         max: Float = Float.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         if (onInvalid == null) {
             floatArgument(id, min, max, block)
@@ -268,7 +322,7 @@ class CommandBuilder<S : CommandSourceStack>(
         mappedWordArgument(id, onInvalid, { raw -> raw.toFloatOrNull()?.takeIf { it in min..max } }, block)
     }
 
-    fun doubleArgument(id: String, min: Double = -Double.MAX_VALUE, max: Double = Double.MAX_VALUE, block: CommandBuilder<S>.() -> Unit = {}) {
+    fun doubleArgument(id: String, min: Double = -Double.MAX_VALUE, max: Double = Double.MAX_VALUE, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
         argument(id, DoubleArgumentType.doubleArg(min, max), block)
     }
 
@@ -276,8 +330,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: Double = -Double.MAX_VALUE,
         max: Double = Double.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         if (onInvalid == null) {
             doubleArgument(id, min, max, block)
@@ -291,8 +345,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: UByte = UByte.MIN_VALUE,
         max: UByte = UByte.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw -> raw.toUByteOrNull()?.takeIf { it in min..max } }, block)
     }
@@ -301,8 +355,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: UShort = UShort.MIN_VALUE,
         max: UShort = UShort.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw -> raw.toUShortOrNull()?.takeIf { it in min..max } }, block)
     }
@@ -311,8 +365,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: UInt = UInt.MIN_VALUE,
         max: UInt = UInt.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw -> raw.toUIntOrNull()?.takeIf { it in min..max } }, block)
     }
@@ -321,8 +375,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: ULong = ULong.MIN_VALUE,
         max: ULong = ULong.MAX_VALUE,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw -> raw.toULongOrNull()?.takeIf { it in min..max } }, block)
     }
@@ -331,8 +385,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: BigInteger? = null,
         max: BigInteger? = null,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw ->
             raw.toBigIntegerOrNull()?.takeIf { value ->
@@ -345,8 +399,8 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         min: BigDecimal? = null,
         max: BigDecimal? = null,
-        onInvalid: (ExecutionContext<S, CommandSender>.() -> Unit)? = null,
-        block: CommandBuilder<S>.() -> Unit = {}
+        onInvalid: (ExecutionContext<S, SenderT>.() -> Unit)? = null,
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         mappedWordArgument(id, onInvalid, { raw ->
             raw.toBigDecimalOrNull()?.takeIf { value ->
@@ -355,14 +409,14 @@ class CommandBuilder<S : CommandSourceStack>(
         }, block)
     }
 
-    fun booleanArgument(id: String, block: CommandBuilder<S>.() -> Unit = {}) {
+    fun booleanArgument(id: String, block: CommandBuilder<S, SenderT>.() -> Unit = {}) {
         argument(id, BoolArgumentType.bool(), block)
     }
 
     fun namedArguments(
         id: String,
         options: Map<String, ArgumentType<*>>,
-        block: CommandBuilder<S>.() -> Unit = {}
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         argumentMappers[id] = { ctx ->
             val input = try {
@@ -380,14 +434,16 @@ class CommandBuilder<S : CommandSourceStack>(
 
                 try {
                     val reader = StringReader(valueStr)
-                    found[key] = type.parse(reader)!!
+                    @Suppress("UNCHECKED_CAST")
+                    val parsed = (type as ArgumentType<Any>).parse<Any>(reader)
+                    found[key] = parsed
                 } catch (_: Exception) {
                 }
             }
             found
         }
 
-        greedyStringArgument(id) {
+        stringArgument(id, format = StringArgumentFormat.GREEDY_STRING) {
             suggests { _, builder ->
                 val remaining = builder.remaining.lowercase()
                 options.keys.forEach { key ->
@@ -405,7 +461,7 @@ class CommandBuilder<S : CommandSourceStack>(
     fun flagsArgument(
         id: String,
         allowedFlags: List<String>,
-        block: CommandBuilder<S>.() -> Unit = {}
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         argumentMappers[id] = { ctx ->
             val input = try {
@@ -425,7 +481,7 @@ class CommandBuilder<S : CommandSourceStack>(
             found
         }
 
-        greedyStringArgument(id) {
+        stringArgument(id, format = StringArgumentFormat.GREEDY_STRING) {
             suggests { _, builder ->
                 val input = builder.remaining.lowercase()
                 val currentFlags = input.split(" ")
@@ -445,7 +501,7 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         values: (CommandContext<S>) -> Iterable<String>,
         format: StringArgumentFormat = StringArgumentFormat.WORD,
-        block: CommandBuilder<S>.() -> Unit = {}
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         listArgument(id, values, { it }, format, block)
     }
@@ -455,7 +511,7 @@ class CommandBuilder<S : CommandSourceStack>(
         values: (CommandContext<S>) -> Iterable<T>,
         mapper: (T) -> String,
         format: StringArgumentFormat = StringArgumentFormat.WORD,
-        block: CommandBuilder<S>.() -> Unit = {}
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         argumentMappers[id] = { ctx ->
             val input = try {
@@ -466,13 +522,7 @@ class CommandBuilder<S : CommandSourceStack>(
             if (input == null) null else values(ctx).find { mapper(it) == input }
         }
 
-        val argumentType = when (format) {
-            StringArgumentFormat.WORD -> StringArgumentType.word()
-            StringArgumentFormat.STRING -> StringArgumentType.string()
-            StringArgumentFormat.GREEDY_STRING -> StringArgumentType.greedyString()
-        }
-
-        val arg = RequiredArgumentBuilder.argument<S, String>(id, argumentType)
+        val arg = RequiredArgumentBuilder.argument<S, String>(id, stringArgumentType(format))
         arg.suggests { ctx, builder ->
             val remaining = builder.remaining.lowercase()
             values(ctx).forEach { item ->
@@ -487,7 +537,7 @@ class CommandBuilder<S : CommandSourceStack>(
         attachChildBuilder(arg, block)
     }
 
-    inline fun <reified T : CommandSender> execute(crossinline block: ExecutionContext<S, T>.() -> Boolean) {
+    inline fun <reified T : SenderT> execute(crossinline block: ExecutionContext<S, T>.() -> Boolean) {
         val wrappedBlock: ExecutionContext<S, *>.() -> Boolean = {
             @Suppress("UNCHECKED_CAST")
             if (sender is T) (this as ExecutionContext<S, T>).block() else false
@@ -498,7 +548,7 @@ class CommandBuilder<S : CommandSourceStack>(
         rebindExecution()
     }
 
-    inline fun <reified T : CommandSender> suspendExecute(
+    inline fun <reified T : SenderT> suspendExecute(
         crossinline block: suspend ExecutionContext<S, T>.() -> Unit
     ) {
         execute<T> {
@@ -509,17 +559,50 @@ class CommandBuilder<S : CommandSourceStack>(
         }
     }
 
+    fun cooldown(
+        duration: Duration,
+        key: ExecutionContext<S, SenderT>.() -> Any = { sender as Any },
+        condition: ExecutionContext<S, SenderT>.() -> Boolean = { true },
+        onCooldown: (ExecutionContext<S, SenderT>.(remaining: Duration) -> Unit)? = null
+    ) {
+        val runnable: ExecutionContext<S, *>.() -> Boolean = {
+            @Suppress("UNCHECKED_CAST")
+            val typedContext = this as ExecutionContext<S, SenderT>
+
+            if (!typedContext.condition()) {
+                false
+            } else {
+                val now = System.currentTimeMillis()
+                val cooldownKey = typedContext.key()
+                val expiresAt = cooldownState[cooldownKey]
+
+                if (expiresAt != null && expiresAt > now) {
+                    val remaining = Duration.ofMillis(expiresAt - now)
+                    onCooldown?.invoke(typedContext, remaining)
+                    true
+                } else {
+                    cooldownState[cooldownKey] = now + duration.toMillis()
+                    false
+                }
+            }
+        }
+
+        inheritedRunnables.add(runnable)
+        propagateRunnableToChildren(runnable)
+        rebindExecution()
+    }
+
     fun rebindExecution() {
         val runnablesSnapshot = inheritedRunnables.toList()
         val mappersSnapshot = argumentMappers.toMap()
         val invalidHandlersSnapshot = invalidArgumentHandlers.toMap()
 
         builder.executes { context ->
-            val execContext = ExecutionContext<S, CommandSender>(
-                context.source.sender,
-                context,
-                mappersSnapshot,
-                invalidHandlersSnapshot
+            val execContext = ExecutionContext(
+                sender = senderResolver(context.source),
+                context = context,
+                mappers = mappersSnapshot,
+                invalidHandlers = invalidHandlersSnapshot
             )
             try {
                 for (runnable in runnablesSnapshot) {
@@ -536,17 +619,18 @@ class CommandBuilder<S : CommandSourceStack>(
         id: String,
         values: List<String>,
         format: StringArgumentFormat = StringArgumentFormat.WORD,
-        block: CommandBuilder<S>.() -> Unit = {}
+        block: CommandBuilder<S, SenderT>.() -> Unit = {}
     ) {
         listArgument(id, { values }, { it }, format, block)
     }
 
     private fun attachChildBuilder(
         childBuilder: ArgumentBuilder<S, *>,
-        block: CommandBuilder<S>.() -> Unit
+        block: CommandBuilder<S, SenderT>.() -> Unit
     ) {
         val subBuilder = CommandBuilder(
             builder = childBuilder,
+            senderResolver = senderResolver,
             inheritedRunnables = inheritedRunnables.toMutableList(),
             argumentMappers = argumentMappers.toMutableMap(),
             invalidArgumentHandlers = invalidArgumentHandlers.toMutableMap(),
@@ -575,6 +659,12 @@ class CommandBuilder<S : CommandSourceStack>(
     }
 }
 
+private fun stringArgumentType(format: StringArgumentFormat): ArgumentType<String> = when (format) {
+    StringArgumentFormat.WORD -> StringArgumentType.word()
+    StringArgumentFormat.STRING -> StringArgumentType.string()
+    StringArgumentFormat.GREEDY_STRING -> StringArgumentType.greedyString()
+}
+
 private fun quoteIfNeeded(value: String, format: StringArgumentFormat): String {
     if (format != StringArgumentFormat.STRING) return value
 
@@ -585,19 +675,18 @@ private fun quoteIfNeeded(value: String, format: StringArgumentFormat): String {
     return "\"$escaped\""
 }
 
-class ExecutionContext<S : CommandSourceStack, out T : CommandSender>(
+class ExecutionContext<S, T : Any>(
     val sender: T,
     val context: CommandContext<S>,
     private val mappers: Map<String, (CommandContext<S>) -> Any?> = emptyMap(),
     @PublishedApi
-    internal val invalidHandlers: Map<String, ExecutionContext<S, CommandSender>.() -> Unit> = emptyMap()
+    internal val invalidHandlers: Map<String, ExecutionContext<S, T>.() -> Unit> = emptyMap()
 ) {
     inline fun <reified V> get(id: String): V {
         return getOrNull(id) ?: run {
-            @Suppress("UNCHECKED_CAST")
-            invalidHandlers[id]?.invoke(this as ExecutionContext<S, CommandSender>)
+            invalidHandlers[id]?.invoke(this)
             if (id in invalidHandlers) {
-                throw HandledCommandException
+                throw HandledCommandException()
             }
             throw IllegalStateException("Required command argument '$id' is missing or failed to map.")
         }
@@ -615,14 +704,6 @@ class ExecutionContext<S : CommandSourceStack, out T : CommandSender>(
         } catch (_: Exception) {
             null
         }
-    }
-
-    fun player(id: String): Player? {
-        val direct = getOrNull<Player>(id)
-        if (direct != null) return direct
-
-        val name = getOrNull<String>(id) ?: return null
-        return Bukkit.getPlayerExact(name)
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -661,53 +742,24 @@ class ExecutionContext<S : CommandSourceStack, out T : CommandSender>(
 }
 
 @PublishedApi
-internal object HandledCommandException : CancellationException()
+internal class HandledCommandException : CancellationException()
 
-fun command(
+private val cooldownState = ConcurrentHashMap<Any, Long>()
+
+fun <S, SenderT : Any> CommandDispatcher<S>.command(
     name: String,
     vararg aliases: String,
-    block: CommandBuilder<CommandSourceStack>.() -> Unit
-) {
-    val commands = KommandConfig.commands
-    if (commands != null) {
-        val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(name)
-        CommandBuilder(builder).apply(block)
-        commands.register(builder.build(), aliases.toList())
-        return
-    }
-
-    val names = listOf(name) + aliases.toList()
-    val dispatcher = KommandConfig.commandDispatcher
-    names.forEach { cmdName ->
-        val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(cmdName)
-        CommandBuilder(builder).apply(block)
-        dispatcher.register(builder)
-    }
-}
-
-fun Commands.command(
-    name: String,
-    vararg aliases: String,
-    block: CommandBuilder<CommandSourceStack>.() -> Unit
-) {
-    val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(name)
-    CommandBuilder(builder).apply(block)
-    this.register(builder.build(), aliases.toList())
-}
-
-fun CommandDispatcher<CommandSourceStack>.command(
-    name: String,
-    vararg aliases: String,
-    block: CommandBuilder<CommandSourceStack>.() -> Unit
+    senderResolver: (S) -> SenderT,
+    block: CommandBuilder<S, SenderT>.() -> Unit
 ) {
     val names = listOf(name) + aliases.toList()
     names.forEach { cmdName ->
-        val builder = LiteralArgumentBuilder.literal<CommandSourceStack>(cmdName)
-        CommandBuilder(builder).apply(block)
-        this.register(builder)
+        val builder = LiteralArgumentBuilder.literal<S>(cmdName)
+        CommandBuilder(builder, senderResolver).apply(block)
+        register(builder)
     }
 }
 
 fun <S> CommandDispatcher<S>.register(builders: List<LiteralArgumentBuilder<S>>) {
-    builders.forEach { this.register(it) }
+    builders.forEach { register(it) }
 }

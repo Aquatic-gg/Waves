@@ -1,66 +1,71 @@
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.authentication.http.BasicAuthentication
+import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
+
 plugins {
-    kotlin("jvm") version "2.3.20"
+    kotlin("jvm") version "2.3.20" apply false
     id("co.uzzu.dotenv.gradle") version "4.0.0"
-    `maven-publish`
 }
 
 group = "gg.aquatic.kommand"
-version = "26.0.8"
+version = "26.1.0"
 
-repositories {
-    mavenCentral()
-    maven {
-        name = "papermc"
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-    maven("https://libraries.minecraft.net")
-}
+val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
+val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 
-dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("com.mojang:brigadier:1.0.500")
-
-    // Testing
-    testImplementation("io.mockk:mockk:1.14.9")
-    testImplementation(kotlin("test"))
-    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-}
-
-kotlin {
-    jvmToolchain(21)
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
-
-val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
-val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
-
-publishing {
+allprojects {
     repositories {
+        mavenCentral()
         maven {
-            name = "aquaticRepository"
-            url = uri("https://repo.nekroplex.com/releases")
+            name = "papermc"
+            url = uri("https://repo.papermc.io/repository/maven-public/")
+        }
+        maven("https://libraries.minecraft.net")
+    }
+}
 
-            credentials {
-                username = maven_username
-                password = maven_password
-            }
-            authentication {
-                create<BasicAuthentication>("basic")
+subprojects {
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "java-library")
+    apply(plugin = "maven-publish")
+
+    extensions.configure<KotlinJvmProjectExtension> {
+        jvmToolchain(21)
+    }
+
+    extensions.configure<JavaPluginExtension> {
+        withSourcesJar()
+        withJavadocJar()
+    }
+
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+    }
+
+    extensions.configure<PublishingExtension> {
+        repositories {
+            maven {
+                name = "aquaticRepository"
+                url = uri("https://repo.nekroplex.com/releases")
+
+                credentials {
+                    username = mavenUsername
+                    password = mavenPassword
+                }
+                authentication {
+                    create<BasicAuthentication>("basic")
+                }
             }
         }
-    }
-    publications {
-        create<MavenPublication>("maven") {
-            groupId = "gg.aquatic"
-            artifactId = "Kommand"
-            version = "${project.version}"
-
-            from(components["java"])
-            //artifact(tasks.compileJava)
+        publications {
+            create<MavenPublication>("maven") {
+                groupId = "gg.aquatic"
+                artifactId = project.name
+                version = "${project.version}"
+                from(components["java"])
+            }
         }
     }
 }
