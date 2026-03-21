@@ -5,16 +5,16 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**Kommand** is a super lightweight, type-safe Kotlin DSL designed to simplify command registration for PaperMC using the
-Brigadier engine. It removes the boilerplate of manual node building and provides a declarative, intuitive way to define
-complex command structures.
+**Kommand** is a super lightweight, type-safe Kotlin DSL designed to simplify command registration on top of the
+Brigadier engine. The project is now split into platform modules so the common DSL can be shared between Paper and
+Velocity without leaking platform types into the core API.
 
 ## ✨ Features
 
 * **Type-Safe DSL:** Define commands, subcommands, and arguments using a clean Kotlin syntax.
 * **Automatic Mapping:** Map string inputs directly to custom objects using `listArgument`.
 * **Advanced Argument Types:**
-    * `playerArgument`: Built-in support for Paper's player selectors with optional filters.
+    * `playerArgument`: Platform-specific extension for Paper and Velocity with optional filters.
     * `listArgument`: For dynamic suggestions and automatic object mapping.
     * `flagsArgument`: Support for CLI-style flags (e.g., `-s`, `--silent`).
     * `namedArguments`: Key-value pair parsing (e.g., `-amount:5`).
@@ -26,7 +26,7 @@ complex command structures.
 
 ## 📦 Installation
 
-Add the library to your build.gradle.kts:
+Add the platform module you need to your `build.gradle.kts`:
 
 ````kotlin
 repositories {
@@ -34,7 +34,9 @@ repositories {
 }
 
 dependencies {
-    implementation("gg.aquatic:Kommand:VERSION")
+    implementation("gg.aquatic:kommand-paper:VERSION")
+    // or
+    implementation("gg.aquatic:kommand-velocity:VERSION")
 }
 ````
 
@@ -59,6 +61,8 @@ command("teleport", "tp") {
     }
 }
 ```
+
+`stringArgument` now supports `WORD`, `STRING`, and `GREEDY_STRING` through the `format` parameter, so you can keep one API for single words, quoted text, or the rest of the line.
 
 ---
 
