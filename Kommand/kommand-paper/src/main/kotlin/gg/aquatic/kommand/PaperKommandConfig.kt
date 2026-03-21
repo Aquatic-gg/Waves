@@ -3,13 +3,9 @@ package gg.aquatic.kommand
 import com.mojang.brigadier.CommandDispatcher
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import org.bukkit.Bukkit
 
-object KommandConfig {
-
-    var commandScope = CoroutineScope(Dispatchers.Default)
+object PaperKommandConfig {
 
     var commands: Commands? = null
 

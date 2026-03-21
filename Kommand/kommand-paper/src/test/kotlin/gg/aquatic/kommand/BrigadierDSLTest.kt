@@ -32,25 +32,19 @@ class BrigadierDSLTest {
         dispatcher.command("crate") {
             listArgument("type", values = { crates }, mapper = { it.id }) {
                 execute<Player> {
-                    // The generic get<T> should use the internal mapper
-                    // registered by listArgument
                     capturedCrate = get<Crate>("type")
                     true
                 }
             }
         }
 
-        // 1. Test successful mapping
         dispatcher.execute("crate legendary", mockSource)
         assertNotNull(capturedCrate, "Crate should have been mapped")
-        // REMOVED SAFE CALLS (?.) because get<Crate> is now non-null
         assertEquals("legendary", capturedCrate.id)
         assertEquals(0.05, capturedCrate.chance)
 
-        // 2. Test invalid input (must use getOrNull in the execute block to avoid Exception)
         capturedCrate = null
 
-        // We redefine the command for the 'invalid' test if we want to test getOrNull specifically
         dispatcher.command("crate_null") {
             listArgument("type", values = { crates }, mapper = { it.id }) {
                 execute<Player> {
@@ -76,7 +70,7 @@ class BrigadierDSLTest {
         dispatcher.command("example") {
             execute<Player> {
                 rootCalls++
-                false // Continue to children
+                false
             }
             "sub1" {
                 "sub2" {
@@ -88,12 +82,10 @@ class BrigadierDSLTest {
             }
         }
 
-        // 1. Run root - only root execute should fire
         dispatcher.execute("example", mockSource)
         assertEquals(1, rootCalls)
         assertEquals(0, sub2Calls)
 
-        // 2. Run nested - root execute fires (inherited) then sub2 fires
         dispatcher.execute("example sub1 sub2", mockSource)
         assertEquals(2, rootCalls, "Root execute should have fired again via inheritance")
         assertEquals(1, sub2Calls, "Sub2 execute should have fired")
@@ -110,7 +102,7 @@ class BrigadierDSLTest {
 
         dispatcher.command("cancel") {
             execute<Player> {
-                true // STOP HERE
+                true
             }
             execute<Player> {
                 logicCalled = true
@@ -140,13 +132,11 @@ class BrigadierDSLTest {
             }
         }
 
-        // 1. Test multiple flags in random order
         dispatcher.execute("testflags -f --silent", mockSource)
         assertTrue(capturedFlags.contains("-f"))
         assertTrue(capturedFlags.contains("--silent"))
         assertEquals(2, capturedFlags.size)
 
-        // 2. Test invalid flags are ignored
         dispatcher.execute("testflags -f --invalid", mockSource)
         assertTrue(capturedFlags.contains("-f"))
         assertEquals(1, capturedFlags.size, "Invalid flag should not be captured")
@@ -172,11 +162,9 @@ class BrigadierDSLTest {
             }
         }
 
-        // 1. Test valid parsing of named int
         dispatcher.execute("testnamed -amount:5 -radius:10", mockSource)
         assertEquals(5, capturedAmount)
 
-        // 2. Test partial or missing named arguments
         capturedAmount = null
         dispatcher.execute("testnamed -radius:20", mockSource)
         assertEquals(null, capturedAmount, "Missing key should return null")
@@ -193,14 +181,11 @@ class BrigadierDSLTest {
         var capturedVal: String? = null
 
         dispatcher.command("teleport") {
-            // Path 1: /teleport (no args)
             execute<Player> {
                 capturedVal = getOrNull<String>("target")
                 true
             }
 
-            // Path 2: /teleport <target>
-            // Using stringArgument for the test to avoid Vanilla provider issues
             stringArgument("target") {
                 execute<Player> {
                     capturedVal = get<String>("target")
@@ -209,11 +194,9 @@ class BrigadierDSLTest {
             }
         }
 
-        // 1. Run without argument
         dispatcher.execute("teleport", mockSource)
         assertEquals(null, capturedVal, "Value should be null when argument is missing")
 
-        // 2. Run with argument
         dispatcher.execute("teleport MyPlayerName", mockSource)
         assertEquals("MyPlayerName", capturedVal, "Value should be captured when argument is present")
     }
@@ -228,26 +211,23 @@ class BrigadierDSLTest {
         var balanceCalls = 0
 
         dispatcher.command("economy") {
-            // Root execute (Help)
             execute<Player> {
                 helpCalls++
-                false // ALLOW logic to continue to subcommands
+                false
             }
 
             "balance" {
                 execute<Player> {
                     balanceCalls++
-                    true // Stop here
+                    true
                 }
             }
         }
 
-        // 1. Run /economy -> Only help should fire
         dispatcher.execute("economy", mockSource)
         assertEquals(1, helpCalls, "Help should have fired once")
         assertEquals(0, balanceCalls, "Balance should not have fired")
 
-        // 2. Run /economy balance -> Help fires first (inherited), then Balance fires
         dispatcher.execute("economy balance", mockSource)
         assertEquals(2, helpCalls, "Help should have fired again (inherited)")
         assertEquals(1, balanceCalls, "Balance should have fired once")
@@ -267,7 +247,6 @@ class BrigadierDSLTest {
             "key" {
                 "give" {
                     listArgument("crate", values = listOf("test")) {
-                        // We intentionally don't place execute blocks on child nodes.
                         stringArgument("player") {
                             intArgument("amount")
                         }
@@ -309,5 +288,148 @@ class BrigadierDSLTest {
         assertEquals("test", capturedCrate)
         assertEquals("MrLarkyy_", capturedPlayer)
         assertEquals(1, capturedAmount)
+    }
+
+    @Test
+    fun `test conditional suggestions only show for matching prefix`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+
+        dispatcher.command("punish") {
+            stringArgument("reason", format = StringArgumentFormat.STRING) {
+                suggest(
+                    suggestions = { listOf(":spam", ":toxicity", ":advertising") },
+                    condition = { it.input.startsWith(":") },
+                )
+            }
+        }
+
+        val source = mockk<CommandSourceStack>()
+        every { source.sender } returns mockk<Player>(relaxed = true)
+
+        val hiddenSuggestions = dispatcher.getCompletionSuggestions(
+            dispatcher.parse("punish normal", source)
+        ).get().list
+
+        assertEquals(emptyList(), hiddenSuggestions.map { it.text })
+
+        val shownSuggestions = dispatcher.getCompletionSuggestions(
+            dispatcher.parse("punish :t", source)
+        ).get().list
+
+        assertEquals(listOf(":toxicity"), shownSuggestions.map { it.text })
+    }
+
+    @Test
+    fun `test string argument supports greedy format`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+        val mockSource = mockk<CommandSourceStack>()
+        every { mockSource.sender } returns mockk<Player>(relaxed = true)
+
+        var capturedReason: String? = null
+
+        dispatcher.command("punish") {
+            stringArgument("reason", format = StringArgumentFormat.GREEDY_STRING) {
+                execute<Player> {
+                    capturedReason = string("reason")
+                    true
+                }
+            }
+        }
+
+        dispatcher.execute("punish repeated chat spam", mockSource)
+        assertEquals("repeated chat spam", capturedReason)
+    }
+
+    private enum class PunishmentType {
+        BAN,
+        MUTE
+    }
+
+    @Test
+    fun `test enum argument maps enum and suggests values`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+        val mockSource = mockk<CommandSourceStack>()
+        every { mockSource.sender } returns mockk<Player>(relaxed = true)
+
+        var capturedType: PunishmentType? = null
+
+        dispatcher.command("punish") {
+            enumArgument<PunishmentType>("type") {
+                execute<Player> {
+                    capturedType = get("type")
+                    true
+                }
+            }
+        }
+
+        dispatcher.execute("punish mute", mockSource)
+        assertEquals(PunishmentType.MUTE, capturedType)
+
+        val suggestions = dispatcher.getCompletionSuggestions(
+            dispatcher.parse("punish m", mockSource)
+        ).get().list
+
+        assertEquals(listOf("mute"), suggestions.map { it.text })
+    }
+
+    @Test
+    fun `test requires receiver lambda can access sender directly`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+        val allowedSender = mockk<Player>(relaxed = true)
+        val deniedSender = mockk<Player>(relaxed = true)
+        val allowedSource = mockk<CommandSourceStack>()
+        val deniedSource = mockk<CommandSourceStack>()
+
+        every { allowedSource.sender } returns allowedSender
+        every { deniedSource.sender } returns deniedSender
+        every { allowedSender.hasPermission("punish.use") } returns true
+        every { deniedSender.hasPermission("punish.use") } returns false
+
+        var executions = 0
+
+        dispatcher.command("punish") {
+            requires { sender.hasPermission("punish.use") }
+            execute<Player> {
+                executions++
+                true
+            }
+        }
+
+        dispatcher.execute("punish", allowedSource)
+        assertEquals(1, executions)
+
+        runCatching {
+            dispatcher.execute("punish", deniedSource)
+        }
+        assertEquals(1, executions)
+    }
+
+    @Test
+    fun `test cooldown prevents repeated execution and invokes callback`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+        val mockPlayer = mockk<Player>(relaxed = true)
+        val mockSource = mockk<CommandSourceStack>()
+        every { mockSource.sender } returns mockPlayer
+
+        var executions = 0
+        var cooldownHits = 0
+
+        dispatcher.command("punish") {
+            cooldown(
+                duration = java.time.Duration.ofSeconds(30),
+                key = { sender },
+                onCooldown = { cooldownHits++ }
+            )
+            execute<Player> {
+                executions++
+                true
+            }
+        }
+
+        dispatcher.execute("punish", mockSource)
+        dispatcher.execute("punish", mockSource)
+
+        assertEquals(1, executions)
+        assertEquals(1, cooldownHits)
     }
 }
