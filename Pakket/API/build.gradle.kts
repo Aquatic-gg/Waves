@@ -18,7 +18,7 @@ dependencies {
         isChanging = true
     }
     api("gg.aquatic:Blokk:26.0.2")
-    api("gg.aquatic:Stacked:26.0.3")
+    api("gg.aquatic:Stacked:26.0.4")
 }
 
 val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
