@@ -13,7 +13,7 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 
@@ -86,7 +86,7 @@ class Hologram(
     @Volatile
     private var rangeTick = 0
 
-    val lines = ConcurrentHashMap.newKeySet<HologramLine>().apply { addAll(lines) }
+    val lines = CopyOnWriteArrayList<HologramLine>().apply { addAll(lines) }
     val viewers = SuspendingSnapshotMap<Player, HologramViewer>()
 
     init {
@@ -250,7 +250,7 @@ class Hologram(
             },
             placeholderContext,
             viewDistance,
-            lines.map { it.create() }.toSet()
+            lines.map { it.create() }
         )
     }
 
