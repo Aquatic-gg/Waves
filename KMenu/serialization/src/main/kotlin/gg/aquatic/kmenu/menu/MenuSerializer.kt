@@ -5,8 +5,8 @@ import gg.aquatic.execute.ConditionalActionHandle
 import gg.aquatic.execute.ConditionalActionsHandle
 import gg.aquatic.execute.action.ActionSerializer
 import gg.aquatic.execute.checkConditions
-import gg.aquatic.execute.condition.ConditionSerializer
 import gg.aquatic.execute.condition.ConditionHandleWithFailActions
+import gg.aquatic.execute.condition.ConditionSerializer
 import gg.aquatic.kmenu.inventory.ButtonType
 import gg.aquatic.kmenu.inventory.InventoryType
 import gg.aquatic.kmenu.menu.settings.*
