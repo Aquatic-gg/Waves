@@ -1,7 +1,6 @@
 package gg.aquatic.stacked.option
 
 import gg.aquatic.common.AquaticCommon
-import gg.aquatic.stacked.Stacked
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextDecoration
