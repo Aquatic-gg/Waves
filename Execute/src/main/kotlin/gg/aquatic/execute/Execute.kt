@@ -9,7 +9,6 @@ import gg.aquatic.execute.action.impl.logical.SmartAction
 import gg.aquatic.execute.condition.impl.PermissionCondition
 import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 import gg.aquatic.kregistry.bootstrap.ContributionBuilder
-import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.plugin.java.JavaPlugin
 
 object Execute {
