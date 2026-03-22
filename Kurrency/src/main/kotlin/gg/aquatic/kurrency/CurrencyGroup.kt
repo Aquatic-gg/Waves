@@ -2,7 +2,6 @@ package gg.aquatic.kurrency
 
 import org.bukkit.entity.Player
 import java.math.BigDecimal
-import java.util.LinkedHashMap
 
 class CurrencyGroup private constructor(
     private val requiredAmounts: LinkedHashMap<Currency, BigDecimal>

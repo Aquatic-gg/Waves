@@ -2,8 +2,8 @@ package gg.aquatic.kurrency
 
 import gg.aquatic.kevent.SuspendingEventBus
 import gg.aquatic.kevent.suspendingEventBusBuilder
-import gg.aquatic.kurrency.event.CurrencyTransactionEvent
 import gg.aquatic.kurrency.db.CurrencyDBHandler
+import gg.aquatic.kurrency.event.CurrencyTransactionEvent
 import gg.aquatic.kurrency.impl.RegisteredCurrency
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
