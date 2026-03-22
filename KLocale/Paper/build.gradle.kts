@@ -23,7 +23,7 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     implementation(project(":Common"))
-    api("gg.aquatic:Common:26.0.14")
+    api("gg.aquatic:Common:26.0.16")
 
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
