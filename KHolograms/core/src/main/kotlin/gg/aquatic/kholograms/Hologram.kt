@@ -9,13 +9,13 @@ import gg.aquatic.pakket.sendPacket
 import gg.aquatic.pakket.trackedBy
 import gg.aquatic.replace.PlaceholderContext
 import gg.aquatic.snapshotmap.SuspendingSnapshotMap
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.concurrent.CopyOnWriteArrayList
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 class Hologram(
     location: Location,

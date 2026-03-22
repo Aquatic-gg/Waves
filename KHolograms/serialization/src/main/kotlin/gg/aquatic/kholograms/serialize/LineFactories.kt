@@ -9,7 +9,6 @@ import gg.aquatic.kholograms.HologramSerializer
 import gg.aquatic.kholograms.line.AnimatedHologramLine
 import gg.aquatic.kholograms.line.ItemHologramLine
 import gg.aquatic.kholograms.line.TextHologramLine
-import gg.aquatic.stacked.StackedItem
 import gg.aquatic.stacked.impl.StackedItemImpl
 import org.bukkit.Color
 import org.bukkit.configuration.ConfigurationSection
