@@ -1,10 +1,6 @@
 package gg.aquatic.clientside
 
-import gg.aquatic.clientside.serialize.ClientsideBlockSettings
-import gg.aquatic.clientside.serialize.ClientsideEntitySettings
-import gg.aquatic.clientside.serialize.ClientsideMEGSettings
-import gg.aquatic.clientside.serialize.ClientsideMultiBlockSettings
-import gg.aquatic.clientside.serialize.ClientsideSettings
+import gg.aquatic.clientside.serialize.*
 import gg.aquatic.kregistry.bootstrap.BootstrapHolder
 
 fun BootstrapHolder.initializeClientside() {

@@ -2,7 +2,6 @@ package gg.aquatic.clientside.bm
 
 import gg.aquatic.clientside.FakeObject
 import gg.aquatic.clientside.ObjectInteractEvent
-import gg.aquatic.clientside.entity.FakeEntity
 import gg.aquatic.common.audience.AquaticAudience
 import kr.toxicity.model.api.BetterModel
 import kr.toxicity.model.api.animation.AnimationModifier
