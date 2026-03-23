@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.20"
     id("com.gradleup.shadow") version "9.4.0"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     `maven-publish`
