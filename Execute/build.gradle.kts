@@ -23,7 +23,7 @@ dependencies {
 
     api("gg.aquatic:KRegistry:25.0.3")
     api("gg.aquatic:KEvent:26.0.5")
-    api("gg.aquatic:Dispatch:26.0.4")
+    api("gg.aquatic:Dispatch:26.0.5")
     api("gg.aquatic:Dispatch-bukkit:26.0.5")
     api("gg.aquatic:Common:26.0.16")
 }
