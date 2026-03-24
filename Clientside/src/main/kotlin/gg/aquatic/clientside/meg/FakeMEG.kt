@@ -19,7 +19,7 @@ class FakeMEG(
     val modelId: String,
     viewRange: Int,
     initialAudience: AquaticAudience,
-    var onInteract: ObjectInteractEvent<FakeMEG> = {}
+    var onInteract: ObjectInteractEvent<FakeMEG> = { _, _, _ -> }
 ) : FakeObject(viewRange, initialAudience) {
 
     val dummy = MEGInteractableDummy(this).apply {

@@ -18,7 +18,7 @@ class FakeBlock(
     location: Location,
     viewRange: Int,
     audience: AquaticAudience,
-    var onInteract: ObjectInteractEvent<FakeBlock> = {},
+    var onInteract: ObjectInteractEvent<FakeBlock> = { _, _, _ -> },
     var onTick: suspend () -> Unit = {}
 ) : FakeObject(viewRange, audience) {
 

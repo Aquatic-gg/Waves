@@ -13,7 +13,7 @@ class FakeMultiBlock(
     override val location: Location,
     viewRange: Int,
     initialAudience: AquaticAudience,
-    var onInteract: ObjectInteractEvent<FakeMultiBlock> = {},
+    var onInteract: ObjectInteractEvent<FakeMultiBlock> = { _, _, _ -> },
     val onTick: suspend () -> Unit = {}
 ) : FakeObject(viewRange, initialAudience) {
 
