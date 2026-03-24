@@ -10,6 +10,9 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "maven-publish")
 
+    group = rootProject.group
+    version = rootProject.version
+
     repositories {
         maven("https://repo.nekroplex.com/releases")
         maven {
