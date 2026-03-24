@@ -60,10 +60,9 @@ abstract class ItemSerializer<T: StackedItem<T>> {
             return Material.matchMaterial(input.uppercase())?.let { ItemStack(it) }
         }
 
-        val split = input.split(":", limit = 2)
-        val prefix = split[0].uppercase()
-        val id = split[1]
+        val factory = input.substringBefore(":")
+        val id = input.substringAfter(":")
 
-        return StackedItem.ITEM_FACTORIES[prefix]?.create(id)
+        return StackedItem.ITEM_FACTORIES[factory]?.create(id)
     }
 }
