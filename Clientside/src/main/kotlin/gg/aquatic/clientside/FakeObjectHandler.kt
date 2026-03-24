@@ -67,7 +67,7 @@ object FakeObjectHandler {
 
     private fun setupModelEngine() {
         if (Bukkit.getPluginManager().getPlugin("ModelEngine") != null) {
-            MEGInteractableHandler()
+            MEGInteractableHandler().initialize()
         }
     }
 
