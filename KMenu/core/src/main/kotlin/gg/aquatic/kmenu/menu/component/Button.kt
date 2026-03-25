@@ -10,7 +10,7 @@ import kotlin.properties.Delegates
 /** A static menu button with optional placeholders and view requirements. */
 class Button(
     override val id: String,
-    private var itemstack: ItemStack?,
+    itemstack: ItemStack?,
     slots: Collection<Int>,
     priority: Int,
     val updateEvery: Int,
@@ -70,7 +70,7 @@ class Button(
 
         val current = currentItem
         if (current == null) {
-            val item = itemstack?.clone() ?: return null
+            val item = itemStack?.clone() ?: return null
             val updated = textUpdater.createItem(menu, item)
             currentItem = updated
             return updated.latestState.value
