@@ -7,6 +7,7 @@ import com.ticxo.modelengine.api.model.ModeledEntity
 import com.ticxo.modelengine.api.model.bone.BoneBehaviorTypes
 import com.ticxo.modelengine.api.model.bone.type.PlayerLimb
 import gg.aquatic.clientside.FakeObject
+import gg.aquatic.clientside.FakeObjectHandler
 import gg.aquatic.clientside.ObjectInteractEvent
 import gg.aquatic.common.audience.AquaticAudience
 import org.bukkit.Color
@@ -32,10 +33,6 @@ class FakeMEG(
         yBodyRot = rot.yaw
     }
 
-    override fun register() {
-
-    }
-
     val modeledEntity: ModeledEntity? get() = ModelEngineAPI.getModeledEntity(dummy.uuid)
     val activeModel: ActiveModel? get() = modeledEntity?.getModel(modelId)?.orElse(null)
 
@@ -44,6 +41,13 @@ class FakeMEG(
         val me = ModelEngineAPI.createModeledEntity(dummy)
         val model = ModelEngineAPI.createActiveModel(modelId)
         me.addModel(model, true)
+        setAudience(initialAudience)
+    }
+
+    override fun register() {
+        if (registered) return
+        registered = true
+        FakeObjectHandler.tickableObjects += this
     }
 
     override fun onShow(player: Player) {}
@@ -79,6 +83,7 @@ class FakeMEG(
             it.isRemoved = true
         }
         dummy.isRemoved = true
+        FakeObjectHandler.tickableObjects -= this
         _viewers.clear()
     }
 }
