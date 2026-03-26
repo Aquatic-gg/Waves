@@ -3,5 +3,6 @@ plugins {
 }
 rootProject.name = "Pakket"
 include("API")
+include("NMS_1_21_4")
 include("NMS_1_21_8")
 include("NMS_1_21_9")
