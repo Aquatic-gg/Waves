@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.3.20"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
     `maven-publish`
     `java-library`
 }
@@ -31,11 +32,20 @@ kotlin {
     jvmToolchain(21)
 }
 
+val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
+val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
+
 subprojects {
     apply(plugin = "kotlin")
+    apply(plugin = "java-library")
+    apply(plugin = "maven-publish")
 
+    group = rootProject.group
     version = rootProject.version
+
     repositories {
+        maven("https://repo.nekroplex.com/releases")
+        maven("https://mvn.lumine.io/repository/maven-public/")
         mavenCentral()
         maven("https://repo.papermc.io/repository/maven-public/")
     }
@@ -43,10 +53,24 @@ subprojects {
     kotlin {
         jvmToolchain(21)
     }
-}
 
-val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
-val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
+    publishing {
+        repositories {
+            maven {
+                name = "aquaticRepository"
+                url = uri("https://repo.nekroplex.com/releases")
+
+                credentials {
+                    username = mavenUsername
+                    password = mavenPassword
+                }
+                authentication {
+                    create<BasicAuthentication>("basic")
+                }
+            }
+        }
+    }
+}
 
 publishing {
     repositories {
@@ -65,12 +89,11 @@ publishing {
     }
     publications {
         create<MavenPublication>("maven") {
-            groupId = "gg.aquatic"
-            artifactId = "Pakket"
-            version = "${project.version}"
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = project.version.toString()
 
             from(components["java"])
-            //artifact(tasks.compileJava)
         }
     }
 }
