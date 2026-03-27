@@ -3,7 +3,7 @@ package gg.aquatic.kurrency.cache
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.CurrencyCache
 import gg.aquatic.kurrency.db.CurrencyDBHandler
-import gg.aquatic.kurrency.impl.RegisteredCurrency
+import gg.aquatic.kurrency.impl.VirtualCurrency
 import kotlinx.coroutines.withContext
 import redis.clients.jedis.UnifiedJedis
 import redis.clients.jedis.params.SetParams
@@ -19,12 +19,12 @@ class RedisCurrencyCache(
 
     private val keyPrefix = "currency:"
 
-    private fun playerKey(uuid: UUID, currency: RegisteredCurrency) =
+    private fun playerKey(uuid: UUID, currency: VirtualCurrency) =
         "$keyPrefix${currency.id}:$uuid"
 
-    override suspend fun get(uuid: UUID, registeredCurrency: RegisteredCurrency): BigDecimal =
+    override suspend fun get(uuid: UUID, virtualCurrency: VirtualCurrency): BigDecimal =
         withContext(VirtualsCtx) {
-            val key = playerKey(uuid, registeredCurrency)
+            val key = playerKey(uuid, virtualCurrency)
             val data = jedis.get(key)
 
             if (data != null) {
@@ -32,17 +32,17 @@ class RedisCurrencyCache(
                 return@withContext data.toBigDecimal().setScale(2, RoundingMode.HALF_DOWN)
             }
 
-            val dbBalance = dbHandler.getBalance(uuid, registeredCurrency)
+            val dbBalance = dbHandler.getBalance(uuid, virtualCurrency)
             jedis.set(key, dbBalance.toPlainString(), SetParams().ex(ttlSeconds))
             dbBalance
         }
 
     override suspend fun getMultiple(
         uuids: Collection<UUID>,
-        registeredCurrency: RegisteredCurrency
+        virtualCurrency: VirtualCurrency
     ): Map<UUID, BigDecimal> = withContext(VirtualsCtx) {
         val uuidList = uuids.toList()
-        val keys = uuidList.map { playerKey(it, registeredCurrency) }.toTypedArray()
+        val keys = uuidList.map { playerKey(it, virtualCurrency) }.toTypedArray()
 
         // Use MGET for a single network round-trip
         val values = jedis.mget(*keys)
@@ -60,29 +60,29 @@ class RedisCurrencyCache(
         }
 
         if (missingUuids.isNotEmpty()) {
-            val dbBalances = dbHandler.getBalances(missingUuids, registeredCurrency)
+            val dbBalances = dbHandler.getBalances(missingUuids, virtualCurrency)
             for ((uuid, balance) in dbBalances) {
-                jedis.set(playerKey(uuid, registeredCurrency), balance.toPlainString(), SetParams().ex(ttlSeconds))
+                jedis.set(playerKey(uuid, virtualCurrency), balance.toPlainString(), SetParams().ex(ttlSeconds))
                 results[uuid] = balance
             }
         }
         results
     }
 
-    override suspend fun put(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
+    override suspend fun put(uuid: UUID, amount: BigDecimal, virtualCurrency: VirtualCurrency) {
         withContext(VirtualsCtx) {
-            val key = playerKey(uuid, registeredCurrency)
+            val key = playerKey(uuid, virtualCurrency)
             val scaled = amount.setScale(2, RoundingMode.HALF_DOWN)
             jedis.set(key, scaled.toPlainString(), SetParams().ex(ttlSeconds))
         }
     }
 
-    override suspend fun invalidate(uuid: UUID, registeredCurrency: RegisteredCurrency?) {
+    override suspend fun invalidate(uuid: UUID, virtualCurrency: VirtualCurrency?) {
         withContext(VirtualsCtx) {
-            if (registeredCurrency == null) {
+            if (virtualCurrency == null) {
                 return@withContext
             }
-            jedis.del(playerKey(uuid, registeredCurrency))
+            jedis.del(playerKey(uuid, virtualCurrency))
         }
     }
 }

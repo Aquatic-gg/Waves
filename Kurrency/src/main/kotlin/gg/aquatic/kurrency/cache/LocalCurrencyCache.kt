@@ -5,7 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.kurrency.CurrencyCache
 import gg.aquatic.kurrency.db.CurrencyDBHandler
-import gg.aquatic.kurrency.impl.RegisteredCurrency
+import gg.aquatic.kurrency.impl.VirtualCurrency
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -20,67 +20,67 @@ class LocalCurrencyCache(
     ttlMinutes: Long = 10
 ) : CurrencyCache {
 
-    private val cache: Cache<UUID, Map<RegisteredCurrency, BigDecimal>> = Caffeine.newBuilder()
+    private val cache: Cache<UUID, Map<VirtualCurrency, BigDecimal>> = Caffeine.newBuilder()
         .expireAfterAccess(ttlMinutes, TimeUnit.MINUTES)
         .build()
 
     // Lock for the DB Loading process (Per player)
     private val loadLocks = ConcurrentHashMap<UUID, Mutex>()
 
-    override suspend fun get(uuid: UUID, registeredCurrency: RegisteredCurrency): BigDecimal {
+    override suspend fun get(uuid: UUID, virtualCurrency: VirtualCurrency): BigDecimal {
         val currentMap = cache.getIfPresent(uuid)
-        currentMap?.get(registeredCurrency)?.let { return it }
+        currentMap?.get(virtualCurrency)?.let { return it }
 
         // Use the per-player lock only for loading the whole profile
         return loadLocks.getOrPut(uuid) { Mutex() }.withLock {
             val secondCheck = cache.getIfPresent(uuid)
-            secondCheck?.get(registeredCurrency)?.let { return@withLock it }
+            secondCheck?.get(virtualCurrency)?.let { return@withLock it }
 
             val freshMap = loadFromDb(uuid)
-            freshMap[registeredCurrency] ?: BigDecimal.ZERO
+            freshMap[virtualCurrency] ?: BigDecimal.ZERO
         }
     }
 
-    private suspend fun loadFromDb(uuid: UUID): Map<RegisteredCurrency, BigDecimal> {
+    private suspend fun loadFromDb(uuid: UUID): Map<VirtualCurrency, BigDecimal> {
         return withContext(VirtualsCtx) {
             val allDbBalances = dbHandler.getAllBalances(uuid)
-            val currencies = RegisteredCurrency.REGISTRY.all()
-            val map = HashMap<RegisteredCurrency, BigDecimal>()
+            val currencies = VirtualCurrency.REGISTRY.all()
+            val map = HashMap<VirtualCurrency, BigDecimal>()
             for ((key, balance) in allDbBalances) {
-                val registered = currencies[key] ?: continue
-                map[registered] = balance.setScale(2, RoundingMode.HALF_DOWN)
+                val currency = currencies[key] ?: continue
+                map[currency] = balance.setScale(2, RoundingMode.HALF_DOWN)
             }
             cache.put(uuid, map)
             map
         }
     }
 
-    override suspend fun put(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
+    override suspend fun put(uuid: UUID, amount: BigDecimal, virtualCurrency: VirtualCurrency) {
         val scaledAmount = amount.setScale(2, RoundingMode.HALF_DOWN)
         val oldMap = cache.getIfPresent(uuid) ?: emptyMap()
         val newMap = oldMap.toMutableMap()
-        newMap[registeredCurrency] = scaledAmount
+        newMap[virtualCurrency] = scaledAmount
         cache.put(uuid, newMap)
     }
 
     override suspend fun getMultiple(
         uuids: Collection<UUID>,
-        registeredCurrency: RegisteredCurrency
+        virtualCurrency: VirtualCurrency
     ): Map<UUID, BigDecimal> {
-        return uuids.associateWith { get(it, registeredCurrency) }
+        return uuids.associateWith { get(it, virtualCurrency) }
     }
 
 
 
-    override suspend fun invalidate(uuid: UUID, registeredCurrency: RegisteredCurrency?) {
-        if (registeredCurrency == null) {
+    override suspend fun invalidate(uuid: UUID, virtualCurrency: VirtualCurrency?) {
+        if (virtualCurrency == null) {
             cache.invalidate(uuid)
             return
         }
 
         val currentMap = cache.getIfPresent(uuid) ?: return
         val newMap = currentMap.toMutableMap()
-        newMap.remove(registeredCurrency)
+        newMap.remove(virtualCurrency)
         if (newMap.isEmpty()) {
             cache.invalidate(uuid)
         } else {
@@ -88,12 +88,12 @@ class LocalCurrencyCache(
         }
     }
 
-    fun setLocalOnly(uuid: UUID, amount: BigDecimal, registeredCurrency: RegisteredCurrency) {
+    fun setLocalOnly(uuid: UUID, amount: BigDecimal, virtualCurrency: VirtualCurrency) {
         val scaled = amount.setScale(2, RoundingMode.HALF_DOWN)
         val currentMap = cache.getIfPresent(uuid) ?: return
 
         val newMap = currentMap.toMutableMap()
-        newMap[registeredCurrency] = scaled
+        newMap[virtualCurrency] = scaled
         cache.put(uuid, newMap)
     }
 }

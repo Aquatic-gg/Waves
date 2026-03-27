@@ -4,7 +4,7 @@ import gg.aquatic.kevent.SuspendingEventBus
 import gg.aquatic.kevent.suspendingEventBusBuilder
 import gg.aquatic.kurrency.db.CurrencyDBHandler
 import gg.aquatic.kurrency.event.CurrencyTransactionEvent
-import gg.aquatic.kurrency.impl.RegisteredCurrency
+import gg.aquatic.kurrency.impl.VirtualCurrency
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -26,12 +26,12 @@ class CurrencyHandler(
         scope = CoroutineScope(EmptyCoroutineContext)
     }
 
-    private fun getLock(uuid: UUID, currency: RegisteredCurrency) =
+    private fun getLock(uuid: UUID, currency: VirtualCurrency) =
         locks.computeIfAbsent(uuid to currency.id) { Mutex() }
 
     private suspend fun <T> withCurrencyLock(
         uuid: UUID,
-        currency: RegisteredCurrency,
+        currency: VirtualCurrency,
         block: suspend () -> T
     ): T = withTimeout(5000) {
         getLock(uuid, currency).withLock { block() }
@@ -39,7 +39,7 @@ class CurrencyHandler(
 
     private suspend fun postTransactionIfChanged(
         uuid: UUID,
-        currency: RegisteredCurrency,
+        currency: VirtualCurrency,
         previousBalance: BigDecimal,
         newBalance: BigDecimal
     ) {
@@ -52,14 +52,14 @@ class CurrencyHandler(
         )
     }
 
-    suspend fun getBalance(uuid: UUID, currency: RegisteredCurrency): BigDecimal =
+    suspend fun getBalance(uuid: UUID, currency: VirtualCurrency): BigDecimal =
         withCurrencyLock(uuid, currency) {
             val balance = dbHandler.getBalance(uuid, currency).setScale(2, RoundingMode.HALF_DOWN)
             cache.put(uuid, balance, currency)
             balance
         }
 
-    suspend fun give(uuid: UUID, currency: RegisteredCurrency, amount: BigDecimal) {
+    suspend fun give(uuid: UUID, currency: VirtualCurrency, amount: BigDecimal) {
         require(amount >= BigDecimal.ZERO) { "Amount must be positive. Use tryTake to deduct." }
         withCurrencyLock(uuid, currency) {
             val current = dbHandler.getBalance(uuid, currency).setScale(2, RoundingMode.HALF_DOWN)
@@ -70,7 +70,7 @@ class CurrencyHandler(
         }
     }
 
-    suspend fun set(uuid: UUID, currency: RegisteredCurrency, amount: BigDecimal) =
+    suspend fun set(uuid: UUID, currency: VirtualCurrency, amount: BigDecimal) =
         withCurrencyLock(uuid, currency) {
             val scaledAmount = amount.setScale(2, RoundingMode.HALF_DOWN)
             val current = dbHandler.getBalance(uuid, currency).setScale(2, RoundingMode.HALF_DOWN)
@@ -79,7 +79,7 @@ class CurrencyHandler(
             postTransactionIfChanged(uuid, currency, current, newBalance)
         }
 
-    suspend fun take(uuid: UUID, currency: RegisteredCurrency, amount: BigDecimal): Boolean {
+    suspend fun take(uuid: UUID, currency: VirtualCurrency, amount: BigDecimal): Boolean {
         require(amount >= BigDecimal.ZERO) { "Amount to take must be positive." }
         return withCurrencyLock(uuid, currency) {
             val current = dbHandler.getBalance(uuid, currency).setScale(2, RoundingMode.HALF_DOWN)
@@ -92,7 +92,7 @@ class CurrencyHandler(
         }
     }
 
-    suspend fun tryTake(uuid: UUID, currency: RegisteredCurrency, amount: BigDecimal): Boolean {
+    suspend fun tryTake(uuid: UUID, currency: VirtualCurrency, amount: BigDecimal): Boolean {
         return take(uuid, currency, amount)
     }
 

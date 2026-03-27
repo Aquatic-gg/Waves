@@ -1,7 +1,7 @@
 package gg.aquatic.kurrency.db
 
 import gg.aquatic.common.coroutine.VirtualsCtx
-import gg.aquatic.kurrency.impl.RegisteredCurrency
+import gg.aquatic.kurrency.impl.VirtualCurrency
 import kotlinx.coroutines.withContext
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.Database
@@ -17,13 +17,13 @@ class CurrencyDBHandler(val database: Database) {
     private suspend fun <T> dbQuery(block: suspend JdbcTransaction.() -> T): T =
         suspendTransaction(db = database) { block() }
 
-    private fun JdbcTransaction.getBalanceInternal(uuid: UUID, currency: RegisteredCurrency): BigDecimal {
+    private fun JdbcTransaction.getBalanceInternal(uuid: UUID, currency: VirtualCurrency): BigDecimal {
         return BalancesTable.select(BalancesTable.balance)
             .where { (BalancesTable.playerUUID eq uuid) and (BalancesTable.currencyId eq currency.id) }
             .singleOrNull()?.get(BalancesTable.balance) ?: BigDecimal.ZERO
     }
 
-    private fun JdbcTransaction.storeBalance(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency) {
+    private fun JdbcTransaction.storeBalance(uuid: UUID, amount: BigDecimal, currency: VirtualCurrency) {
         val result = BalancesTable.upsert {
             it[BalancesTable.playerUUID] = uuid
             it[BalancesTable.currencyId] = currency.id
@@ -35,7 +35,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun getBalance(uuid: UUID, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
+    suspend fun getBalance(uuid: UUID, currency: VirtualCurrency): BigDecimal = withContext(VirtualsCtx) {
         dbQuery { getBalanceInternal(uuid, currency) }
     }
 
@@ -47,7 +47,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun getBalances(uuids: Collection<UUID>, currency: RegisteredCurrency): Map<UUID, BigDecimal> = withContext(VirtualsCtx) {
+    suspend fun getBalances(uuids: Collection<UUID>, currency: VirtualCurrency): Map<UUID, BigDecimal> = withContext(VirtualsCtx) {
         dbQuery {
             BalancesTable.select(BalancesTable.playerUUID, BalancesTable.balance)
                 .where { (BalancesTable.playerUUID inList uuids) and (BalancesTable.currencyId eq currency.id) }
@@ -55,7 +55,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun changeBy(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
+    suspend fun changeBy(uuid: UUID, amount: BigDecimal, currency: VirtualCurrency): BigDecimal = withContext(VirtualsCtx) {
         dbQuery {
             val newBalance = getBalanceInternal(uuid, currency).add(amount)
             storeBalance(uuid, newBalance, currency)
@@ -63,14 +63,14 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun setAndGet(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency): BigDecimal = withContext(VirtualsCtx) {
+    suspend fun setAndGet(uuid: UUID, amount: BigDecimal, currency: VirtualCurrency): BigDecimal = withContext(VirtualsCtx) {
         dbQuery {
             storeBalance(uuid, amount, currency)
             amount
         }
     }
 
-    suspend fun tryTake(uuid: UUID, amount: BigDecimal, currency: RegisteredCurrency): BigDecimal? = withContext(VirtualsCtx) {
+    suspend fun tryTake(uuid: UUID, amount: BigDecimal, currency: VirtualCurrency): BigDecimal? = withContext(VirtualsCtx) {
         dbQuery {
             val current = getBalanceInternal(uuid, currency)
             if (current < amount) {
@@ -87,7 +87,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun getLeaderboard(currency: RegisteredCurrency, limit: Int = 10): List<Pair<UUID, BigDecimal>> = withContext(VirtualsCtx) {
+    suspend fun getLeaderboard(currency: VirtualCurrency, limit: Int = 10): List<Pair<UUID, BigDecimal>> = withContext(VirtualsCtx) {
         dbQuery {
             BalancesTable.select(BalancesTable.playerUUID, BalancesTable.balance)
                 .where { BalancesTable.currencyId eq currency.id }
@@ -97,7 +97,7 @@ class CurrencyDBHandler(val database: Database) {
         }
     }
 
-    suspend fun getPlayerRank(uuid: UUID, currency: RegisteredCurrency): Long = withContext(VirtualsCtx) {
+    suspend fun getPlayerRank(uuid: UUID, currency: VirtualCurrency): Long = withContext(VirtualsCtx) {
         dbQuery {
             val playerBalance = BalancesTable.select(BalancesTable.balance)
                 .where { (BalancesTable.playerUUID eq uuid) and (BalancesTable.currencyId eq currency.id) }
