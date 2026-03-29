@@ -9,7 +9,7 @@ description = "Gradle plugin that generates runtime dependency manifests and syn
 
 dependencies {
     compileOnly(gradleApi())
-    compileOnly("com.gradleup.shadow:shadow-gradle-plugin:9.4.0")
+    compileOnly("com.gradleup.shadow:shadow-gradle-plugin:9.4.1")
 }
 
 tasks.withType<JavaCompile>().configureEach {
