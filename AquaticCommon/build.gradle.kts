@@ -14,7 +14,7 @@ repositories {
     maven("https://repo.nekroplex.com/releases")
 }
 
-val exposedVersion = "1.1.1"
+val exposedVersion = "1.2.0"
 dependencies {
     testImplementation(kotlin("test"))
     compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
