@@ -1,0 +1,210 @@
+package gg.aquatic.pakket.nms_26_1_1
+
+import gg.aquatic.pakket.api.ReflectionUtils
+import gg.aquatic.pakket.api.event.PacketEvent
+import gg.aquatic.pakket.api.event.packet.*
+import gg.aquatic.pakket.api.nms.listener.*
+import net.minecraft.core.NonNullList
+import net.minecraft.network.HashedStack
+import net.minecraft.network.protocol.Packet
+import net.minecraft.network.protocol.game.*
+import net.minecraft.world.InteractionHand
+import org.bukkit.Location
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
+import org.bukkit.Registry
+import org.bukkit.craftbukkit.block.data.CraftBlockData
+import org.bukkit.craftbukkit.entity.CraftEntityType
+import org.bukkit.craftbukkit.inventory.CraftItemStack
+import org.bukkit.entity.Player
+import org.bukkit.event.player.PlayerRecipeBookSettingsChangeEvent
+import org.bukkit.inventory.ItemStack
+
+class PacketListener(player: Player) : PacketListenerBase(
+    player = player,
+    bundleAdapter = BundleAdapter,
+    outgoingHandlers = listOf(OutgoingHandler),
+    incomingHandlers = listOf(IncomingHandler)
+) {
+
+    private object BundleAdapter : PacketBundleAdapter {
+        @Suppress("UNCHECKED_CAST")
+        override fun unwrap(packet: Any): Iterable<Any>? {
+            return if (packet is ClientboundBundlePacket) {
+                packet.subPackets()
+            } else {
+                null
+            }
+        }
+
+        @Suppress("UNCHECKED_CAST")
+        override fun wrap(packets: List<Any>): Any {
+            return ClientboundBundlePacket(packets.map { it as Packet<ClientGamePacketListener> })
+        }
+    }
+
+    private object OutgoingHandler : OutgoingPacketHandler {
+        override fun handle(packet: Any, player: Player): OutgoingHandlerResult? {
+            return when (packet) {
+                is ClientboundAddEntityPacket -> {
+                    val event = PacketEntitySpawnEvent(
+                        player,
+                        packet.id,
+                        packet.uuid,
+                        CraftEntityType.minecraftToBukkit(packet.type),
+                        Location(player.world, packet.x, packet.y, packet.z, packet.yRot, packet.yRot)
+                    )
+                    OutgoingHandlerResult.Forward(event) { packet }
+                }
+
+                is ClientboundRemoveEntitiesPacket -> {
+                    val event = PacketDestroyEntitiesPacket(player, packet.entityIds.toIntArray())
+                    OutgoingHandlerResult.Forward(event) { packet }
+                }
+
+                is ClientboundLevelChunkWithLightPacket -> {
+                    val event = PacketChunkLoadEvent(player, packet.x, packet.z, packet, ArrayList())
+                    OutgoingHandlerResult.Forward(event) { packet }
+                }
+
+                is ClientboundBlockUpdatePacket -> {
+                    val event = PacketBlockChangeEvent(
+                        player,
+                        packet.pos.x,
+                        packet.pos.y,
+                        packet.pos.z,
+                        CraftBlockData.createData(packet.blockState)
+                    )
+                    OutgoingHandlerResult.Forward(event) {
+                        ClientboundBlockUpdatePacket(
+                            packet.pos,
+                            (event.blockData as CraftBlockData).state
+                        )
+                    }
+                }
+
+                is ClientboundContainerSetSlotPacket -> {
+                    val event = PacketContainerSetSlotEvent(
+                        player,
+                        packet.containerId,
+                        packet.stateId,
+                        CraftItemStack.asCraftMirror(packet.item)
+                    )
+                    OutgoingHandlerResult.Forward(event) {
+                        ClientboundContainerSetSlotPacket(
+                            packet.containerId,
+                            packet.stateId,
+                            packet.slot,
+                            CraftItemStack.asNMSCopy(event.item)
+                        )
+                    }
+                }
+
+                is ClientboundContainerSetContentPacket -> {
+                    val event = PacketContainerContentEvent(
+                        player,
+                        packet.containerId,
+                        packet.items.map { CraftItemStack.asCraftMirror(it) }.toMutableList(),
+                        CraftItemStack.asCraftMirror(packet.carriedItem)
+                    )
+                    OutgoingHandlerResult.Forward(event) {
+                        ClientboundContainerSetContentPacket(
+                            packet.containerId,
+                            packet.stateId,
+                            NonNullList.create<net.minecraft.world.item.ItemStack>().apply {
+                                addAll(event.contents.map { CraftItemStack.asNMSCopy(it) })
+                            },
+                            CraftItemStack.asNMSCopy(event.carriedItem)
+                        )
+                    }
+                }
+
+                is ClientboundOpenScreenPacket -> {
+                    val event = PacketContainerOpenEvent(player, packet.containerId)
+                    OutgoingHandlerResult.Forward(event) { packet }
+                }
+
+                is ClientboundContainerClosePacket -> {
+                    val event = PacketContainerCloseEvent(player)
+                    OutgoingHandlerResult.Forward(event) { packet }
+                }
+
+                else -> null
+            }
+        }
+    }
+
+    private object IncomingHandler : IncomingPacketHandler {
+        override fun handle(packet: Any, player: Player): PacketEvent? {
+            return when (packet) {
+                is ServerboundInteractPacket -> {
+                    val interactType = when {
+                        packet.location() != null -> PacketInteractEvent.InteractType.INTERACT_AT
+                        packet.hand() != null -> PacketInteractEvent.InteractType.INTERACT
+                        else -> PacketInteractEvent.InteractType.ATTACK
+                    }
+                    PacketInteractEvent(
+                        player,
+                        packet.hand() == null && packet.location() == null,
+                        packet.usingSecondaryAction(),
+                        packet.entityId(),
+                        interactType
+                    )
+                }
+
+                is ServerboundContainerClosePacket -> {
+                    PacketContainerCloseEvent(player)
+                }
+
+                is ServerboundRenameItemPacket -> {
+                    PacketItemRenameEvent(player, packet.name)
+                }
+
+                is ServerboundRecipeBookSeenRecipePacket -> {
+                    PacketRecipeBookSeenRecipeReceiveEvent(player, packet.recipe.index)
+                }
+
+                is ServerboundRecipeBookChangeSettingsPacket -> {
+                    PacketRecipeBookChangeSettingsReceiveEvent(
+                        player,
+                        PlayerRecipeBookSettingsChangeEvent.RecipeBookType.entries[packet.bookType.ordinal],
+                        packet.isOpen,
+                        packet.isFiltering
+                    )
+                }
+
+                is ServerboundContainerClickPacket -> {
+                    val carriedItem = (packet.carriedItem as? HashedStack.ActualItem)?.let { carried ->
+                        val type = carried.item.registeredName
+                        carried.components.addedComponents
+
+                        var item = NamespacedKey.fromString(type)?.let { typeKey ->
+                            Registry.ITEM.get(typeKey)
+                        }?.createItemStack(carried.count)
+
+                        if (item != null) {
+                            if (item.type == Material.AIR) return@let null
+                            val nmsItem = CraftItemStack.asNMSCopy(item)
+                            nmsItem.applyComponents(nmsItem.components)
+                            item = CraftItemStack.asBukkitCopy(nmsItem)
+                        }
+                        item
+                    }
+                    PacketContainerClickEvent(
+                        player,
+                        packet.containerId(),
+                        packet.stateId(),
+                        packet.slotNum().toInt(),
+                        packet.buttonNum().toInt(),
+                        packet.containerInput().id(),
+                        carriedItem,
+                        packet.changedSlots().mapValues { null as ItemStack? },
+                    )
+                }
+
+                else -> null
+            }
+        }
+    }
+}
+

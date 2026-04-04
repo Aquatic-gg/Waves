@@ -8,7 +8,8 @@ enum class NMSVersion {
     V_1_21_4,
     V_1_21_5,
     V_1_21_7,
-    V_1_21_9;
+    V_1_21_9,
+    V_26_1_1;
 
     companion object {
         fun ofAquatic(): NMSVersion? {
@@ -20,6 +21,7 @@ enum class NMSVersion {
                 "1.21.5" -> V_1_21_5
                 "1.21.6", "1.21.7", "1.21.8" -> V_1_21_7
                 "1.21.9", "1.21.10", "1.21.11" -> V_1_21_9
+                "26.1", "26.1.0", "26.1.1" -> V_26_1_1
                 else -> null
             }
         }

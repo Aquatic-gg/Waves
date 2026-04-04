@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm") version "2.3.20"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.19" apply false
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
     `maven-publish`
     `java-library`
 }
@@ -25,6 +25,7 @@ dependencies {
     api(project(":NMS_1_21_4"))
     api(project(":NMS_1_21_8"))
     api(project(":NMS_1_21_9"))
+    api(project(mapOf("path" to ":NMS_26_1_1", "configuration" to "archives")))
     api("gg.aquatic:KEvent:26.0.5")
     api("gg.aquatic:Common:26.0.16")
 }
