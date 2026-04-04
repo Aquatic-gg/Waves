@@ -70,8 +70,6 @@ class LocalCurrencyCache(
         return uuids.associateWith { get(it, virtualCurrency) }
     }
 
-
-
     override suspend fun invalidate(uuid: UUID, virtualCurrency: VirtualCurrency?) {
         if (virtualCurrency == null) {
             cache.invalidate(uuid)
