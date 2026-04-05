@@ -18,7 +18,7 @@ repositories {
     maven("https://jitpack.io")
 }
 
-val exposedVersion = "1.1.1"
+val exposedVersion = "1.2.0"
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
