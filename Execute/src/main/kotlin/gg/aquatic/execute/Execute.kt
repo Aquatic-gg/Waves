@@ -11,9 +11,13 @@ import gg.aquatic.execute.condition.impl.DayOfMonthCondition
 import gg.aquatic.execute.condition.impl.DayOfWeekCondition
 import gg.aquatic.execute.condition.impl.BiomeCondition
 import gg.aquatic.execute.condition.impl.HasEmptyInventorySlotCondition
+import gg.aquatic.execute.condition.impl.HasNextPageCondition
+import gg.aquatic.execute.condition.impl.HasNextOrPreviousPageCondition
+import gg.aquatic.execute.condition.impl.HasPreviousPageCondition
 import gg.aquatic.execute.condition.impl.MonthCondition
 import gg.aquatic.execute.condition.impl.OnlinePlayerCountCondition
 import gg.aquatic.execute.condition.impl.PermissionCondition
+import gg.aquatic.execute.condition.impl.SenderPermissionCondition
 import gg.aquatic.execute.condition.impl.TimeRangeCondition
 import gg.aquatic.execute.condition.impl.WeekOfYearModuloCondition
 import gg.aquatic.execute.condition.impl.WeekParityCondition
@@ -60,9 +64,13 @@ object Execute {
             add("day-of-month", DayOfMonthCondition)
             add("day-of-week", DayOfWeekCondition)
             add("has-empty-inventory-slot", HasEmptyInventorySlotCondition)
+            add("has-next-page", HasNextPageCondition)
+            add("has-next-or-previous-page", HasNextOrPreviousPageCondition)
+            add("has-previous-page", HasPreviousPageCondition)
             add("month", MonthCondition)
             add("online-player-count", OnlinePlayerCountCondition)
             add("permission", PermissionCondition)
+            add("sender-permission", SenderPermissionCondition)
             add("time-range", TimeRangeCondition)
             add("week-parity", WeekParityCondition)
             add("week-of-year-mod", WeekOfYearModuloCondition)
