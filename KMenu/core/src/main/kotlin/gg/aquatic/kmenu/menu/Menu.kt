@@ -132,6 +132,9 @@ open class Menu(
         component.onClick.invoke(event)
     }
 
+    open suspend fun onClosed(player: Player) {
+    }
+
     class ComponentState(
         val slots: Collection<Int>,
         val itemStack: ItemStack?

@@ -6,6 +6,7 @@ import gg.aquatic.kevent.suspendingEventBusBuilder
 import gg.aquatic.kmenu.KMenu
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryCloseEvent
 import gg.aquatic.kmenu.inventory.event.AsyncPacketInventoryInteractEvent
+import gg.aquatic.kmenu.menu.Menu
 import gg.aquatic.kmenu.menu.MenuHandler
 import gg.aquatic.kmenu.packetInventory
 import gg.aquatic.pakket.Pakket
@@ -193,6 +194,12 @@ internal object InventoryHandler {
         KMenu.packetInventories.remove(player)
 
         removed.viewers.remove(player.uniqueId)
+
+        if (removed is Menu) {
+            KMenu.scope.launch {
+                removed.onClosed(player)
+            }
+        }
 
         if (!updateContent) return
 
