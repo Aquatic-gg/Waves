@@ -18,6 +18,7 @@ open class PacketInventory(
 
     val viewers = SuspendingSnapshotMap<UUID, InventoryViewer>()
     val content = SnapshotMap<Int, ItemStack>()
+    var anvilInput: String = ""
 
     var title: Component = title
         private set
@@ -116,6 +117,7 @@ open class PacketInventory(
 
     override fun clone(): PacketInventory {
         val inv = PacketInventory(title, type)
+        inv.anvilInput = anvilInput
         content.forEach { (key, value) -> inv.content[key] = value.clone() }
         return inv
     }

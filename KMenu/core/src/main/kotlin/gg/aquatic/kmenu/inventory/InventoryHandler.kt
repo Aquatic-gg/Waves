@@ -73,6 +73,15 @@ internal object InventoryHandler {
             updateInventoryContent(inventory, viewer)
         }
 
+        packetEvent<PacketItemRenameEvent> {
+            val inventory = it.player.packetInventory() ?: return@packetEvent
+            val anvilType = inventory.type as? AnvilInventoryType ?: return@packetEvent
+            it.then {
+                inventory.anvilInput = it.name
+                anvilType.onRename?.invoke(it.player, it.name, inventory)
+            }
+        }
+
         packetEvent<PacketContainerClickEvent> { event ->
             handlePacketClick(event)
         }
