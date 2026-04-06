@@ -1,6 +1,8 @@
 package gg.aquatic.kholograms
 
 import gg.aquatic.common.coroutine.VirtualsCtx
+import gg.aquatic.kholograms.line.AnimatedHologramLine
+import gg.aquatic.kholograms.line.ItemHologramLine
 import gg.aquatic.kholograms.line.TextHologramLine
 import gg.aquatic.kholograms.serialize.LineSettings
 import gg.aquatic.pakket.Pakket
@@ -119,7 +121,7 @@ class Hologram(
         val spawnedLines = viewer.lines
         viewer.mutex.withLock {
             val visibleLines = ArrayList<HologramLine>(this.lines.size)
-            for (line in this.lines) {
+            for (line in this.lines.asReversed()) {
                 var current: HologramLine? = line
                 while (current != null) {
                     if (current.filter(player)) {
@@ -130,13 +132,8 @@ class Hologram(
                 }
             }
 
-            val iterator = spawnedLines.iterator()
-            while (iterator.hasNext()) {
-                val spawned = iterator.next()
-                if (spawned.line !in visibleLines) {
-                    spawned.destroy()
-                    iterator.remove()
-                }
+            while (spawnedLines.size > visibleLines.size) {
+                spawnedLines.removeLast().destroy()
             }
 
             var height = 0.0
@@ -148,27 +145,32 @@ class Hologram(
                 height += halfHeight
                 val targetLocation = this.location.clone().add(0.0, height, 0.0)
 
-                val existing = spawnedLines.find { it.line == line }
+                val existing = spawnedLines.getOrNull(index)
                 val packetEntity = if (existing == null) {
                     val entity = line.spawn(targetLocation, player, viewer.context)
-                    val newLine = HologramLineHandle(this, player, line, targetLocation, viewer.context, entity)
+                    val newLine = HologramLineHandle(this, player, targetLocation, viewer.context, entity, line, index)
                     spawnedLines.add(newLine)
                     changed = true
                     entity
                 } else {
-                    existing.tick()
-                    if (existing.currentLocation != targetLocation) {
-                        existing.move(targetLocation)
+                    if (requiresRespawn(existing.renderedLine, line)) {
+                        existing.destroy()
+                        val entity = line.spawn(targetLocation, player, viewer.context)
+                        spawnedLines[index] = HologramLineHandle(this, player, targetLocation, viewer.context, entity, line, index)
+                        changed = true
+                        entity
+                    } else {
+                        line.tick(existing)
+                        existing.sourceIndex = index
+                        if (existing.currentLocation != targetLocation) {
+                            existing.move(targetLocation)
+                        }
+                        existing.packetEntity
                     }
-                    existing.packetEntity
                 }
 
                 currentEntityIds[index] = packetEntity.entityId
                 height += halfHeight
-            }
-
-            if (changed) {
-                spawnedLines.sortBy { spawned -> visibleLines.indexOf(spawned.line) }
             }
 
             if ((changed || seat != null) && seat != null) {
@@ -260,4 +262,16 @@ class Hologram(
         val lines: MutableList<HologramLineHandle>,
         val mutex: Mutex = Mutex()
     )
+
+    private fun requiresRespawn(renderedLine: HologramLine, targetLine: HologramLine): Boolean {
+        if (targetLine is AnimatedHologramLine) {
+            return false
+        }
+
+        return when (targetLine) {
+            is TextHologramLine -> renderedLine !is TextHologramLine
+            is ItemHologramLine -> renderedLine !is ItemHologramLine
+            else -> renderedLine::class != targetLine::class
+        }
+    }
 }

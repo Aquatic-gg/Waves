@@ -47,29 +47,32 @@ class AnimatedHologramLine(
                 handle.index = 0
             }
             val pair = frames[handle.index]
-            val previousFrame = frame
             frame = pair.second
-
-            if (previousFrame.javaClass != frame.javaClass) {
-                hologramLineHandle.packetEntity.sendDespawn(Pakket.handler, false, hologramLineHandle.player)
-                val packetEntity = frame.spawn(
-                    hologramLineHandle.currentLocation,
-                    hologramLineHandle.player,
-                    hologramLineHandle.placeholderContext
+            val renderedLine = hologramLineHandle.renderedLine.takeIf { it !== this }
+                ?: createRenderState(frame).also { hologramLineHandle.renderedLine = it }
+            if (tryApplyFrame(renderedLine, frame)) {
+                val data = renderedLine.buildData(
+                    hologramLineHandle.placeholderContext,
+                    hologramLineHandle.player
                 )
-                hologramLineHandle.packetEntity = packetEntity
-                hologramLineHandle.packetEntity.sendSpawnComplete(Pakket.handler, false, hologramLineHandle.player)
+                if (data.isNotEmpty()) {
+                    val packet = Pakket.handler.createEntityUpdatePacket(hologramLineHandle.packetEntity.entityId, data)
+                    hologramLineHandle.packetEntity.updatePacket = packet
+                    hologramLineHandle.player.sendPacket(packet, false)
+                }
                 return
             }
-            val data = buildData(hologramLineHandle)
-            if (data.isEmpty()) return
 
-            frame.tick(hologramLineHandle)
-
-            val packet = Pakket.handler.createEntityUpdatePacket(hologramLineHandle.packetEntity.entityId, data)
-            hologramLineHandle.packetEntity.updatePacket = packet
-
-            hologramLineHandle.player.sendPacket(packet)
+            hologramLineHandle.packetEntity.sendDespawn(Pakket.handler, false, hologramLineHandle.player)
+            val newRenderState = createRenderState(frame)
+            hologramLineHandle.renderedLine = newRenderState
+            val packetEntity = newRenderState.spawn(
+                hologramLineHandle.currentLocation,
+                hologramLineHandle.player,
+                hologramLineHandle.placeholderContext
+            )
+            hologramLineHandle.packetEntity = packetEntity
+            hologramLineHandle.packetEntity.sendSpawnComplete(Pakket.handler, false, hologramLineHandle.player)
             return
         }
     }
@@ -82,9 +85,12 @@ class AnimatedHologramLine(
     }
 
     override fun buildData(hologramLineHandle: HologramLineHandle): List<EntityDataValue> {
-        return frames[ticks.getOrPut(hologramLineHandle.player.uniqueId) { AnimationHandle() }.index].second.buildData(
-            hologramLineHandle
-        )
+        val handle = ticks.getOrPut(hologramLineHandle.player.uniqueId) { AnimationHandle() }
+        val renderedLine = hologramLineHandle.renderedLine.takeIf { it !== this }
+            ?: createRenderState(frames[handle.index].second).also {
+                hologramLineHandle.renderedLine = it
+            }
+        return renderedLine.buildData(hologramLineHandle)
     }
 
     class AnimationHandle {
@@ -112,4 +118,67 @@ class AnimatedHologramLine(
         }
     }
 
+    private fun createRenderState(line: HologramLine): HologramLine = when (line) {
+        is ItemHologramLine -> ItemHologramLine(
+            item = line.item.clone(),
+            height = line.height,
+            scale = line.scale,
+            billboard = line.billboard,
+            itemDisplayTransform = line.itemDisplayTransform,
+            filter = line.filter,
+            failLine = line.failLine,
+            transformationDuration = line.transformationDuration,
+            teleportInterpolation = line.teleportInterpolation,
+            translation = Vector3f(line.translation)
+        )
+
+        is TextHologramLine -> TextHologramLine(
+            height = line.height,
+            filter = line.filter,
+            failLine = line.failLine,
+            text = line.text,
+            lineWidth = line.lineWidth,
+            scale = line.scale,
+            billboard = line.billboard,
+            hasShadow = line.hasShadow,
+            backgroundColor = line.backgroundColor,
+            isSeeThrough = line.isSeeThrough,
+            transformationDuration = line.transformationDuration,
+            teleportInterpolation = line.teleportInterpolation,
+            translation = Vector3f(line.translation)
+        )
+
+        else -> line
+    }
+
+    private fun tryApplyFrame(renderedLine: HologramLine, targetFrame: HologramLine): Boolean {
+        return when {
+            renderedLine is ItemHologramLine && targetFrame is ItemHologramLine -> {
+                renderedLine.item = targetFrame.item.clone()
+                renderedLine.itemDisplayTransform = targetFrame.itemDisplayTransform
+                renderedLine.scale = targetFrame.scale
+                renderedLine.billboard = targetFrame.billboard
+                renderedLine.transformationDuration = targetFrame.transformationDuration
+                renderedLine.teleportInterpolation = targetFrame.teleportInterpolation
+                renderedLine.translation = Vector3f(targetFrame.translation)
+                true
+            }
+
+            renderedLine is TextHologramLine && targetFrame is TextHologramLine -> {
+                renderedLine.text = targetFrame.text
+                renderedLine.lineWidth = targetFrame.lineWidth
+                renderedLine.scale = targetFrame.scale
+                renderedLine.billboard = targetFrame.billboard
+                renderedLine.hasShadow = targetFrame.hasShadow
+                renderedLine.backgroundColor = targetFrame.backgroundColor
+                renderedLine.isSeeThrough = targetFrame.isSeeThrough
+                renderedLine.transformationDuration = targetFrame.transformationDuration
+                renderedLine.teleportInterpolation = targetFrame.teleportInterpolation
+                renderedLine.translation = Vector3f(targetFrame.translation)
+                true
+            }
+
+            else -> false
+        }
+    }
 }

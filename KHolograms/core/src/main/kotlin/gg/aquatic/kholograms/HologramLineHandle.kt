@@ -9,10 +9,11 @@ import org.bukkit.entity.Player
 class HologramLineHandle(
     val hologram: Hologram,
     val player: Player,
-    val line: HologramLine,
     location: Location,
     val placeholderContext: PlaceholderContext<Player>,
-    var packetEntity: PacketEntity
+    var packetEntity: PacketEntity,
+    var renderedLine: HologramLine,
+    var sourceIndex: Int
 ) {
 
     init {
@@ -21,10 +22,6 @@ class HologramLineHandle(
 
     var currentLocation: Location = location
         private set
-
-    suspend fun tick() {
-        line.tick(this)
-    }
 
     fun move(location: Location) {
         currentLocation = location
