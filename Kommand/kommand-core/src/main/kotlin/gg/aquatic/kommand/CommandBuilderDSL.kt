@@ -73,6 +73,8 @@ class CommandBuilder<S, SenderT : Any>(
     val builder: ArgumentBuilder<S, *>,
     private val senderResolver: (S) -> SenderT,
     val inheritedRunnables: MutableList<ExecutionContext<S, *>.() -> Boolean> = mutableListOf(),
+    @PublishedApi
+    internal val localRunnables: MutableList<ExecutionContext<S, *>.() -> Boolean> = mutableListOf(),
     private val argumentMappers: MutableMap<String, (CommandContext<S>) -> Any?> = mutableMapOf(),
     private val invalidArgumentHandlers: MutableMap<String, ExecutionContext<S, SenderT>.() -> Unit> = mutableMapOf(),
     private var inheritedRunnableCount: Int = inheritedRunnables.size,
@@ -532,21 +534,29 @@ class CommandBuilder<S, SenderT : Any>(
         attachChildBuilder(arg, block)
     }
 
-    inline fun <reified T : SenderT> execute(crossinline block: ExecutionContext<S, T>.() -> Boolean) {
+    inline fun <reified T : SenderT> execute(
+        inheritToChildren: Boolean = true,
+        crossinline block: ExecutionContext<S, T>.() -> Boolean
+    ) {
         val wrappedBlock: ExecutionContext<S, *>.() -> Boolean = {
             @Suppress("UNCHECKED_CAST")
             if (sender is T) (this as ExecutionContext<S, T>).block() else false
         }
 
-        inheritedRunnables.add(wrappedBlock)
-        propagateRunnableToChildren(wrappedBlock)
+        if (inheritToChildren) {
+            inheritedRunnables.add(wrappedBlock)
+            propagateRunnableToChildren(wrappedBlock)
+        } else {
+            localRunnables.add(wrappedBlock)
+        }
         rebindExecution()
     }
 
     inline fun <reified T : SenderT> suspendExecute(
+        inheritToChildren: Boolean = true,
         crossinline block: suspend ExecutionContext<S, T>.() -> Unit
     ) {
-        execute<T> {
+        execute<T>(inheritToChildren = inheritToChildren) {
             KommandConfig.commandScope.launch {
                 block()
             }
@@ -588,7 +598,7 @@ class CommandBuilder<S, SenderT : Any>(
     }
 
     fun rebindExecution() {
-        val runnablesSnapshot = inheritedRunnables.toList()
+        val runnablesSnapshot = (inheritedRunnables + localRunnables).toList()
         val mappersSnapshot = argumentMappers.toMap()
         val invalidHandlersSnapshot = invalidArgumentHandlers.toMap()
 
@@ -627,6 +637,7 @@ class CommandBuilder<S, SenderT : Any>(
             builder = childBuilder,
             senderResolver = senderResolver,
             inheritedRunnables = inheritedRunnables.toMutableList(),
+            localRunnables = mutableListOf(),
             argumentMappers = argumentMappers.toMutableMap(),
             invalidArgumentHandlers = invalidArgumentHandlers.toMutableMap(),
             inheritedRunnableCount = inheritedRunnables.size,

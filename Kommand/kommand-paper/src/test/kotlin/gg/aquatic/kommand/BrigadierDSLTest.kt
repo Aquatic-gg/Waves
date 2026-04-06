@@ -234,6 +234,40 @@ class BrigadierDSLTest {
     }
 
     @Test
+    fun `test non inheritable execute only runs on current node`() {
+        val dispatcher = CommandDispatcher<CommandSourceStack>()
+        val mockSource = mockk<CommandSourceStack>()
+        every { mockSource.sender } returns mockk<Player>(relaxed = true)
+
+        var rootCalls = 0
+        var subCalls = 0
+
+        dispatcher.command("aqcrates") {
+            execute<Player>(inheritToChildren = false) {
+                rootCalls++
+                true
+            }
+
+            "key" {
+                "bank" {
+                    execute<Player> {
+                        subCalls++
+                        true
+                    }
+                }
+            }
+        }
+
+        dispatcher.execute("aqcrates", mockSource)
+        assertEquals(1, rootCalls)
+        assertEquals(0, subCalls)
+
+        dispatcher.execute("aqcrates key bank", mockSource)
+        assertEquals(1, rootCalls, "Root execute should not run on subcommands when inheritance is disabled")
+        assertEquals(1, subCalls, "Subcommand execute should still run")
+    }
+
+    @Test
     fun `test trailing execute works for nested optional arguments`() {
         val dispatcher = CommandDispatcher<CommandSourceStack>()
         val mockSource = mockk<CommandSourceStack>()
