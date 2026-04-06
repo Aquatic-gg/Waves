@@ -8,8 +8,7 @@ import org.jetbrains.exposed.v1.jdbc.SchemaUtils
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 object HikariDBFactory {
-
-    fun init(url: String, driver: String, user: String, pass: String, vararg tables: Table): Database {
+    fun createDataSource(url: String, driver: String, user: String, pass: String): HikariDataSource {
         val config = HikariConfig().apply {
             jdbcUrl = url
             driverClassName = driver
@@ -30,7 +29,11 @@ object HikariDBFactory {
             addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
         }
 
-        val dataSource = HikariDataSource(config)
+        return HikariDataSource(config)
+    }
+
+    fun init(url: String, driver: String, user: String, pass: String, vararg tables: Table): Database {
+        val dataSource = createDataSource(url, driver, user, pass)
         val db = Database.connect(dataSource)
 
         transaction(db) {
