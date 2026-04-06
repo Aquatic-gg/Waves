@@ -2,11 +2,18 @@ package gg.aquatic.klocale.impl.paper
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
+import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.event.HoverEvent
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+import org.bukkit.command.CommandSender
+import kotlinx.coroutines.runBlocking
+import kotlin.math.max
+import kotlin.math.min
 
 val PLACEHOLDER_REGEX = Regex("%([^%]+)%")
+private const val PAGE_CLICK_PREFIX = "__aq_page__:"
+private const val VISIBILITY_INSERT_PREFIX = "__aq_visible__:"
 
 /**
  * Finds all unique placeholders within this Component and its children.
@@ -20,6 +27,25 @@ fun Component.findPlaceholders(): Set<String> {
     val result = mutableSetOf<String>()
 
     fun recurse(comp: Component) {
+        comp.style().insertion()?.let { insertion ->
+            PLACEHOLDER_REGEX.findAll(insertion).forEach { match ->
+                result.add(match.groupValues[1])
+            }
+        }
+        comp.style().clickEvent()?.let { click ->
+            val clickValue = click.payloadTextValue() ?: return@let
+            PLACEHOLDER_REGEX.findAll(clickValue).forEach { match ->
+                result.add(match.groupValues[1])
+            }
+        }
+        comp.style().hoverEvent()?.let { hover ->
+            if (hover.action() == HoverEvent.Action.SHOW_TEXT) {
+                val hoverComp = hover.value() as? Component
+                if (hoverComp != null) {
+                    recurse(hoverComp)
+                }
+            }
+        }
         if (comp is TextComponent) {
             val text = comp.content()
             PLACEHOLDER_REGEX.findAll(text).forEach { match ->
@@ -56,6 +82,12 @@ fun Component.replacePlaceholders(updater: (String) -> String): Component {
                     val replacedHover = recurse(hoverComp)
                     newStyle = newStyle.hoverEvent(HoverEvent.showText(replacedHover))
                 }
+            }
+        }
+
+        style.clickEvent()?.let { click ->
+            click.updated(updater)?.let { updated ->
+                newStyle = newStyle.clickEvent(updated)
             }
         }
 
@@ -168,6 +200,18 @@ fun Component.replacePlaceholders(cached: Map<String, String>): Component {
             }
         }
 
+        style.clickEvent()?.let { click ->
+            val rawValue = click.payloadTextValue() ?: return@let
+            var newValue = rawValue
+            PLACEHOLDER_REGEX.findAll(newValue).forEach { match ->
+                val key = match.groupValues[1]
+                newValue = newValue.replace("%$key%", cached[key] ?: key)
+            }
+            click.updated { newValue }?.let { updated ->
+                newStyle = newStyle.clickEvent(updated)
+            }
+        }
+
         // Handle insertion text (plain string)
         style.insertion()?.let { insertion ->
             var newInsertion = insertion
@@ -275,4 +319,135 @@ fun Component.toPlain(): String {
 
 fun Component.toMMString(): String {
     return PaperLocaleBuilder.miniMessage.serialize(this)
+}
+
+fun Component.resolvePageCallbacks(
+    page: Int,
+    totalPages: Int,
+    sender: CommandSender,
+    message: PaperMessage,
+): Component {
+    fun targetPage(raw: String): Int? {
+        val normalized = raw.removePrefix(PAGE_CLICK_PREFIX).trim().lowercase()
+        return when (normalized) {
+            "next" -> min(totalPages - 1, page + 1)
+            "prev", "previous" -> max(0, page - 1)
+            "current" -> page
+            else -> normalized.toIntOrNull()?.coerceIn(0, max(totalPages - 1, 0))
+        }
+    }
+
+    fun recurse(comp: Component): Component {
+        val style = comp.style()
+        var newStyle = style
+
+        style.hoverEvent()?.let { hover ->
+            if (hover.action() == HoverEvent.Action.SHOW_TEXT) {
+                val hoverComp = hover.value() as? Component
+                if (hoverComp != null) {
+                    newStyle = newStyle.hoverEvent(HoverEvent.showText(recurse(hoverComp)))
+                }
+            }
+        }
+
+        style.clickEvent()?.let { click ->
+            val raw = click.payloadTextValue()
+            if (raw != null && raw.startsWith(PAGE_CLICK_PREFIX)) {
+                val resolvedTarget = targetPage(raw)
+                if (resolvedTarget != null) {
+                    newStyle = newStyle.clickEvent(
+                        ClickEvent.callback {
+                            message.send(listOf(sender), resolvedTarget)
+                        }
+                    )
+                }
+            }
+        }
+
+        var rebuilt = if (comp is TextComponent) {
+            Component.text(comp.content()).style(newStyle)
+        } else {
+            comp.style(newStyle)
+        }
+        for (child in comp.children()) {
+            rebuilt = rebuilt.append(recurse(child))
+        }
+        return rebuilt
+    }
+
+    return recurse(this)
+}
+
+fun Component.resolveVisibilityConditions(
+    context: MessageContext,
+    resolver: (suspend (MessageContext, List<ComponentVisibilityPayload>) -> Boolean)?,
+): Component? {
+    fun isVisible(raw: String): Boolean {
+        val payloads = ComponentVisibilityCodec.decode(raw.removePrefix(VISIBILITY_INSERT_PREFIX).trim())
+        if (payloads.isEmpty()) return true
+        if (resolver == null) return true
+        return runBlocking { resolver(context, payloads) }
+    }
+
+    fun recurse(comp: Component): Component? {
+        val style = comp.style()
+        var newStyle = style
+
+        style.insertion()?.let { insertion ->
+            if (insertion.startsWith(VISIBILITY_INSERT_PREFIX)) {
+                if (!isVisible(insertion)) {
+                    return null
+                }
+                newStyle = newStyle.insertion(null)
+            }
+        }
+
+        style.hoverEvent()?.let { hover ->
+            if (hover.action() == HoverEvent.Action.SHOW_TEXT) {
+                val hoverComp = hover.value() as? Component
+                if (hoverComp != null) {
+                    val resolvedHover = recurse(hoverComp)
+                    newStyle = if (resolvedHover != null) {
+                        newStyle.hoverEvent(HoverEvent.showText(resolvedHover))
+                    } else {
+                        newStyle.hoverEvent(null)
+                    }
+                }
+            }
+        }
+
+        var rebuilt = if (comp is TextComponent) {
+            Component.text(comp.content()).style(newStyle)
+        } else {
+            comp.style(newStyle)
+        }
+        for (child in comp.children()) {
+            recurse(child)?.let { rebuilt = rebuilt.append(it) }
+        }
+        return rebuilt
+    }
+
+    return recurse(this)
+}
+
+private fun ClickEvent.payloadTextValue(): String? {
+    return when (val payload = payload()) {
+        is ClickEvent.Payload.Text -> payload.value()
+        is ClickEvent.Payload.Int -> payload.integer().toString()
+        else -> null
+    }
+}
+
+private fun ClickEvent.updated(transform: (String) -> String): ClickEvent? {
+    return when (action()) {
+        ClickEvent.Action.OPEN_URL -> payloadTextValue()?.let(transform)?.let(ClickEvent::openUrl)
+        ClickEvent.Action.OPEN_FILE -> payloadTextValue()?.let(transform)?.let(ClickEvent::openFile)
+        ClickEvent.Action.RUN_COMMAND -> payloadTextValue()?.let(transform)?.let(ClickEvent::runCommand)
+        ClickEvent.Action.SUGGEST_COMMAND -> payloadTextValue()?.let(transform)?.let(ClickEvent::suggestCommand)
+        ClickEvent.Action.CHANGE_PAGE -> payloadTextValue()?.let(transform)?.let { value ->
+            value.toIntOrNull()?.let(ClickEvent::changePage)
+        }
+        ClickEvent.Action.COPY_TO_CLIPBOARD -> payloadTextValue()?.let(transform)?.let(ClickEvent::copyToClipboard)
+        else -> null
+    }
 }

@@ -4,16 +4,12 @@ import gg.aquatic.klocale.message.Message
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.JoinConfiguration
 import org.bukkit.command.CommandSender
-import org.bukkit.entity.Player
-import kotlin.math.ceil
-import kotlin.math.max
-import kotlin.math.min
 
-class PaperMessage private constructor(
+open class PaperMessage protected constructor(
     val lines: Iterable<MessageLine>,
-    val pagination: PaginationSettings? = null,
     val view: MessageView = MessageView.Chat,
-    private val hooks: List<(CommandSender, PaperMessage) -> Unit> = emptyList()
+    protected val hooks: List<(CommandSender, PaperMessage) -> Unit> = emptyList(),
+    internal val visibilityResolver: (suspend (MessageContext, List<ComponentVisibilityPayload>) -> Boolean)? = null,
 ) : Message<PaperMessage> {
 
     companion object {
@@ -21,20 +17,24 @@ class PaperMessage private constructor(
             vararg lines: Component,
             pagination: PaginationSettings? = null,
             view: MessageView = MessageView.Chat,
-            callbacks: List<(CommandSender, PaperMessage) -> Unit> = emptyList()
-        ) = PaperMessage(
-            lines.map { MessageLine(it, it.findPlaceholders()) },
-            pagination,
-            view,
-            callbacks
-        )
+            callbacks: List<(CommandSender, PaperMessage) -> Unit> = emptyList(),
+            visibilityResolver: (suspend (MessageContext, List<ComponentVisibilityPayload>) -> Boolean)? = null,
+        ) = of(lines.asIterable(), pagination, view, callbacks, visibilityResolver)
 
         fun of(
             lines: Iterable<Component>,
             pagination: PaginationSettings? = null,
             view: MessageView = MessageView.Chat,
-            callbacks: List<(CommandSender, PaperMessage) -> Unit> = emptyList()
-        ) = PaperMessage(lines.map { MessageLine(it, it.findPlaceholders()) }, pagination, view, callbacks)
+            callbacks: List<(CommandSender, PaperMessage) -> Unit> = emptyList(),
+            visibilityResolver: (suspend (MessageContext, List<ComponentVisibilityPayload>) -> Boolean)? = null,
+        ): PaperMessage {
+            val mapped = lines.map { MessageLine(it, it.findPlaceholders()) }
+            return if (pagination != null) {
+                PaginatedPaperMessage(mapped, pagination, view, callbacks, visibilityResolver)
+            } else {
+                PaperMessage(mapped, view, callbacks, visibilityResolver)
+            }
+        }
     }
 
     class MessageLine(
@@ -48,16 +48,16 @@ class PaperMessage private constructor(
         Component.join(JoinConfiguration.newlines(), lines.map { it.component })
     } else null
 
-    fun withCallback(callback: (CommandSender, PaperMessage) -> Unit) =
-        PaperMessage(lines, pagination, view, hooks + callback)
+    open fun withCallback(callback: (CommandSender, PaperMessage) -> Unit): PaperMessage =
+        recreate(lines.map { it.component }, hooks + callback)
 
     fun send(vararg receiver: CommandSender) = send(receiver.asIterable())
 
-    fun send(receivers: Iterable<CommandSender>) {
-        if (pagination != null && view is MessageView.Chat) {
-            sendPaginated(receivers)
-        }
+    open fun send(receivers: Iterable<CommandSender>) {
+        send(receivers, page = 0)
+    }
 
+    open fun send(receivers: Iterable<CommandSender>, page: Int) {
         val componentToSend = if (view is MessageView.Chat) cachedComponent ?: Component.join(
             JoinConfiguration.newlines(),
             lines.map { it.component }
@@ -65,47 +65,28 @@ class PaperMessage private constructor(
 
         for (player in receivers) {
             hooks.forEach { it(player, this) }
+            val context = SimpleMessageContext(player)
+            val resolvedLines = lines.mapNotNull {
+                it.component
+                    .resolveVisibilityConditions(context, visibilityResolver)
+                    ?.resolvePageCallbacks(0, 1, player, this)
+            }
             when (view) {
-                is MessageView.Chat -> view.send(player, listOf(componentToSend!!))
-                is MessageView.ActionBar -> view.send(player, lines.map { it.component })
-                is MessageView.Title -> view.send(player, lines.map { it.component })
-            }
-        }
-    }
-
-    private fun sendPaginated(receivers: Iterable<CommandSender>, page: Int = 0) {
-        val pagination = pagination ?: return send(receivers)
-        if (lines.count() == 0) {
-            return
-        }
-        val startIndex = page * pagination.pageSize
-        val endIndex = startIndex + pagination.pageSize
-
-        if (startIndex >= lines.count()) {
-            return
-        }
-
-        for (sender in receivers) {
-            val components = ArrayList<Component>()
-
-            if (pagination.header != null) {
-                components.add(pagination.header.updatePaginationPlaceholders(page, sender))
-            }
-            for (i in startIndex until endIndex) {
-                if (i >= lines.count()) {
-                    break
+                is MessageView.Chat -> {
+                    val resolved = if (cachedComponent != null && isStatic) {
+                        cachedComponent
+                            .resolveVisibilityConditions(context, visibilityResolver)
+                            ?.resolvePageCallbacks(0, 1, player, this)
+                            ?: Component.empty()
+                    } else {
+                        Component.join(JoinConfiguration.newlines(), resolvedLines)
+                    }
+                    view.send(player, listOf(resolved))
                 }
-                components.add(lines.elementAt(i).component.updatePaginationPlaceholders(page, sender))
+                is MessageView.ActionBar -> view.send(player, resolvedLines)
+                is MessageView.Title -> view.send(player, resolvedLines)
             }
-            if (pagination.footer != null) {
-                components.add(pagination.footer.updatePaginationPlaceholders(page, sender))
-            }
-
-            val component = Component.join(JoinConfiguration.newlines(), components)
-            sender.sendMessage(component)
         }
-
-
     }
 
     override fun replace(
@@ -119,38 +100,33 @@ class PaperMessage private constructor(
         replacements: Map<String, String>
     ): PaperMessage {
         if (isStatic) return this
-        return of(lines.map { line ->
+        return recreate(lines.map { line ->
             val filtered = replacements.filter { it.key in line.placeholders }
             if (filtered.isEmpty()) return@map line.component
             line.component.replacePlaceholders(filtered)
-        }, pagination, view, hooks)
+        })
     }
 
     override fun replace(updater: (String) -> String): PaperMessage {
         if (isStatic) return this
-        return of(lines.map {
+        return recreate(lines.map {
             if (it.placeholders.isEmpty()) return@map it.component
             it.component.replacePlaceholders(updater)
-        }, pagination, view, hooks)
+        })
     }
 
     fun replace(placeholder: String, component: Component): PaperMessage {
         if (isStatic) return this
-        return of(lines.map { line ->
+        return recreate(lines.map { line ->
             if (!line.placeholders.contains(placeholder)) return@map line.component
             line.component.replaceWith(mapOf(placeholder to { component }))
-        }, pagination, view, hooks)
+        })
     }
 
-    private fun Component.updatePaginationPlaceholders(page: Int, sender: CommandSender) = replacePlaceholders(
-        mapOf(
-            "%aq-player%" to if (sender is Player) sender.name else "*console",
-            "%aq-page%" to page.toString(),
-            "%aq-prev-page%" to max(page - 1, 0).toString(),
-            "%aq-next-page%" to min(
-                ceil(lines.count().toDouble() / lines.count().toDouble()).toInt() - 1,
-                page + 1
-            ).toString()
-        )
-    )
+    protected open fun recreate(
+        lines: Iterable<Component>,
+        hooks: List<(CommandSender, PaperMessage) -> Unit> = this.hooks
+    ): PaperMessage {
+        return PaperMessage.of(lines, view = view, callbacks = hooks, visibilityResolver = visibilityResolver)
+    }
 }
