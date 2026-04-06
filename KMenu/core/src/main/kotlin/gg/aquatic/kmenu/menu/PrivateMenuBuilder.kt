@@ -16,6 +16,7 @@ class PrivateMenuBuilder(
     var type: InventoryType = InventoryType.GENERIC9X6
 ) {
     var cancelBukkitInteractions: Boolean = true
+    var menuFactory: ((Component, InventoryType, Player, Boolean) -> PrivateMenu)? = null
     private val components = mutableListOf<MenuComponent>()
 
     fun button(id: String, slot: Int, block: ButtonBuilder.() -> Unit) {
@@ -43,7 +44,8 @@ class PrivateMenuBuilder(
     }
 
     suspend fun build(): PrivateMenu {
-        val menu = PrivateMenu(title, type, player, cancelBukkitInteractions)
+        val menu = menuFactory?.invoke(title, type, player, cancelBukkitInteractions)
+            ?: PrivateMenu(title, type, player, cancelBukkitInteractions)
         components.forEach { menu.addComponent(it) }
         deferredActions.forEach { it(menu) }
         return menu
