@@ -10,13 +10,13 @@ class PaperLocaleBuilder {
     var defaultLanguage: Locale = Locale.ENGLISH
     var missingKeyHandler: MissingKeyHandler<PaperMessage> = MissingKeyHandler.Throwing()
     var miniMessage = Companion.miniMessage
-    var providers: MutableIterable<LocaleProvider<PaperMessage>> = mutableListOf()
+    var providers: MutableCollection<LocaleProvider<PaperMessage>> = mutableListOf()
 
     fun build(): BaseLocaleManager<PaperMessage> {
         Companion.miniMessage = miniMessage
         return BaseLocaleManager(
             defaultLanguage = defaultLanguage,
-            providers = providers,
+            mutableProviders = providers,
             missingKeyHandler = missingKeyHandler
         )
     }
