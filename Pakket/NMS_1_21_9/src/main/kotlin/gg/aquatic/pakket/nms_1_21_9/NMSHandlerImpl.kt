@@ -88,7 +88,7 @@ object NMSHandlerImpl : NMSHandler() {
     override fun unregisterPacketListener(player: Player) {
         val craftPlayer = player as CraftPlayer
         val connection = craftPlayer.handle.connection.connection
-        val channel = connection.channel ?: return
+        val channel = connection.channel
         removePacketListener(channel, "waves_packet_listener")
     }
 
@@ -147,7 +147,6 @@ object NMSHandlerImpl : NMSHandler() {
     override fun createEntity(location: Location, entityType: EntityType, uuid: UUID?): PacketEntity? {
         val nmsEntityType =
             net.minecraft.world.entity.EntityType.byString(entityType.name.lowercase()).getOrNull() ?: return null
-        //val id = generateEntityId()
 
         val worldServer = (location.world as CraftWorld).handle
         val entity =
@@ -157,20 +156,15 @@ object NMSHandlerImpl : NMSHandler() {
         entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
         entity.yHeadRot = location.yaw
 
-        val trackedEntity = worldServer.chunkSource.chunkMap.TrackedEntity(
-            entity,
-            50,
-            50,
-            true
-        )
         val tracker = ServerEntity(
             worldServer,
             entity,
             entity.type.updateInterval(),
             true,
-            trackedEntity,
+            TrackedEntity,
             HashSet(),
         )
+
         return PacketEntity(
             location,
             entity.id,
@@ -210,19 +204,13 @@ object NMSHandlerImpl : NMSHandler() {
         val entity = packetEntity.entityInstance as Entity
         entity.absMoveTo(location.x, location.y, location.z, location.yaw, location.pitch)
         val worldServer = (location.world as CraftWorld).handle
-        val trackedEntity = worldServer.chunkSource.chunkMap.TrackedEntity(
-            entity,
-            50,
-            50,
-            true
-        )
         return entity.getAddEntityPacket(
             ServerEntity(
                 worldServer,
                 entity,
                 entity.type.updateInterval(),
                 true,
-                trackedEntity,
+                TrackedEntity,
                 HashSet()
             )
         )
