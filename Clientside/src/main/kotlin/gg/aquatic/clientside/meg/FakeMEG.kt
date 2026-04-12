@@ -10,7 +10,6 @@ import gg.aquatic.clientside.FakeObject
 import gg.aquatic.clientside.FakeObjectHandler
 import gg.aquatic.clientside.ObjectInteractEvent
 import gg.aquatic.common.audience.AquaticAudience
-import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.function.Predicate
@@ -67,8 +66,18 @@ class FakeMEG(
     }
 
     @Suppress("unused")
-    fun setTint(tint: Color) {
-        activeModel?.defaultTint = tint
+    fun setGlowing(glowing: Boolean) {
+        activeModel?.setGlowing(glowing)
+    }
+
+    @Suppress("unused")
+    fun setGlowColor(color: Int?) {
+        activeModel?.setGlowColor(color)
+    }
+
+    @Suppress("unused")
+    fun setScale(scale: Double) {
+        activeModel?.setScale(scale)
     }
 
     @Suppress("unused")
