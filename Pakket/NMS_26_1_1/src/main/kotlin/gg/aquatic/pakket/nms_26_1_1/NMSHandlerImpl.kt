@@ -14,8 +14,10 @@ import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.profile.GameEventAction
 import gg.aquatic.pakket.api.nms.profile.ProfileEntry
 import gg.aquatic.pakket.api.nms.profile.UserProfile
+import gg.aquatic.common.coroutine.BukkitCtx
 import io.netty.buffer.Unpooled
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
+import kotlinx.coroutines.withContext
 import net.kyori.adventure.text.Component
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
@@ -96,19 +98,17 @@ object NMSHandlerImpl : NMSHandler() {
     }
 
 
-    override fun chunkViewers(chunk: Chunk): Collection<Player> {
-        val craftWorld = chunk.world as CraftWorld
-        return craftWorld.handle.chunkSource.chunkMap.getPlayers(ChunkPos(chunk.x, chunk.z), false)
-            .map { it.bukkitEntity as Player }
+    override suspend fun chunkViewers(chunk: Chunk): Collection<Player> = withContext(BukkitCtx.ofLocation(Location(chunk.world, chunk.x * 16.0, 0.0, chunk.z * 16.0))) {
+        chunk.playersSeeingChunk.toList()
     }
 
-    override fun trackedChunks(player: Player): Collection<Chunk> {
+    override suspend fun trackedChunks(player: Player): Collection<Chunk> = withContext(BukkitCtx.ofEntity(player)) {
         val chunkPositions = HashSet<ChunkPos>()
         (player as CraftPlayer).handle.chunkTrackingView.forEach { chunkPos ->
             chunkPositions.add(chunkPos)
         }
         val craftWorld = player.world as CraftWorld
-        return chunkPositions.mapNotNull {
+        chunkPositions.mapNotNull {
             val chunk = player.world.getChunkAt(it.x, it.z)
             val players =
                 craftWorld.handle.chunkSource.chunkMap.getPlayers(ChunkPos(chunk.x, chunk.z), false).map { p -> p.uuid }

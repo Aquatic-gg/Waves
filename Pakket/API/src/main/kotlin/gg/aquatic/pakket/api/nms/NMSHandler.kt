@@ -39,8 +39,8 @@ abstract class NMSHandler {
 
     abstract fun injectPacketListener(player: Player)
     abstract fun unregisterPacketListener(player: Player)
-    abstract fun chunkViewers(chunk: Chunk): Collection<Player>
-    abstract fun trackedChunks(player: Player): Collection<Chunk>
+    abstract suspend fun chunkViewers(chunk: Chunk): Collection<Player>
+    abstract suspend fun trackedChunks(player: Player): Collection<Chunk>
 
     abstract fun createBundlePacket(packets: Collection<Any>): Any
     abstract fun createSetSlotItemPacket(inventoryId: Int, stateId: Int, slot: Int, itemStack: ItemStack?): Any
