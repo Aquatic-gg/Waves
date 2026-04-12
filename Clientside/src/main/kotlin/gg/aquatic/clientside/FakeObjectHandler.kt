@@ -4,6 +4,7 @@ import gg.aquatic.clientside.block.FakeBlock
 import gg.aquatic.clientside.entity.FakeEntity
 import gg.aquatic.clientside.meg.MEGInteractableHandler
 import gg.aquatic.common.ChunkId
+import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.common.event
 import gg.aquatic.common.ticker.GlobalTicker
 import gg.aquatic.kregistry.bootstrap.BootstrapHolder
@@ -75,14 +76,18 @@ object FakeObjectHandler {
         packetEvent<PacketChunkLoadEvent> {
             val bundle = getChunkCacheBundle(it.x, it.z, it.player.world) ?: return@packetEvent
             it.then {
-                updateVisibilityBatch(it.player, bundle.blocks.values.flatten())
-                for (entity in bundle.entities) entity.updateVisibility(it.player)
+                VirtualsCtx.launch {
+                    updateVisibilityBatch(it.player, bundle.blocks.values.flatten())
+                    for (entity in bundle.entities) entity.updateVisibility(it.player)
+                }
             }
         }
         event<PlayerChunkUnloadEvent> {
             val bundle = getChunkCacheBundle(it.chunk.x, it.chunk.z, it.world) ?: return@event
-            for (block in bundle.blocks.values.flatten()) block.updateVisibility(it.player)
-            for (entity in bundle.entities) entity.updateVisibility(it.player)
+            VirtualsCtx.launch {
+                for (block in bundle.blocks.values.flatten()) block.updateVisibility(it.player)
+                for (entity in bundle.entities) entity.updateVisibility(it.player)
+            }
         }
     }
 
@@ -90,7 +95,7 @@ object FakeObjectHandler {
      * Dynamically updates visibility for a batch of blocks in a single packet per chunk.
      * Combines hiding old blocks and showing new blocks into one multi-block change.
      */
-    fun updateVisibilityBatch(player: Player, blocks: Collection<FakeBlock>) {
+    suspend fun updateVisibilityBatch(player: Player, blocks: Collection<FakeBlock>) {
         val updatesByChunk = HashMap<org.bukkit.Chunk, MutableMap<Location, org.bukkit.block.data.BlockData>>()
 
         for (block in blocks) {
@@ -123,9 +128,11 @@ object FakeObjectHandler {
             handlePlayerRemove(it.player)
         }
         event<PlayerJoinEvent> {
-            for (tickableObject in tickableObjects) {
-                if (tickableObject.audience.canBeApplied(it.player)) {
-                    tickableObject.addViewer(it.player)
+            VirtualsCtx.launch {
+                for (tickableObject in tickableObjects) {
+                    if (tickableObject.audience.canBeApplied(it.player)) {
+                        tickableObject.addViewer(it.player)
+                    }
                 }
             }
         }

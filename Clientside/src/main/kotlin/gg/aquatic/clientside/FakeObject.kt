@@ -1,6 +1,7 @@
 package gg.aquatic.clientside
 
 import gg.aquatic.common.audience.AquaticAudience
+import gg.aquatic.common.coroutine.VirtualsCtx
 import gg.aquatic.pakket.isChunkTracked
 import org.bukkit.Bukkit
 import org.bukkit.Location
@@ -52,25 +53,27 @@ abstract class FakeObject(
     fun setAudience(newAudience: AquaticAudience) {
         this._audience = newAudience
 
-        // Remove those no longer in audience
-        val currentViewers = _viewers
-        for (uuid in currentViewers) {
-            val player = Bukkit.getPlayer(uuid) ?: continue
-            if (!newAudience.canBeApplied(player)) {
-                removeViewer(player)
+        VirtualsCtx.launch {
+            // Remove those no longer in audience
+            val currentViewers = _viewers
+            for (uuid in currentViewers) {
+                val player = Bukkit.getPlayer(uuid) ?: continue
+                if (!newAudience.canBeApplied(player)) {
+                    removeViewer(player)
+                }
             }
-        }
 
-        // Add everyone online who matches the new audience
-        for (player in Bukkit.getOnlinePlayers()) {
-            if (newAudience.canBeApplied(player)) {
-                addViewer(player)
+            // Add everyone online who matches the new audience
+            for (player in Bukkit.getOnlinePlayers()) {
+                if (newAudience.canBeApplied(player)) {
+                    addViewer(player)
+                }
             }
         }
     }
 
 
-    open fun addViewer(player: Player) {
+    open suspend fun addViewer(player: Player) {
         if (!_viewers.add(player.uniqueId)) return
         updateVisibility(player)
     }
@@ -97,7 +100,7 @@ abstract class FakeObject(
     protected abstract fun onShow(player: Player)
     protected abstract fun onHide(player: Player)
 
-    fun updateVisibility(player: Player) {
+    suspend fun updateVisibility(player: Player) {
         if (shouldSee(player)) {
             show(player)
         } else {
@@ -105,7 +108,7 @@ abstract class FakeObject(
         }
     }
 
-    fun shouldSee(player: Player): Boolean {
+    suspend fun shouldSee(player: Player): Boolean {
         if (destroyed || !player.isOnline) return false
         val objectLocation = location
         val objectWorld = objectLocation.world ?: return false
@@ -134,7 +137,7 @@ abstract class FakeObject(
         }
     }
 
-    private fun refreshVisibility() {
+    private suspend fun refreshVisibility() {
         val worldPlayers = location.world?.players ?: return
 
         for (player in worldPlayers) {

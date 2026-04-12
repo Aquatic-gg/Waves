@@ -39,7 +39,7 @@ class FakeMultiBlock(
         blocks.forEach { it.unregister() }
     }
 
-    override fun addViewer(player: Player) {
+    override suspend fun addViewer(player: Player) {
         super.addViewer(player)
         blocks.forEach { it.addViewer(player) }
     }

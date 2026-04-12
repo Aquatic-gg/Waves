@@ -95,7 +95,7 @@ class FakeBlock(
             addAll(viewers)
             addAll(isViewing)
         }.filter { player ->
-            player.world.name == location.world?.name && player.isChunkTracked(location.chunk)
+            player.world.name == location.world?.name
         }
 
         _isViewing.clear()
