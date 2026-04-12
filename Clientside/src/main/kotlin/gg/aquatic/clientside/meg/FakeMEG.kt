@@ -87,10 +87,7 @@ class FakeMEG(
 
     override fun destroy() {
         if (!markDestroyed()) return
-        activeModel?.let {
-            it.destroy()
-            it.isRemoved = true
-        }
+        activeModel?.isRemoved = true
         dummy.isRemoved = true
         FakeObjectHandler.tickableObjects -= this
         _viewers.clear()
