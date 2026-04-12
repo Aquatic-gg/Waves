@@ -6,7 +6,6 @@ import gg.aquatic.kholograms.line.ItemHologramLine
 import gg.aquatic.kholograms.line.TextHologramLine
 import gg.aquatic.kholograms.serialize.LineSettings
 import gg.aquatic.pakket.Pakket
-import gg.aquatic.pakket.chunkId
 import gg.aquatic.pakket.sendPacket
 import gg.aquatic.pakket.trackedBy
 import gg.aquatic.replace.PlaceholderContext
@@ -26,7 +25,6 @@ class Hologram(
     viewDistance: Int,
     lines: Collection<HologramLine>,
 ) {
-
     var chunk: Chunk? = if (location.chunk.isLoaded) location.chunk else null
     var seat: Int? = null
         private set
@@ -92,7 +90,7 @@ class Hologram(
     val viewers = SuspendingSnapshotMap<Player, HologramViewer>()
 
     init {
-        val chunkId = location.chunk.chunkId()
+        val chunkId = location.chunk.hologramChunkKey()
         if (this.chunk == null) {
             HologramHandler.waitingHolograms.getOrPut(chunkId) { ArrayList() }.add(this)
         } else {
@@ -196,8 +194,12 @@ class Hologram(
         val chunk = this.chunk
         if (chunk != null) {
             for (trackedByPlayer in chunk.trackedBy()) {
-                if (!filter(trackedByPlayer)) continue
-                if (trackedByPlayer.world != location.world) continue
+                if (!filter(trackedByPlayer)) {
+                    continue
+                }
+                if (trackedByPlayer.world != location.world) {
+                    continue
+                }
                 if (trackedByPlayer.location.distanceSquared(location) <= viewDistanceSquared) {
                     remaining.remove(trackedByPlayer)
                     if (viewers.containsKey(trackedByPlayer)) {

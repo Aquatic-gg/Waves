@@ -1,16 +1,17 @@
 package gg.aquatic.kholograms
 
-import gg.aquatic.common.ChunkId
 import gg.aquatic.common.event
 import gg.aquatic.common.ticker.GlobalTicker
 import gg.aquatic.pakket.chunkId
 import gg.aquatic.snapshotmap.SuspendingSnapshotMap
+import org.bukkit.Chunk
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
+import java.util.UUID
 
 object HologramHandler {
-    val tickingHolograms = SuspendingSnapshotMap<ChunkId, MutableCollection<Hologram>>()
-    val waitingHolograms = SuspendingSnapshotMap<ChunkId, MutableCollection<Hologram>>()
+    val tickingHolograms = SuspendingSnapshotMap<HologramChunkKey, MutableCollection<Hologram>>()
+    val waitingHolograms = SuspendingSnapshotMap<HologramChunkKey, MutableCollection<Hologram>>()
 
     fun initialize() {
         GlobalTicker.runRepeatFixedDelay(50L) {
@@ -28,7 +29,7 @@ object HologramHandler {
         }
 
         event<ChunkLoadEvent> {
-            val chunkId = it.chunk.chunkId()
+            val chunkId = it.chunk.hologramChunkKey()
             val toLoad = waitingHolograms.remove(chunkId) ?: return@event
             val list = tickingHolograms.getOrPut(chunkId) { ArrayList() }
             for (hologram in toLoad) {
@@ -37,7 +38,7 @@ object HologramHandler {
             }
         }
         event<ChunkUnloadEvent> {
-            val chunkId = it.chunk.chunkId()
+            val chunkId = it.chunk.hologramChunkKey()
             val toWait = tickingHolograms.remove(chunkId) ?: return@event
             val list = waitingHolograms.getOrPut(chunkId) { ArrayList() }
             for (hologram in toWait) {
@@ -67,4 +68,15 @@ object HologramHandler {
             holograms.remove(hologram)
         }
     }
+}
+
+data class HologramChunkKey(
+    val worldId: UUID,
+    val x: Int,
+    val z: Int,
+)
+
+internal fun Chunk.hologramChunkKey(): HologramChunkKey {
+    val chunkId = chunkId()
+    return HologramChunkKey(world.uid, chunkId.x, chunkId.z)
 }
