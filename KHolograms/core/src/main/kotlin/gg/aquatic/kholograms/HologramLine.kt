@@ -1,6 +1,5 @@
 package gg.aquatic.kholograms
 
-import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.replace.PlaceholderContext
 import org.bukkit.Location
@@ -28,7 +27,7 @@ interface HologramLine {
             failLine?.getVisibleLine(player)
         }
 
-    fun spawn(location: Location, player: Player, placeholderContext: PlaceholderContext<Player>): PacketEntity
+    suspend fun spawn(location: Location, player: Player, placeholderContext: PlaceholderContext<Player>): HologramRenderHandle
     suspend fun tick(hologramLineHandle: HologramLineHandle)
     fun buildData(placeholderContext: PlaceholderContext<Player>, player: Player): List<EntityDataValue>
 

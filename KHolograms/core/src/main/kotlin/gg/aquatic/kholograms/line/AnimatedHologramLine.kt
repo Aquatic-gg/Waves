@@ -2,9 +2,10 @@ package gg.aquatic.kholograms.line
 
 import gg.aquatic.kholograms.HologramLine
 import gg.aquatic.kholograms.HologramLineHandle
+import gg.aquatic.kholograms.HologramRenderHandle
+import gg.aquatic.kholograms.PacketEntityHologramRenderHandle
 import gg.aquatic.kholograms.serialize.LineSettings
 import gg.aquatic.pakket.Pakket
-import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.sendPacket
 import gg.aquatic.replace.PlaceholderContext
@@ -27,11 +28,11 @@ class AnimatedHologramLine(
 ) : HologramLine {
 
     val ticks = SnapshotMap<UUID, AnimationHandle>()
-    override fun spawn(
+    override suspend fun spawn(
         location: Location,
         player: Player,
         placeholderContext: PlaceholderContext<Player>,
-    ): PacketEntity {
+    ): HologramRenderHandle {
         return frames.first().second.spawn(location, player, placeholderContext)
     }
 
@@ -55,24 +56,20 @@ class AnimatedHologramLine(
                     hologramLineHandle.placeholderContext,
                     hologramLineHandle.player
                 )
-                if (data.isNotEmpty()) {
-                    val packet = Pakket.handler.createEntityUpdatePacket(hologramLineHandle.packetEntity.entityId, data)
-                    hologramLineHandle.packetEntity.updatePacket = packet
-                    hologramLineHandle.player.sendPacket(packet, false)
-                }
+                val handle = hologramLineHandle.renderHandle as? PacketEntityHologramRenderHandle
+                handle?.update(data, hologramLineHandle.player)
                 return
             }
 
-            hologramLineHandle.packetEntity.sendDespawn(Pakket.handler, false, hologramLineHandle.player)
+            hologramLineHandle.renderHandle.destroy(hologramLineHandle.player)
             val newRenderState = createRenderState(frame)
             hologramLineHandle.renderedLine = newRenderState
-            val packetEntity = newRenderState.spawn(
+            val renderHandle = newRenderState.spawn(
                 hologramLineHandle.currentLocation,
                 hologramLineHandle.player,
                 hologramLineHandle.placeholderContext
             )
-            hologramLineHandle.packetEntity = packetEntity
-            hologramLineHandle.packetEntity.sendSpawnComplete(Pakket.handler, false, hologramLineHandle.player)
+            hologramLineHandle.renderHandle = renderHandle
             return
         }
     }

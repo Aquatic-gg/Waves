@@ -2,9 +2,10 @@ package gg.aquatic.kholograms.line
 
 import gg.aquatic.kholograms.HologramLine
 import gg.aquatic.kholograms.HologramLineHandle
+import gg.aquatic.kholograms.HologramRenderHandle
+import gg.aquatic.kholograms.PacketEntityHologramRenderHandle
 import gg.aquatic.kholograms.serialize.LineSettings
 import gg.aquatic.pakket.Pakket
-import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.DisplayEntityData
 import gg.aquatic.pakket.api.nms.entity.data.impl.display.ItemDisplayEntityData
@@ -69,26 +70,24 @@ class ItemHologramLine(
         }
     }
 
-    override fun spawn(
+    override suspend fun spawn(
         location: Location,
         player: Player,
         placeholderContext: PlaceholderContext<Player>
-    ): PacketEntity {
+    ): HologramRenderHandle {
         val packetEntity = Pakket.handler.createEntity(location, EntityType.ITEM_DISPLAY, null)
             ?: throw Exception("Failed to create entity")
         val entityData = createInitialData()
         val packet = Pakket.handler.createEntityUpdatePacket(packetEntity.entityId, entityData)
         packetEntity.updatePacket = packet
-        return packetEntity
+        return PacketEntityHologramRenderHandle(packetEntity).also { it.sendSpawn(player) }
     }
 
     override suspend fun tick(hologramLineHandle: HologramLineHandle) {
         val entityData = buildData(hologramLineHandle)
         if (entityData.isEmpty()) return
-
-        val packet = Pakket.handler.createEntityUpdatePacket(hologramLineHandle.packetEntity.entityId, entityData)
-        hologramLineHandle.packetEntity.updatePacket = packet
-        hologramLineHandle.player.sendPacket(packet, false)
+        val handle = hologramLineHandle.renderHandle as? PacketEntityHologramRenderHandle ?: return
+        handle.update(entityData, hologramLineHandle.player)
     }
 
     override fun buildData(placeholderContext: PlaceholderContext<Player>, player: Player): List<EntityDataValue> {

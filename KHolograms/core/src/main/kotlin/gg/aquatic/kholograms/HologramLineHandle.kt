@@ -1,7 +1,5 @@
 package gg.aquatic.kholograms
 
-import gg.aquatic.pakket.Pakket
-import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.replace.PlaceholderContext
 import org.bukkit.Location
 import org.bukkit.entity.Player
@@ -11,24 +9,20 @@ class HologramLineHandle(
     val player: Player,
     location: Location,
     val placeholderContext: PlaceholderContext<Player>,
-    var packetEntity: PacketEntity,
+    var renderHandle: HologramRenderHandle,
     var renderedLine: HologramLine,
     var sourceIndex: Int
 ) {
 
-    init {
-        packetEntity.sendSpawnComplete(Pakket.handler, false, player)
-    }
-
     var currentLocation: Location = location
         private set
 
-    fun move(location: Location) {
+    suspend fun move(location: Location) {
         currentLocation = location
-        packetEntity.teleport(Pakket.handler, location, false, player)
+        renderHandle.move(location, player)
     }
 
     fun destroy() {
-        packetEntity.sendDespawn(Pakket.handler, false, player)
+        renderHandle.destroy(player)
     }
 }
