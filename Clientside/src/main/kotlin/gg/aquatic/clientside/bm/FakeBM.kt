@@ -9,6 +9,7 @@ import kr.toxicity.model.api.bukkit.platform.BukkitAdapter
 import kr.toxicity.model.api.bukkit.platform.BukkitPlayer
 import kr.toxicity.model.api.event.hitbox.HitBoxInteractEvent
 import kr.toxicity.model.api.nms.ModelInteractionHand
+import kr.toxicity.model.api.tracker.ModelScaler
 import kr.toxicity.model.api.tracker.TrackerModifier
 import kr.toxicity.model.api.tracker.TrackerUpdateAction
 import org.bukkit.Color
@@ -49,6 +50,24 @@ class FakeBM(
     @Suppress("unused")
     fun setTint(tint: Color) {
         model.update(TrackerUpdateAction.tint(tint.asRGB()))
+    }
+
+    @Suppress("unused")
+    fun setGlowing(glowing: Boolean) {
+        model.update(TrackerUpdateAction.glow(glowing))
+    }
+
+    @Suppress("unused")
+    fun setGlowColor(color: Int?) {
+        if (color != null) {
+            model.update(TrackerUpdateAction.glowColor(color))
+        }
+    }
+
+    @Suppress("unused")
+    fun setScale(scale: Double) {
+        model.scaler(ModelScaler.value(scale.toFloat()))
+        model.forceUpdate(true)
     }
 
     @Suppress("unused")

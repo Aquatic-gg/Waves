@@ -9,6 +9,7 @@ fun BootstrapHolder.initializeClientside() {
     ClientsideRegistryHolder.registryBootstrap(this) {
         registry(ClientsideSettings.Factory.REGISTRY_KEY) {
             add("block", ClientsideBlockSettings.Companion)
+            add("bm", ClientsideBMSettings.Companion)
             add("entity", ClientsideEntitySettings.Companion)
             add("meg", ClientsideMEGSettings.Companion)
             add("multiblock", ClientsideMultiBlockSettings.Companion)
