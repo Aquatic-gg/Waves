@@ -72,13 +72,14 @@ sealed class AbstractSnapshotMap<K : Any, V : Any>(
         val finalKs = if (i < size) ks.copyOf(i) else ks
         val finalVs = if (i < size) vs.copyOf(i) else vs
 
-        val newSnapshot = Snapshot(finalKs as Array<Any?>, finalVs as Array<Any?>, startVersion)
+        val newSnapshot = Snapshot(finalKs, finalVs, startVersion)
         if (startVersion == version) {
             snapshot = newSnapshot
         }
         return newSnapshot
     }
 
+    @Suppress("UNCHECKED_CAST")
     private inner class SnapshotKeySet : MutableSet<K> by internalMap.keys {
         override fun iterator(): MutableIterator<K> {
             val snap = getOrComputeSnapshot()
@@ -91,6 +92,7 @@ sealed class AbstractSnapshotMap<K : Any, V : Any>(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private inner class SnapshotValueCollection : MutableCollection<V> by internalMap.values {
         override fun iterator(): MutableIterator<V> {
             val snap = getOrComputeSnapshot()
@@ -103,6 +105,7 @@ sealed class AbstractSnapshotMap<K : Any, V : Any>(
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
     private inner class SnapshotEntrySet : MutableSet<MutableMap.MutableEntry<K, V>> by internalMap.entries {
         override fun iterator(): MutableIterator<MutableMap.MutableEntry<K, V>> {
             val snap = getOrComputeSnapshot()
