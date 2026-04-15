@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.revxrsal"
-version = "1.0.0"
+version = "0.1.1"
 
 repositories {
     mavenCentral()
@@ -15,7 +15,7 @@ repositories {
 
 dependencies {
     compileOnly("org.jetbrains.kotlin.jvm:org.jetbrains.kotlin.jvm.gradle.plugin:2.2.0")
-    implementation("org.ow2.asm:asm:9.9")
+    compileOnly("org.jetbrains.kotlin:kotlin-compiler-embeddable:2.3.20")
 }
 
 gradlePlugin {

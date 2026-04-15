@@ -1,10 +1,12 @@
 package revxrsal.kobjects.asm
 
-import org.objectweb.asm.*
-import org.objectweb.asm.ClassReader.EXPAND_FRAMES
+import org.jetbrains.org.objectweb.asm.ClassReader
+import org.jetbrains.org.objectweb.asm.ClassWriter
 import java.io.File
 import kotlin.io.readBytes
 import kotlin.io.writeBytes
+
+private const val EXPAND_FRAMES = 8
 
 /**
  * Applies the necessary bytecode transformations to Kotlin object class files
