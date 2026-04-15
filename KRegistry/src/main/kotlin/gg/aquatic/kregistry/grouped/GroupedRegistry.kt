@@ -30,7 +30,7 @@ class GroupedRegistry<Id, Group, Value : GroupedEntry<Group>>(
         return buildMap {
             for ((entryClass, reg) in data) {
                 if (entryClass.isAssignableFrom(clazz)) {
-                    putAll((reg as Registry<Id, Value>).all())
+                    putAll(reg.all())
                 }
             }
         }
