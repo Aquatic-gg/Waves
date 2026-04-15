@@ -23,7 +23,7 @@ subprojects {
     }
 
     extensions.configure<KotlinJvmProjectExtension> {
-        jvmToolchain(21)
+        jvmToolchain(25)
     }
 
     tasks.withType<Test>().configureEach {
