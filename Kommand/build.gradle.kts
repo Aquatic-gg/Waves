@@ -31,7 +31,7 @@ subprojects {
     apply(plugin = "maven-publish")
 
     extensions.configure<KotlinJvmProjectExtension> {
-        jvmToolchain(21)
+        jvmToolchain(25)
     }
 
     extensions.configure<JavaPluginExtension> {
