@@ -20,6 +20,10 @@ suspend fun Player.isChunkTracked(chunk: Chunk): Boolean {
     return chunk.trackedBy(this)
 }
 
+suspend fun Player.isChunkTracked(world: World, chunkX: Int, chunkZ: Int): Boolean {
+    return trackedChunks().any { it.world.uid == world.uid && it.x == chunkX && it.z == chunkZ }
+}
+
 suspend fun Chunk.trackedBy(): Collection<Player> {
     return Pakket.handler.chunkViewers(this)
 }
