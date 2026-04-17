@@ -96,22 +96,24 @@ object FakeObjectHandler {
      * Combines hiding old blocks and showing new blocks into one multi-block change.
      */
     suspend fun updateVisibilityBatch(player: Player, blocks: Collection<FakeBlock>) {
-        val updatesByChunk = HashMap<org.bukkit.Chunk, MutableMap<Location, org.bukkit.block.data.BlockData>>()
+        val updatesByChunk = HashMap<ChunkId, MutableMap<Location, org.bukkit.block.data.BlockData>>()
 
         for (block in blocks) {
-            val chunk = block.location.chunk
-            if (!player.isChunkTracked(chunk)) continue
+            val location = block.location
+            val world = location.world ?: continue
+            val chunkId = ChunkId(Math.floorDiv(location.blockX, 16), Math.floorDiv(location.blockZ, 16))
+            if (!player.isChunkTracked(world, chunkId.x, chunkId.z)) continue
 
             val shouldSee = block.shouldSee(player)
             val isViewing = block.isPacketViewer(player)
 
             if (shouldSee && !isViewing) {
-                val updateMap = updatesByChunk.getOrPut(chunk) { HashMap() }
-                updateMap[block.location] = block.renderedBlockData()
+                val updateMap = updatesByChunk.getOrPut(chunkId) { HashMap() }
+                updateMap[location] = block.renderedBlockData()
                 block.injectViewer(player)
             } else if (!shouldSee && isViewing) {
-                val updateMap = updatesByChunk.getOrPut(chunk) { HashMap() }
-                updateMap.putIfAbsent(block.location, block.location.block.blockData)
+                val updateMap = updatesByChunk.getOrPut(chunkId) { HashMap() }
+                updateMap.putIfAbsent(location, block.restoreBlockData())
                 block.ejectViewer(player)
             }
         }

@@ -115,7 +115,9 @@ abstract class FakeObject(
         if (player.world.name != objectWorld.name) return false
         if (!audience.canBeApplied(player)) return false
 
-        if (!player.isChunkTracked(objectLocation.chunk)) return false
+        val chunkX = Math.floorDiv(objectLocation.blockX, 16)
+        val chunkZ = Math.floorDiv(objectLocation.blockZ, 16)
+        if (!player.isChunkTracked(objectWorld, chunkX, chunkZ)) return false
 
         val distSq = player.location.distanceSquared(objectLocation)
         return distSq <= viewRangeSquared.toDouble()
