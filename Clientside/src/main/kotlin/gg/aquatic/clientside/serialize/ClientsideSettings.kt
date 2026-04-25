@@ -14,7 +14,7 @@ import org.bukkit.util.Vector
 
 interface ClientsideSettings<T: FakeObject> {
 
-    fun create(location: Location, audience: AquaticAudience, onInteract: ObjectInteractEvent<T>): T
+    suspend fun create(location: Location, audience: AquaticAudience, onInteract: ObjectInteractEvent<T>): T
 
     fun applyOffset(
         location: Location,

@@ -14,17 +14,17 @@ class ClientsideEntitySettings(
     val offsetY: Double = 0.0,
     val offsetZ: Double = 0.0,
 ) : ClientsideSettings<FakeEntity> {
-    override fun create(
+    override suspend fun create(
         location: Location,
         audience: AquaticAudience,
         onInteract: ObjectInteractEvent<FakeEntity>
     ): FakeEntity {
-        return FakeEntity(
-            entityType,
-            applyOffset(location, offsetX, offsetY, offsetZ, centerOnBlockXZ = true),
-            viewRange,
-            audience,
-            onInteract = onInteract
+        return FakeEntity.createRegistered(
+            type = entityType,
+            location = applyOffset(location, offsetX, offsetY, offsetZ, centerOnBlockXZ = true),
+            viewRange = viewRange,
+            audience = audience,
+            onInteract = onInteract,
         )
     }
 

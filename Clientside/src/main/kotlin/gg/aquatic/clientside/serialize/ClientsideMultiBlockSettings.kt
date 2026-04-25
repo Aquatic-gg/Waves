@@ -15,12 +15,18 @@ class ClientsideMultiBlockSettings(
     val offsetY: Double = 0.0,
     val offsetZ: Double = 0.0,
 ): ClientsideSettings<FakeMultiBlock> {
-    override fun create(
+    override suspend fun create(
         location: Location,
         audience: AquaticAudience,
         onInteract: ObjectInteractEvent<FakeMultiBlock>
     ): FakeMultiBlock {
-        return FakeMultiBlock(multiBlock, applyOffset(location, offsetX, offsetY, offsetZ), viewRange, audience, onInteract)
+        return FakeMultiBlock.createRegistered(
+            multiBlokk = multiBlock,
+            location = applyOffset(location, offsetX, offsetY, offsetZ),
+            viewRange = viewRange,
+            initialAudience = audience,
+            onInteract = onInteract,
+        )
     }
 
     companion object: ClientsideSettings.Factory {

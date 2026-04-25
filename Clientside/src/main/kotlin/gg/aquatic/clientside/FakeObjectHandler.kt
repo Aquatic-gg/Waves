@@ -77,7 +77,7 @@ object FakeObjectHandler {
             val bundle = getChunkCacheBundle(it.x, it.z, it.player.world) ?: return@packetEvent
             it.then {
                 VirtualsCtx.launch {
-                    updateVisibilityBatch(it.player, bundle.blocks.values.flatten())
+                    updateVisibilityBatch(it.player, bundle.blocks.values.flatten(), assumeChunkVisible = true)
                     for (entity in bundle.entities) entity.updateVisibility(it.player)
                 }
             }
@@ -95,16 +95,28 @@ object FakeObjectHandler {
      * Dynamically updates visibility for a batch of blocks in a single packet per chunk.
      * Combines hiding old blocks and showing new blocks into one multi-block change.
      */
-    suspend fun updateVisibilityBatch(player: Player, blocks: Collection<FakeBlock>) {
+    suspend fun updateVisibilityBatch(
+        player: Player,
+        blocks: Collection<FakeBlock>,
+        assumeChunkVisible: Boolean = false,
+    ) {
         val updatesByChunk = HashMap<ChunkId, MutableMap<Location, org.bukkit.block.data.BlockData>>()
 
         for (block in blocks) {
             val location = block.location
             val world = location.world ?: continue
             val chunkId = ChunkId(Math.floorDiv(location.blockX, 16), Math.floorDiv(location.blockZ, 16))
-            if (!player.isChunkTracked(world, chunkId.x, chunkId.z)) continue
+            if (!assumeChunkVisible && !player.isChunkTracked(world, chunkId.x, chunkId.z)) continue
 
-            val shouldSee = block.shouldSee(player)
+            val shouldSee = if (assumeChunkVisible) {
+                !block.destroyed &&
+                    player.isOnline &&
+                    player.world.name == world.name &&
+                    block.audience.canBeApplied(player) &&
+                    player.location.distanceSquared(location) <= (block.viewRange * block.viewRange).toDouble()
+            } else {
+                block.shouldSee(player)
+            }
             val isViewing = block.isPacketViewer(player)
 
             if (shouldSee && !isViewing) {

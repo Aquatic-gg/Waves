@@ -5,6 +5,7 @@ import gg.aquatic.clientside.FakeObject
 import gg.aquatic.clientside.FakeObjectHandler
 import gg.aquatic.clientside.ObjectInteractEvent
 import gg.aquatic.common.audience.AquaticAudience
+import gg.aquatic.common.coroutine.BukkitCtx
 import gg.aquatic.pakket.Pakket
 import gg.aquatic.pakket.api.nms.PacketEntity
 import gg.aquatic.pakket.api.nms.entity.EntityDataValue
@@ -17,6 +18,7 @@ import org.bukkit.entity.Player
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import java.util.concurrent.ConcurrentHashMap
+import kotlinx.coroutines.withContext
 
 class FakeEntity(
     val type: EntityType,
@@ -97,7 +99,7 @@ class FakeEntity(
     }
 
     @Suppress("unused")
-    fun teleport(newLocation: Location) {
+    suspend fun teleport(newLocation: Location) {
         this.location = newLocation
         if (registered) {
             unregister()
@@ -107,17 +109,20 @@ class FakeEntity(
         isViewing.forEach { it.sendPacket(packet, false) }
     }
 
-    override fun register() {
-        if (registered) return
-        registered = true
-        FakeObjectHandler.tickableObjects += this
-        FakeObjectHandler.idToEntity += entityId to this
+    override suspend fun register() {
+        withContext(BukkitCtx.ofLocation(location)) {
+            if (registered) return@withContext
+            registered = true
+            FakeObjectHandler.tickableObjects += this@FakeEntity
+            FakeObjectHandler.idToEntity += entityId to this@FakeEntity
 
-        val chunkX = Math.floorDiv(location.blockX, 16)
-        val chunkZ = Math.floorDiv(location.blockZ, 16)
+            val chunkX = Math.floorDiv(location.blockX, 16)
+            val chunkZ = Math.floorDiv(location.blockZ, 16)
 
-        val bundle = FakeObjectHandler.getOrCreateChunkCacheBundle(chunkX, chunkZ, location.world!!)
-        bundle.entities += this
+            val bundle = FakeObjectHandler.getOrCreateChunkCacheBundle(chunkX, chunkZ, location.world!!)
+            bundle.entities += this@FakeEntity
+            bootstrapAudienceViewers()
+        }
     }
 
     fun unregister() {
@@ -142,5 +147,23 @@ class FakeEntity(
 
     override suspend fun tick() {
         onTick()
+    }
+
+    companion object {
+        suspend fun createRegistered(
+            type: EntityType,
+            location: Location,
+            viewRange: Int,
+            audience: AquaticAudience,
+            consumer: FakeEntity.() -> Unit = {},
+            onInteract: ObjectInteractEvent<FakeEntity> = { _, _, _ -> },
+            onUpdate: (Player) -> Unit = {},
+            onTick: suspend () -> Unit = {}
+        ): FakeEntity {
+            return withContext(BukkitCtx.ofLocation(location)) {
+                FakeEntity(type, location, viewRange, audience, consumer, onInteract, onUpdate, onTick)
+                    .also { it.register() }
+            }
+        }
     }
 }

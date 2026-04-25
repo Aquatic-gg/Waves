@@ -31,8 +31,11 @@ class FakeMultiBlock(
         }
     }
 
-    override fun register() {
+    override suspend fun register() {
+        if (registered) return
+        registered = true
         blocks.forEach { it.register() }
+        bootstrapAudienceViewers()
     }
 
     fun unregister() {
@@ -60,5 +63,20 @@ class FakeMultiBlock(
         if (!markDestroyed()) return
         blocks.forEach { it.destroy() }
         blocks.clear()
+    }
+
+    companion object {
+        suspend fun createRegistered(
+            multiBlokk: MultiBlokk,
+            location: Location,
+            viewRange: Int,
+            initialAudience: AquaticAudience,
+            onInteract: ObjectInteractEvent<FakeMultiBlock> = { _, _, _ -> },
+            onTick: suspend () -> Unit = {}
+        ): FakeMultiBlock {
+            return FakeMultiBlock(multiBlokk, location, viewRange, initialAudience, onInteract, onTick).also {
+                it.register()
+            }
+        }
     }
 }

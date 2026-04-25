@@ -15,17 +15,17 @@ class ClientsideBMSettings(
     val scale: Double = 1.0,
     val glowing: Boolean = false,
 ) : ClientsideSettings<FakeBM> {
-    override fun create(
+    override suspend fun create(
         location: Location,
         audience: AquaticAudience,
         onInteract: ObjectInteractEvent<FakeBM>
     ): FakeBM {
-        return FakeBM(
-            applyOffset(location, offsetX, offsetY, offsetZ, centerOnBlockXZ = true),
-            modelId,
-            viewRange,
-            audience,
-            onInteract
+        return FakeBM.createRegistered(
+            location = applyOffset(location, offsetX, offsetY, offsetZ, centerOnBlockXZ = true),
+            modelId = modelId,
+            viewRange = viewRange,
+            initialAudience = audience,
+            onInteract = onInteract,
         ).apply {
             setScale(scale)
             setGlowing(glowing)

@@ -21,10 +21,11 @@ abstract class FakeObject(
     val destroyed: Boolean
         get() = destroyedState.get()
 
+    @Volatile
     var registered: Boolean = false
         protected set
 
-    abstract fun register()
+    abstract suspend fun register()
 
     private val viewRangeSquared = viewRange * viewRange
 
@@ -52,6 +53,7 @@ abstract class FakeObject(
 
     fun setAudience(newAudience: AquaticAudience) {
         this._audience = newAudience
+        if (!registered) return
 
         VirtualsCtx.launch {
             // Remove those no longer in audience
@@ -68,6 +70,14 @@ abstract class FakeObject(
                 if (newAudience.canBeApplied(player)) {
                     addViewer(player)
                 }
+            }
+        }
+    }
+
+    protected suspend fun bootstrapAudienceViewers() {
+        for (player in Bukkit.getOnlinePlayers()) {
+            if (audience.canBeApplied(player)) {
+                addViewer(player)
             }
         }
     }

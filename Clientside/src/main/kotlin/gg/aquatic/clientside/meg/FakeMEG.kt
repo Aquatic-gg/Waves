@@ -10,9 +10,11 @@ import gg.aquatic.clientside.FakeObject
 import gg.aquatic.clientside.FakeObjectHandler
 import gg.aquatic.clientside.ObjectInteractEvent
 import gg.aquatic.common.audience.AquaticAudience
+import gg.aquatic.common.coroutine.BukkitCtx
 import org.bukkit.Location
 import org.bukkit.entity.Player
 import java.util.function.Predicate
+import kotlinx.coroutines.withContext
 
 class FakeMEG(
     override val location: Location,
@@ -43,10 +45,13 @@ class FakeMEG(
         setAudience(initialAudience)
     }
 
-    override fun register() {
-        if (registered) return
-        registered = true
-        FakeObjectHandler.tickableObjects += this
+    override suspend fun register() {
+        withContext(BukkitCtx.ofLocation(location)) {
+            if (registered) return@withContext
+            registered = true
+            FakeObjectHandler.tickableObjects += this@FakeMEG
+            bootstrapAudienceViewers()
+        }
     }
 
     override fun onShow(player: Player) {}
@@ -91,5 +96,19 @@ class FakeMEG(
         dummy.isRemoved = true
         FakeObjectHandler.tickableObjects -= this
         _viewers.clear()
+    }
+
+    companion object {
+        suspend fun createRegistered(
+            location: Location,
+            modelId: String,
+            viewRange: Int,
+            initialAudience: AquaticAudience,
+            onInteract: ObjectInteractEvent<FakeMEG> = { _, _, _ -> }
+        ): FakeMEG {
+            return withContext(BukkitCtx.ofLocation(location)) {
+                FakeMEG(location, modelId, viewRange, initialAudience, onInteract).also { it.register() }
+            }
+        }
     }
 }

@@ -15,12 +15,18 @@ class ClientsideBlockSettings(
     val offsetY: Double = 0.0,
     val offsetZ: Double = 0.0,
 ) : ClientsideSettings<FakeBlock> {
-    override fun create(
+    override suspend fun create(
         location: Location,
         audience: AquaticAudience,
         onInteract: ObjectInteractEvent<FakeBlock>
     ): FakeBlock {
-        return FakeBlock(block, applyOffset(location, offsetX, offsetY, offsetZ), viewRange, audience, onInteract)
+        return FakeBlock.createRegistered(
+            block = block,
+            location = applyOffset(location, offsetX, offsetY, offsetZ),
+            viewRange = viewRange,
+            audience = audience,
+            onInteract = onInteract,
+        )
     }
 
     companion object: ClientsideSettings.Factory {

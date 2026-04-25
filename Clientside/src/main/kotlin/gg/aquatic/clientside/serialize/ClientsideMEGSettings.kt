@@ -13,17 +13,17 @@ class ClientsideMEGSettings(
     val offsetY: Double = 0.0,
     val offsetZ: Double = 0.0,
 ): ClientsideSettings<FakeMEG> {
-    override fun create(
+    override suspend fun create(
         location: Location,
         audience: AquaticAudience,
         onInteract: ObjectInteractEvent<FakeMEG>
     ): FakeMEG {
-        return FakeMEG(
-            applyOffset(location, offsetX, offsetY, offsetZ, centerOnBlockXZ = true),
-            modelId,
-            viewRange,
-            audience,
-            onInteract
+        return FakeMEG.createRegistered(
+            location = applyOffset(location, offsetX, offsetY, offsetZ, centerOnBlockXZ = true),
+            modelId = modelId,
+            viewRange = viewRange,
+            initialAudience = audience,
+            onInteract = onInteract,
         )
     }
 

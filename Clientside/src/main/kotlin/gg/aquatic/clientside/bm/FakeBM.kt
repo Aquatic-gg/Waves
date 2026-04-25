@@ -3,6 +3,7 @@ package gg.aquatic.clientside.bm
 import gg.aquatic.clientside.FakeObject
 import gg.aquatic.clientside.ObjectInteractEvent
 import gg.aquatic.common.audience.AquaticAudience
+import gg.aquatic.common.coroutine.BukkitCtx
 import kr.toxicity.model.api.BetterModel
 import kr.toxicity.model.api.animation.AnimationModifier
 import kr.toxicity.model.api.bukkit.platform.BukkitAdapter
@@ -15,6 +16,7 @@ import kr.toxicity.model.api.tracker.TrackerUpdateAction
 import org.bukkit.Color
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import kotlinx.coroutines.withContext
 
 
 class FakeBM(
@@ -31,12 +33,17 @@ class FakeBM(
         }
     }
 
-    override fun register() {
-        model.listenHitBox(HitBoxInteractEvent::class.java) { e ->
-            val isLeft = e.hand == ModelInteractionHand.LEFT
+    override suspend fun register() {
+        withContext(BukkitCtx.ofLocation(location)) {
+            if (registered) return@withContext
+            registered = true
+            model.listenHitBox(HitBoxInteractEvent::class.java) { e ->
+                val isLeft = e.hand == ModelInteractionHand.LEFT
 
-            val player = e.who as BukkitPlayer
-            handleInteract(player.source(), isLeft)
+                val player = e.who as BukkitPlayer
+                handleInteract(player.source(), isLeft)
+            }
+            bootstrapAudienceViewers()
         }
     }
 
@@ -79,5 +86,19 @@ class FakeBM(
         if (!markDestroyed()) return
         model.close()
         _viewers.clear()
+    }
+
+    companion object {
+        suspend fun createRegistered(
+            location: Location,
+            modelId: String,
+            viewRange: Int,
+            initialAudience: AquaticAudience,
+            onInteract: ObjectInteractEvent<FakeBM> = { _, _, _ -> },
+        ): FakeBM {
+            return withContext(BukkitCtx.ofLocation(location)) {
+                FakeBM(location, modelId, viewRange, initialAudience, onInteract).also { it.register() }
+            }
+        }
     }
 }
