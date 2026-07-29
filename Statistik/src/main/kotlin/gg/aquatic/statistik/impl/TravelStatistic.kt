@@ -1,0 +1,51 @@
+package gg.aquatic.statistik.impl
+
+import gg.aquatic.common.argument.ObjectArgument
+import gg.aquatic.common.argument.impl.PrimitiveObjectArgument
+import gg.aquatic.statistik.ListenerStatisticType
+import gg.aquatic.statistik.StatisticAddEvent
+import org.bukkit.entity.Player
+import org.bukkit.event.HandlerList
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerMoveEvent
+
+object TravelStatistic: ListenerStatisticType<Player>() {
+    override val binder: Class<out Player> = Player::class.java
+    override val arguments: Collection<ObjectArgument<*>> = listOf(
+        PrimitiveObjectArgument("count-swimming", true, required = true),
+        PrimitiveObjectArgument("count-flying", true, required = true),
+        PrimitiveObjectArgument("count-gliding", defaultValue = true, required = true),
+        PrimitiveObjectArgument("count-driving", defaultValue = true, required = true)
+    )
+    private var listener: Listener? = null
+    override fun createListener() = listen<PlayerMoveEvent> {
+        val player = it.player
+
+        if (it.from.blockX == it.to.blockX && it.from.blockY == it.to.blockY && it.from.blockZ == it.to.blockZ) {
+            return@listen
+        }
+
+        for (statisticHandle in handles) {
+            val args = statisticHandle.args
+            val swimming = args.boolean("count-swimming") ?: true
+            val flying = args.boolean("count-flying") ?: true
+            val gliding = args.boolean("count-gliding") ?: true
+            val driving = args.boolean("count-driving") ?: true
+
+            if ((!swimming && player.isSwimming) ||
+                (!flying && player.isFlying) ||
+                (!gliding && player.isGliding) ||
+                (!driving && player.isInsideVehicle)) {
+                continue
+            }
+
+            val event = StatisticAddEvent(this, it.from.distance(it.to), player)
+            statisticHandle.consumer(event)
+        }
+    }
+
+    override fun terminate() {
+        listener?.let { HandlerList.unregisterAll(it) }
+        listener = null
+    }
+}
