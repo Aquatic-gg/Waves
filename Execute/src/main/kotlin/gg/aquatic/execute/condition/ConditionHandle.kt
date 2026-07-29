@@ -1,0 +1,22 @@
+package gg.aquatic.execute.condition
+
+import gg.aquatic.common.argument.ObjectArguments
+import gg.aquatic.execute.ExecutableObject
+import gg.aquatic.execute.ExecutableObjectHandle
+
+class ConditionHandle<A>(executableObject: ExecutableObject<A, Boolean>, arguments: ObjectArguments) :
+    ExecutableObjectHandle<A, Boolean>(
+        executableObject, arguments
+    ) {
+
+    override suspend fun execute(binder: A, textUpdater: (A, String) -> String): Boolean {
+        val negate = arguments.boolean("negate") { str -> textUpdater(binder, str) } ?: false
+        val context = arguments.context(binder, textUpdater)
+        val value = executableObject.execute(binder, context)
+        if (negate) {
+            return !value
+        }
+        return value
+    }
+
+}
