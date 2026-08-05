@@ -22,6 +22,9 @@ run/
 run/*
 run
 
+logs/
+.logs/
+
 .env
 
 ### Kotlin ###

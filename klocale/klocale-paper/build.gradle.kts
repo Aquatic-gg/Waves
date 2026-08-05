@@ -1,0 +1,50 @@
+import me.champeau.jmh.JmhBytecodeGeneratorTask
+
+plugins {
+    id("me.champeau.jmh")
+    id("io.morethan.jmhreport")
+}
+
+dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
+
+    implementation(project(":klocale:klocale-common"))
+    api(project(":aquatic-common"))
+    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+
+    jmh("org.openjdk.jmh:jmh-core:1.37")
+    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+
+    jmhImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    jmhImplementation("net.kyori:adventure-text-serializer-plain:4.26.1")
+
+    testImplementation(kotlin("test"))
+    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    testImplementation("net.kyori:adventure-text-serializer-plain:4.26.1")
+}
+
+tasks.named<JmhBytecodeGeneratorTask>("jmhRunBytecodeGenerator") {
+}
+
+tasks.named<Jar>("jmhJar") {
+    isZip64 = true
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+jmh {
+    resultFormat = "JSON"
+    includes.set(listOf("ReplacementBenchmark"))
+    forceGC = true
+    duplicateClassesStrategy = DuplicatesStrategy.EXCLUDE
+    resultsFile = layout.buildDirectory.file("reports/jmh/results.json")
+}
+
+jmhReport {
+    jmhResultPath = layout.buildDirectory.file("reports/jmh/results.json").get().asFile.absolutePath
+    jmhReportOutput = layout.buildDirectory.dir("reports/jmh").get().asFile.absolutePath
+}
+
+tasks.jmh {
+    finalizedBy(tasks.jmhReport)
+}

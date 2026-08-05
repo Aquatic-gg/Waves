@@ -1,7 +1,7 @@
 pluginManagement {
     repositories {
         mavenLocal()
-        maven { url = uri("https://repo.nekroplex.com/releases") }
+        maven { url = uri("https://repo.aquatic.gg/releases") }
         gradlePluginPortal()
     }
 }
@@ -11,66 +11,35 @@ plugins {
 
 rootProject.name = "Waves"
 
-val submodules = listOf(
-    "KMenu" to "gg.aquatic:KMenu",
-    "KRegistry" to "gg.aquatic:KRegistry",
-    "KEvent" to "gg.aquatic:KEvent",
-    "Pakket" to "gg.aquatic:Pakket",
-    "Stacked" to "gg.aquatic:Stacked",
-    "Execute" to "gg.aquatic.execute:Execute",
-    "Replace" to "gg.aquatic.replace:Replace",
-    "Kommand" to "gg.aquatic.kommand:kommand-paper",
-    "KLocale" to "gg.aquatic:KLocale",
-    "Kurrency" to "gg.aquatic:Kurrency",
-    "Blokk" to "gg.aquatic:Blokk",
-    "TreePAPI" to "gg.aquatic:TreePAPI",
-    "SnapshotMap" to "gg.aquatic:snapshotmap",
-    "AquaticCommon" to "gg.aquatic:Common",
-    "Statistik" to "gg.aquatic:Statistik",
-    "KHolograms" to "gg.aquatic:KHolograms",
-    "Clientside" to "gg.aquatic:Clientside",
-    "Dispatch" to "gg.aquatic:Dispatch",
-    "QuickMiniMessage" to "gg.aquatic:QuickMiniMessage",
+include(
+    ":aquatic-common",
+    ":blokk",
+    ":clientside",
+    ":dispatch",
+    ":dispatch:dispatch-paper",
+    ":execute",
+    ":kevent",
+    ":kholograms:kholograms-core",
+    ":kholograms:kholograms-serialization",
+    ":klocale:klocale-common",
+    ":klocale:klocale-paper",
+    ":kmenu:kmenu-core",
+    ":kmenu:kmenu-serialization",
+    ":kommand:kommand-core",
+    ":kommand:kommand-paper",
+    ":kommand:kommand-velocity",
+    ":kregistry",
+    ":kurrency",
+    ":pakket",
+    ":pakket:pakket-api",
+    ":pakket:pakket-nms-1-21-4",
+    ":pakket:pakket-nms-1-21-8",
+    ":pakket:pakket-nms-1-21-9",
+    ":pakket:pakket-nms-26-1-1",
+    ":quick-mini-message",
+    ":replace",
+    ":snapshot-map",
+    ":stacked",
+    ":statistik",
+    ":tree-papi",
 )
-
-submodules.forEach { (folder, artifact) ->
-    includeBuild(folder) {
-        dependencySubstitution {
-            when (folder) {
-                "KHolograms" -> {
-                    substitute(module("gg.aquatic:KHolograms")).using(project(":core"))
-                    substitute(module("gg.aquatic:KHolograms-serialization")).using(project(":serialization"))
-                }
-                "KMenu" -> {
-                    substitute(module("gg.aquatic:KMenu")).using(project(":core"))
-                    substitute(module("gg.aquatic:KMenu-serialization")).using(project(":serialization"))
-                }
-                "Pakket" -> {
-                    substitute(module("gg.aquatic:Pakket")).using(project(":"))
-                    substitute(module("gg.aquatic.pakket:API")).using(project(":API"))
-                    substitute(module("gg.aquatic.pakket.nms:NMS_1_21_4")).using(project(":NMS_1_21_4"))
-                    substitute(module("gg.aquatic.pakket.nms:NMS_1_21_8")).using(project(":NMS_1_21_8"))
-                    substitute(module("gg.aquatic.pakket.nms:NMS_1_21_9")).using(project(":NMS_1_21_9"))
-                    substitute(module("gg.aquatic.pakket.nms:NMS_26_1_1")).using(project(":NMS_26_1_1"))
-                }
-                "Dispatch" -> {
-                    substitute(module("gg.aquatic:Dispatch")).using(project(":"))
-                    substitute(module("gg.aquatic:Dispatch-bukkit")).using(project(":Paper"))
-                }
-                "Kommand" -> {
-                    substitute(module("gg.aquatic:Kommand")).using(project(":kommand-paper"))
-                    substitute(module("gg.aquatic.kommand:kommand-paper")).using(project(":kommand-paper"))
-                    substitute(module("gg.aquatic.kommand:kommand-core")).using(project(":kommand-core"))
-                    substitute(module("gg.aquatic.kommand:kommand-velocity")).using(project(":kommand-velocity"))
-                }
-                else -> {
-                    substitute(module(artifact)).using(project(":"))
-                }
-            }
-            if (folder == "KLocale") {
-                substitute(module("gg.aquatic:KLocale-Paper")).using(project(":Paper"))
-                substitute(module("gg.aquatic:KLocale")).using(project(":Common"))
-            }
-        }
-    }
-}
