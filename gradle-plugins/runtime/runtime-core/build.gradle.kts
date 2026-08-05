@@ -18,7 +18,7 @@ publishing {
     repositories {
         maven {
             name = "aquaticRepository"
-            url = uri("https://repo.nekroplex.com/releases")
+            url = uri("https://repo.aquatic.gg/releases")
 
             credentials {
                 username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""

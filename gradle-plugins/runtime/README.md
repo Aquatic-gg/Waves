@@ -1,6 +1,6 @@
 # Runtime
 
-[![Reposilite](https://repo.nekroplex.com/api/badge/latest/releases/gg/aquatic/runtime-core?color=40c14a&name=Reposilite)](https://repo.nekroplex.com/#/releases/gg/aquatic/runtime-core)
+[![Reposilite](https://repo.aquatic.gg/api/badge/latest/releases/gg/aquatic/runtime-core?color=40c14a&name=Reposilite)](https://repo.aquatic.gg/#/releases/gg/aquatic/runtime-core)
 
 Runtime is a small toolset for generating a dependency manifest at build time and resolving or relocating those
 dependencies at runtime. It ships as:
@@ -23,7 +23,7 @@ Add the repository for both the Gradle plugin and runtime-core:
 // settings.gradle.kts
 pluginManagement {
     repositories {
-        maven { url = uri("https://repo.nekroplex.com/releases") }
+        maven { url = uri("https://repo.aquatic.gg/releases") }
         gradlePluginPortal()
     }
 }
@@ -37,7 +37,7 @@ plugins {
 }
 
 repositories {
-    maven { url = uri("https://repo.nekroplex.com/releases") }
+    maven { url = uri("https://repo.aquatic.gg/releases") }
     mavenCentral()
 }
 ```

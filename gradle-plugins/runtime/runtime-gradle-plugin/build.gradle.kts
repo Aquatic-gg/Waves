@@ -33,7 +33,7 @@ publishing {
     repositories {
         maven {
             name = "aquaticRepository"
-            url = uri("https://repo.nekroplex.com/releases")
+            url = uri("https://repo.aquatic.gg/releases")
 
             credentials {
                 username = maven_username
