@@ -33,7 +33,10 @@ publishing {
     repositories {
         maven {
             name = "aquaticRepository"
-            url = uri("https://repo.aquatic.gg/releases")
+            url = uri(
+                "https://repo.aquatic.gg/" +
+                    if (version.toString().endsWith("-SNAPSHOT")) "snapshots" else "releases"
+            )
 
             credentials {
                 username = maven_username

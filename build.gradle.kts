@@ -24,7 +24,7 @@ bukkitKObjects {
 }
 
 group = "gg.aquatic.waves"
-version = "26.0.54"
+version = "2.0.0-SNAPSHOT"
 
 /**
  * Maven artifact id published for each module, keyed by Gradle project path.
@@ -68,9 +68,12 @@ val publishedArtifactIds = mapOf(
 val mavenUsername = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
 val mavenPassword = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
 
+val isSnapshot = version.toString().endsWith("-SNAPSHOT")
+val publishRepositoryUrl = "https://repo.aquatic.gg/" + if (isSnapshot) "snapshots" else "releases"
+
 fun RepositoryHandler.aquaticRepository() = maven {
     name = "aquaticRepository"
-    url = uri("https://repo.aquatic.gg/releases")
+    url = uri(publishRepositoryUrl)
 
     credentials {
         username = mavenUsername
