@@ -5,11 +5,10 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**Kommand** is a super lightweight, type-safe Kotlin DSL designed to simplify command registration on top of the
-Brigadier engine. The project is now split into platform modules so the common DSL can be shared between Paper and
-Velocity without leaking platform types into the core API.
+Kommand is a type-safe Kotlin DSL for command registration on top of Brigadier. It is split into platform modules so the
+common DSL can be shared between Paper and Velocity without leaking platform types into the core API.
 
-## ✨ Features
+## Features
 
 * **Type-Safe DSL:** Define commands, subcommands, and arguments using a clean Kotlin syntax.
 * **Automatic Mapping:** Map string inputs directly to custom objects using `listArgument`.
@@ -24,7 +23,7 @@ Velocity without leaking platform types into the core API.
 
 ---
 
-## 📦 Installation
+## Installation
 
 Add the platform module you need to your `build.gradle.kts`:
 
@@ -42,7 +41,7 @@ dependencies {
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Basic Usage
 Define a simple command with a required argument:
@@ -66,7 +65,7 @@ command("teleport", "tp") {
 
 ---
 
-## 🧠 Understanding Execution Flow
+## Understanding Execution Flow
 
 In **Kommand**, every `execute` block returns a `Boolean`. This value determines whether the engine should stop or continue searching for more specific matches.
 
@@ -74,7 +73,7 @@ In **Kommand**, every `execute` block returns a `Boolean`. This value determines
 *   **`return true`**: Logic stops here. Use this when the command is fully handled.
 *   **`return false`**: Logic runs, but the engine continues to check child arguments or subcommands.
 
-This is perfect for **Global Logic** (like logging or cooldown checks) that should apply to all subcommands:
+This is useful for global logic (like logging or cooldown checks) that should apply to all subcommands:
 
 ```kotlin
 command("economy") {
@@ -135,7 +134,7 @@ command("heal") {
 
 ---
 
-## 🛠️ Advanced Examples
+## Advanced Examples
 
 ### Advanced List Mapping
 Map dynamic collections to your own domain objects automatically.
@@ -183,20 +182,13 @@ command("stats") {
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-
-## 💬 Community & Support
-
-Got questions, need help, or want to showcase what you've built with **Kommand**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-* **Issues**: Open a ticket on GitHub for bugs or feature requests.
+Contributions are welcome. Feel free to submit a pull request.
 
 ---
-*Built with ❤️ by Larkyy*
+
+## Community & Support
+
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

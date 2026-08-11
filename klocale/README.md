@@ -1,25 +1,25 @@
-# 🌍 KLocale
+# KLocale
 
 [![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/klocale/badge)](https://www.codefactor.io/repository/github/mrlarkyy/klocale)
 [![Reposilite](https://repo.aquatic.gg/api/badge/latest/releases/gg/aquatic/klocale?color=40c14a&name=Reposilite&filter=26)](https://repo.aquatic.gg/#/releases/gg/aquatic/klocale)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**KLocale** is a high-performance, developer-friendly localization library for Kotlin and PaperMC. It bridges the gap between raw configuration files and rich, interactive Adventure Components.
+KLocale is a localization library for Kotlin and PaperMC. It maps configuration files to Adventure Components.
 
-## ✨ Features
+## Features
 
-*   **High Performance:** Pre-renders static messages to minimize object allocation.
-*   **Smart Fallbacks:** Automatic locale resolution (e.g., en_US -> en -> default).
-*   **MiniMessage Ready:** Native support for Kyori MiniMessage and legacy color codes.
-*   **Single-Pass Replacement:** Optimized placeholder system to prevent double-replacement issues.
-*   **Multi-Provider:** Load locales from YAML, GitHub, HTTP, or internal resources.
-*   **Async Loading:** Coroutine-based loading to keep your server tick-rate silky smooth.
-*   **Fail-Safe:** Customizable strategies for missing keys (MissingKeyHandler).
+*   **Pre-rendering:** Static messages are pre-rendered to reduce object allocation.
+*   **Fallbacks:** Automatic locale resolution (e.g. en_US -> en -> default).
+*   **MiniMessage:** Supports Kyori MiniMessage and legacy color codes.
+*   **Single-pass replacement:** Placeholder replacement avoids double-replacement issues.
+*   **Multiple providers:** Load locales from YAML, GitHub, HTTP, or internal resources.
+*   **Async loading:** Coroutine-based loading to keep locale loading off the main thread.
+*   **Missing keys:** Configurable strategies for missing keys (`MissingKeyHandler`).
 
 ---
 
-## 📦 Installation
+## Installation
 
 Add the library to your build.gradle.kts:
 
@@ -36,9 +36,9 @@ dependencies {
 
 ---
 
-## 🚀 Quick Start (Paper)
+## Quick Start (Paper)
 
-Initialize your locale manager using the clean Kotlin DSL:
+Initialize your locale manager using the Kotlin DSL:
 
 ````kotlin
 val localeManager = KLocale.paper {
@@ -64,7 +64,7 @@ scope.launch {
 
 ### Sending Messages
 
-Fetching and sending messages is intuitive and chainable:
+Fetching and sending messages is chainable:
 
 ````kotlin
 fun welcome(player: Player) {
@@ -76,11 +76,11 @@ fun welcome(player: Player) {
 }
 ````
 
-## 🛠 Advanced Usage
+## Advanced Usage
 
 ### Type-Safe Enums
-Implement `CfgMessageHandler` to access your messages globally with clean syntax:
-Check out `MessagesExample` for a full example.
+Implement `CfgMessageHandler` to access your messages globally.
+See `MessagesExample` for a full example.
 
 ```kotlin
 enum class Messages(override val path: String) : CfgMessageHandler<PaperMessage> {
@@ -149,21 +149,13 @@ class MyCustomHandler : MissingKeyHandler<PaperMessage> {
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-
-## 💬 Community & Support
-
-Got questions, need help, or want to showcase what you've built with **KLocale**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
-
+Contributions are welcome. Feel free to submit a pull request.
 
 ---
-*Built with ❤️ by Larkyy*
+
+## Community & Support
+
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

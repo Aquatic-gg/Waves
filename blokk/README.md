@@ -1,21 +1,22 @@
-# Blokk 🧱
+# Blokk
 
 [![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/blokk/badge)](https://www.codefactor.io/repository/github/mrlarkyy/blokk)
 [![Reposilite](https://repo.aquatic.gg/api/badge/latest/releases/gg/aquatic/blokk?color=40c14a&name=Reposilite)](https://repo.aquatic.gg/#/releases/gg/aquatic/blokk)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**Blokk** is a powerful Kotlin library for Minecraft (Paper/Spigot) that provides a unified abstraction layer for block placement. It allows developers to handle Vanilla blocks, ItemsAdder blocks, and Oraxen blocks through a single API, while supporting complex, rotatable multi-block structures.
+Blokk is a Kotlin library for Minecraft (Paper/Spigot) that provides an abstraction layer for block placement. It handles
+Vanilla, ItemsAdder, and Oraxen blocks through a single API, and supports rotatable multi-block structures.
 
-## ✨ Features
+## Features
 
-- **Unified Block API**: A single interface for `Vanilla`, `ItemsAdder`, and `Oraxen` blocks.
-- **Multi-Block Structures**: Define complex shapes using a simple character-map grid system.
-- **Directional Rotation**: Multi-blocks automatically rotate based on the target location's yaw to face the correct direction.
-- **Easy Serialization**: Load individual blocks or entire multi-blocks directly from Bukkit `ConfigurationSection`.
-- **Extensible**: Add support for custom block providers using the `BlockFactory` registry.
+- **Unified block API**: A single interface for `Vanilla`, `ItemsAdder`, and `Oraxen` blocks.
+- **Multi-block structures**: Define shapes using a character-map grid system.
+- **Directional rotation**: Multi-blocks rotate based on the target location's yaw.
+- **Serialization**: Load individual blocks or multi-blocks from a Bukkit `ConfigurationSection`.
+- **Extensible**: Add custom block providers through the `BlockFactory` registry.
 
-## 📦 Installation
+## Installation
 
 Add the repository and dependency to your `build.gradle.kts`:
 
@@ -29,10 +30,10 @@ dependencies {
 }
 ````
 
-## 🚀 Usage
+## Usage
 
 ### Initialization
-Before using the library, you must initialize it with the block factories you want to support (e.g., ItemsAdder or Oraxen).
+Initialize the library with the block factories you want to support (e.g. ItemsAdder or Oraxen).
 
 ````kotlin
 override fun onEnable() {
@@ -82,11 +83,7 @@ val multiBlock = BlokkSerializer.loadMultiBlock(configSection)
 val placedLocations = multiBlock.spawn(location)
 ````
 
-## 💬 Community & Support
+## Community & Support
 
-Got questions, need help, or want to showcase what you've built with **Blokk**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

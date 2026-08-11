@@ -1,22 +1,23 @@
-# TreePAPI 🌳
+# TreePAPI
 
 [![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/treepapi/badge)](https://www.codefactor.io/repository/github/mrlarkyy/treepapi)
 [![Reposilite](https://repo.aquatic.gg/api/badge/latest/releases/gg/aquatic/tree-papi?color=40c14a&name=Reposilite)](https://repo.aquatic.gg/#/releases/gg/aquatic/tree-papi)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-A high-performance, DSL-based library for creating complex, nested PlaceholderAPI expansions in Kotlin. Instead of messy `if-else` or `switch` chains, TreePAPI uses a tree structure to resolve placeholders with $O(1)$ literal lookups and efficient argument parsing.
+A DSL-based library for building nested PlaceholderAPI expansions in Kotlin. Instead of `if-else` or `when` chains,
+TreePAPI resolves placeholders through a tree structure with O(1) literal lookups.
 
-## ✨ Features
-*   **Intuitive DSL:** Define placeholders using a clean, nested structure.
-*   **High Performance:** Uses HashMaps for literal lookups and index-based traversal to avoid unnecessary memory allocations.
-*   **Smart Parsing:** Built-in support for quoted arguments (e.g., `%prefix_display_"My Name With Spaces"%`).
-*   **Type Safe:** Easily extract arguments as `String`, `Int`, or Bukkit `Player` objects.
-*   **Optional Arguments:** Fallback handlers allow for flexible placeholder depths (e.g., `%eco_bal%` and `%eco_bal_gems%`).
+## Features
+*   **DSL:** Define placeholders using a nested structure.
+*   **Literal lookups:** Uses hash maps for literal lookups and index-based traversal to limit allocations.
+*   **Quoted arguments:** Supports quoted arguments (e.g. `%prefix_display_"My Name With Spaces"%`).
+*   **Type-safe:** Extract arguments as `String`, `Int`, or Bukkit `Player` objects.
+*   **Optional arguments:** Fallback handlers allow flexible placeholder depths (e.g. `%eco_bal%` and `%eco_bal_gems%`).
 
 ---
 
-## 🛠️ Installation
+## Installation
 
 Add the library to your `build.gradle.kts`:
 
@@ -34,7 +35,7 @@ dependencies {
 
 ---
 
-## 🚀 Usage
+## Usage
 
 ### 1. Define your Placeholders
 Using the `papiPlaceholder` function, you can build your tree.
@@ -100,11 +101,7 @@ The library automatically handles underscores within quotes, which is a common l
 
 ---
 
-## 💬 Community & Support
+## Community & Support
 
-Got questions, need help, or want to showcase what you've built with **TreePAPI**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

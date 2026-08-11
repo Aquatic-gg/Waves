@@ -5,36 +5,30 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-blue.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-A high-performance, packet-based, asynchronous Minecraft menu framework for Paper.
-Designed to be lightweight, packet-efficient, and easy to unit test.
+A packet-based, asynchronous Minecraft menu framework for Paper. It manages inventory windows entirely through packets,
+which makes it unit-testable without a running server.
 
 ## Key Features
 
-* **Zero Bukkit Inventories:** Uses pure packets for window management via [Pakket](https://github.com/aquatic/Pakket).
-* **Async by Design:** Built for Kotlin coroutines with non-blocking updates.
-* **Packet-Efficient:** Sends only the slots that actually changed.
-* **Reactive Components:** Buttons and lists update dynamically without re-creating objects.
-* **Advanced Slot Management:** Priorities, overlaps, rectangles, and ranges.
+* **No Bukkit inventories:** Manages windows through packets via [Pakket](https://github.com/aquatic/Pakket).
+* **Async:** Built for Kotlin coroutines with non-blocking updates.
+* **Packet-efficient:** Sends only the slots that actually changed.
+* **Reactive components:** Buttons and lists update without re-creating objects.
+* **Slot management:** Priorities, overlaps, rectangles, and ranges.
 
 ### Why KMenu?
 
-Unlike standard GUI APIs, KMenu operates entirely on the client side.
+KMenu operates entirely on the client side, which has a few consequences:
 
-**Who should use this?**
-* **Server owners** building complex navigation menus, shops, or profile views.
-* **Developers** who want full control without Bukkit inventory quirks.
-
-**The "Ghost" Advantage**
-Because the inventory logic is handled via packets:
-1. **Item Security:** Items are virtual; players cannot steal them via glitches.
-2. **Button Logic:** Every slot behaves like a programmable button.
-3. **Performance:** No server-side container ticking or sync overhead.
+1. **Item security:** Items are virtual, so players cannot remove them through inventory glitches.
+2. **Button logic:** Every slot behaves like a programmable button.
+3. **No container ticking:** There is no server-side container to tick or keep in sync.
 
 ### Technical Overview
 
-KMenu bypasses the Bukkit `InventoryView` system. It listens to packet events, processes click logic
-internally, and sends window packets directly to the client. This allows for custom container types
-and titles without the limitations of the native API.
+KMenu bypasses the Bukkit `InventoryView` system. It listens to packet events, processes click logic internally, and
+sends window packets directly to the client. This allows custom container types and titles that the native API does not
+expose.
 
 ---
 
@@ -171,8 +165,8 @@ menu.open(player)
 
 ### SlotManager (Pure Logic)
 
-KMenu decouples menu logic from Bukkit's heavy registry system. The `SlotManager` handles priority and ownership
-calculations using pure Kotlin math (`y * 9 + x`), making it lightning-fast and unit-testable without a server.
+KMenu keeps menu logic separate from Bukkit. The `SlotManager` handles priority and ownership calculations using plain
+Kotlin math (`y * 9 + x`), so it is unit-testable without a server.
 
 ### Packet Saver
 
@@ -180,7 +174,7 @@ Before sending a slot update, KMenu performs:
 1. **Reference check** (same object)
 2. **Basic check** (amount + type)
 3. **Deep check** (`isSimilar`)
-This ensures zero redundant packets, improving network stability for large servers.
+This avoids sending redundant slot-update packets.
 
 ### Reactive ListMenu
 
@@ -219,9 +213,5 @@ fun `test priority ownership`() {
 
 ## Community & Support
 
-Got questions or want to showcase what you've built with KMenu?
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-* **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

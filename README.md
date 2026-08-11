@@ -1,131 +1,97 @@
-# 🌊 Waves Framework
+# Waves
 
 [![Code Quality](https://www.codefactor.io/repository/github/mrlarkyy/waves/badge)](https://www.codefactor.io/repository/github/mrlarkyy/waves)
 [![Reposilite](https://repo.aquatic.gg/api/badge/latest/releases/gg/aquatic/waves?color=40c14a&name=Reposilite)](https://repo.aquatic.gg/#/releases/gg/aquatic/waves)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**Waves** is a cutting-edge, modular development ecosystem for high-scale Minecraft servers. Built from the ground up to
-leverage **Kotlin Coroutines** and **Packet-Level Abstractions**, it allows developers to build feature-rich
-experiences (like fake entities, custom GUIs, and scripted logic) without the performance tax of traditional Bukkit API
-implementations.
+Waves is a modular set of Kotlin libraries for Paper/Spigot Minecraft servers. It leans on Kotlin coroutines and
+packet-level abstractions so features like fake entities, custom GUIs, and configurable logic can be built without going
+through the standard Bukkit API for everything.
 
----
+## Design notes
 
-## 🏛 Core Philosophy: "Client-Side First"
+- Many visuals (holograms, fake entities) live only in the client via the `Pakket` module, so they do not occupy
+  server-side entities.
+- Actions, database access, and input handling are built around coroutines and run off the main thread where possible.
+- High-read data can be stored in `SnapshotMap`, which is optimized for frequent iteration.
 
-Traditional Minecraft development relies on server-side entities that tick every 50ms, consuming valuable CPU cycles.
-Waves shifts the paradigm:
+## Modules
 
-- **Zero-Tick Visuals**: Using the `Pakket` module, visuals like Holograms and Fake Entities exist only in the player's
-  memory.
-- **Asynchronous Logic**: Nearly every system in Waves (Actions, Database, Input) is designed to run on `Dispatchers.IO`
-  or custom coroutine scopes, keeping the main server thread focused strictly on physics and vital logic.
-- **Snapshot Caching**: High-read data is stored in `SnapshotMap`, providing near-instant access for multi-threaded read
-  operations.
+Each module handles one part of plugin development and can be depended on independently.
 
----
+| Module                                     | Purpose                                                                                          |
+|:-------------------------------------------|:-------------------------------------------------------------------------------------------------|
+| [AquaticCommon](./aquatic-common)          | Shared foundation: `ArgumentContext` for type-safe parsing, coroutine scopes, Bukkit extensions. |
+| [Pakket](./pakket)                         | NMS/packet abstraction for client-side entity spawning, metadata, and passenger packets.         |
+| [Execute](./execute)                       | Serializable logic engine for defining `Actions` and `Requirements` in configuration.            |
+| [KMenu](./kmenu)                           | Packet-based inventory GUI framework with async click handling, pagination, and live updates.    |
+| [Kommand](./kommand)                       | Type-safe command routing on top of Brigadier.                                                   |
+| [KLocale](./klocale)                       | Per-player localization with Adventure/MiniMessage support.                                      |
+| [SnapshotMap](./snapshot-map)              | Read-optimized map wrapper for high-frequency iteration.                                          |
+| [KRegistry](./kregistry)                   | Registry system for managing lifecycles and lookups of plugin components.                        |
+| [KEvent](./kevent)                         | Coroutine-friendly event bus.                                                                    |
+| [Kurrency](./kurrency)                     | Economy abstraction supporting multiple providers (Vault, PlayerPoints, etc.) and custom types.  |
+| [Blokk](./blokk)                           | Block abstraction for reading block data and placing blocks across multiple plugins.             |
+| [Replace](./replace)                       | String/Component placeholder engine with caching and throttled updates.                          |
+| [Stacked](./stacked)                       | ItemStack utility library for item building and click handling with plugin hooks.                |
+| [Statistik](./statistik)                   | Player statistic tracking.                                                                        |
+| [TreePAPI](./tree-papi)                    | DSL for building PlaceholderAPI expansions.                                                       |
 
-## 🧱 The Module Ecosystem
+## Feature overview
 
-Waves is powered by a comprehensive family of specialized libraries. Each module handles a specific pillar of modern
-plugin development, allowing for a clean, decoupled architecture.
+### Packet-based "fake" objects
 
-| Module                                                         | Purpose                                                                                                                           | Source                                                |
-|:---------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------|:-------------------------------------------------------|
-| **[AquaticCommon](./aquatic-common)** | The foundation. Provides `ArgumentContext` for type-safe data parsing, Coroutine scopes, and extensive Bukkit extensions.         | [🔗 Source](./aquatic-common) |
-| **[Pakket](./pakket)**               | High-level NMS/Packet abstraction. Manages client-side entity spawning, metadata updates, and passenger packets.                  | [🔗 Source](./pakket)        |
-| **[Execute](./execute)**             | A serializable logic engine. Allows complex `Actions` and `Requirements` to be defined in configurations and executed at runtime. | [🔗 Source](./execute)       |
-| **[KMenu](./kmenu)**                 | A reactive DSL for Inventory GUIs. Features asynchronous click handling, pagination, and dynamic button updating.                 | [🔗 Source](./kmenu)         |
-| **[Kommand](./kommand)**             | Modern, type-safe command routing framework that eliminates boilerplate command registration.                                     | [🔗 Source](./kommand)       |
-| **[KLocale](./klocale)**             | Internationalization engine. Handles per-player localization with full Adventure/MiniMessage support.                             | [🔗 Source](./klocale)       |
-| **[SnapshotMap](./snapshot-map)**     | Thread-safe, lock-free maps optimized for extreme read performance in high-concurrency environments.                              | [🔗 Source](./snapshot-map)   |
-| **[KRegistry](./kregistry)**         | Dynamic object registry for managing lifecycles and lookups of custom plugin components.                                          | [🔗 Source](./kregistry)     |
-| **[KEvent](./kevent)**               | Lightweight, Coroutine-friendly event wrappers to replace standard, bulky event listeners.                                        | [🔗 Source](./kevent)        |
-| **[Kurrency](./kurrency)**           | A unified economy abstraction layer supporting multiple providers (Vault, PlayerPoints, etc.) and custom currencies.              | [🔗 Source](./kurrency)      |
-| **[Blokk](./blokk)**                 | A simple block library for getting blockdata & placing blocks via multiple plugins.                                               | [🔗 Source](./blokk)         |
-| **[Replace](./replace)**             | High-performance string replacement engine designed for rapid placeholder processing.                                             | [🔗 Source](./replace)       |
-| **[Stacked](./stacked)**             | Modern ItemStack utility library for click handling and item building with plugin hooks.                                          | [🔗 Source](./stacked)       |
-| **[Statistik](./statistik)**         | Optimized data tracking system for player metrics.                                                                                | [🔗 Source](./statistik)     |
-| **[TreePAPI](./tree-papi)**           | A placeholders DSL for PlaceholderAPI plugin - simple creation of placeholders.                                                   | [🔗 Source](./tree-papi)      |
+Located in `gg.aquatic.waves.clientside`:
 
----
+- Client-side entities: spawn NPCs, blocks, or models visible only to specific players.
+- ModelEngine integration via `FakeMEG` for custom models through packets.
+- Packet-level click detection mapped back to Bukkit-like interaction events.
 
-## 🛠 Feature Deep-Dive
+### Scriptable actions (`Execute`)
 
-### 👻 Packet-Based "Fake" Objects
+- Type-safe parameter parsing (Int, String, Collection, etc.) for actions.
+- Requirements to gate actions behind checks (permissions, currency, etc.).
+- Nested logical conditions defined directly in configuration.
 
-Located in `gg.aquatic.waves.clientside`, this system allows for:
+### Economy and data (`Kurrency` and `Statistik`)
 
-- **Client-Side Entities**: Spawn NPCs, blocks, or models that only specific players can see.
-- **ModelEngine Integration**: Built-in support for `FakeMEG` to handle custom models via packets.
-- **Interaction Handling**: Packet-level click detection that maps back to standard Bukkit-like events.
+- `Kurrency`: a single API for multiple currency types (Vault, points, etc.).
+- `Statistik`: tracking of player data and metrics.
 
-### 📜 Scriptable Actions (`Execute`)
+### Collections (`SnapshotMap`)
 
-Turn your YAML configs into logic. `Execute` supports:
+For data read at high frequency (move events, packet listeners), `SnapshotMap` provides lock-free, thread-safe
+iteration. See the [module benchmarks](./snapshot-map) for measured comparisons against `ConcurrentHashMap`.
 
-- **Arguments**: Type-safe parameter parsing (Int, String, Collection, etc.) for actions.
-- **Requirements**: Gate actions behind checks (permissions, currency, etc.).
-- **Smart Actions**: Nested logical conditions directly in configuration.
-
-### 💰 Economy & Data (`Kurrency` & `Statistik`)
-
-- **Kurrency**: A unified API for handling multiple types of currency (Vault, Points, etc.).
-- **Statistik**: Optimized tracking of player data and metrics.
-
-### 🗺 Optimized Collections (`SnapshotMap`)
-
-For data that is read thousands of times per second (like move events or packet listeners), Waves uses `SnapshotMap` to
-provide lock-free, thread-safe access that outperforms standard `ConcurrentHashMap`.
-
----
-
-## ⚡ Performance Benchmarks
-
-The **SnapshotMap** module is specifically benchmarked for Minecraft environments.
-
-- **Read Speed**: Significantly faster than `ConcurrentHashMap` for high-frequency lookups (e.g., getting player data on
-  every move packet).
-- **Scalability**: Designed to maintain performance as player counts increase.
-
----
-
-## 🚀 Getting Started
+## Getting started
 
 ### Prerequisites
 
 - Java 21+
-- Gradle (with Kotlin DSL)
+- Gradle (Kotlin DSL)
 - A Paper/Spigot server 1.21.1+
 
 ### Installation
 
-All internal libraries live in this repository, so a plain clone is all you need:
+All internal libraries live in this repository, so a plain clone is enough:
 
-```shell script
+```shell
 git clone https://github.com/Aquatic-gg/Waves.git
 ```
 
 ### Building
 
-```shell script
+```shell
 # Build the main shadowed jar
 ./gradlew shadowJar
 ```
 
-## 🤝 Contributing
+## Contributing
 
-Waves is a massive ecosystem. If you'd like to contribute to a specific module, please check the individual module
-directories linked in the table above.
+To contribute to a specific module, see the individual module directories linked in the table above.
 
----
+## Community & Support
 
-## 💬 Community & Support
-
-Got questions, need help, or want to showcase what you've built with **Waves**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-* **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

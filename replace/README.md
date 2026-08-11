@@ -1,23 +1,24 @@
-# Replace 🔄
+# Replace
 
 [![CodeFactor](https://www.codefactor.io/repository/github/mrlarkyy/replace/badge)](https://www.codefactor.io/repository/github/mrlarkyy/replace)
 [![Reposilite](https://repo.aquatic.gg/api/badge/latest/releases/gg/aquatic/replace?color=40c14a&name=Reposilite)](https://repo.aquatic.gg/#/releases/gg/aquatic/replace)
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**Replace** is a high-performance, type-safe Kotlin library designed for Minecraft plugins to handle dynamic placeholders with built-in caching and smart state management.
+Replace is a type-safe Kotlin library for handling dynamic placeholders in Minecraft plugins, with caching and change
+tracking to avoid redundant work.
 
-## ✨ Key Features
+## Key Features
 
-- **Smart Updating:** Automatically avoids redundant updates to save CPU and network bandwidth (crucial for packet-based systems).
-- **Type-Safe Contexts:** Link placeholders to specific types (e.g., `Player`, `Entity`, or custom objects).
-- **Context Transformations:** Easily map data types (e.g., provide a `Game` object and automatically inherit `Player` placeholders).
-- **Update Intervals:** Built-in throttling to control how often values are re-calculated.
-- **Multi-Format:** Support for `String` literals and Kyori `Component`s out of the box.
+- **Change tracking:** Skips redundant updates to save CPU and network bandwidth, which matters for packet-based systems.
+- **Type-safe contexts:** Link placeholders to specific types (e.g. `Player`, `Entity`, or custom objects).
+- **Context transformations:** Map data types (e.g. provide a `Game` object and inherit `Player` placeholders).
+- **Update intervals:** Throttling to control how often values are recalculated.
+- **Multiple formats:** Supports `String` literals and Kyori `Component`s.
 
 ---
 
-## 📦 Installation
+## Installation
 
 Add the repository and dependency to your `build.gradle.kts`:
 
@@ -33,7 +34,7 @@ dependencies {
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Define Placeholders
 You can define placeholders that return simple strings or complex Kyori components.
@@ -92,8 +93,9 @@ if (updateResult.wasUpdated) {
 }
 ```
 
-### 5. Placeholder DSL (New! 🌳)
-For complex placeholders with multiple branches and arguments (PAPI-style), you can use the built-in DSL. It handles underscored tokens and quoted arguments automatically.
+### 5. Placeholder DSL
+For placeholders with multiple branches and arguments (PAPI-style), use the built-in DSL. It handles underscored tokens
+and quoted arguments automatically.
 
 ```kotlin
 Placeholders.registerDSL<Player>("rank") {
@@ -139,28 +141,21 @@ Placeholders.registerDSL<Player>("stat") {
 }
 ```
 
-## 🔌 PlaceholderAPI Support
-If PlaceholderAPI is present on the server, `Replace` can automatically wrap PAPI placeholders into its type-safe system using the `papi` identifier:
+## PlaceholderAPI Support
+If PlaceholderAPI is present on the server, Replace can wrap PAPI placeholders into its type-safe system using the `papi`
+identifier:
 
-`%papi_player_name%` → Automatically resolved via PAPI.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+`%papi_player_name%` -> resolved via PAPI.
 
 ---
 
-## 💬 Community & Support
+## Contributing
 
-Got questions, need help, or want to showcase what you've built with **Replace**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
-
+Contributions are welcome. Feel free to submit a pull request.
 
 ---
-*Built with ❤️ by Larkyy*
+
+## Community & Support
+
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

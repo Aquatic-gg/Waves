@@ -5,68 +5,67 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-A high-performance, read-optimized `MutableMap` wrapper for Kotlin/JVM.
+A read-optimized `MutableMap` wrapper for Kotlin/JVM.
 
-`SnapshotMap` is designed for scenarios where map iterations (`forEach`) are frequent but modifications are occasional.
-It uses an internal **Array-Snapshot** strategy to provide ultra-fast, lock-free iteration that significantly
-outperforms standard `ConcurrentHashMap`.
+`SnapshotMap` targets workloads where iteration (`forEach`) is frequent but modification is occasional. It keeps an
+internal array snapshot for lock-free iteration, which in read-heavy tests outperforms `ConcurrentHashMap` (see
+[benchmarks](#performance-benchmarks)).
 
 ## Features
 
-- **Zero-Allocation Iteration:** Once the snapshot is cached, `forEach` performs no allocations and avoids `Map.Entry`
+- **Allocation-free iteration:** Once the snapshot is cached, `forEach` performs no allocations and avoids `Map.Entry`
   overhead.
-- **CPU Cache Friendly:** Data is stored in contiguous arrays, maximizing L3 cache hits during full-map scans.
-- **Lock-Free Reads:** Standard point-lookups (`get`) delegate directly to the underlying map with zero-cost
-  abstraction.
-- **Smart Invalidation:** Snapshots are lazily rebuilt only when data actually changes, preventing redundant work during
-  frequent "no-op" writes.
-- **Coroutine Friendly:** Includes `SuspendingSnapshotMap` using `Mutex` for non-blocking iteration in asynchronous environments.
+- **Cache-friendly layout:** Data is stored in contiguous arrays for better cache locality during full-map scans.
+- **Lock-free reads:** Point lookups (`get`) delegate directly to the underlying map.
+- **Lazy invalidation:** Snapshots are rebuilt only when data actually changes, avoiding redundant work on no-op writes.
+- **Coroutine variant:** `SuspendingSnapshotMap` uses a `Mutex` for non-blocking iteration in async code.
 
 ---
 
 ## When to use SnapshotMap
 
-`SnapshotMap` is a specialized tool. It is not a 1:1 replacement for `ConcurrentHashMap` in every scenario.
+`SnapshotMap` is a specialized tool, not a drop-in replacement for `ConcurrentHashMap` in every scenario.
 
-### 💡 Which implementation to choose?
+### Which implementation to choose
 
-*   **`SnapshotMap`**: Use this for standard threaded applications. It uses `synchronized` for snapshot rebuilding, which is highly optimized by the JVM.
-*   **`SuspendingSnapshotMap`**: Use this in **Kotlin Coroutines** (e.g., Ktor, Quarkus). It uses a `Mutex`, ensuring that threads are never blocked during a snapshot rebuild, keeping your event loop responsive.
+*   **`SnapshotMap`**: For standard threaded applications. It uses `synchronized` for snapshot rebuilding.
+*   **`SuspendingSnapshotMap`**: For Kotlin coroutines (e.g. Ktor, Quarkus). It uses a `Mutex`, so threads are not
+    blocked during a snapshot rebuild.
 
-### ✅ Use SnapshotMap when:
+### Use SnapshotMap when
 
-* **Read-Iteration Heavy:** Your application calls `forEach` significantly more often than it calls `put` or `remove`.
-* **High Thread Contention:** Multiple threads are iterating over the map simultaneously. `SnapshotMap` eliminates the
-  internal locking bottlenecks of standard concurrent collections.
-* **Data Stability:** Your data changes in bursts or at set intervals (e.g., a game tick or a periodic config reload).
-* **Large Map Scans:** You are iterating over thousands of items where the CPU cache benefit of a flat array becomes
-  noticeable.
+* **Read/iteration heavy:** You call `forEach` far more often than `put` or `remove`.
+* **High thread contention:** Multiple threads iterate the map at once, where `SnapshotMap` avoids the locking overhead
+  of standard concurrent collections.
+* **Data changes in bursts:** Data updates at intervals (e.g. a game tick or a periodic config reload).
+* **Large scans:** You iterate over thousands of items, where the flat-array cache benefit is noticeable.
 
-### ❌ Avoid SnapshotMap when:
+### Avoid SnapshotMap when
 
-* **Write-Heavy Workloads:** If you are modifying the map as frequently as you are reading it, the overhead of constant
-  array rebuilding will make it slower than a standard `ConcurrentHashMap`.
-* **Memory Constrained:** This map stores a cached copy of your keys and values in arrays, effectively doubling the
-  reference memory usage of the map.
+* **Write-heavy:** If you modify the map as often as you read it, the cost of rebuilding the array makes it slower than
+  `ConcurrentHashMap`.
+* **Memory constrained:** The map keeps a cached copy of keys and values in arrays, roughly doubling reference memory
+  usage.
 
 ---
 
 ## Performance Benchmarks
 
-In our JMH tests with 100,000 items, `SnapshotMap` demonstrates superior scalability in read-heavy environments.
+JMH tests with 100,000 items, comparing read-heavy workloads. Results vary by machine and workload.
 
-### 1. Iteration Scalability (The "Win")
+### 1. Iteration Scalability
 
 *Measured with 7 threads iterating and 1 thread performing occasional writes (100ms interval).*
-Once the snapshot is cached, **SnapshotMap is ~2.5x faster** than `ConcurrentHashMap`. The `SuspendingSnapshotMap` performs nearly identically to the synchronous version thanks to `inline` optimization.
+Once the snapshot is cached, `SnapshotMap` is about 2.5x faster than `ConcurrentHashMap`. `SuspendingSnapshotMap`
+performs close to the synchronous version thanks to `inline` optimization.
 
 ![Iteration Scalability](scalability_results.png)
 
 ### 2. Single-Threaded Baseline (vs HashMap)
 
-In a single-threaded environment, `SnapshotMap` trades a small amount of raw lookup speed for a massive boost in scan
-efficiency. It is **~50% faster in iteration** due to cache locality, but **~30% slower in point-reads** because of
-delegation and thread-safety overhead.
+In a single-threaded environment, `SnapshotMap` trades some point-lookup speed for faster scans. It is about 50% faster
+in iteration due to cache locality, but about 30% slower in point reads because of delegation and thread-safety
+overhead.
 
 |  Point-Read Performance (HashMap Wins)  |   Iteration Performance (SnapshotMap Wins)   |
 |:---------------------------------------:|:--------------------------------------------:|
@@ -102,7 +101,7 @@ dependencies {
 // Wraps any ConcurrentHashMap (defaults to a new one)
 val map = SnapshotMap<String, Int>()
 
-// High-Performance Iteration (Snapshot optimized)
+// Snapshot-optimized iteration
 map.forEach { key, value ->
     println("$key -> $value")
 }
@@ -124,8 +123,7 @@ suspend fun processData() {
 
 ---
 
-## 💬 Community & Support
+## Community & Support
 
-Join our community for support or to discuss performance optimizations!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

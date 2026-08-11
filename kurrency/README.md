@@ -5,25 +5,24 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-Kurrency is a powerful, flexible, and asynchronous multi-currency management library designed for high-performance
-Minecraft servers (Paper/Spigot). It provides a robust API for handling player balances with support for multiple
-database backends and built-in caching.
+Kurrency is an asynchronous multi-currency management library for Minecraft servers (Paper/Spigot). It handles player
+balances with support for multiple database backends and caching.
 
-## ✨ Features
+## Features
 
-- **Multi-Currency Support**: Register and manage multiple custom currencies simultaneously.
-- **Asynchronous & Thread-Safe**: Built with Kotlin Coroutines and mutex-based locking to ensure data integrity during
+- **Multi-currency**: Register and manage multiple custom currencies at once.
+- **Asynchronous and thread-safe**: Built with Kotlin coroutines and mutex-based locking to protect data during
   transactions.
-- **Database Persistence**: Powered by [JetBrains Exposed](https://github.com/JetBrains/Exposed), supporting various SQL
+- **Database persistence**: Uses [JetBrains Exposed](https://github.com/JetBrains/Exposed), supporting several SQL
   databases.
-- **Efficient Caching**: Customizable caching layer to reduce database load.
-- **Registry System**: Integrated with `KRegistry` for easy currency management and lookup.
-- **Event System**: Built-in event bus (using `KEvent`) to listen for currency transactions.
-- **Vault Integration**: Ready for interoperability with the Vault API.
+- **Caching**: Configurable caching layer to reduce database load.
+- **Registry**: Integrated with `KRegistry` for currency management and lookup.
+- **Events**: Event bus (via `KEvent`) for currency transactions.
+- **Vault**: Interoperable with the Vault API.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Installation
 
@@ -59,7 +58,7 @@ initializeKurrency(
 )
 ```
 
-## 🛠 Currency Types & Registration
+## Currency Types & Registration
 
 Kurrency supports several ways to handle money. You can register them during initialization or at runtime using
 `KurrencyConfig.injectCurrency(currency)`.
@@ -106,7 +105,7 @@ val vault = VaultCurrency(id = "money", prefix = "$")
 KurrencyConfig.injectCurrency(vault)
 ```
 
-## 💻 Usage Examples
+## Usage Examples
 
 ### Basic Operations
 
@@ -142,11 +141,7 @@ handler.withTransaction(player.uniqueId, gems) { currentBalance ->
 
 ---
 
-## 💬 Community & Support
+## Community & Support
 
-Got questions, need help, or want to showcase what you've built with **Kurrency**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

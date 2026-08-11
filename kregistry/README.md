@@ -5,14 +5,14 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-A lightweight, type-safe registry system for Kotlin. KRegistry provides a bootstrap-driven registry graph with hierarchical type lookups and typed collections.
+A type-safe registry system for Kotlin. KRegistry provides a bootstrap-driven registry graph with hierarchical type lookups and typed collections.
 
 ## Features
 
-*   **Bootstrap-Driven Registries:** Build a registry graph from contributions with deterministic initialization.
-*   **Atomic Global State:** The registry graph uses compare-and-swap for safe concurrent updates.
-*   **Hierarchical Lookups:** Search grouped registries by binder type (including superclasses).
-*   **Zero Boilerplate:** Reified generics for clean, type-safe accessors.
+*   **Bootstrap-driven registries:** Build a registry graph from contributions with deterministic initialization.
+*   **Atomic global state:** The registry graph uses compare-and-swap for concurrent updates.
+*   **Hierarchical lookups:** Search grouped registries by binder type, including superclasses.
+*   **Reified generics:** Type-safe accessors without manual casting.
 
 ---
 
@@ -102,9 +102,5 @@ Grouped registries store per-binder registries keyed by a binder class. Use
 
 ## Community & Support
 
-Got questions, need help, or want to showcase what you've built with **KRegistry**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

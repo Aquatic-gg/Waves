@@ -5,11 +5,12 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-Execute is a high-performance, coroutine-based engine for creating complex logic sequences. It allows you to bind **Actions** to **Conditions** using a robust, extensible argument and registry system.
+Execute is a coroutine-based engine for building logic sequences. It binds **Actions** to **Conditions** through an
+extensible argument and registry system.
 
 ---
 
-### 📦 Installation
+### Installation
 
 Add the repository and dependency to your `build.gradle.kts`:
 
@@ -25,7 +26,7 @@ dependencies {
 
 ---
 
-### 🚀 Quick Start
+### Quick Start
 
 Initialize the engine in your plugin's `onEnable`. This sets up the Adventure API (MiniMessage) integration and registers all default executables.
 
@@ -40,7 +41,7 @@ Execute.injectExecutables()
 
 ---
 
-### 🛠️ Core Concepts & Code Examples
+### Core Concepts & Code Examples
 
 #### 1. Creating a Custom Action
 Actions define logic executed on a "binder" (usually a Player).
@@ -76,9 +77,10 @@ object MyCondition : Condition<Player> {
 
 ---
 
-### 💾 Serialization System
+### Serialization System
 
-Execute features a built-in serialization layer via `ActionSerializer`, `ConditionSerializer`, and `ArgumentSerializer`. This allows for seamless conversion between configuration files (like YAML) and live objects.
+Execute includes a serialization layer via `ActionSerializer`, `ConditionSerializer`, and `ArgumentSerializer`, which
+converts between configuration files (like YAML) and live objects.
 
 > #### How Serialization Works:
 > * **Config to Object:** The `ArgumentSerializer` reads `ConfigurationSection` data and maps it to the defined `ObjectArgument` list.
@@ -103,7 +105,7 @@ my-button:
 
 ---
 
-### 📂 Advanced Argument Types
+### Advanced Argument Types
 
 The engine supports a wide array of specialized arguments:
 * **TimedActionsArgument:** Execute actions after a specific delay.
@@ -111,7 +113,7 @@ The engine supports a wide array of specialized arguments:
 
 ---
 
-### 🏗️ Project Structure
+### Project Structure
 
 * `gg.aquatic.execute.action.impl.logical`: Advanced execution logic (ConditionalActions, SmartActions).
 * `gg.aquatic.execute.argument.impl`: Implementation of the argument parsing engine.
@@ -120,20 +122,13 @@ The engine supports a wide array of specialized arguments:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-
-## 💬 Community & Support
-
-Got questions, need help, or want to showcase what you've built with **KEvent**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-* **Issues**: Open a ticket on GitHub for bugs or feature requests.
+Contributions are welcome. Feel free to submit a pull request.
 
 ---
-*Built with ❤️ by Larkyy*
+
+## Community & Support
+
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

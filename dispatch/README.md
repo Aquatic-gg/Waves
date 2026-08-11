@@ -5,24 +5,21 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-Dispatch is a lightweight, coroutine-based task scheduler library for Kotlin, designed to handle asynchronous task
-execution with support for one-time delays, fixed-delay repetitions, and fixed-rate repetitions. It provides robust task
-management features, including pausing, resuming, and canceling tasks via returned task objects, along with real-time
-metrics and event tracking.
+Dispatch is a coroutine-based task scheduler for Kotlin. It handles one-time delays, fixed-delay repetitions, and
+fixed-rate repetitions, and lets you pause, resume, and cancel tasks through returned task objects. It also exposes
+metrics and a lifecycle event stream.
 
 ## Features
 
-- **Flexible Scheduling**: Schedule tasks to run once after a delay, or repeatedly at fixed intervals (delay or
-  rate-based). Supports **limited repeats** and **delayed starts**.
-- **Coroutine-Powered**: Built on Kotlin coroutines for efficient, non-blocking execution.
-- **Task Management**: Pause, resume, or cancel tasks directly on returned task objects. Includes a **built-in
-  status flow** to track a task's lifecycle.
-- **Customizable Execution Context**: Specify your own coroutine scope and dispatcher for integration with frameworks
-  like BukkitScheduler.
-- **Metrics and Monitoring**: Access live statistics on task counts, executions, and failures.
-- **Event Streaming**: Subscribe to a flow of events for task lifecycle notifications (start, completion, failure).
-- **Thread Safety**: Operates on a specified dispatcher to ensure controlled task handling.
-- **Lifecycle Control**: Integrates seamlessly with coroutine scopes for proper cancellation and error handling.
+- **Scheduling**: Run tasks once after a delay, or repeatedly at fixed intervals (delay or rate-based). Supports limited
+  repeats and delayed starts.
+- **Coroutine-based**: Built on Kotlin coroutines for non-blocking execution.
+- **Task management**: Pause, resume, or cancel tasks directly on returned task objects, with a status flow to track a
+  task's lifecycle.
+- **Execution context**: Specify your own coroutine scope and dispatcher, e.g. to integrate with BukkitScheduler.
+- **Metrics**: Live statistics on task counts, executions, and failures.
+- **Events**: Subscribe to a flow of task lifecycle notifications (start, completion, failure).
+- **Lifecycle control**: Integrates with coroutine scopes for cancellation and error handling.
 
 ---
 
@@ -228,13 +225,15 @@ be reused.
 
 ---
 
-## 🚀 Platform Support (Paper/Bukkit)
+## Platform Support (Paper/Bukkit)
 
-Dispatch now includes a dedicated module for **Paper/Bukkit** servers. This module allows you to run tasks safely on the server's primary thread or specific region threads (for Folia compatibility) while maintaining the benefits of coroutine scheduling.
+Dispatch includes a module for Paper/Bukkit servers. It runs tasks on the server's primary thread or specific region
+threads (for Folia compatibility) while keeping coroutine scheduling.
 
-- **Thread Safety**: Automatically handles thread-switching and "joins" tasks, ensuring the scheduler waits for the main thread to finish before proceeding.
-- **Folia Ready**: Includes `BukkitCtx.OfLocation` and `BukkitCtx.OfEntity` for regional scheduling.
-- **Non-Blocking**: The scheduler runs in the background; only your task's action blocks the primary thread.
+- **Thread switching**: Handles thread-switching and joins tasks, so the scheduler waits for the main thread to finish
+  before proceeding.
+- **Folia support**: Includes `BukkitCtx.OfLocation` and `BukkitCtx.OfEntity` for regional scheduling.
+- **Non-blocking**: The scheduler runs in the background; only your task's action blocks the primary thread.
 
 ---
 
@@ -279,11 +278,7 @@ scheduler.runRepeatFixedRate(20 * 50L) {
 - **Performance**: The default dispatcher uses a single thread; for CPU-intensive tasks, provide a multi-threaded
   dispatcher.
 
-## 💬 Community & Support
+## Community & Support
 
-Got questions, need help, or want to showcase what you've built with **Dispatch**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-* **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

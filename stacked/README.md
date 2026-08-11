@@ -5,23 +5,21 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**Stacked** is a robust Kotlin library for Minecraft (Paper/Spigot) developers, designed to provide a unified
-abstraction layer for item management. It simplifies handling, serializing, and modifying items across various popular
-custom item plugins.
+Stacked is a Kotlin library for Minecraft (Paper/Spigot) that provides an abstraction layer for item management. It
+handles, serializes, and modifies items across several custom item plugins through one API.
 
-## 🚀 Key Features
+## Key Features
 
-- Unified Item API: Interface with multiple item providers through a single, consistent API.
-- Cross-Plugin Support: Native support for Oraxen, Nexo, ItemsAdder, MythicMobs, MMOItems, HeadDatabase, Eco, and
-  CraftEngine.
-- Rich Item Options: Granular control over item properties including Lore, Enchants, Custom Model Data, Dye colors, and
-  Spawner types via ItemOptionHandle.
-- Serialization Layer: Seamlessly serialize and deserialize items for database storage or configuration files.
-- Interaction Handling: Built-in event system to handle complex item interactions (clicks, drops, swaps) easily.
+- Unified item API: interface with multiple item providers through a single API.
+- Cross-plugin support: Oraxen, Nexo, ItemsAdder, MythicMobs, MMOItems, HeadDatabase, Eco, and CraftEngine.
+- Item options: control over item properties including lore, enchants, custom model data, dye colors, and spawner types
+  via `ItemOptionHandle`.
+- Serialization: serialize and deserialize items for database storage or configuration files.
+- Interaction handling: event system for item interactions (clicks, drops, swaps).
 
 ---
 
-## 📦 Installation
+## Installation
 
 Add the repository and dependencies to your build.gradle.kts:
 
@@ -43,7 +41,7 @@ dependencies {
 
 ---
 
-## 💡 Quick Start
+## Quick Start
 
 ### Initialization
 
@@ -84,7 +82,7 @@ val item = StackedItem.loadFromYml(ConfigurationSection)
 
 ---
 
-## 🛠️ Supported Factories
+## Supported Factories
 
 Stacked uses specialized factories to retrieve items from different providers:
 
@@ -101,20 +99,13 @@ Stacked uses specialized factories to retrieve items from different providers:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-
-## 💬 Community & Support
-
-Got questions, need help, or want to showcase what you've built with **KEvent**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-* **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-* **Issues**: Open a ticket on GitHub for bugs or feature requests.
+Contributions are welcome. Feel free to submit a pull request.
 
 ---
-*Built with ❤️ by Larkyy*
+
+## Community & Support
+
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.

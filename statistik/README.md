@@ -5,20 +5,19 @@
 ![Kotlin](https://img.shields.io/badge/kotlin-2.3.0-purple.svg?logo=kotlin)
 [![Discord](https://img.shields.io/discord/884159187565826179?color=5865F2&label=Discord&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
 
-**Statistik** is a lightweight, extensible Kotlin framework for tracking player statistics on Minecraft (Paper/Spigot)
-servers. It provides a structured way to register, listen for, and handle various player actions through a clean,
-argument-based system.
+Statistik is an extensible Kotlin framework for tracking player statistics on Minecraft (Paper/Spigot) servers. It
+registers, listens for, and handles player actions through an argument-based system.
 
-## 🚀 Features
+## Features
 
-- **Modular Design:** Easy to add new statistic types by extending `ListenerStatisticType`.
-- **Argument Support:** Statistics can accept dynamic arguments (e.g., filtering `BlockBreak` by specific block types).
-- **Event-Driven:** Uses a custom `StatisticAddEvent` to bridge game events with your statistic logic.
-- **Kotlin-First:** Built with Kotlin, leveraging DSL-like listeners and objects for a clean API.
+- **Extensible:** Add new statistic types by extending `ListenerStatisticType`.
+- **Arguments:** Statistics can accept arguments (e.g. filtering `BlockBreak` by specific block types).
+- **Event-driven:** Uses a `StatisticAddEvent` to bridge game events with your statistic logic.
+- **Kotlin API:** DSL-like listeners and objects.
 
 ---
 
-## 📦 Installation
+## Installation
 
 To use Statistik in your project, add it to your `build.gradle.kts`:
 
@@ -34,18 +33,15 @@ dependencies {
 
 ---
 
-## 💻 Usage
+## Usage
 
 ### Registering a Statistic
 
-Statistics are managed through the `StatistikRegistry`. You can register the built-in implementations or your own custom
-ones.
+Statistics are managed through the `StatistikRegistry`. You can register the built-in implementations or your own.
 
 ### Implementing a Custom Statistic
 
-### Implementing a Custom Statistic
-
-Creating a new statistic is simple. While `ListenerStatisticType` is available for Bukkit events, you can extend the base `StatisticType` for any custom logic:
+`ListenerStatisticType` is available for Bukkit events, but you can extend the base `StatisticType` for any custom logic:
 
 ```kotlin
 object MyCustomStatistic : StatisticType<Player>() {
@@ -92,8 +88,8 @@ handle.register()
 
 #### 2. Using the Serializer (Recommended)
 
-Usually, you'll want to define statistics in a `config.yml`. The `StatistikSerializer` makes this easy by mapping
-configuration sections directly to handles.
+Usually you define statistics in a `config.yml`. The `StatistikSerializer` maps configuration sections directly to
+handles.
 
 **config.yml:**
 
@@ -121,7 +117,7 @@ val handles = StatistikSerializer.fromSections<Player>(section.getSections()) { 
 handles.forEach { it.register() }
 ```
 
-### 💡 Key Concepts
+### Key Concepts
 
 - **`StatisticType`**: The logic provider (e.g., `BlockBreakStatistic`). It defines *what* event to listen to.
 - **`StatisticHandle`**: An instance of a statistic. It defines *filters* (via `ObjectArguments`) and *actions* (via the
@@ -131,11 +127,7 @@ handles.forEach { it.register() }
 
 ---
 
-## 💬 Community & Support
+## Community & Support
 
-Got questions, need help, or want to showcase what you've built with **Statistik**? Join our community!
-
-[![Discord Banner](https://img.shields.io/badge/Discord-Join%20our%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/invite/ffKAAQwNdC)
-
-*   **Discord**: [Join the Aquatic Development Discord](https://discord.com/invite/ffKAAQwNdC)
-*   **Issues**: Open a ticket on GitHub for bugs or feature requests.
+- Discord: [Aquatic Development](https://discord.com/invite/ffKAAQwNdC)
+- Issues: open a ticket on GitHub for bugs or feature requests.
