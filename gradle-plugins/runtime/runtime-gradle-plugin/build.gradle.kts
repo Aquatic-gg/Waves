@@ -26,8 +26,8 @@ tasks.withType<Jar>().configureEach {
     manifest.attributes("Implementation-Version" to project.version)
 }
 
-val maven_username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
-val maven_password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
+val maven_username = extra["mavenUsername"] as String
+val maven_password = extra["mavenPassword"] as String
 
 publishing {
     repositories {

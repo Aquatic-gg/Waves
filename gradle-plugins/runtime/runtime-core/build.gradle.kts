@@ -24,8 +24,8 @@ publishing {
             )
 
             credentials {
-                username = if (env.isPresent("MAVEN_USERNAME")) env.fetch("MAVEN_USERNAME") else ""
-                password = if (env.isPresent("MAVEN_PASSWORD")) env.fetch("MAVEN_PASSWORD") else ""
+                username = extra["mavenUsername"] as String
+                password = extra["mavenPassword"] as String
             }
             authentication {
                 create<BasicAuthentication>("basic")

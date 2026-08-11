@@ -6,7 +6,7 @@ plugins {
     kotlin("jvm") version "2.3.20"
     kotlin("plugin.serialization") version "2.3.20"
     id("com.gradleup.shadow") version "9.4.1"
-    id("io.github.revxrsal.bukkitkobjects")
+    id("gg.aquatic.bukkitkobjects")
     id("gg.aquatic.runtime")
     id("co.uzzu.dotenv.gradle") version "4.0.0"
     java
@@ -347,4 +347,11 @@ publishing {
             artifact(tasks.shadowJar)
         }
     }
+}
+
+// The bundled Gradle plugins live in separate included builds, so their publish
+// tasks are not part of the root publish by default. Wire them in explicitly.
+tasks.named("publish") {
+    dependsOn(gradle.includedBuild("bukkit-kobjects").task(":publish"))
+    dependsOn(gradle.includedBuild("runtime").task(":publish"))
 }
