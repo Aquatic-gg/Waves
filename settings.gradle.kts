@@ -1,11 +1,12 @@
 pluginManagement {
     // Gradle plugins built from source in this repository. Plugins supplied
     // this way are requested without a version in the consuming build.
-    includeBuild("gradle-plugins/runtime")
     includeBuild("gradle-plugins/bukkit-kobjects")
 
     repositories {
-        mavenLocal()
+        maven {
+            url = uri("https://repo.kyngs.xyz/gradle-plugins")
+        }
         maven { url = uri("https://repo.aquatic.gg/releases") }
         gradlePluginPortal()
     }
@@ -15,11 +16,6 @@ plugins {
 }
 
 rootProject.name = "Waves"
-
-// Included again outside pluginManagement so that gg.aquatic:runtime-core,
-// which the runtime plugin injects into consumers, substitutes to the local
-// project instead of being resolved from a repository.
-includeBuild("gradle-plugins/runtime")
 
 include(
     ":aquatic-common",

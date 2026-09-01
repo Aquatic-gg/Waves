@@ -1,17 +1,17 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
-import xyz.jpenilla.runtask.task.AbstractRun
 
 plugins {
     kotlin("jvm") version "2.3.20"
     kotlin("plugin.serialization") version "2.3.20"
-    id("com.gradleup.shadow") version "9.4.1"
+    id("com.gradleup.shadow") version "9.6.1"
     id("gg.aquatic.bukkitkobjects")
-    id("gg.aquatic.runtime")
     id("co.uzzu.dotenv.gradle") version "4.0.0"
+    id("xyz.kyngs.librarian.plugin") version "2.0.0-SNAPSHOT"
     java
     id("xyz.jpenilla.run-paper") version "3.0.2"
     `maven-publish`
+    `java-library`
 
     // Applied selectively by individual modules.
     id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
@@ -105,6 +105,7 @@ allprojects {
         maven("https://repo.momirealms.net/releases")
         maven("https://repo.nexomc.com/releases")
         maven("https://repo.oraxen.com/releases")
+        maven("https://repo.kyngs.xyz/public/")
     }
 }
 
@@ -170,58 +171,33 @@ tasks {
     }
 }
 
-dependencyResolution {
-    repo("https://repo.maven.apache.org/maven2/")
-    repo("https://repo.papermc.io/repository/maven-public/")
-    repo("https://jitpack.io")
-    relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
-    relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
-    relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
-    relocate("org.jetbrains.exposed", "gg.aquatic.waves.libs.exposed")
-    relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
-    relocate("org.bstats", "gg.aquatic.waves.libs.bstats")
-}
-
-tasks.withType(AbstractRun::class) {
-    javaLauncher = javaToolchains.launcherFor {
-        vendor = JvmVendorSpec.JETBRAINS
-        languageVersion = JavaLanguageVersion.of(25)
-    }
-    jvmArgs("-XX:+AllowEnhancedClassRedefinition")
-}
-
 val exposedVersion = "1.2.0"
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.2.+")
     compileOnly("org.slf4j:slf4j-api:2.0.17")
 
-    implementation(project(":kmenu:kmenu-core"))
-    implementation(project(":kmenu:kmenu-serialization"))
-    implementation(project(":replace"))
-    implementation(project(":stacked"))
-    implementation(project(":kregistry"))
-    implementation(project(":kevent"))
-    implementation(project(":pakket"))
-    implementation(project(":execute"))
-    implementation(project(":kommand:kommand-paper"))
-    implementation(project(":aquatic-common"))
-    implementation(project(":kurrency"))
-    implementation(project(":klocale:klocale-common"))
-    implementation(project(":klocale:klocale-paper"))
-    implementation(project(":blokk"))
-    implementation(project(":tree-papi"))
-    implementation(project(":snapshot-map"))
-    implementation(project(":statistik"))
-    implementation(project(":kholograms:kholograms-core"))
-    implementation(project(":kholograms:kholograms-serialization"))
-    implementation(project(":clientside"))
-    implementation(project(":dispatch"))
-    implementation(project(":dispatch:dispatch-paper"))
-    implementation(project(":quick-mini-message"))
-    runtimeDownload("com.charleskorn.kaml:kaml:0.104.0")
+    implementation("xyz.kyngs.librarian:librarian-paper:2.0.0-SNAPSHOT")
+    api(project(":kmenu:kmenu-core"))
+    api(project(":kmenu:kmenu-serialization"))
+    api(project(":replace"))
+    api(project(":stacked"))
+    api(project(":kregistry"))
+    api(project(":pakket"))
+    api(project(":execute"))
+    api(project(":aquatic-common"))
+    api(project(":kurrency"))
+    api(project(":klocale:klocale-common"))
+    api(project(":klocale:klocale-paper"))
+    api(project(":blokk"))
+    api(project(":statistik"))
+    api(project(":kholograms:kholograms-core"))
+    api(project(":kholograms:kholograms-serialization"))
+    api(project(":clientside"))
+    api(project(":quick-mini-message"))
+    librarian("com.charleskorn.kaml:kaml:0.104.0")
 
-    runtimeDownload("com.github.ben-manes.caffeine:caffeine:3.2.3")
-    runtimeDownload("org.reflections:reflections:0.10.2")
+    librarian("com.github.ben-manes.caffeine:caffeine:3.2.3")
+    librarian("org.reflections:reflections:0.10.2")
     compileOnly("net.kyori:adventure-text-minimessage:4.26.1")
     compileOnly("net.kyori:adventure-text-serializer-gson:4.26.1")
     compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
@@ -232,73 +208,38 @@ dependencies {
     // Testing
     testImplementation("io.mockk:mockk:1.14.9")
     testImplementation(kotlin("test"))
-    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     testImplementation("com.h2database:h2:2.4.240")
-    testImplementation("net.kyori:adventure-text-serializer-gson:4.26.1")
-    testImplementation("net.kyori:adventure-text-minimessage:4.26.1")
 
     // DB
-    runtimeDownload("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    runtimeDownload("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    runtimeDownload("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    runtimeDownload("redis.clients:jedis:7.4.1")
-    runtimeDownload("com.zaxxer:HikariCP:7.0.2")
-    runtimeDownload("org.xerial:sqlite-jdbc:3.53.0.0")
-    runtimeDownload("org.mariadb.jdbc:mariadb-java-client:3.5.8")
+    librarian("org.jetbrains.exposed:exposed-core:$exposedVersion")
+    librarian("org.jetbrains.exposed:exposed-dao:$exposedVersion")
+    librarian("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
+    librarian("redis.clients:jedis:7.4.1")
+    librarian("com.zaxxer:HikariCP:7.0.2")
+    librarian("org.xerial:sqlite-jdbc:3.53.0.0")
+    librarian("org.mariadb.jdbc:mariadb-java-client:3.5.8")
 
-    runtimeDownload("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
-    runtimeDownload("org.jetbrains.kotlin:kotlin-reflect:2.3.20")
-    runtimeDownload("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    runtimeDownload("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    @Suppress("RedundantKotlinStdLibDependency")
+    librarian("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
+    librarian("org.jetbrains.kotlin:kotlin-reflect:2.3.20")
+    librarian("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    librarian("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 }
 
-configurations {
-    val gsonTest by creating
-    runtimeDownload {
-        exclude("org.checkerframework", "checker-qual")
-        exclude("com.google.code.gson")
-    }
-    compileOnly {
-        extendsFrom(configurations.runtimeDownload.get())
-    }
-    testImplementation {
-        extendsFrom(configurations.runtimeDownload.get())
-    }
-}
+val excludedLibs = listOf(
+    "org.slf4j:.*:.*",
+    "org.checkerframework:.*:.*",
+    "com.google.errorprone:.*:.*",
+    "com.google.protobuf:.*:.*",
+    "com.google.code.gson:.*:.*",
+)
 
-dependencies {
-    add("gsonTest", "com.google.code.gson:gson:2.13.2")
-}
-
-tasks.test {
-    classpath += configurations["gsonTest"]
+librarian {
+    excludedLibs.forEach { excludeDependency(it) }
 }
 
 kotlin {
     jvmToolchain(25)
-}
-
-val regularJar = tasks.register<ShadowJar>("regularJar") {
-    group = "build"
-    configurations = listOf(project.configurations.runtimeClasspath.get())
-    from(sourceSets.main.get().output)
-    archiveBaseName.set("Waves")
-    archiveClassifier.set("")
-    includedDependencies.setFrom(project.provider {
-        val workspacePath = rootDir.absoluteFile.normalize().toPath()
-        buildList {
-            configurations.get().forEach { configuration ->
-                configuration.resolvedConfiguration.resolvedArtifacts.forEach { artifact ->
-                    val artifactPath = artifact.file.absoluteFile.normalize().toPath()
-                    val isAquaticModule = artifact.moduleVersion.id.group.startsWith("gg.aquatic")
-                    val isLocalCompositeArtifact = artifactPath.startsWith(workspacePath)
-                    if (isAquaticModule || isLocalCompositeArtifact) {
-                        add(artifact.file)
-                    }
-                }
-            }
-        }
-    })
 }
 
 tasks.withType<ShadowJar> {
@@ -313,24 +254,29 @@ tasks.withType<ShadowJar> {
         exclude(dependency("javax.annotation:javax.annotation-api:.*"))
         exclude(dependency("com.google.code.findbugs:jsr305:.*"))
         exclude(dependency("org.slf4j:.*:.*"))
+        exclude(dependency("com.github.ben-manes.caffeine:caffeine:.*"))
+        exclude(dependency("com.google.code.gson:gson:.*"))
+        exclude(dependency("org.jetbrains.exposed:.*:.*"))
+        exclude(dependency("com.zaxxer:HikariCP:.*"))
+        exclude(dependency("redis.clients:jedis:.*"))
+        exclude(dependency("org.apache.commons:commons-pool2:.*"))
+        exclude(dependency("org.json:json:.*"))
     }
+
+    relocate("kotlin", "gg.aquatic.waves.libs.kotlin")
+    relocate("kotlinx", "gg.aquatic.waves.libs.kotlinx")
+    relocate("org.jetbrains.kotlin", "gg.aquatic.waves.libs.kotlin")
+    relocate("org.jetbrains.exposed", "gg.aquatic.waves.libs.exposed")
+    relocate("com.zaxxer.hikari", "gg.aquatic.waves.libs.hikari")
+    relocate("org.bstats", "gg.aquatic.waves.libs.bstats")
 
     mergeServiceFiles()
     filesMatching("META-INF/services/**") {
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
-}
 
-tasks.withType<PublishToMavenLocal>().configureEach {
-    dependsOn(tasks.jar)
-    dependsOn(regularJar)
-    dependsOn(tasks.shadowJar)
-}
-
-tasks.withType<PublishToMavenRepository>().configureEach {
-    dependsOn(tasks.jar)
-    dependsOn(regularJar)
-    dependsOn(tasks.shadowJar)
+    archiveBaseName.set("Waves")
+    archiveClassifier.set("")
 }
 
 publishing {
@@ -342,9 +288,7 @@ publishing {
             groupId = "gg.aquatic"
             artifactId = "waves"
             version = project.version.toString()
-
-            artifact(regularJar)
-            artifact(tasks.shadowJar)
+            from(components["java"])
         }
     }
 }
@@ -353,5 +297,4 @@ publishing {
 // tasks are not part of the root publish by default. Wire them in explicitly.
 tasks.named("publish") {
     dependsOn(gradle.includedBuild("bukkit-kobjects").task(":publish"))
-    dependsOn(gradle.includedBuild("runtime").task(":publish"))
 }
