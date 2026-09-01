@@ -9,6 +9,7 @@ import gg.aquatic.pakket.nms_1_21_8.NMSHandlerImpl as NMSHandlerImpl_1_21_7
 import gg.aquatic.pakket.nms_1_21_4.NMSHandlerImpl as NMSHandlerImpl_1_21_4
 import gg.aquatic.pakket.nms_1_21_9.NMSHandlerImpl as NMSHandlerImpl_1_21_9
 import gg.aquatic.pakket.nms_26_1_1.NMSHandlerImpl as NMSHandlerImpl_26_1_1
+import gg.aquatic.pakket.nms_26_2.NMSHandlerImpl as NMSHandlerImpl_26_2
 import org.bukkit.entity.Player
 
 object Pakket {
@@ -19,6 +20,7 @@ object Pakket {
             NMSVersion.V_1_21_7 -> NMSHandlerImpl_1_21_7
             NMSVersion.V_1_21_9 -> NMSHandlerImpl_1_21_9
             NMSVersion.V_26_1_1 -> NMSHandlerImpl_26_1_1
+            NMSVersion.V_26_2 -> NMSHandlerImpl_26_2
             else -> throw IllegalStateException("Unsupported server version: ${Bukkit.getServer().bukkitVersion.substringBefore("-")}.")
         }
     }

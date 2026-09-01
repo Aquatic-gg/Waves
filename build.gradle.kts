@@ -57,6 +57,7 @@ val publishedArtifactIds = mapOf(
     ":pakket:pakket-nms-1-21-8" to "pakket-nms-1-21-8",
     ":pakket:pakket-nms-1-21-9" to "pakket-nms-1-21-9",
     ":pakket:pakket-nms-26-1-1" to "pakket-nms-26-1-1",
+    ":pakket:pakket-nms-26-2" to "pakket-nms-26-2",
     ":quick-mini-message" to "quick-mini-message",
     ":replace" to "replace",
     ":snapshot-map" to "snapshot-map",
@@ -149,7 +150,7 @@ subprojects {
 
 tasks {
     runServer {
-        minecraftVersion("1.21.11")
+        minecraftVersion("26.2")
     }
 
     build {

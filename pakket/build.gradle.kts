@@ -6,6 +6,7 @@ dependencies {
     api(project(":pakket:pakket-nms-1-21-8"))
     api(project(":pakket:pakket-nms-1-21-9"))
     api(project(mapOf("path" to ":pakket:pakket-nms-26-1-1", "configuration" to "archives")))
+    api(project(mapOf("path" to ":pakket:pakket-nms-26-2", "configuration" to "archives")))
     api(project(":kevent"))
     api(project(":aquatic-common"))
 }

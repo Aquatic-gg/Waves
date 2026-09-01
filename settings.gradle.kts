@@ -42,6 +42,7 @@ include(
     ":pakket:pakket-nms-1-21-8",
     ":pakket:pakket-nms-1-21-9",
     ":pakket:pakket-nms-26-1-1",
+    ":pakket:pakket-nms-26-2",
     ":quick-mini-message",
     ":replace",
     ":snapshot-map",
