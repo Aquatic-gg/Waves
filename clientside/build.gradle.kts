@@ -1,6 +1,6 @@
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    compileOnly(libs.paper.api)
+    compileOnly(libs.kotlinx.coroutines.core)
 
     api(project(":aquatic-common"))
     api(project(":execute"))
@@ -11,8 +11,8 @@ dependencies {
     api(project(":blokk"))
     api(project(":kregistry"))
 
-    compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
-    compileOnly("io.github.toxicity188:bettermodel-bukkit-api:3.0.0")
+    compileOnly(libs.model.engine)
+    compileOnly(libs.bettermodel)
 
     testImplementation(kotlin("test"))
 }

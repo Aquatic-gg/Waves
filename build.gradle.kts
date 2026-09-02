@@ -2,21 +2,21 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
-    kotlin("jvm") version "2.3.20"
-    kotlin("plugin.serialization") version "2.3.20"
-    id("com.gradleup.shadow") version "9.6.1"
+    alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.shadow)
     id("gg.aquatic.bukkitkobjects")
-    id("co.uzzu.dotenv.gradle") version "4.0.0"
-    id("xyz.kyngs.librarian.plugin") version "2.0.0-SNAPSHOT"
+    alias(libs.plugins.dotenv)
+    alias(libs.plugins.librarian)
     java
-    id("xyz.jpenilla.run-paper") version "3.0.2"
+    alias(libs.plugins.run.paper)
     `maven-publish`
     `java-library`
 
     // Applied selectively by individual modules.
-    id("io.papermc.paperweight.userdev") version "2.0.0-beta.21" apply false
-    id("me.champeau.jmh") version "0.7.3" apply false
-    id("io.morethan.jmhreport") version "0.9.6" apply false
+    alias(libs.plugins.paperweight.userdev) apply false
+    alias(libs.plugins.jmh) apply false
+    alias(libs.plugins.jmhreport) apply false
 }
 
 bukkitKObjects {
@@ -176,12 +176,11 @@ tasks {
     }
 }
 
-val exposedVersion = "1.2.0"
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.2.+")
-    compileOnly("org.slf4j:slf4j-api:2.0.17")
+    compileOnly(libs.paper.api)
+    compileOnly(libs.slf4j.api)
 
-    implementation("xyz.kyngs.librarian:librarian-paper:2.0.0-SNAPSHOT")
+    implementation(libs.librarian.paper)
     api(project(":kmenu:kmenu-core"))
     api(project(":kmenu:kmenu-serialization"))
     api(project(":replace"))
@@ -198,7 +197,6 @@ dependencies {
     api(project(":kholograms:kholograms-serialization"))
     api(project(":clientside"))
     api(project(":quick-mini-message"))
-    api(project(":clientside"))
     api(project(":dispatch"))
     api(project(":dispatch:dispatch-paper"))
     api(project(":execute"))
@@ -208,36 +206,36 @@ dependencies {
     api(project(":snapshot-map"))
     api(project(":tree-papi"))
 
-    librarian("com.charleskorn.kaml:kaml:0.104.0")
+    librarian(libs.kaml)
 
-    librarian("com.github.ben-manes.caffeine:caffeine:3.2.3")
-    librarian("org.reflections:reflections:0.10.2")
-    compileOnly("net.kyori:adventure-text-minimessage:5.2.0")
-    compileOnly("net.kyori:adventure-text-serializer-gson:5.2.0")
-    compileOnly("net.kyori:adventure-text-serializer-plain:5.2.0")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-    compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
-    compileOnly("me.clip:placeholderapi:2.12.2")
+    librarian(libs.caffeine)
+    librarian(libs.reflections)
+    compileOnly(libs.adventure.text.minimessage)
+    compileOnly(libs.adventure.text.serializer.gson)
+    compileOnly(libs.adventure.text.serializer.plain)
+    compileOnly(libs.vault.api)
+    compileOnly(libs.model.engine)
+    compileOnly(libs.placeholderapi)
 
     // Testing
-    testImplementation("io.mockk:mockk:1.14.9")
+    testImplementation(libs.mockk)
     testImplementation(kotlin("test"))
-    testImplementation("com.h2database:h2:2.4.240")
+    testImplementation(libs.h2)
 
     // DB
-    librarian("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    librarian("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    librarian("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    librarian("redis.clients:jedis:7.4.1")
-    librarian("com.zaxxer:HikariCP:7.0.2")
-    librarian("org.xerial:sqlite-jdbc:3.53.0.0")
-    librarian("org.mariadb.jdbc:mariadb-java-client:3.5.8")
+    librarian(libs.exposed.core)
+    librarian(libs.exposed.dao)
+    librarian(libs.exposed.jdbc)
+    librarian(libs.jedis)
+    librarian(libs.hikaricp)
+    librarian(libs.sqlite.jdbc)
+    librarian(libs.mariadb.java.client)
 
     @Suppress("RedundantKotlinStdLibDependency")
-    librarian("org.jetbrains.kotlin:kotlin-stdlib:2.3.20")
-    librarian("org.jetbrains.kotlin:kotlin-reflect:2.3.20")
-    librarian("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    librarian("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    librarian(libs.kotlin.stdlib)
+    librarian(libs.kotlin.reflect)
+    librarian(libs.kotlinx.coroutines.core)
+    librarian(libs.kotlinx.serialization.json)
 }
 
 val excludedLibs = listOf(

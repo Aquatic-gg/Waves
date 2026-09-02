@@ -7,5 +7,5 @@ dependencies {
 
     api(project(":pakket:pakket-api"))
     api(project(":kevent"))
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    compileOnly(libs.kotlinx.coroutines.core)
 }

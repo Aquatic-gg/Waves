@@ -1,0 +1,139 @@
+[versions]
+# Kotlin
+kotlin = "2.3.20"
+kotlinx-coroutines = "1.10.2"
+kotlinx-serialization = "1.11.0"
+
+# Platform APIs (shared across all subprojects)
+paper = "26.2.+"
+adventure = "5.2.0"
+velocity = "3.4.0"
+brigadier = "1.0.500"
+netty = "4.2.12.Final"
+
+# Database
+exposed = "1.2.0"
+hikaricp = "7.0.2"
+jedis = "7.4.1"
+sqlite-jdbc = "3.53.0.0"
+mariadb = "3.5.8"
+
+# Utilities
+slf4j = "2.0.17"
+librarian = "2.0.0-SNAPSHOT"
+kaml = "0.104.0"
+caffeine = "3.2.3"
+reflections = "0.10.2"
+
+# Third-party plugin APIs
+vault-api = "1.7.1"
+model-engine = "R4.0.9"
+placeholderapi = "2.12.2"
+itemsadder-api = "4.0.10"
+itemsadder-legacy = "3.6.2-beta-r3"
+oraxen = "1.211.0"
+nexo = "1.21.0"
+bettermodel = "3.0.0"
+mythic = "5.11.2"
+mythiclib = "1.6.2-SNAPSHOT"
+mmoitems = "6.9.5-SNAPSHOT"
+headdatabase = "1.3.2"
+eco = "7.1.0"
+craft-engine = "0.0.67"
+score = "5.25.3.9"
+
+# Testing and benchmarking
+mockk = "1.14.9"
+h2 = "2.4.240"
+junit-jupiter = "6.0.3"
+jmh = "1.37"
+xchart = "3.8.8"
+jackson = "2.21.2"
+
+# Gradle plugins
+shadow = "9.6.1"
+dotenv = "4.0.0"
+run-paper = "3.0.2"
+paperweight = "2.0.0-beta.21"
+jmh-plugin = "0.7.3"
+jmhreport = "0.9.6"
+
+[libraries]
+# Kotlin
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+# Platform APIs
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper" }
+adventure-text-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure" }
+adventure-text-serializer-gson = { module = "net.kyori:adventure-text-serializer-gson", version.ref = "adventure" }
+adventure-text-serializer-plain = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "adventure" }
+adventure-text-serializer-ansi = { module = "net.kyori:adventure-text-serializer-ansi", version.ref = "adventure" }
+velocity-api = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
+brigadier = { module = "com.mojang:brigadier", version.ref = "brigadier" }
+netty-all = { module = "io.netty:netty-all", version.ref = "netty" }
+
+# Database
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
+exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref = "exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+hikaricp = { module = "com.zaxxer:HikariCP", version.ref = "hikaricp" }
+jedis = { module = "redis.clients:jedis", version.ref = "jedis" }
+sqlite-jdbc = { module = "org.xerial:sqlite-jdbc", version.ref = "sqlite-jdbc" }
+mariadb-java-client = { module = "org.mariadb.jdbc:mariadb-java-client", version.ref = "mariadb" }
+
+# Utilities
+slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "slf4j" }
+librarian-paper = { module = "xyz.kyngs.librarian:librarian-paper", version.ref = "librarian" }
+kaml = { module = "com.charleskorn.kaml:kaml", version.ref = "kaml" }
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+reflections = { module = "org.reflections:reflections", version.ref = "reflections" }
+
+# Third-party plugin APIs
+vault-api = { module = "com.github.MilkBowl:VaultAPI", version.ref = "vault-api" }
+model-engine = { module = "com.ticxo.modelengine:ModelEngine", version.ref = "model-engine" }
+placeholderapi = { module = "me.clip:placeholderapi", version.ref = "placeholderapi" }
+itemsadder-api = { module = "dev.lone:api-itemsadder", version.ref = "itemsadder-api" }
+itemsadder-legacy = { module = "com.github.LoneDev6:API-ItemsAdder", version.ref = "itemsadder-legacy" }
+oraxen = { module = "io.th0rgal:oraxen", version.ref = "oraxen" }
+nexo = { module = "com.nexomc:nexo", version.ref = "nexo" }
+bettermodel = { module = "io.github.toxicity188:bettermodel-bukkit-api", version.ref = "bettermodel" }
+mythic-dist = { module = "io.lumine:Mythic-Dist", version.ref = "mythic" }
+mythiclib-dist = { module = "io.lumine:MythicLib-dist", version.ref = "mythiclib" }
+mmoitems-api = { module = "net.Indyuce:MMOItems-API", version.ref = "mmoitems" }
+headdatabase-api = { module = "com.arcaniax:HeadDatabase-API", version.ref = "headdatabase" }
+eco = { module = "com.willfp:eco", version.ref = "eco" }
+craft-engine-core = { module = "net.momirealms:craft-engine-core", version.ref = "craft-engine" }
+craft-engine-bukkit = { module = "net.momirealms:craft-engine-bukkit", version.ref = "craft-engine" }
+score = { module = "com.github.Ssomar-Developement:SCore", version.ref = "score" }
+
+# Testing and benchmarking
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+h2 = { module = "com.h2database:h2", version.ref = "h2" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+jmh-core = { module = "org.openjdk.jmh:jmh-core", version.ref = "jmh" }
+jmh-generator-annprocess = { module = "org.openjdk.jmh:jmh-generator-annprocess", version.ref = "jmh" }
+xchart = { module = "org.knowm.xchart:xchart", version.ref = "xchart" }
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+
+[plugins]
+# Kotlin
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+# Build and packaging
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+dotenv = { id = "co.uzzu.dotenv.gradle", version.ref = "dotenv" }
+librarian = { id = "xyz.kyngs.librarian.plugin", version.ref = "librarian" }
+
+# Minecraft tooling
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-paper" }
+paperweight-userdev = { id = "io.papermc.paperweight.userdev", version.ref = "paperweight" }
+
+# Benchmarking
+jmh = { id = "me.champeau.jmh", version.ref = "jmh-plugin" }
+jmhreport = { id = "io.morethan.jmhreport", version.ref = "jmhreport" }

@@ -1,6 +1,6 @@
 dependencies {
     api(project(":kommand:kommand-core"))
-    compileOnlyApi("com.velocitypowered:velocity-api:3.4.0")
+    compileOnlyApi(libs.velocity.api)
 
     testImplementation(kotlin("test"))
 }

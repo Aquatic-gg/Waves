@@ -1,25 +1,23 @@
-val exposedVersion = "1.2.0"
-
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly(libs.paper.api)
 
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    api(libs.kotlinx.coroutines.core)
     api(project(":kregistry"))
     api(project(":kevent"))
     api(project(":aquatic-common"))
     api(project(":dispatch"))
     api(project(":dispatch:dispatch-paper"))
 
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1") {
+    compileOnly(libs.vault.api) {
         exclude(group = "org.bukkit", module = "bukkit")
     }
 
-    api("org.jetbrains.exposed:exposed-core:$exposedVersion")
-    api("org.jetbrains.exposed:exposed-dao:$exposedVersion")
-    api("org.jetbrains.exposed:exposed-jdbc:$exposedVersion")
-    api("com.github.ben-manes.caffeine:caffeine:3.2.3")
-    api("redis.clients:jedis:7.4.1")
-    api("com.zaxxer:HikariCP:7.0.2")
+    api(libs.exposed.core)
+    api(libs.exposed.dao)
+    api(libs.exposed.jdbc)
+    api(libs.caffeine)
+    api(libs.jedis)
+    api(libs.hikaricp)
 
     testImplementation(kotlin("test"))
 }

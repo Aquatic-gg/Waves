@@ -6,22 +6,22 @@ plugins {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
+    compileOnly(libs.paper.api)
+    compileOnly(libs.adventure.text.serializer.plain)
 
     implementation(project(":klocale:klocale-common"))
     api(project(":aquatic-common"))
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    api(libs.kotlinx.coroutines.core)
 
-    jmh("org.openjdk.jmh:jmh-core:1.37")
-    jmh("org.openjdk.jmh:jmh-generator-annprocess:1.37")
+    jmh(libs.jmh.core)
+    jmh(libs.jmh.generator.annprocess)
 
-    jmhImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    jmhImplementation("net.kyori:adventure-text-serializer-plain:4.26.1")
+    jmhImplementation(libs.paper.api)
+    jmhImplementation(libs.adventure.text.serializer.plain)
 
     testImplementation(kotlin("test"))
-    testImplementation("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    testImplementation("net.kyori:adventure-text-serializer-plain:4.26.1")
+    testImplementation(libs.paper.api)
+    testImplementation(libs.adventure.text.serializer.plain)
 }
 
 tasks.named<JmhBytecodeGeneratorTask>("jmhRunBytecodeGenerator") {

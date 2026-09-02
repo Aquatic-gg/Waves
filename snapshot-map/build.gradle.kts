@@ -3,10 +3,10 @@ plugins {
 }
 
 dependencies {
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    compileOnly(libs.kotlinx.coroutines.core)
 
-    jmh("org.knowm.xchart:xchart:3.8.8")
-    jmh("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    jmh(libs.xchart)
+    jmh(libs.kotlinx.coroutines.core)
 
     testImplementation(kotlin("test"))
 }

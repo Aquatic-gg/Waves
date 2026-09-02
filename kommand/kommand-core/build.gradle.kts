@@ -1,7 +1,7 @@
 dependencies {
-    compileOnlyApi("com.mojang:brigadier:1.0.500")
-    api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    compileOnlyApi(libs.brigadier)
+    api(libs.kotlinx.coroutines.core)
 
-    testImplementation("io.mockk:mockk:1.14.9")
+    testImplementation(libs.mockk)
     testImplementation(kotlin("test"))
 }

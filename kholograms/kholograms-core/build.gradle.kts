@@ -1,6 +1,6 @@
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
+    compileOnly(libs.paper.api)
+    compileOnly(libs.kotlinx.coroutines.core)
 
     api(project(":aquatic-common"))
     api(project(":replace"))

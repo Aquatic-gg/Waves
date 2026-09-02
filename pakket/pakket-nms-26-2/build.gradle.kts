@@ -7,8 +7,8 @@ dependencies {
 
     api(project(":pakket:pakket-api"))
     api(project(":kevent"))
-    compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    compileOnly("net.kyori:adventure-text-serializer-ansi:4.26.1")
+    compileOnly(libs.kotlinx.coroutines.core)
+    compileOnly(libs.adventure.text.serializer.ansi)
 }
 
 tasks.matching { it.name == "reobfJar" }.configureEach {
