@@ -430,7 +430,7 @@ fun Component.resolveVisibilityConditions(
     return recurse(this)
 }
 
-private fun ClickEvent.payloadTextValue(): String? {
+private fun ClickEvent<*>.payloadTextValue(): String? {
     return when (val payload = payload()) {
         is ClickEvent.Payload.Text -> payload.value()
         is ClickEvent.Payload.Int -> payload.integer().toString()
@@ -438,16 +438,16 @@ private fun ClickEvent.payloadTextValue(): String? {
     }
 }
 
-private fun ClickEvent.updated(transform: (String) -> String): ClickEvent? {
+private fun ClickEvent<*>.updated(transform: (String) -> String): ClickEvent<*>? {
     return when (action()) {
-        ClickEvent.Action.OPEN_URL -> payloadTextValue()?.let(transform)?.let(ClickEvent::openUrl)
-        ClickEvent.Action.OPEN_FILE -> payloadTextValue()?.let(transform)?.let(ClickEvent::openFile)
-        ClickEvent.Action.RUN_COMMAND -> payloadTextValue()?.let(transform)?.let(ClickEvent::runCommand)
-        ClickEvent.Action.SUGGEST_COMMAND -> payloadTextValue()?.let(transform)?.let(ClickEvent::suggestCommand)
+        ClickEvent.Action.OPEN_URL -> payloadTextValue()?.let(transform)?.let { ClickEvent.openUrl(it) }
+        ClickEvent.Action.OPEN_FILE -> payloadTextValue()?.let(transform)?.let { ClickEvent.openFile(it) }
+        ClickEvent.Action.RUN_COMMAND -> payloadTextValue()?.let(transform)?.let { ClickEvent.runCommand(it) }
+        ClickEvent.Action.SUGGEST_COMMAND -> payloadTextValue()?.let(transform)?.let { ClickEvent.suggestCommand(it) }
         ClickEvent.Action.CHANGE_PAGE -> payloadTextValue()?.let(transform)?.let { value ->
-            value.toIntOrNull()?.let(ClickEvent::changePage)
+            value.toIntOrNull()?.let { ClickEvent.changePage(it) }
         }
-        ClickEvent.Action.COPY_TO_CLIPBOARD -> payloadTextValue()?.let(transform)?.let(ClickEvent::copyToClipboard)
+        ClickEvent.Action.COPY_TO_CLIPBOARD -> payloadTextValue()?.let(transform)?.let { ClickEvent.copyToClipboard(it) }
         else -> null
     }
 }
