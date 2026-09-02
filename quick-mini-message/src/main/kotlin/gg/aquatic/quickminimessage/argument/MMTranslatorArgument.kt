@@ -7,7 +7,7 @@ class MMTranslatorArgument<T> internal constructor(
     val name: String,
     val data: T
 ) : VirtualComponentRenderer<Void> {
-    override fun apply(context: Void): ComponentLike? {
-        return data as? ComponentLike
+    override fun apply(context: Void): ComponentLike {
+        return data as ComponentLike
     }
 }

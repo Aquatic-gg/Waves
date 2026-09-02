@@ -96,7 +96,15 @@ internal val COLOR_ALIASES = mapOf(
     "grey" to NamedTextColor.GRAY
 )
 
-internal val CLICK_ACTIONS = ClickEvent.Action.entries.associateBy { it.name.lowercase(Locale.ROOT) }
+internal val CLICK_ACTIONS = mapOf(
+    "open_url" to ClickEvent.Action.OPEN_URL,
+    "open_file" to ClickEvent.Action.OPEN_FILE,
+    "run_command" to ClickEvent.Action.RUN_COMMAND,
+    "suggest_command" to ClickEvent.Action.SUGGEST_COMMAND,
+    "change_page" to ClickEvent.Action.CHANGE_PAGE,
+    "copy_to_clipboard" to ClickEvent.Action.COPY_TO_CLIPBOARD,
+    "custom" to ClickEvent.Action.CUSTOM
+)
 
 internal val COMPACT_SENTINEL = Component.text(
     "",

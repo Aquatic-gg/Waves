@@ -455,7 +455,7 @@ internal class Parser(
         frames.add(frame)
     }
 
-    private fun parseClick(args: List<String>): ClickEvent? {
+    private fun parseClick(args: List<String>): ClickEvent<*>? {
         if (args.size < 2) return null
         val actionName = asciiLowercase(args[0])
         val action = CLICK_ACTIONS[actionName] ?: return null
