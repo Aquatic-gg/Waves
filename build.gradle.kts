@@ -250,6 +250,10 @@ librarian {
     excludedLibs.forEach { excludeDependency(it) }
 }
 
+configurations.testImplementation {
+    extendsFrom(configurations["librarian"])
+}
+
 kotlin {
     jvmToolchain(25)
 }
