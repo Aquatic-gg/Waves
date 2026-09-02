@@ -8,6 +8,7 @@ import org.bukkit.Chunk
 import org.bukkit.event.world.ChunkLoadEvent
 import org.bukkit.event.world.ChunkUnloadEvent
 import java.util.UUID
+import java.util.concurrent.ConcurrentHashMap
 
 object HologramHandler {
     val tickingHolograms = SuspendingSnapshotMap<HologramChunkKey, MutableCollection<Hologram>>()
@@ -31,7 +32,7 @@ object HologramHandler {
         event<ChunkLoadEvent> {
             val chunkId = it.chunk.hologramChunkKey()
             val toLoad = waitingHolograms.remove(chunkId) ?: return@event
-            val list = tickingHolograms.getOrPut(chunkId) { ArrayList() }
+            val list = tickingHolograms.getOrPut(chunkId) { ConcurrentHashMap.newKeySet() }
             for (hologram in toLoad) {
                 hologram.chunk = it.chunk
                 list += hologram
@@ -40,7 +41,7 @@ object HologramHandler {
         event<ChunkUnloadEvent> {
             val chunkId = it.chunk.hologramChunkKey()
             val toWait = tickingHolograms.remove(chunkId) ?: return@event
-            val list = waitingHolograms.getOrPut(chunkId) { ArrayList() }
+            val list = waitingHolograms.getOrPut(chunkId) { ConcurrentHashMap.newKeySet() }
             for (hologram in toWait) {
                 hologram.chunk = null
                 list += hologram
