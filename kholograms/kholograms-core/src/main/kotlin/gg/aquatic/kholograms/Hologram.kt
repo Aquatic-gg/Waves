@@ -16,7 +16,6 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Chunk
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.CopyOnWriteArrayList
 
 class Hologram(
@@ -93,9 +92,9 @@ class Hologram(
     init {
         val chunkId = location.chunk.hologramChunkKey()
         if (this.chunk == null) {
-            HologramHandler.waitingHolograms.getOrPut(chunkId) { ConcurrentHashMap.newKeySet() }.add(this)
+            HologramHandler.waitingHolograms.addHolograms(chunkId, listOf(this))
         } else {
-            HologramHandler.tickingHolograms.getOrPut(chunkId) { ConcurrentHashMap.newKeySet() }.add(this)
+            HologramHandler.tickingHolograms.addHolograms(chunkId, listOf(this))
             VirtualsCtx {
                 checkPlayersRange()
                 tick()

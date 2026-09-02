@@ -48,6 +48,27 @@ sealed class AbstractSnapshotMap<K : Any, V : Any>(
         return internalMap.remove(key, value).also { if (it) invalidate() }
     }
 
+    fun getOrPut(key: K, defaultValue: () -> V): V {
+        var inserted = false
+        val value = internalMap.computeIfAbsent(key) {
+            inserted = true
+            defaultValue()
+        }
+        if (inserted) invalidate()
+        return value
+    }
+
+    fun compute(key: K, remappingFunction: (K, V?) -> V?): V? {
+        var changed = false
+        val result = internalMap.compute(key) { k, old ->
+            val new = remappingFunction(k, old)
+            if (new !== old) changed = true
+            new
+        }
+        if (changed) invalidate()
+        return result
+    }
+
     override val keys: MutableSet<K> get() = SnapshotKeySet()
     override val values: MutableCollection<V> get() = SnapshotValueCollection()
     override val entries: MutableSet<MutableMap.MutableEntry<K, V>> get() = SnapshotEntrySet()

@@ -32,20 +32,18 @@ object HologramHandler {
         event<ChunkLoadEvent> {
             val chunkId = it.chunk.hologramChunkKey()
             val toLoad = waitingHolograms.remove(chunkId) ?: return@event
-            val list = tickingHolograms.getOrPut(chunkId) { ConcurrentHashMap.newKeySet() }
             for (hologram in toLoad) {
                 hologram.chunk = it.chunk
-                list += hologram
             }
+            tickingHolograms.addHolograms(chunkId, toLoad)
         }
         event<ChunkUnloadEvent> {
             val chunkId = it.chunk.hologramChunkKey()
             val toWait = tickingHolograms.remove(chunkId) ?: return@event
-            val list = waitingHolograms.getOrPut(chunkId) { ConcurrentHashMap.newKeySet() }
             for (hologram in toWait) {
                 hologram.chunk = null
-                list += hologram
             }
+            waitingHolograms.addHolograms(chunkId, toWait)
         }
     }
 
@@ -80,4 +78,17 @@ data class HologramChunkKey(
 internal fun Chunk.hologramChunkKey(): HologramChunkKey {
     val chunkId = chunkId()
     return HologramChunkKey(world.uid, chunkId.x, chunkId.z)
+}
+
+/**
+ * Adds holograms under the map's per-key lock so the add cannot land on a set
+ * that a concurrent remove(chunkId) already detached from the map.
+ */
+internal fun SuspendingSnapshotMap<HologramChunkKey, MutableCollection<Hologram>>.addHolograms(
+    chunkId: HologramChunkKey,
+    holograms: Collection<Hologram>,
+) {
+    compute(chunkId) { _, existing ->
+        (existing ?: ConcurrentHashMap.newKeySet()).also { it += holograms }
+    }
 }
