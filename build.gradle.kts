@@ -148,6 +148,10 @@ subprojects {
     }
 }
 
+java {
+    withSourcesJar()
+}
+
 tasks {
     runServer {
         minecraftVersion("26.2")
@@ -184,7 +188,6 @@ dependencies {
     api(project(":stacked"))
     api(project(":kregistry"))
     api(project(":pakket"))
-    api(project(":execute"))
     api(project(":aquatic-common"))
     api(project(":kurrency"))
     api(project(":klocale:klocale-common"))
@@ -195,13 +198,23 @@ dependencies {
     api(project(":kholograms:kholograms-serialization"))
     api(project(":clientside"))
     api(project(":quick-mini-message"))
+    api(project(":clientside"))
+    api(project(":dispatch"))
+    api(project(":dispatch:dispatch-paper"))
+    api(project(":execute"))
+    api(project(":kevent"))
+    api(project(":kommand:kommand-core"))
+    api(project(":kommand:kommand-paper"))
+    api(project(":snapshot-map"))
+    api(project(":tree-papi"))
+
     librarian("com.charleskorn.kaml:kaml:0.104.0")
 
     librarian("com.github.ben-manes.caffeine:caffeine:3.2.3")
     librarian("org.reflections:reflections:0.10.2")
-    compileOnly("net.kyori:adventure-text-minimessage:4.26.1")
-    compileOnly("net.kyori:adventure-text-serializer-gson:4.26.1")
-    compileOnly("net.kyori:adventure-text-serializer-plain:4.26.1")
+    compileOnly("net.kyori:adventure-text-minimessage:5.2.0")
+    compileOnly("net.kyori:adventure-text-serializer-gson:5.2.0")
+    compileOnly("net.kyori:adventure-text-serializer-plain:5.2.0")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("com.ticxo.modelengine:ModelEngine:R4.0.9")
     compileOnly("me.clip:placeholderapi:2.12.2")
@@ -277,7 +290,6 @@ tasks.withType<ShadowJar> {
     }
 
     archiveBaseName.set("Waves")
-    archiveClassifier.set("")
 }
 
 publishing {
