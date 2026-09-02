@@ -59,7 +59,7 @@ class ObjectRewriter(
             }
         }
         if (name == "<clinit>") {
-            return object : MethodVisitor(ASM9) {
+            return object : MethodVisitor(ASM9, cv.visitMethod(access, name, descriptor, signature, exceptions)) {
 
                 private var isCreatingInstance = false
 
